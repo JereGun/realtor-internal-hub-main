@@ -35,6 +35,7 @@ LOCAL_APPS = [
     'notifications',
     'core',
     'accounting',  # Agregada app de contabilidad
+    'locations',
 ]
 
 THIRD_PARTY_APPS = [

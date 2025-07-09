@@ -3,156 +3,116 @@
 
 {% block title %}
     {% if object %}
-        Editar Cliente - {{ object.first_name }} {{ object.last_name }}
+        Editar Cliente - {{ object.full_name }}
     {% else %}
         Nuevo Cliente
     {% endif %}
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            <div class="card shadow-sm border-light">
+                <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center py-3">
+                    <h5 class="mb-0 text-dark fw-bold">
                         {% if object %}
-                            <i class="fas fa-user-edit"></i> Editar Cliente
+                            <i class="bi bi-pencil-square me-2"></i> Editar Cliente
                         {% else %}
-                            <i class="fas fa-user-plus"></i> Nuevo Cliente
+                            <i class="bi bi-person-plus-fill me-2"></i> Nuevo Cliente
                         {% endif %}
-                    </h3>
-                    <div class="card-tools">
-                        <a href="{% url 'customers:customer_list' %}" class="btn btn-secondary btn-sm">
-                            <i class="fas fa-arrow-left"></i> Volver a la Lista
-                        </a>
-                        {% if object %}
-                            <a href="{% url 'customers:customer_detail' object.pk %}" class="btn btn-info btn-sm">
-                                <i class="fas fa-eye"></i> Ver Detalle
-                            </a>
-                        {% endif %}
-                    </div>
+                    </h5>
+                    <a href="{% url 'customers:customer_list' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Volver al Listado
+                    </a>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4 p-md-5">
                     <form method="post" class="needs-validation" novalidate>
                         {% csrf_token %}
                         
-                        <!-- Personal Information Section -->
-                        <div class="row">
-                            <div class="col-md-12">
-                                <h5 class="mb-3">
-                                    <i class="fas fa-user"></i> Información Personal
-                                </h5>
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                {{ form.first_name|as_crispy_field }}
-                            </div>
-                            <div class="col-md-6">
-                                {{ form.last_name|as_crispy_field }}
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                {{ form.email|as_crispy_field }}
-                            </div>
-                            <div class="col-md-6">
-                                {{ form.phone|as_crispy_field }}
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                {{ form.birth_date|as_crispy_field }}
-                            </div>
-                            <div class="col-md-6">
-                                {{ form.identity_number|as_crispy_field }}
-                            </div>
-                        </div>
-                        
-                        <hr class="my-4">
-                        
-                        <!-- Address Information Section -->
-                        <div class="row">
-                            <div class="col-md-12">
-                                <h5 class="mb-3">
-                                    <i class="fas fa-map-marker-alt"></i> Información de Dirección
-                                </h5>
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-12">
-                                {{ form.address|as_crispy_field }}
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                {{ form.city|as_crispy_field }}
-                            </div>
-                            <div class="col-md-6">
-                                {{ form.state|as_crispy_field }}
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                {{ form.postal_code|as_crispy_field }}
-                            </div>
-                            <div class="col-md-6">
-                                {{ form.country|as_crispy_field }}
-                            </div>
-                        </div>
-                        
-                        <hr class="my-4">
-                        
-                        <!-- Additional Information Section -->
-                        <div class="row">
-                            <div class="col-md-12">
-                                <h5 class="mb-3">
-                                    <i class="fas fa-info-circle"></i> Información Adicional
-                                </h5>
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-12">
-                                {{ form.notes|as_crispy_field }}
-                            </div>
-                        </div>
-                        
-                        <hr class="my-4">
-                        
-                        <!-- Form Actions -->
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <button type="submit" class="btn btn-primary">
-                                            <i class="fas fa-save"></i>
-                                            {% if object %}
-                                                Guardar Cambios
-                                            {% else %}
-                                                Crear Cliente
-                                            {% endif %}
-                                        </button>
-                                        <a href="{% url 'customers:customer_list' %}" class="btn btn-secondary">
-                                            <i class="fas fa-times"></i> Cancelar
-                                        </a>
-                                    </div>
-                                    {% if object %}
-                                        <div>
-                                            <a href="{% url 'customers:customer_delete' object.pk %}" class="btn btn-danger" onclick="return confirm('¿Está seguro de que desea eliminar este cliente?')">
-                                                <i class="fas fa-trash"></i> Eliminar
-                                            </a>
-                                        </div>
-                                    {% endif %}
+                        <fieldset class="mb-4">
+                            <legend class="h6 fw-bold text-primary mb-3"><i class="bi bi-person-badge me-2"></i>Información Personal</legend>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    {{ form.first_name|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.last_name|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.email|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.phone|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.document|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.birth_date|as_crispy_field }}
                                 </div>
                             </div>
+                        </fieldset>
+                        
+                        <fieldset class="mb-4">
+                            <legend class="h6 fw-bold text-primary mb-3"><i class="bi bi-geo-alt-fill me-2"></i>Información de Dirección</legend>
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    {{ form.street|as_crispy_field }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form.number|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.neighborhood|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.locality|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.province|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.country|as_crispy_field }}
+                                </div>
+                            </div>
+                        </fieldset>
+                        
+                        <fieldset class="mb-4">
+                            <legend class="h6 fw-bold text-primary mb-3"><i class="bi bi-info-circle-fill me-2"></i>Información Adicional</legend>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    {{ form.profession|as_crispy_field }}
+                                </div>
+                                <div class="col-md-12">
+                                    {{ form.notes|as_crispy_field }}
+                                </div>
+                            </div>
+                        </fieldset>
+                        
+                        <hr class="my-4">
+                        
+                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center">
+                            <div>
+                                <button type="submit" class="btn btn-primary mb-2 mb-sm-0">
+                                    <i class="bi bi-save-fill me-1"></i>
+                                    {% if object %}
+                                        Guardar Cambios
+                                    {% else %}
+                                        Crear Cliente
+                                    {% endif %}
+                                </button>
+                                <a href="{% url 'customers:customer_list' %}" class="btn btn-outline-secondary mb-2 mb-sm-0">
+                                    <i class="bi bi-x-circle me-1"></i> Cancelar
+                                </a>
+                            </div>
+                            {% if object %}
+                                <div>
+                                    <a href="{% url 'customers:customer_delete' object.pk %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Está seguro de que desea eliminar este cliente? Esta acción no se puede deshacer.')">
+                                        <i class="bi bi-trash-fill me-1"></i> Eliminar Cliente
+                                    </a>
+                                </div>
+                            {% endif %}
                         </div>
                     </form>
                 </div>
@@ -162,12 +122,12 @@
 </div>
 
 <script>
-// Form validation
+// Bootstrap form validation
 (function() {
     'use strict';
     window.addEventListener('load', function() {
         var forms = document.getElementsByClassName('needs-validation');
-        var validation = Array.prototype.filter.call(forms, function(form) {
+        Array.prototype.filter.call(forms, function(form) {
             form.addEventListener('submit', function(event) {
                 if (form.checkValidity() === false) {
                     event.preventDefault();
@@ -179,12 +139,71 @@
     }, false);
 })();
 
-// Date picker for birth_date field
+// Ensure birth_date input is of type date and has a max date
 document.addEventListener('DOMContentLoaded', function() {
     const birthDateInput = document.getElementById('id_birth_date');
     if (birthDateInput) {
-        birthDateInput.type = 'date';
-        birthDateInput.max = new Date().toISOString().split('T')[0];
+        birthDateInput.setAttribute('type', 'date'); // Ensure it's date type
+        const today = new Date().toISOString().split('T')[0];
+        birthDateInput.setAttribute('max', today); // Prevent future dates
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    const countrySelect = document.getElementById('id_country');
+    const provinceSelect = document.getElementById('id_province');
+    const localitySelect = document.getElementById('id_locality');
+
+    async function loadProvinces(countryId) {
+        if (!countryId) {
+            provinceSelect.innerHTML = '<option value="">---------</option>';
+            localitySelect.innerHTML = '<option value="">---------</option>';
+            return;
+        }
+
+        try {
+            const response = await fetch(`/locations/api/states/?country_id=${countryId}`);
+            const provinces = await response.json();
+            
+            provinceSelect.innerHTML = '<option value="">---------</option>';
+            provinces.forEach(province => {
+                provinceSelect.innerHTML += `<option value="${province.id}">${province.name}</option>`;
+            });
+        } catch (error) {
+            console.error('Error cargando provincias:', error);
+        }
+    }
+
+    async function loadCities(stateId) {
+        if (!stateId) {
+            localitySelect.innerHTML = '<option value="">---------</option>';
+            return;
+        }
+
+        try {
+            const response = await fetch(`/locations/api/cities/?state_id=${stateId}`);
+            const cities = await response.json();
+            
+            localitySelect.innerHTML = '<option value="">---------</option>';
+            cities.forEach(city => {
+                localitySelect.innerHTML += `<option value="${city.id}">${city.name}</option>`;
+            });
+        } catch (error) {
+            console.error('Error cargando ciudades:', error);
+        }
+    }
+
+    countrySelect.addEventListener('change', function() {
+        loadProvinces(this.value);
+    });
+
+    provinceSelect.addEventListener('change', function() {
+        loadCities(this.value);
+    });
+
+    // Cargar provincias iniciales si hay un país seleccionado
+    if (countrySelect.value) {
+        loadProvinces(countrySelect.value);
     }
 });
 </script>

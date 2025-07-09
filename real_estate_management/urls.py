@@ -18,6 +18,7 @@ urlpatterns = [
     path('notifications/', include('notifications.urls')),
     path('accounting/', include('accounting.urls')),
     path('contabilidad/', include('accounting.urls_web')),
+    path('locations/', include('locations.urls')),
 ]
 
 # Serve media files during development

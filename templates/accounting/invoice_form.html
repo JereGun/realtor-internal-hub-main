@@ -4,101 +4,146 @@
 {% block title %}{% if invoice %}Editar Factura{% else %}Nueva Factura{% endif %}{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row g-4">
-        <!-- Formulario principal -->
-        <div class="col-lg-7">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h4 text-dark mb-0">
-                    <i class="bi bi-file-earmark-text me-2"></i> {% if invoice %}Editar Factura{% else %}Nueva Factura{% endif %}
-                </h1>
-                <a href="{% url 'accounting:invoice_list' %}" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left"></i> Volver
-                </a>
-            </div>
+<div class="container-fluid mt-4">
+    <div class="row g-lg-4 g-md-3 g-2">
+        <!-- Columna del Formulario Principal -->
+        <div class="col-lg-7 col-md-12">
+            <div class="card shadow-sm border-light mb-4">
+                <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center py-3">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="bi bi-file-earmark-text me-2"></i>
+                        {% if invoice %}Editar Factura #{{ invoice.number }}{% else %}Nueva Factura{% endif %}
+                    </h5>
+                    <a href="{% url 'accounting:invoice_list' %}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Volver al listado
+                    </a>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" id="invoiceForm">
+                        {% csrf_token %}
+                        
+                        <fieldset class="mb-4">
+                            <legend class="h6 fw-bold text-primary mb-3">Datos Generales</legend>
+                            <div class="row g-3">
+                                <div class="col-md-4">{{ form.number|as_crispy_field }}</div>
+                                <div class="col-md-4">{{ form.date|as_crispy_field }}</div>
+                                <div class="col-md-4">{{ form.due_date|as_crispy_field }}</div>
+                                <div class="col-md-6">{{ form.customer|as_crispy_field }}</div>
+                                <div class="col-md-6">{{ form.state|as_crispy_field }}</div>
+                                <div class="col-md-6">{{ form.contract|as_crispy_field }}</div>
+                                <div class="col-md-6">{{ form.property|as_crispy_field }}</div>
+                                <div class="col-12">{{ form.description|as_crispy_field }}</div>
+                                 <!-- Total Amount field will be updated by JS, so make it readonly or hidden if not manually editable -->
+                                <div class="col-md-6" style="display:none;">{{ form.total_amount|as_crispy_field }}</div>
+                            </div>
+                        </fieldset>
 
-            <form method="post" id="invoiceForm" class="card shadow-sm border-0">
-                {% csrf_token %}
-                <div class="card-body">
-                    <h5 class="mb-3">Datos Generales</h5>
-                    <div class="row">
-                        <div class="col-md-6">
-                            {{ form.number|as_crispy_field }}
-                            {{ form.date|as_crispy_field }}
-                            {{ form.due_date|as_crispy_field }}
-                            {{ form.customer|as_crispy_field }}
+                        <fieldset>
+                            <legend class="h6 fw-bold text-primary mb-3">Ítems de la Factura</legend>
+                            {{ formset.management_form }}
+                            <div id="invoice-items-formset">
+                                {% for item_form in formset.forms %}
+                                <div class="row g-2 mb-2 align-items-center invoice-item-row">
+                                    <div class="col-md-6">{{ item_form.concept|as_crispy_field }}</div>
+                                    <div class="col-md-4">{{ item_form.amount|as_crispy_field }}</div>
+                                    <div class="col-md-2 text-end pt-3">
+                                        {% if item_form.instance.pk or formset.can_delete %}
+                                        <div class="form-check d-inline-block me-2" style="display:none;"> <!-- Ocultar checkbox si no se quiere mostrar -->
+                                             {{ item_form.DELETE }}
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-danger remove-item-btn">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <button type="button" id="add-item-btn" class="btn btn-sm btn-outline-success mt-2">
+                                <i class="bi bi-plus-circle me-1"></i> Agregar Ítem
+                            </button>
+                        </fieldset>
+                        
+                        <hr class="my-4">
+                        <div class="d-flex justify-content-end">
+                            <a href="{% url 'accounting:invoice_list' %}" class="btn btn-secondary me-2">
+                                <i class="bi bi-x-circle me-1"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i> Guardar Factura
+                            </button>
                         </div>
-                        <div class="col-md-6">
-                            {{ form.total_amount|as_crispy_field }}
-                            {{ form.state|as_crispy_field }}
-                            {{ form.contract|as_crispy_field }}
-                            {{ form.property|as_crispy_field }}
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna de la Vista Previa -->
+        <div class="col-lg-5 col-md-12">
+            <div class="card shadow-sm border-light sticky-top" style="top: 20px;">
+                <div class="card-header bg-light border-bottom py-3">
+                    <h5 class="mb-0 text-dark fw-bold"><i class="bi bi-eye-fill me-2"></i>Vista Previa de Factura</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-3 d-flex justify-content-between align-items-center">
+                        <h4 class="text-primary mb-0">FACTURA</h4>
+                        <span class="badge bg-secondary" id="preview-status-badge">Pendiente</span>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <p class="mb-1 small text-muted">NÚMERO:</p>
+                            <p class="fw-bold" id="preview-number">---</p>
+                        </div>
+                        <div class="col-6 text-end">
+                            <p class="mb-1 small text-muted">FECHA:</p>
+                            <p class="fw-bold" id="preview-date">--/--/----</p>
+                            <p class="mb-1 small text-muted">VENCIMIENTO:</p>
+                            <p class="fw-bold" id="preview-due-date">--/--/----</p>
                         </div>
                     </div>
 
-                    {{ form.description|as_crispy_field }}
-
-                    <hr class="my-4">
-                    <h5 class="mb-3">Ítems de la Factura</h5>
-                    {{ formset.management_form }}
-
-                    <div class="table-responsive mb-4">
-                        <table class="table table-sm table-bordered align-middle" id="itemsTable">
+                    <div class="mb-3">
+                        <p class="mb-1 small text-muted">CLIENTE:</p>
+                        <p class="fw-bold" id="preview-customer">Nombre del Cliente</p>
+                        <p class="small" id="preview-customer-details">Detalles adicionales del cliente</p>
+                    </div>
+                    
+                    <div class="table-responsive mb-3">
+                        <table class="table table-sm">
                             <thead class="table-light">
                                 <tr>
                                     <th>Concepto</th>
-                                    <th>Monto</th>
-                                    <th class="text-center">Acción</th>
+                                    <th class="text-end">Monto</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                {% for form in formset.forms %}
-                                <tr>
-                                    <td>{{ form.concept }}</td>
-                                    <td>{{ form.amount }}</td>
-                                    <td class="text-center">
-                                        {% if form.instance.pk %}
-                                        <div class="form-check">
-                                            {{ form.DELETE }} <label class="form-check-label">Eliminar</label>
-                                        </div>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
+                            <tbody id="preview-items-table">
+                                <!-- Los ítems se agregarán aquí por JS -->
+                                <tr><td colspan="2" class="text-center text-muted py-3">No hay ítems agregados.</td></tr>
                             </tbody>
                         </table>
                     </div>
 
-                    <div class="d-flex justify-content-end">
-                        <button type="submit" class="btn btn-primary me-2">
-                            <i class="bi bi-save me-1"></i> Guardar
-                        </button>
-                        <a href="{% url 'accounting:invoice_list' %}" class="btn btn-secondary">Cancelar</a>
+                    <div class="row justify-content-end">
+                        <div class="col-md-6">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-muted">Subtotal:</span>
+                                <span id="preview-subtotal">$0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="text-muted">Impuestos (IVA 21%):</span> <!-- Asumiendo IVA 21% -->
+                                <span id="preview-taxes">$0.00</span>
+                            </div>
+                            <hr class="my-1">
+                            <div class="d-flex justify-content-between fw-bold h5 mt-2">
+                                <span>TOTAL:</span>
+                                <span id="preview-total-amount">$0.00</span>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </form>
-        </div>
-
-        <!-- Vista previa factura -->
-        <div class="col-lg-5">
-            <div class="card shadow-sm border-0">
-                <div class="card-body">
-                    <h5 class="mb-3">
-                        <i class="bi bi-eye me-1"></i> Vista Previa
-                    </h5>
-
-                    <div class="border p-3 rounded bg-light">
-                        <p class="fw-bold mb-1">Factura Nº: <span id="preview-number"></span></p>
-                        <p class="mb-1"><strong>Fecha:</strong> <span id="preview-date"></span></p>
-                        <p class="mb-1"><strong>Vencimiento:</strong> <span id="preview-due"></span></p>
-                        <p class="mb-1"><strong>Cliente:</strong> <span id="preview-customer"></span></p>
-                        <p class="mb-1"><strong>Total:</strong> $<span id="preview-total"></span></p>
-                        <hr>
-                        <strong>Conceptos:</strong>
-                        <ul class="list-unstyled small mt-2" id="preview-items">
-                        </ul>
-                        <hr>
-                        <p class="text-end fw-bold">Total: $<span id="preview-total-bottom"></span></p>
+                     <div class="mt-3 small text-muted" id="preview-description">
+                        <p class="mb-1"><strong>Descripción:</strong></p>
+                        <p id="preview-description-text">---</p>
                     </div>
                 </div>
             </div>
@@ -107,31 +152,196 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        function updatePreview() {
-            document.getElementById('preview-number').textContent = document.getElementById('id_number')?.value || '';
-            document.getElementById('preview-date').textContent = document.getElementById('id_date')?.value || '';
-            document.getElementById('preview-due').textContent = document.getElementById('id_due_date')?.value || '';
-            document.getElementById('preview-customer').textContent = document.getElementById('id_customer')?.selectedOptions?.[0]?.text || '';
-            const total = document.getElementById('id_total_amount')?.value || '0.00';
-            document.getElementById('preview-total').textContent = total;
-            document.getElementById('preview-total-bottom').textContent = total;
+document.addEventListener('DOMContentLoaded', function () {
+    const invoiceForm = document.getElementById('invoiceForm');
+    const formsetContainer = document.getElementById('invoice-items-formset');
+    const addItemButton = document.getElementById('add-item-btn');
+    const totalFormsInput = document.querySelector('input[name="lines-TOTAL_FORMS"]');
+    const initialFormsInput = document.querySelector('input[name="lines-INITIAL_FORMS"]'); // Corrected selector
 
-            const itemsList = document.getElementById('preview-items');
-            itemsList.innerHTML = '';
-            const concepts = document.querySelectorAll('input[name$="-concept"]');
-            const amounts = document.querySelectorAll('input[name$="-amount"]');
-            for (let i = 0; i < concepts.length; i++) {
-                if (concepts[i].value.trim()) {
-                    const li = document.createElement('li');
-                    li.textContent = `• ${concepts[i].value} - $${amounts[i].value || '0.00'}`;
-                    itemsList.appendChild(li);
-                }
+    // Preview elements
+    const previewNumber = document.getElementById('preview-number');
+    const previewDate = document.getElementById('preview-date');
+    const previewDueDate = document.getElementById('preview-due-date');
+    const previewCustomer = document.getElementById('preview-customer');
+    const previewCustomerDetails = document.getElementById('preview-customer-details'); // Assuming you might add this
+    const previewItemsTableBody = document.getElementById('preview-items-table');
+    const previewSubtotal = document.getElementById('preview-subtotal');
+    const previewTaxes = document.getElementById('preview-taxes'); // Assuming a tax rate
+    const previewTotalAmount = document.getElementById('preview-total-amount');
+    const previewStatusBadge = document.getElementById('preview-status-badge');
+    const previewDescriptionText = document.getElementById('preview-description-text');
+
+
+    const updateTotalAmountField = (total) => {
+        const totalAmountInput = document.getElementById('id_total_amount');
+        if (totalAmountInput) {
+            totalAmountInput.value = total.toFixed(2);
+        }
+    };
+
+    function updatePreview() {
+        // Update general invoice info
+        previewNumber.textContent = document.getElementById('id_number')?.value || '---';
+        previewDate.textContent = document.getElementById('id_date')?.value || '--/--/----';
+        previewDueDate.textContent = document.getElementById('id_due_date')?.value || '--/--/----';
+        
+        const customerSelect = document.getElementById('id_customer');
+        previewCustomer.textContent = customerSelect?.selectedOptions[0]?.text || 'Nombre del Cliente';
+        // previewCustomerDetails.textContent = ''; // Add logic if you have more customer details
+
+        const stateSelect = document.getElementById('id_state');
+        if (stateSelect && stateSelect.selectedOptions.length > 0) {
+            previewStatusBadge.textContent = stateSelect.selectedOptions[0].text;
+            previewStatusBadge.className = 'badge'; // Reset classes
+            switch (stateSelect.value.toLowerCase()) {
+                case 'paid': previewStatusBadge.classList.add('bg-success'); break;
+                case 'pending': previewStatusBadge.classList.add('bg-warning', 'text-dark'); break;
+                case 'cancelled': previewStatusBadge.classList.add('bg-danger'); break;
+                default: previewStatusBadge.classList.add('bg-secondary');
             }
+        } else {
+            previewStatusBadge.textContent = 'Pendiente';
+            previewStatusBadge.className = 'badge bg-secondary';
         }
 
-        document.getElementById('invoiceForm').addEventListener('input', updatePreview);
-        updatePreview(); // initial render
+        previewDescriptionText.textContent = document.getElementById('id_description')?.value || '---';
+
+
+        // Update items table and calculate totals
+        previewItemsTableBody.innerHTML = ''; // Clear existing items
+        let subtotal = 0;
+        let itemCount = 0;
+
+        document.querySelectorAll('.invoice-item-row').forEach(row => {
+            const conceptInput = row.querySelector('input[name$="-concept"]');
+            const amountInput = row.querySelector('input[name$="-amount"]');
+            const deleteCheckbox = row.querySelector('input[name$="-DELETE"]');
+
+            if (deleteCheckbox && deleteCheckbox.checked) {
+                return; // Skip deleted rows
+            }
+
+            const concept = conceptInput?.value.trim() || '';
+            const amount = parseFloat(amountInput?.value) || 0;
+
+            if (concept || amount > 0) {
+                itemCount++;
+                const tr = previewItemsTableBody.insertRow();
+                const conceptCell = tr.insertCell();
+                const amountCell = tr.insertCell();
+
+                conceptCell.textContent = concept || 'N/A';
+                amountCell.textContent = `$${amount.toFixed(2)}`;
+                amountCell.classList.add('text-end');
+                
+                subtotal += amount;
+            }
+        });
+        
+        if (itemCount === 0) {
+             const tr = previewItemsTableBody.insertRow();
+             const cell = tr.insertCell();
+             cell.colSpan = 2;
+             cell.textContent = 'No hay ítems agregados.';
+             cell.classList.add('text-center', 'text-muted', 'py-3');
+        }
+
+        const taxRate = 0.21; // Example tax rate (21%)
+        const taxes = subtotal * taxRate;
+        const total = subtotal + taxes;
+
+        previewSubtotal.textContent = `$${subtotal.toFixed(2)}`;
+        previewTaxes.textContent = `$${taxes.toFixed(2)}`;
+        previewTotalAmount.textContent = `$${total.toFixed(2)}`;
+        updateTotalAmountField(total);
+    }
+
+    function addFormsetRow() {
+        const formIdx = parseInt(totalFormsInput.value);
+        const emptyFormHtml = document.getElementById('empty-form').innerHTML.replace(/__prefix__/g, formIdx);
+        
+        const newRowDiv = document.createElement('div');
+        newRowDiv.classList.add('row', 'g-2', 'mb-2', 'align-items-center', 'invoice-item-row');
+        newRowDiv.innerHTML = `
+            <div class="col-md-6">${emptyFormHtml.match(/<div class="col-md-6">([\s\S]*?)<\/div>/)[1]}</div>
+            <div class="col-md-4">${emptyFormHtml.match(/<div class="col-md-4">([\s\S]*?)<\/div>/)[1]}</div>
+            <div class="col-md-2 text-end pt-3">
+                <button type="button" class="btn btn-sm btn-outline-danger remove-item-btn"><i class="bi bi-trash"></i></button>
+            </div>
+        `;
+        // Manually extract and set up crispy fields if they are complex.
+        // This simplified version assumes simple input fields.
+        // For complex fields, you might need to re-initialize JS widgets or use a more robust templating approach.
+
+        formsetContainer.appendChild(newRowDiv);
+        totalFormsInput.value = formIdx + 1;
+        
+        // Add event listener to the new remove button
+        newRowDiv.querySelector('.remove-item-btn').addEventListener('click', function() {
+            const rowToRemove = this.closest('.invoice-item-row');
+            const deleteCheckbox = rowToRemove.querySelector('input[name$="-DELETE"]');
+            if (deleteCheckbox) { // If it's an existing form, mark for deletion
+                deleteCheckbox.checked = true;
+                rowToRemove.style.display = 'none';
+            } else { // If it's a new form, just remove it
+                rowToRemove.remove();
+                // Decrement totalFormsInput if necessary, though Django handles this on submit.
+                // For preview consistency, you might need to adjust form counts if removing non-persisted forms.
+            }
+            updatePreview();
+        });
+        updatePreview(); // Update preview after adding new row
+    }
+    
+    // Add new formset row
+    if (addItemButton) {
+        addItemButton.addEventListener('click', addFormsetRow);
+    }
+
+    // Initial setup for remove buttons on existing forms
+    document.querySelectorAll('.remove-item-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const rowToRemove = this.closest('.invoice-item-row');
+            const deleteCheckbox = rowToRemove.querySelector('input[name$="-DELETE"]');
+             // Check if item_form.instance.pk exists for this row to determine if it's a saved item
+            const isSavedItem = rowToRemove.querySelector('input[id$="-id"]'); // Check if an ID input exists
+
+            if (deleteCheckbox && isSavedItem && isSavedItem.value) { // If it's an existing form that was saved
+                deleteCheckbox.checked = true;
+                rowToRemove.style.display = 'none'; // Hide it
+            } else { // If it's a new form or an unsaved existing form
+                rowToRemove.remove(); // Simply remove from DOM
+                // Optional: If removing a form that was part of initial forms but not saved,
+                // you might need to adjust INITIAL_FORMS count if your backend relies on it strictly.
+                // However, Django's formset handling is usually robust enough.
+            }
+            updatePreview();
+        });
     });
+
+    // Update preview on any form input change
+    if (invoiceForm) {
+        invoiceForm.addEventListener('input', updatePreview);
+        invoiceForm.addEventListener('change', updatePreview); // For select elements
+    }
+    
+    // Initial preview render
+    updatePreview();
+
+    // Prepare empty form template (if not already available and needed for complex addFormsetRow)
+    // This is a simplified approach. For complex forms, you might need a hidden template div.
+    // Create a hidden div with the empty form structure if it's not directly available
+    // For this example, we'll assume the structure can be derived or is simple.
+    // If your formset has a specific empty_form structure provided by Django, use that.
+    // Example: const emptyFormTemplate = {{ formset.empty_form|crispy }}; (would need JS processing)
+    // For now, addFormsetRow reconstructs it, which is fine for simple cases.
+
+});
 </script>
+
+<!-- Hidden template for new formset rows -->
+<div id="empty-form" style="display: none;">
+    {{ formset.empty_form|crispy }}
+</div>
 {% endblock %}

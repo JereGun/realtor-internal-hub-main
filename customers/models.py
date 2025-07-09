@@ -16,9 +16,11 @@ class Customer(BaseModel):
     street = models.CharField(max_length=200, blank=True, verbose_name="Calle")
     number = models.CharField(max_length=20, blank=True, verbose_name="Número")
     neighborhood = models.CharField(max_length=100, blank=True, verbose_name="Barrio")
-    locality = models.CharField(max_length=100, blank=True, verbose_name="Localidad")
-    province = models.CharField(max_length=100, blank=True, verbose_name="Provincia")
-    country = models.CharField(max_length=100, default="Argentina", verbose_name="País")
+    
+    # Nuevos campos ForeignKey para la dirección utilizando la app locations
+    country = models.ForeignKey('locations.Country', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="País")
+    province = models.ForeignKey('locations.State', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Provincia")
+    locality = models.ForeignKey('locations.City', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Localidad")
     
     # Additional Information
     birth_date = models.DateField(blank=True, null=True, verbose_name="Fecha de Nacimiento")

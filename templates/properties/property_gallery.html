@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+
+{% block title %}Galería - {{ property.title }} - {{ block.super }}{% endblock %}
+{% block page_title %}Galería de Imágenes{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2>
+            <i class="bi bi-images"></i> Galería de Imágenes
+        </h2>
+        <p class="text-muted mb-0">{{ property.title }}</p>
+    </div>
+    <div>
+        <a href="{% url 'properties:add_image' property.pk %}" class="btn btn-success">
+            <i class="bi bi-camera"></i> Agregar Imagen
+        </a>
+        <a href="{% url 'properties:property_detail' property.pk %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver a Propiedad
+        </a>
+    </div>
+</div>
+
+<!-- Información rápida de la propiedad -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h5 class="mb-1">{{ property.title }}</h5>
+                <p class="text-muted mb-2">
+                    <i class="bi bi-geo-alt"></i> {{ property.full_address }}
+                </p>
+                <div>
+                    <span class="badge bg-primary me-2">{{ property.property_type }}</span>
+                    <span class="badge bg-success">{{ property.property_status }}</span>
+                </div>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="row text-center">
+                    <div class="col-4">
+                        <strong>{{ property.total_surface }}</strong><br>
+                        <small class="text-muted">m² totales</small>
+                    </div>
+                    <div class="col-4">
+                        <strong>{{ property.bedrooms }}</strong><br>
+                        <small class="text-muted">dormitorios</small>
+                    </div>
+                    <div class="col-4">
+                        <strong>{{ images|length }}</strong><br>
+                        <small class="text-muted">imágenes</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if images %}
+    <!-- Controles de vista -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <button class="btn btn-sm btn-outline-primary" onclick="toggleView('grid')" id="btn-grid">
+                <i class="bi bi-grid-3x3-gap"></i> Grilla
+            </button>
+            <button class="btn btn-sm btn-outline-primary" onclick="toggleView('list')" id="btn-list">
+                <i class="bi bi-list"></i> Lista
+            </button>
+        </div>
+        <div class="text-muted">
+            {{ images|length }} imagen{{ images|length|pluralize:"es" }}
+        </div>
+    </div>
+
+    <!-- Vista en Grilla -->
+    <div id="grid-view" class="row">
+        {% for image in images %}
+        <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card">
+                <div class="position-relative">
+                    <img src="{{ image.image.url }}" class="card-img-top" style="height: 250px; object-fit: cover;" alt="{{ image.description }}">
+                    
+                    <!-- Overlay con acciones -->
+                    <div class="position-absolute top-0 end-0 p-2">
+                        {% if image.is_cover %}
+                            <span class="badge bg-warning">
+                                <i class="bi bi-star-fill"></i> Portada
+                            </span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Overlay de acciones al hover -->
+                    <div class="position-absolute bottom-0 start-0 end-0 p-2 bg-dark bg-opacity-50 d-none hover-overlay">
+                        <div class="d-flex justify-content-center gap-2">
+                            <button class="btn btn-sm btn-light" onclick="openImageModal('{{ image.image.url }}', '{{ image.description }}', {{ image.id }})">
+                                <i class="bi bi-zoom-in"></i>
+                            </button>
+                            <a href="{% url 'properties:delete_image' property.pk image.pk %}" 
+                               class="btn btn-sm btn-danger"
+                               onclick="return confirm('¿Estás seguro de eliminar esta imagen?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body p-3">
+                    <h6 class="card-title mb-1">{{ image.description|default:"Sin descripción" }}</h6>
+                    <small class="text-muted">
+                        Subida: {{ image.uploaded_at|date:"d/m/Y H:i" }}
+                    </small>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Vista en Lista -->
+    <div id="list-view" class="d-none">
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 100px;">Imagen</th>
+                                <th>Descripción</th>
+                                <th style="width: 100px;">Portada</th>
+                                <th style="width: 150px;">Fecha</th>
+                                <th style="width: 120px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for image in images %}
+                            <tr>
+                                <td>
+                                    <img src="{{ image.image.url }}" class="img-thumbnail" style="width: 80px; height: 60px; object-fit: cover;" alt="{{ image.description }}">
+                                </td>
+                                <td>
+                                    <strong>{{ image.description|default:"Sin descripción" }}</strong>
+                                </td>
+                                <td class="text-center">
+                                    {% if image.is_cover %}
+                                        <span class="badge bg-warning">
+                                            <i class="bi bi-star-fill"></i>
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small>{{ image.uploaded_at|date:"d/m/Y H:i" }}</small>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary" onclick="openImageModal('{{ image.image.url }}', '{{ image.description }}', {{ image.id }})">
+                                            <i class="bi bi-zoom-in"></i>
+                                        </button>
+                                        <a href="{% url 'properties:delete_image' property.pk image.pk %}" 
+                                           class="btn btn-outline-danger"
+                                           onclick="return confirm('¿Estás seguro de eliminar esta imagen?')">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% else %}
+    <!-- Sin imágenes -->
+    <div class="text-center py-5">
+        <i class="bi bi-camera display-1 text-muted"></i>
+        <h3 class="text-muted mt-3">Sin imágenes</h3>
+        <p class="text-muted">Esta propiedad no tiene imágenes cargadas.</p>
+        <a href="{% url 'properties:add_image' property.pk %}" class="btn btn-primary">
+            <i class="bi bi-camera"></i> Agregar Primera Imagen
+        </a>
+    </div>
+{% endif %}
+
+<!-- Modal para ver imagen completa -->
+<div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalTitle">Ver Imagen</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" class="img-fluid" alt="Imagen">
+            </div>
+            <div class="modal-footer justify-content-between">
+                <span id="imageDescription" class="text-muted"></span>
+                <div>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <a id="deleteImageBtn" href="#" class="btn btn-danger" onclick="return confirm('¿Estás seguro de eliminar esta imagen?')">
+                        <i class="bi bi-trash"></i> Eliminar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card:hover .hover-overlay {
+    display: block !important;
+}
+
+.card-img-top {
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover .card-img-top {
+    transform: scale(1.05);
+}
+</style>
+
+<script>
+function toggleView(view) {
+    const gridView = document.getElementById('grid-view');
+    const listView = document.getElementById('list-view');
+    const btnGrid = document.getElementById('btn-grid');
+    const btnList = document.getElementById('btn-list');
+    
+    if (view === 'grid') {
+        gridView.classList.remove('d-none');
+        listView.classList.add('d-none');
+        btnGrid.classList.add('active');
+        btnList.classList.remove('active');
+    } else {
+        gridView.classList.add('d-none');
+        listView.classList.remove('d-none');
+        btnGrid.classList.remove('active');
+        btnList.classList.add('active');
+    }
+    
+    // Guardar preferencia en localStorage
+    localStorage.setItem('gallery-view', view);
+}
+
+function openImageModal(imageUrl, description, imageId) {
+    document.getElementById('modalImage').src = imageUrl;
+    document.getElementById('imageDescription').textContent = description || 'Sin descripción';
+    document.getElementById('deleteImageBtn').href = 
+        "{% url 'properties:delete_image' property.pk 0 %}".replace('0', imageId);
+    
+    const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+    modal.show();
+}
+
+// Cargar vista preferida al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    const savedView = localStorage.getItem('gallery-view') || 'grid';
+    toggleView(savedView);
+});
+
+// Navegación con teclado en el modal
+document.addEventListener('keydown', function(e) {
+    const modal = document.getElementById('imageModal');
+    if (modal.classList.contains('show')) {
+        if (e.key === 'Escape') {
+            bootstrap.Modal.getInstance(modal).hide();
+        }
+    }
+});
+</script>
+{% endblock %}

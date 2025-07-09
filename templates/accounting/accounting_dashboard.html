@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Dashboard de Contabilidad{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12 col-lg-10 mx-auto">
+
+            <!-- Encabezado -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h4 text-dark mb-0">
+                    <i class="bi bi-bar-chart-line me-2"></i> Dashboard de Contabilidad
+                </h1>
+            </div>
+
+            <!-- Contenido del Dashboard -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Resumen Financiero</h5>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="alert alert-success" role="alert">
+                                <h4 class="alert-heading">Ingresos Totales</h4>
+                                <p class="display-6">$0.00</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="alert alert-danger" role="alert">
+                                <h4 class="alert-heading">Gastos Totales</h4>
+                                <p class="display-6">$0.00</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="alert alert-info" role="alert">
+                                <h4 class="alert-heading">Facturas Pendientes</h4>
+                                <p class="display-6">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Pagos Recientes</h5>
+                            <p>Aquí se mostrarán los pagos más recientes.</p>
+                            <a href="{% url 'accounting:payment_list' %}" class="btn btn-sm btn-outline-primary">Ver todos los pagos</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Facturas Pendientes</h5>
+                            <p>Aquí se mostrarán las facturas con estado 'sent' o 'draft'.</p>
+                            <a href="{% url 'accounting:invoice_list' %}" class="btn btn-sm btn-outline-primary">Ver todas las facturas</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

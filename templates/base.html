@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sistema de Gestión Inmobiliaria{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    
+    {% block extra_css %}{% endblock %}
+    
+    <style>
+        .main-content {
+            margin-left: 250px;
+            transition: margin-left 0.3s;
+        }
+        .sidebar-collapsed .main-content {
+            margin-left: 0;
+        }
+        @media (max-width: 992px) {
+            .main-content {
+                margin-left: 0;
+            }
+            #sidebar {
+                display: none;
+            }
+        }
+        #sidebar {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        #sidebar.hidden-slide {
+            transform: translateX(-100%);
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="{% if request.session.sidebar_collapsed %}sidebar-collapsed{% endif %}">
+    <button id="showSidebarBtn" class="btn btn-light border position-fixed top-0 start-0 m-2 d-print-none" style="z-index: 1050; display: none;">
+        <i class="bi bi-list"></i>
+    </button>
+    {% if user.is_authenticated %}
+        {% include 'includes/navbar.html' %}
+        <button id="expandSidebarBtn" class="btn btn-light border position-fixed top-0 start-0 m-2 d-print-none" style="z-index: 1050; display: none;">
+            <i class="bi bi-chevron-double-right"></i>
+        </button>
+    {% endif %}
+    
+    <div class="main-content p-4">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </div>
+    
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const expandBtn = document.getElementById('expandSidebarBtn');
+        
+            const isCollapsed = sidebar.classList.toggle('hidden-slide');
+            localStorage.setItem('sidebarCollapsed', isCollapsed);
+            document.body.classList.toggle('sidebar-collapsed', isCollapsed);
+        
+            expandBtn.style.display = isCollapsed ? 'block' : 'none';
+        }
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            const sidebar = document.getElementById('sidebar');
+            const expandBtn = document.getElementById('expandSidebarBtn');
+        
+            const collapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            if (collapsed) {
+                sidebar.classList.add('d-none');
+                document.body.classList.add('sidebar-collapsed');
+                expandBtn.style.display = 'block';
+            }
+        
+            if (expandBtn) {
+                expandBtn.addEventListener('click', toggleSidebar);
+            }
+        });
+    </script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Detalle de Pago{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12 col-lg-8 mx-auto">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="h4 mb-0">Pago #{{ payment.id }}</h2>
+                    <div>
+                        <a href="{% url 'payments:payment_edit' payment.pk %}" class="btn btn-warning btn-sm">Editar</a>
+                        <a href="{% url 'payments:payment_delete' payment.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">Contrato</dt>
+                        <dd class="col-sm-8">{{ payment.contract }}</dd>
+                        <dt class="col-sm-4">Cliente</dt>
+                        <dd class="col-sm-8">{{ payment.contract.customer }}</dd>
+                        <dt class="col-sm-4">Método de pago</dt>
+                        <dd class="col-sm-8">{{ payment.payment_method }}</dd>
+                        <dt class="col-sm-4">Monto</dt>
+                        <dd class="col-sm-8">{{ payment.amount }}</dd>
+                        <dt class="col-sm-4">Estado</dt>
+                        <dd class="col-sm-8">{{ payment.get_status_display }}</dd>
+                        <dt class="col-sm-4">Fecha de vencimiento</dt>
+                        <dd class="col-sm-8">{{ payment.due_date|date:'d/m/Y' }}</dd>
+                        <dt class="col-sm-4">Recibo</dt>
+                        <dd class="col-sm-8">{{ payment.receipt_number }}</dd>
+                        <dt class="col-sm-4">Notas</dt>
+                        <dd class="col-sm-8">{{ payment.notes }}</dd>
+                    </dl>
+                </div>
+            </div>
+            <a href="{% url 'payments:payment_list' %}" class="btn btn-secondary">Volver a la lista</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+
+{% block title %}Agentes - {{ block.super }}{% endblock %}
+{% block page_title %}Agentes{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>
+        <i class="bi bi-people"></i> Lista de Agentes
+    </h2>
+    <div>
+        <a href="{% url 'agents:agent_create' %}" class="btn btn-primary">
+            <i class="bi bi-person-plus"></i> Nuevo Agente
+        </a>
+    </div>
+</div>
+
+<!-- Filtros y búsqueda -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <input type="text" name="search" class="form-control" placeholder="Buscar por nombre, email o matrícula..." value="{{ request.GET.search }}">
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-control">
+                    <option value="">Todos los estados</option>
+                    <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Activos</option>
+                    <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inactivos</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="sort" class="form-control">
+                    <option value="name" {% if request.GET.sort == 'name' %}selected{% endif %}>Ordenar por nombre</option>
+                    <option value="email" {% if request.GET.sort == 'email' %}selected{% endif %}>Ordenar por email</option>
+                    <option value="commission" {% if request.GET.sort == 'commission' %}selected{% endif %}>Ordenar por comisión</option>
+                    <option value="properties" {% if request.GET.sort == 'properties' %}selected{% endif %}>Ordenar por propiedades</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-search"></i> Buscar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lista de agentes -->
+<div class="row">
+    {% for agent in agents %}
+    <div class="col-lg-6 col-xl-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="flex-shrink-0">
+                        {% if agent.image_path %}
+                            <img src="{{ agent.image_path.url }}" class="rounded-circle" width="60" height="60" style="object-fit: cover;" alt="{{ agent.full_name }}">
+                        {% else %}
+                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                <i class="bi bi-person text-white" style="font-size: 1.5rem;"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h5 class="card-title mb-1">{{ agent.full_name }}</h5>
+                        <p class="text-muted mb-1">
+                            <i class="bi bi-envelope me-1"></i>
+                            <small>{{ agent.email }}</small>
+                        </p>
+                        {% if agent.phone %}
+                        <p class="text-muted mb-0">
+                            <i class="bi bi-telephone me-1"></i>
+                            <small>{{ agent.phone }}</small>
+                        </p>
+                        {% endif %}
+                    </div>
+                    <div class="flex-shrink-0">
+                        {% if agent.is_active %}
+                            <span class="badge bg-success">Activo</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Inactivo</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <div class="text-center p-2 bg-light rounded">
+                            <div class="fw-bold text-primary">{{ agent.property_set.count }}</div>
+                            <small class="text-muted">Propiedades</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center p-2 bg-light rounded">
+                            <div class="fw-bold text-success">{{ agent.commission_rate }}%</div>
+                            <small class="text-muted">Comisión</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <small class="text-muted">
+                        <i class="bi bi-card-text me-1"></i>
+                        Matrícula: {{ agent.license_number }}
+                    </small>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        <i class="bi bi-calendar me-1"></i>
+                        Desde {{ agent.date_joined|date:"M Y" }}
+                    </small>
+                    <div class="btn-group">
+                        <a href="{% url 'agents:agent_detail' agent.pk %}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        <a href="{% url 'agents:agent_edit' agent.pk %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="text-center py-5">
+            <i class="bi bi-people display-1 text-muted"></i>
+            <h3 class="text-muted mt-3">No se encontraron agentes</h3>
+            <p class="text-muted">No hay agentes que coincidan con los criterios de búsqueda.</p>
+            <a href="{% url 'agents:agent_create' %}" class="btn btn-primary">
+                <i class="bi bi-person-plus"></i> Crear Primer Agente
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Estadísticas rápidas -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-graph-up"></i> Estadísticas Generales
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="border-end">
+                            <h4 class="text-primary mb-1">{{ agents.count }}</h4>
+                            <small class="text-muted">Total Agentes</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border-end">
+                            <h4 class="text-success mb-1">{{ active_agents_count|default:0 }}</h4>
+                            <small class="text-muted">Agentes Activos</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border-end">
+                            <h4 class="text-info mb-1">{{ total_properties|default:0 }}</h4>
+                            <small class="text-muted">Propiedades Totales</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <h4 class="text-warning mb-1">{{ avg_commission|default:0|floatformat:1 }}%</h4>
+                        <small class="text-muted">Comisión Promedio</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Paginación -->
+{% if is_paginated %}
+<nav aria-label="Paginación de agentes" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1">Primera</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+            </li>
+        {% endif %}
+        
+        <li class="page-item active">
+            <span class="page-link">
+                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+            </span>
+        </li>
+        
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Última</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

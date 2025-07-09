@@ -1,0 +1,356 @@
+{% extends 'base.html' %}
+
+{% block title %}Comparar Propiedades - {{ block.super }}{% endblock %}
+{% block page_title %}Comparar Propiedades{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>
+        <i class="bi bi-arrows-expand"></i> Comparar Propiedades
+    </h2>
+    <a href="{% url 'properties:property_list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Volver a Lista
+    </a>
+</div>
+
+{% if properties %}
+    <div class="row">
+        {% for property in properties %}
+        <div class="col-lg-6 mb-4">
+            <div class="card h-100 {% if forloop.first %}border-primary{% else %}border-success{% endif %}">
+                <div class="card-header {% if forloop.first %}bg-primary text-white{% else %}bg-success text-white{% endif %}">
+                    <h5 class="mb-0">
+                        <i class="bi bi-house"></i> {{ property.title }}
+                    </h5>
+                    <small>{{ property.full_address }}</small>
+                </div>
+                
+                <!-- Imagen principal -->
+                <div class="card-img-container" style="height: 250px; overflow: hidden;">
+                    {% if property.cover_image %}
+                        <img src="{{ property.cover_image.image.url }}" class="card-img-top w-100 h-100" style="object-fit: cover;" alt="{{ property.title }}">
+                    {% else %}
+                        <div class="bg-light h-100 d-flex align-items-center justify-content-center">
+                            <i class="bi bi-house text-muted" style="font-size: 4rem;"></i>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="card-body">
+                    <!-- Estado y Tipo -->
+                    <div class="mb-3">
+                        <span class="badge bg-primary me-2">{{ property.property_type }}</span>
+                        <span class="badge bg-success">{{ property.property_status }}</span>
+                    </div>
+
+                    <!-- Características principales -->
+                    <div class="row text-center mb-3">
+                        <div class="col-4">
+                            <div class="border rounded p-2">
+                                <i class="bi bi-rulers text-primary"></i><br>
+                                <strong>{{ property.total_surface }}</strong><br>
+                                <small class="text-muted">m² totales</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="border rounded p-2">
+                                <i class="bi bi-door-closed text-primary"></i><br>
+                                <strong>{{ property.bedrooms }}</strong><br>
+                                <small class="text-muted">dormitorios</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="border rounded p-2">
+                                <i class="bi bi-droplet text-primary"></i><br>
+                                <strong>{{ property.bathrooms }}</strong><br>
+                                <small class="text-muted">baños</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Superficie cubierta -->
+                    {% if property.covered_surface %}
+                    <div class="mb-2">
+                        <strong>Superficie Cubierta:</strong> {{ property.covered_surface }} m²
+                    </div>
+                    {% endif %}
+
+                    <!-- Características adicionales -->
+                    <div class="mb-3">
+                        {% if property.garage %}
+                            <span class="badge bg-info me-1">
+                                <i class="bi bi-car-front"></i> Garage
+                            </span>
+                        {% endif %}
+                        {% if property.furnished %}
+                            <span class="badge bg-info me-1">
+                                <i class="bi bi-house"></i> Amueblado
+                            </span>
+                        {% endif %}
+                        {% if property.year_built %}
+                            <span class="badge bg-secondary me-1">
+                                <i class="bi bi-calendar"></i> {{ property.year_built }}
+                            </span>
+                        {% endif %}
+                        {% if property.orientation %}
+                            <span class="badge bg-secondary me-1">
+                                <i class="bi bi-compass"></i> {{ property.orientation }}
+                            </span>
+                        {% endif %}
+                        {% if property.floors %}
+                            <span class="badge bg-secondary me-1">
+                                <i class="bi bi-building"></i> {{ property.floors }} planta{{ property.floors|pluralize }}
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Precios -->
+                    <div class="border-top pt-3 mb-3">
+                        {% if property.sale_price %}
+                        <div class="mb-2">
+                            <strong class="text-success">Precio de Venta:</strong><br>
+                            <span class="h4 text-success">${{ property.sale_price|floatformat:0 }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if property.rental_price %}
+                        <div class="mb-2">
+                            <strong class="text-primary">Precio de Alquiler:</strong><br>
+                            <span class="h5 text-primary">${{ property.rental_price|floatformat:0 }}/mes</span>
+                        </div>
+                        {% endif %}
+                        
+                        {% if property.expenses %}
+                        <div class="mb-2">
+                            <strong>Expensas:</strong> ${{ property.expenses|floatformat:0 }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Ubicación detallada -->
+                    <div class="border-top pt-3 mb-3">
+                        <h6><i class="bi bi-geo-alt"></i> Ubicación</h6>
+                        <div class="row">
+                            <div class="col-6">
+                                <small class="text-muted">Barrio:</small><br>
+                                <strong>{{ property.neighborhood|default:"-" }}</strong>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Localidad:</small><br>
+                                <strong>{{ property.locality|default:"-" }}</strong>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
+                            <div class="col-6">
+                                <small class="text-muted">Provincia:</small><br>
+                                <strong>{{ property.province|default:"-" }}</strong>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">País:</small><br>
+                                <strong>{{ property.country|default:"-" }}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Características y tags -->
+                    {% if property.features.all %}
+                    <div class="border-top pt-3 mb-3">
+                        <h6><i class="bi bi-star"></i> Características</h6>
+                        {% for feature in property.features.all %}
+                            <span class="badge bg-info me-1 mb-1">{{ feature.name }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if property.tags.all %}
+                    <div class="border-top pt-3 mb-3">
+                        <h6><i class="bi bi-tags"></i> Etiquetas</h6>
+                        {% for tag in property.tags.all %}
+                            <span class="badge me-1 mb-1" style="background-color: {{ tag.color }};">{{ tag.name }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Agente -->
+                    <div class="border-top pt-3">
+                        <h6><i class="bi bi-person"></i> Agente</h6>
+                        <div class="d-flex align-items-center">
+                            {% if property.agent.image_path %}
+                                <img src="{{ property.agent.image_path.url }}" width="40" height="40" class="rounded-circle me-2" alt="{{ property.agent.full_name }}">
+                            {% else %}
+                                <i class="bi bi-person-circle me-2" style="font-size: 2.5rem;"></i>
+                            {% endif %}
+                            <div>
+                                <strong>{{ property.agent.full_name }}</strong><br>
+                                <small class="text-muted">{{ property.agent.email }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <small class="text-muted">
+                            Agregada: {{ property.created_at|date:"d/m/Y" }}
+                        </small>
+                        <a href="{% url 'properties:property_detail' property.pk %}" class="btn btn-sm btn-primary">
+                            <i class="bi bi-eye"></i> Ver Detalles
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Tabla de comparación resumida -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bi bi-table"></i> Comparación Resumida
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 150px;">Característica</th>
+                            {% for property in properties %}
+                            <th class="text-center">{{ property.title|truncatechars:30 }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Tipo</strong></td>
+                            {% for property in properties %}
+                            <td class="text-center">{{ property.property_type }}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td><strong>Estado</strong></td>
+                            {% for property in properties %}
+                            <td class="text-center">{{ property.property_status }}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td><strong>Superficie Total</strong></td>
+                            {% for property in properties %}
+                            <td class="text-center">{{ property.total_surface }} m²</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td><strong>Superficie Cubierta</strong></td>
+                            {% for property in properties %}
+                            <td class="text-center">{{ property.covered_surface|default:"-" }} {% if property.covered_surface %}m²{% endif %}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td><strong>Dormitorios</strong></td>
+                            {% for property in properties %}
+                            <td class="text-center">{{ property.bedrooms }}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td><strong>Baños</strong></td>
+                            {% for property in properties %}
+                            <td class="text-center">{{ property.bathrooms }}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td><strong>Garage</strong></td>
+                            {% for property in properties %}
+                            <td class="text-center">
+                                {% if property.garage %}
+                                    <i class="bi bi-check-circle text-success"></i>
+                                {% else %}
+                                    <i class="bi bi-x-circle text-danger"></i>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td><strong>Amueblado</strong></td>
+                            {% for property in properties %}
+                            <td class="text-center">
+                                {% if property.furnished %}
+                                    <i class="bi bi-check-circle text-success"></i>
+                                {% else %}
+                                    <i class="bi bi-x-circle text-danger"></i>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td><strong>Precio de Venta</strong></td>
+                            {% for property in properties %}
+                            <td class="text-center">
+                                {% if property.sale_price %}
+                                    <strong class="text-success">${{ property.sale_price|floatformat:0 }}</strong>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td><strong>Precio de Alquiler</strong></td>
+                            {% for property in properties %}
+                            <td class="text-center">
+                                {% if property.rental_price %}
+                                    <strong class="text-primary">${{ property.rental_price|floatformat:0 }}/mes</strong>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td><strong>Expensas</strong></td>
+                            {% for property in properties %}
+                            <td class="text-center">
+                                {% if property.expenses %}
+                                    ${{ property.expenses|floatformat:0 }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td><strong>Año de Construcción</strong></td>
+                            {% for property in properties %}
+                            <td class="text-center">{{ property.year_built|default:"-" }}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td><strong>Orientación</strong></td>
+                            {% for property in properties %}
+                            <td class="text-center">{{ property.orientation|default:"-" }}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td><strong>Plantas</strong></td>
+                            {% for property in properties %}
+                            <td class="text-center">{{ property.floors|default:"-" }}</td>
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% else %}
+    <!-- Sin propiedades para comparar -->
+    <div class="text-center py-5">
+        <i class="bi bi-arrows-expand display-1 text-muted"></i>
+        <h3 class="text-muted mt-3">Sin propiedades para comparar</h3>
+        <p class="text-muted">Selecciona al menos una propiedad para comenzar la comparación.</p>
+        <a href="{% url 'properties:property_list' %}" class="btn btn-primary">
+            <i class="bi bi-search"></i> Explorar Propiedades
+        </a>
+    </div>
+{% endif %}
+{% endblock %}

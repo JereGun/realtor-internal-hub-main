@@ -1,0 +1,149 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Propiedades - {{ block.super }}{% endblock %}
+{% block page_title %}Propiedades{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Lista de Propiedades</h2>
+    <a href="{% url 'properties:property_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Nueva Propiedad
+    </a>
+</div>
+
+<!-- Search Form -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                {{ search_form.search }}
+            </div>
+            <div class="col-md-2">
+                {{ search_form.property_type }}
+            </div>
+            <div class="col-md-2">
+                {{ search_form.property_status }}
+            </div>
+            <div class="col-md-2">
+                {{ search_form.locality }}
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="bi bi-search"></i> Buscar
+                </button>
+                <a href="{% url 'properties:property_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle"></i> Limpiar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Properties Grid -->
+<div class="row">
+    {% for property in properties %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+            {% if property.cover_image %}
+                <img src="{{ property.cover_image.image.url }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+            {% else %}
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <i class="bi bi-house text-muted" style="font-size: 3rem;"></i>
+                </div>
+            {% endif %}
+            
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">{{ property.title }}</h5>
+                <p class="card-text text-muted small">
+                    <i class="bi bi-geo-alt"></i> {{ property.full_address }}
+                </p>
+                
+                <div class="row text-center mb-3">
+                    <div class="col-4">
+                        <small class="text-muted">
+                            <i class="bi bi-rulers"></i><br>
+                            {{ property.total_surface }} m²
+                        </small>
+                    </div>
+                    <div class="col-4">
+                        <small class="text-muted">
+                            <i class="bi bi-door-closed"></i><br>
+                            {{ property.bedrooms }} dorm.
+                        </small>
+                    </div>
+                    <div class="col-4">
+                        <small class="text-muted">
+                            <i class="bi bi-droplet"></i><br>
+                            {{ property.bathrooms }} baños
+                        </small>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <span class="badge bg-primary">{{ property.property_type }}</span>
+                    <span class="badge bg-success">{{ property.property_status }}</span>
+                </div>
+                
+                <div class="mb-3">
+                    {% if property.sale_price %}
+                        <strong class="text-success">Venta: ${{ property.sale_price|floatformat:0 }}</strong><br>
+                    {% endif %}
+                    {% if property.rental_price %}
+                        <strong class="text-primary">Alquiler: ${{ property.rental_price|floatformat:0 }}/mes</strong>
+                    {% endif %}
+                </div>
+                
+                <div class="mt-auto">
+                    <a href="{% url 'properties:property_detail' property.pk %}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-eye"></i> Ver Detalles
+                    </a>
+                    <a href="{% url 'properties:property_edit' property.pk %}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-pencil"></i> Editar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="text-center py-5">
+            <i class="bi bi-house display-1 text-muted"></i>
+            <h3 class="text-muted">No se encontraron propiedades</h3>
+            <p class="text-muted">Prueba ajustando los filtros de búsqueda.</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+<nav aria-label="Paginación de propiedades">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1">Primera</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+            </li>
+        {% endif %}
+        
+        <li class="page-item active">
+            <span class="page-link">
+                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+            </span>
+        </li>
+        
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Última</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

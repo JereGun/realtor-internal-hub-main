@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3">Dashboard</h1>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-bg-success mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Ventas de Propiedades</h5>
+                    <p class="card-text display-6">${{ sales_total|floatformat:2 }}</p>
+                    <small>{{ sales_count }} ventas</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-bg-info mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Ingresos por Alquileres</h5>
+                    <p class="card-text display-6">${{ rent_income|floatformat:2 }}</p>
+                    <small>{{ rent_count }} alquileres</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-bg-warning mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Pagos Pendientes</h5>
+                    <p class="card-text display-6">${{ pending_payments|floatformat:2 }}</p>
+                    <small>{{ pending_count }} pagos</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Resumen de Últimas Ventas y Alquileres</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Propiedad</th>
+                                    <th>Cliente</th>
+                                    <th>Monto</th>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for op in last_operations %}
+                                <tr>
+                                    <td>{{ op.type }}</td>
+                                    <td>{{ op.property }}</td>
+                                    <td>{{ op.customer }}</td>
+                                    <td>${{ op.amount|floatformat:2 }}</td>
+                                    <td>{{ op.date|date:'d/m/Y' }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="5">No hay operaciones recientes.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    {% if object %}
+        Editar Cliente - {{ object.first_name }} {{ object.last_name }}
+    {% else %}
+        Nuevo Cliente
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        {% if object %}
+                            <i class="fas fa-user-edit"></i> Editar Cliente
+                        {% else %}
+                            <i class="fas fa-user-plus"></i> Nuevo Cliente
+                        {% endif %}
+                    </h3>
+                    <div class="card-tools">
+                        <a href="{% url 'customers:customer_list' %}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> Volver a la Lista
+                        </a>
+                        {% if object %}
+                            <a href="{% url 'customers:customer_detail' object.pk %}" class="btn btn-info btn-sm">
+                                <i class="fas fa-eye"></i> Ver Detalle
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Personal Information Section -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h5 class="mb-3">
+                                    <i class="fas fa-user"></i> Información Personal
+                                </h5>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.first_name|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.last_name|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.email|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.phone|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.birth_date|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.identity_number|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <!-- Address Information Section -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h5 class="mb-3">
+                                    <i class="fas fa-map-marker-alt"></i> Información de Dirección
+                                </h5>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-12">
+                                {{ form.address|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.city|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.state|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.postal_code|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.country|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <!-- Additional Information Section -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h5 class="mb-3">
+                                    <i class="fas fa-info-circle"></i> Información Adicional
+                                </h5>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-12">
+                                {{ form.notes|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <!-- Form Actions -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save"></i>
+                                            {% if object %}
+                                                Guardar Cambios
+                                            {% else %}
+                                                Crear Cliente
+                                            {% endif %}
+                                        </button>
+                                        <a href="{% url 'customers:customer_list' %}" class="btn btn-secondary">
+                                            <i class="fas fa-times"></i> Cancelar
+                                        </a>
+                                    </div>
+                                    {% if object %}
+                                        <div>
+                                            <a href="{% url 'customers:customer_delete' object.pk %}" class="btn btn-danger" onclick="return confirm('¿Está seguro de que desea eliminar este cliente?')">
+                                                <i class="fas fa-trash"></i> Eliminar
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+// Date picker for birth_date field
+document.addEventListener('DOMContentLoaded', function() {
+    const birthDateInput = document.getElementById('id_birth_date');
+    if (birthDateInput) {
+        birthDateInput.type = 'date';
+        birthDateInput.max = new Date().toISOString().split('T')[0];
+    }
+});
+</script>
+{% endblock %}

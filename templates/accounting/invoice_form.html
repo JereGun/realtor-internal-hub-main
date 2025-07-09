@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if invoice %}Editar Factura{% else %}Nueva Factura{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row g-4">
+        <!-- Formulario principal -->
+        <div class="col-lg-7">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h4 text-dark mb-0">
+                    <i class="bi bi-file-earmark-text me-2"></i> {% if invoice %}Editar Factura{% else %}Nueva Factura{% endif %}
+                </h1>
+                <a href="{% url 'accounting:invoice_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </a>
+            </div>
+
+            <form method="post" id="invoiceForm" class="card shadow-sm border-0">
+                {% csrf_token %}
+                <div class="card-body">
+                    <h5 class="mb-3">Datos Generales</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{ form.number|as_crispy_field }}
+                            {{ form.date|as_crispy_field }}
+                            {{ form.due_date|as_crispy_field }}
+                            {{ form.customer|as_crispy_field }}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.total_amount|as_crispy_field }}
+                            {{ form.state|as_crispy_field }}
+                            {{ form.contract|as_crispy_field }}
+                            {{ form.property|as_crispy_field }}
+                        </div>
+                    </div>
+
+                    {{ form.description|as_crispy_field }}
+
+                    <hr class="my-4">
+                    <h5 class="mb-3">Ítems de la Factura</h5>
+                    {{ formset.management_form }}
+
+                    <div class="table-responsive mb-4">
+                        <table class="table table-sm table-bordered align-middle" id="itemsTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Concepto</th>
+                                    <th>Monto</th>
+                                    <th class="text-center">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for form in formset.forms %}
+                                <tr>
+                                    <td>{{ form.concept }}</td>
+                                    <td>{{ form.amount }}</td>
+                                    <td class="text-center">
+                                        {% if form.instance.pk %}
+                                        <div class="form-check">
+                                            {{ form.DELETE }} <label class="form-check-label">Eliminar</label>
+                                        </div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="bi bi-save me-1"></i> Guardar
+                        </button>
+                        <a href="{% url 'accounting:invoice_list' %}" class="btn btn-secondary">Cancelar</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Vista previa factura -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="mb-3">
+                        <i class="bi bi-eye me-1"></i> Vista Previa
+                    </h5>
+
+                    <div class="border p-3 rounded bg-light">
+                        <p class="fw-bold mb-1">Factura Nº: <span id="preview-number"></span></p>
+                        <p class="mb-1"><strong>Fecha:</strong> <span id="preview-date"></span></p>
+                        <p class="mb-1"><strong>Vencimiento:</strong> <span id="preview-due"></span></p>
+                        <p class="mb-1"><strong>Cliente:</strong> <span id="preview-customer"></span></p>
+                        <p class="mb-1"><strong>Total:</strong> $<span id="preview-total"></span></p>
+                        <hr>
+                        <strong>Conceptos:</strong>
+                        <ul class="list-unstyled small mt-2" id="preview-items">
+                        </ul>
+                        <hr>
+                        <p class="text-end fw-bold">Total: $<span id="preview-total-bottom"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        function updatePreview() {
+            document.getElementById('preview-number').textContent = document.getElementById('id_number')?.value || '';
+            document.getElementById('preview-date').textContent = document.getElementById('id_date')?.value || '';
+            document.getElementById('preview-due').textContent = document.getElementById('id_due_date')?.value || '';
+            document.getElementById('preview-customer').textContent = document.getElementById('id_customer')?.selectedOptions?.[0]?.text || '';
+            const total = document.getElementById('id_total_amount')?.value || '0.00';
+            document.getElementById('preview-total').textContent = total;
+            document.getElementById('preview-total-bottom').textContent = total;
+
+            const itemsList = document.getElementById('preview-items');
+            itemsList.innerHTML = '';
+            const concepts = document.querySelectorAll('input[name$="-concept"]');
+            const amounts = document.querySelectorAll('input[name$="-amount"]');
+            for (let i = 0; i < concepts.length; i++) {
+                if (concepts[i].value.trim()) {
+                    const li = document.createElement('li');
+                    li.textContent = `• ${concepts[i].value} - $${amounts[i].value || '0.00'}`;
+                    itemsList.appendChild(li);
+                }
+            }
+        }
+
+        document.getElementById('invoiceForm').addEventListener('input', updatePreview);
+        updatePreview(); // initial render
+    });
+</script>
+{% endblock %}

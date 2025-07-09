@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block page_title %}Agregar Aumento{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12 col-lg-6 mx-auto">
+            <div class="card mt-5">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">Agregar Aumento al Contrato #{{ contract.id }}</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary me-2">Guardar</button>
+                            <a href="{% url 'contracts:contract_detail' contract.pk %}" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

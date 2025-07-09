@@ -1,0 +1,343 @@
+{% extends 'base.html' %}
+
+{% block title %}Estadísticas de Propiedades - {{ block.super }}{% endblock %}
+{% block page_title %}Estadísticas de Propiedades{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>
+        <i class="bi bi-graph-up"></i> Estadísticas de Propiedades
+    </h2>
+    <div>
+        <a href="{% url 'properties:property_list' %}" class="btn btn-outline-primary">
+            <i class="bi bi-list"></i> Ver Lista
+        </a>
+        <a href="{% url 'properties:property_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Nueva Propiedad
+        </a>
+    </div>
+</div>
+
+<!-- Resumen General -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">{{ stats.total_properties }}</h4>
+                        <p class="mb-0">Total Propiedades</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-house" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">{{ stats.available_properties }}</h4>
+                        <p class="mb-0">Disponibles</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-check-circle" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">{{ stats.sold_properties }}</h4>
+                        <p class="mb-0">Vendidas</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-currency-dollar" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="mb-0">{{ stats.rented_properties }}</h4>
+                        <p class="mb-0">Alquiladas</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="bi bi-key" style="font-size: 2rem;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Estadísticas por Tipo -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-pie-chart"></i> Propiedades por Tipo
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if stats.by_type %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th class="text-center">Cantidad</th>
+                                    <th class="text-center">Porcentaje</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in stats.by_type %}
+                                <tr>
+                                    <td>{{ item.property_type__name|default:"Sin tipo" }}</td>
+                                    <td class="text-center">
+                                        <span class="badge bg-primary">{{ item.count }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar" role="progressbar" 
+                                                 style="width: {{ item.percentage }}%"
+                                                 aria-valuenow="{{ item.percentage }}"
+                                                 aria-valuemin="0" aria-valuemax="100">
+                                                {{ item.percentage|floatformat:1 }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center">No hay datos disponibles</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas por Estado -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-bar-chart"></i> Propiedades por Estado
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if stats.by_status %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Estado</th>
+                                    <th class="text-center">Cantidad</th>
+                                    <th class="text-center">Porcentaje</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in stats.by_status %}
+                                <tr>
+                                    <td>{{ item.property_status__name|default:"Sin estado" }}</td>
+                                    <td class="text-center">
+                                        <span class="badge bg-success">{{ item.count }}</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar bg-success" role="progressbar" 
+                                                 style="width: {{ item.percentage }}%"
+                                                 aria-valuenow="{{ item.percentage }}"
+                                                 aria-valuemin="0" aria-valuemax="100">
+                                                {{ item.percentage|floatformat:1 }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center">No hay datos disponibles</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Propiedades por Localidad -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-geo-alt"></i> Top Localidades
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if stats.by_locality %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Localidad</th>
+                                    <th class="text-center">Cantidad</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in stats.by_locality %}
+                                <tr>
+                                    <td>{{ item.locality|default:"Sin localidad" }}</td>
+                                    <td class="text-center">
+                                        <span class="badge bg-info">{{ item.count }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center">No hay datos disponibles</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Rangos de Precios -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-currency-dollar"></i> Rangos de Precios
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h6 class="text-success">Venta</h6>
+                        {% if stats.price_stats.sale_min and stats.price_stats.sale_max %}
+                            <p class="mb-1">
+                                <strong>Mínimo:</strong><br>
+                                ${{ stats.price_stats.sale_min|floatformat:0 }}
+                            </p>
+                            <p class="mb-1">
+                                <strong>Máximo:</strong><br>
+                                ${{ stats.price_stats.sale_max|floatformat:0 }}
+                            </p>
+                            <p class="mb-0">
+                                <strong>Promedio:</strong><br>
+                                ${{ stats.price_stats.sale_avg|floatformat:0 }}
+                            </p>
+                        {% else %}
+                            <p class="text-muted">Sin datos</p>
+                        {% endif %}
+                    </div>
+                    <div class="col-6">
+                        <h6 class="text-primary">Alquiler</h6>
+                        {% if stats.price_stats.rental_min and stats.price_stats.rental_max %}
+                            <p class="mb-1">
+                                <strong>Mínimo:</strong><br>
+                                ${{ stats.price_stats.rental_min|floatformat:0 }}
+                            </p>
+                            <p class="mb-1">
+                                <strong>Máximo:</strong><br>
+                                ${{ stats.price_stats.rental_max|floatformat:0 }}
+                            </p>
+                            <p class="mb-0">
+                                <strong>Promedio:</strong><br>
+                                ${{ stats.price_stats.rental_avg|floatformat:0 }}
+                            </p>
+                        {% else %}
+                            <p class="text-muted">Sin datos</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Propiedades Recientes -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-clock"></i> Propiedades Agregadas Recientemente
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if recent_properties %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Propiedad</th>
+                                    <th>Tipo</th>
+                                    <th>Estado</th>
+                                    <th>Localidad</th>
+                                    <th>Precio</th>
+                                    <th>Fecha</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for property in recent_properties %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ property.title }}</strong><br>
+                                        <small class="text-muted">{{ property.full_address|truncatechars:40 }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ property.property_type }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">{{ property.property_status }}</span>
+                                    </td>
+                                    <td>{{ property.locality|default:"-" }}</td>
+                                    <td>
+                                        {% if property.sale_price %}
+                                            <small class="text-success">Venta:</small><br>
+                                            <strong class="text-success">${{ property.sale_price|floatformat:0 }}</strong>
+                                        {% endif %}
+                                        {% if property.rental_price %}
+                                            <small class="text-primary">Alquiler:</small><br>
+                                            <strong class="text-primary">${{ property.rental_price|floatformat:0 }}</strong>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small>{{ property.created_at|date:"d/m/Y" }}</small>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'properties:property_detail' property.pk %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center">No hay propiedades recientes</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

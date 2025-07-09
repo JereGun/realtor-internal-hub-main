@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+
+{% block page_title %}{{ customer.get_full_name }} - Detalles del Cliente{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'customers:customer_list' %}">Clientes</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">{{ customer.get_full_name }}</li>
+                        </ol>
+                    </nav>
+                    <h1 class="h3 mb-0">{{ customer.get_full_name }}</h1>
+                </div>
+                <div class="btn-group" role="group">
+                    <a href="{% url 'customers:customer_edit' customer.pk %}" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Editar
+                    </a>
+                    <a href="{% url 'customers:customer_delete' customer.pk %}" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Customer Information -->
+                <div class="col-lg-8">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-user"></i> Información Personal
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-muted">Nombre</h6>
+                                    <p class="mb-3">{{ customer.first_name }}</p>
+
+                                    <h6 class="text-muted">Apellido</h6>
+                                    <p class="mb-3">{{ customer.last_name }}</p>
+
+                                    <h6 class="text-muted">Email</h6>
+                                    <p class="mb-3">
+                                        {% if customer.email %}
+                                            <a href="mailto:{{ customer.email }}">{{ customer.email }}</a>
+                                        {% else %}
+                                            <span class="text-muted">No especificado</span>
+                                        {% endif %}
+                                    </p>
+
+                                    <h6 class="text-muted">Teléfono</h6>
+                                    <p class="mb-3">
+                                        {% if customer.phone %}
+                                            <a href="tel:{{ customer.phone }}">{{ customer.phone }}</a>
+                                        {% else %}
+                                            <span class="text-muted">No especificado</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-muted">Tipo de Cliente</h6>
+                                    <p class="mb-3">
+                                        <span class="badge bg-info fs-6">{{ customer.get_customer_type_display }}</span>
+                                    </p>
+
+                                    <h6 class="text-muted">Estado</h6>
+                                    <p class="mb-3">
+                                        {% if customer.is_active %}
+                                            <span class="badge bg-success fs-6">Activo</span>
+                                        {% else %}
+                                            <span class="badge bg-danger fs-6">Inactivo</span>
+                                        {% endif %}
+                                    </p>
+
+                                    <h6 class="text-muted">Presupuesto</h6>
+                                    <p class="mb-3">
+                                        {% if customer.budget %}
+                                            ${{ customer.budget|floatformat:0 }}
+                                        {% else %}
+                                            <span class="text-muted">No especificado</span>
+                                        {% endif %}
+                                    </p>
+
+                                    <h6 class="text-muted">Agente Asignado</h6>
+                                    <p class="mb-3">
+                                        {% if customer.agent %}
+                                            {{ customer.agent.get_full_name }}
+                                        {% else %}
+                                            <span class="text-muted">Sin asignar</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {% if customer.notes %}
+                            <div class="mt-4">
+                                <h6 class="text-muted">Notas</h6>
+                                <div class="bg-light p-3 rounded">
+                                    {{ customer.notes|linebreaksbr }}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Address Information -->
+                    {% if customer.address or customer.city or customer.state or customer.zip_code or customer.country %}
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-map-marker-alt"></i> Dirección
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="text-muted">Dirección</h6>
+                                    <p class="mb-3">{{ customer.address|default:"No especificada" }}</p>
+
+                                    <h6 class="text-muted">Ciudad</h6>
+                                    <p class="mb-3">{{ customer.city|default:"No especificada" }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-muted">Estado/Provincia</h6>
+                                    <p class="mb-3">{{ customer.state|default:"No especificado" }}</p>
+
+                                    <h6 class="text-muted">Código Postal</h6>
+                                    <p class="mb-3">{{ customer.zip_code|default:"No especificado" }}</p>
+
+                                    <h6 class="text-muted">País</h6>
+                                    <p class="mb-3">{{ customer.country|default:"No especificado" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Customer Activity/Properties -->
+                    {% if customer.properties.exists %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-home"></i> Propiedades Relacionadas
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Propiedad</th>
+                                            <th>Tipo</th>
+                                            <th>Estado</th>
+                                            <th>Precio</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for property in customer.properties.all %}
+                                        <tr>
+                                            <td>
+                                                <a href="{% url 'properties:property_detail' property.pk %}" class="text-decoration-none">
+                                                    {{ property.title }}
+                                                </a>
+                                            </td>
+                                            <td>{{ property.get_property_type_display }}</td>
+                                            <td>
+                                                <span class="badge bg-secondary">{{ property.get_status_display }}</span>
+                                            </td>
+                                            <td>${{ property.price|floatformat:0 }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Sidebar -->
+                <div class="col-lg-4">
+                    <!-- Quick Stats -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-bar"></i> Estadísticas
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <div class="border-end">
+                                        <h4 class="text-primary">{{ customer.properties.count }}</h4>
+                                        <small class="text-muted">Propiedades</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <h4 class="text-success">{{ customer.transactions.count }}</h4>
+                                    <small class="text-muted">Transacciones</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Registration Info -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-info-circle"></i> Información del Sistema
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="text-muted">Fecha de Registro</h6>
+                            <p class="mb-3">{{ customer.created_at|date:"d/m/Y H:i" }}</p>
+
+                            <h6 class="text-muted">Última Actualización</h6>
+                            <p class="mb-3">{{ customer.updated_at|date:"d/m/Y H:i" }}</p>
+
+                            {% if customer.source %}
+                            <h6 class="text-muted">Fuente de Contacto</h6>
+                            <p class="mb-3">{{ customer.get_source_display }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-bolt"></i> Acciones Rápidas
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                {% if customer.email %}
+                                <a href="mailto:{{ customer.email }}" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-envelope"></i> Enviar Email
+                                </a>
+                                {% endif %}
+                                
+                                {% if customer.phone %}
+                                <a href="tel:{{ customer.phone }}" class="btn btn-outline-success btn-sm">
+                                    <i class="fas fa-phone"></i> Llamar
+                                </a>
+                                {% endif %}
+
+                                <a href="{% url 'properties:property_create' %}?customer={{ customer.pk }}" class="btn btn-outline-info btn-sm">
+                                    <i class="fas fa-home"></i> Agregar Propiedad
+                                </a>
+
+                                <a href="{% url 'customers:customer_edit' customer.pk %}" class="btn btn-outline-warning btn-sm">
+                                    <i class="fas fa-edit"></i> Editar Cliente
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ property.title }} - {{ block.super }}{% endblock %}
+{% block page_title %}Detalles de Propiedad{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>{{ property.title }}</h2>
+    <div>
+        <a href="{% url 'properties:property_edit' property.pk %}" class="btn btn-primary">
+            <i class="bi bi-pencil"></i> Editar
+        </a>
+        <a href="{% url 'properties:add_image' property.pk %}" class="btn btn-success">
+            <i class="bi bi-camera"></i> Agregar Imagen
+        </a>
+        <a href="{% url 'properties:property_delete' property.pk %}" class="btn btn-danger">
+            <i class="bi bi-trash"></i> Eliminar
+        </a>
+        <a href="{% url 'properties:property_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Imágenes -->
+    <div class="col-lg-8 mb-4">
+        {% if images %}
+            <div id="propertyCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    {% for image in images %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                        <img src="{{ image.image.url }}" class="d-block w-100" style="height: 400px; object-fit: cover;" alt="{{ image.description }}">
+                        <div class="carousel-caption d-flex justify-content-between align-items-end">
+                            <span class="badge bg-dark">{{ image.description }}</span>
+                            <a href="{% url 'properties:delete_image' property.pk image.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar esta imagen?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if images|length > 1 %}
+                <button class="carousel-control-prev" type="button" data-bs-target="#propertyCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#propertyCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 400px;">
+                <div class="text-center">
+                    <i class="bi bi-camera text-muted" style="font-size: 4rem;"></i>
+                    <h4 class="text-muted">Sin imágenes</h4>
+                    <a href="{% url 'properties:add_image' property.pk %}" class="btn btn-primary">
+                        <i class="bi bi-camera"></i> Agregar Primera Imagen
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Información Principal -->
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Información General</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <span class="badge bg-primary me-2">{{ property.property_type }}</span>
+                    <span class="badge bg-success">{{ property.property_status }}</span>
+                </div>
+                
+                <div class="mb-3">
+                    <strong><i class="bi bi-geo-alt text-primary"></i> Ubicación:</strong><br>
+                    {{ property.full_address }}
+                </div>
+
+                <div class="row text-center mb-3">
+                    <div class="col-4">
+                        <i class="bi bi-rulers text-primary"></i><br>
+                        <strong>{{ property.total_surface }}</strong><br>
+                        <small class="text-muted">m² totales</small>
+                    </div>
+                    <div class="col-4">
+                        <i class="bi bi-door-closed text-primary"></i><br>
+                        <strong>{{ property.bedrooms }}</strong><br>
+                        <small class="text-muted">dormitorios</small>
+                    </div>
+                    <div class="col-4">
+                        <i class="bi bi-droplet text-primary"></i><br>
+                        <strong>{{ property.bathrooms }}</strong><br>
+                        <small class="text-muted">baños</small>
+                    </div>
+                </div>
+
+                {% if property.covered_surface %}
+                <div class="mb-2">
+                    <strong>Superficie Cubierta:</strong> {{ property.covered_surface }} m²
+                </div>
+                {% endif %}
+
+                {% if property.garage %}
+                <div class="mb-2">
+                    <i class="bi bi-car-front text-success"></i> <strong>Con Garage</strong>
+                </div>
+                {% endif %}
+
+                {% if property.furnished %}
+                <div class="mb-2">
+                    <i class="bi bi-house text-success"></i> <strong>Amueblado</strong>
+                </div>
+                {% endif %}
+
+                <hr>
+
+                <!-- Precios -->
+                {% if property.sale_price %}
+                <div class="mb-2">
+                    <strong class="text-success">Precio de Venta:</strong><br>
+                    <span class="h4 text-success">${{ property.sale_price|floatformat:0 }}</span>
+                </div>
+                {% endif %}
+
+                {% if property.rental_price %}
+                <div class="mb-2">
+                    <strong class="text-primary">Precio de Alquiler:</strong><br>
+                    <span class="h5 text-primary">${{ property.rental_price|floatformat:0 }}/mes</span>
+                </div>
+                {% endif %}
+
+                {% if property.expenses %}
+                <div class="mb-2">
+                    <strong>Expensas:</strong> ${{ property.expenses|floatformat:0 }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Agente -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Agente a Cargo</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    {% if property.agent.image_path %}
+                        <img src="{{ property.agent.image_path.url }}" width="50" height="50" class="rounded-circle me-3">
+                    {% else %}
+                        <i class="bi bi-person-circle me-3" style="font-size: 3rem;"></i>
+                    {% endif %}
+                    <div>
+                        <strong>{{ property.agent.full_name }}</strong><br>
+                        <small class="text-muted">{{ property.agent.email }}</small><br>
+                        {% if property.agent.phone %}
+                        <small class="text-muted">{{ property.agent.phone }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <!-- Descripción -->
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Descripción</h5>
+            </div>
+            <div class="card-body">
+                <p>{{ property.description|linebreaks }}</p>
+            </div>
+        </div>
+
+        <!-- Características Adicionales -->
+        {% if property.year_built or property.orientation or property.floors %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Detalles Adicionales</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% if property.year_built %}
+                    <div class="col-md-4 mb-2">
+                        <strong>Año de Construcción:</strong><br>
+                        {{ property.year_built }}
+                    </div>
+                    {% endif %}
+                    {% if property.orientation %}
+                    <div class="col-md-4 mb-2">
+                        <strong>Orientación:</strong><br>
+                        {{ property.orientation }}
+                    </div>
+                    {% endif %}
+                    {% if property.floors %}
+                    <div class="col-md-4 mb-2">
+                        <strong>Plantas:</strong><br>
+                        {{ property.floors }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Características -->
+        {% if property.features.all %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Características</h5>
+            </div>
+            <div class="card-body">
+                {% for feature in property.features.all %}
+                    <span class="badge bg-info me-2 mb-2">{{ feature.name }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Etiquetas -->
+        {% if property.tags.all %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Etiquetas</h5>
+            </div>
+            <div class="card-body">
+                {% for tag in property.tags.all %}
+                    <span class="badge me-2 mb-2" style="background-color: {{ tag.color }};">{{ tag.name }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

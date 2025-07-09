@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Detalle de Contrato{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12 col-lg-8 mx-auto">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="h4 mb-0">Contrato #{{ contract.id }}</h2>
+                    <div>
+                        <a href="{% url 'contracts:contract_edit' contract.pk %}" class="btn btn-warning btn-sm">Editar</a>
+                        <a href="{% url 'contracts:contract_delete' contract.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-4">Propiedad</dt>
+                        <dd class="col-sm-8">{{ contract.property }}</dd>
+                        <dt class="col-sm-4">Cliente</dt>
+                        <dd class="col-sm-8">{{ contract.customer }}</dd>
+                        <dt class="col-sm-4">Agente</dt>
+                        <dd class="col-sm-8">{{ contract.agent }}</dd>
+                        <dt class="col-sm-4">Tipo</dt>
+                        <dd class="col-sm-8">{{ contract.get_contract_type_display }}</dd>
+                        <dt class="col-sm-4">Monto</dt>
+                        <dd class="col-sm-8">{{ contract.amount }}</dd>
+                        <dt class="col-sm-4">Activo</dt>
+                        <dd class="col-sm-8">{% if contract.is_active %}Sí{% else %}No{% endif %}</dd>
+                        <dt class="col-sm-4">Fecha de creación</dt>
+                        <dd class="col-sm-8">{{ contract.created_at|date:'d/m/Y' }}</dd>
+                    </dl>
+                </div>
+            </div>
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Aumentos</h5>
+                    <a href="{% url 'contracts:add_increase' contract.pk %}" class="btn btn-primary btn-sm">Agregar Aumento</a>
+                </div>
+                <div class="card-body">
+                    {% if increases %}
+                        <ul class="list-group">
+                            {% for increase in increases %}
+                                <li class="list-group-item">
+                                    <strong>{{ increase.date|date:'d/m/Y' }}:</strong> {{ increase.previous_amount }} → {{ increase.new_amount }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No hay aumentos registrados.</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Facturas</h5>
+                    <a href="{% url 'contracts:invoice_create' %}?contract={{ contract.pk }}" class="btn btn-primary btn-sm">Nueva Factura</a>
+                </div>
+                <div class="card-body">
+                    {% if invoices %}
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Emisión</th>
+                                        <th>Vencimiento</th>
+                                        <th>Estado</th>
+                                        <th>Total</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for invoice in invoices %}
+                                    <tr>
+                                        <td>{{ invoice.id }}</td>
+                                        <td>{{ invoice.issue_date|date:'d/m/Y' }}</td>
+                                        <td>{{ invoice.due_date|date:'d/m/Y' }}</td>
+                                        <td>{{ invoice.get_status_display }}</td>
+                                        <td>${{ invoice.total|floatformat:2 }}</td>
+                                        <td>
+                                            <a href="{% url 'contracts:invoice_detail' invoice.pk %}" class="btn btn-sm btn-info">Ver</a>
+                                            <a href="{% url 'contracts:invoice_edit' invoice.pk %}" class="btn btn-sm btn-warning">Editar</a>
+                                            <a href="{% url 'contracts:invoice_delete' invoice.pk %}" class="btn btn-sm btn-danger">Eliminar</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p>No hay facturas registradas para este contrato.</p>
+                    {% endif %}
+                </div>
+            </div>
+            <a href="{% url 'contracts:contract_list' %}" class="btn btn-secondary">Volver a la lista</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

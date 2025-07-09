@@ -52,7 +52,12 @@
 
     <div class="mt-auto pt-3 border-top">
         <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-            <img src="{{ user.image_path.url|default:'/static/default-profile.png' }}" alt="{{Perfil}}" width="32" height="32" class="rounded-circle me-2">
+            
+            {% if agent.image_path %}
+                <img src="{{ user.image_path.url }}" alt="{{Perfil}}" width="32" height="32" class="rounded-circle me-2">
+            {% else %}
+                <img src="static/default-profile.png" alt="{{Perfil}}" width="32" height="32" class="rounded-circle me-2">
+            {% endif %}
             <strong>{{ user.get_full_name }}</strong>
         </a>
         <ul class="dropdown-menu dropdown-menu-end">

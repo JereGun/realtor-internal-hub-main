@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .urls_invoice import urlpatterns as invoice_urlpatterns
+# from .urls_invoice import urlpatterns as invoice_urlpatterns # Removed
 
 app_name = 'contracts'
 
@@ -13,4 +13,4 @@ urlpatterns = [
     path('<int:pk>/add-increase/', views.add_contract_increase, name='add_increase'),
 ]
 
-urlpatterns += invoice_urlpatterns
+# urlpatterns += invoice_urlpatterns # Removed

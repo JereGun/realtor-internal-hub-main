@@ -5,8 +5,10 @@ from django.contrib import messages
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.db.models import Q
-from .models import Contract, ContractIncrease, Invoice, InvoiceItem
-from .forms import ContractForm, ContractIncreaseForm, ContractSearchForm, InvoiceForm, InvoiceItemForm
+# Removed Invoice, InvoiceItem from models import
+from .models import Contract, ContractIncrease
+# Removed InvoiceForm, InvoiceItemForm from forms import
+from .forms import ContractForm, ContractIncreaseForm, ContractSearchForm
 
 
 class ContractListView(LoginRequiredMixin, ListView):
@@ -55,7 +57,12 @@ class ContractDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['increases'] = self.object.increases.all()
-        context['invoices'] = self.object.invoices.prefetch_related('items').all()
+        # Point to accounting_invoices from the accounting app's Invoice model
+        # Ensure 'accounting_invoices' is the correct related_name in accounting.models_invoice.Invoice
+        if hasattr(self.object, 'accounting_invoices'):
+            context['invoices'] = self.object.accounting_invoices.prefetch_related('lines').all() 
+        else:
+            context['invoices'] = [] # Or handle as an error/log message
         return context
 
 
@@ -80,7 +87,11 @@ class ContractUpdateView(LoginRequiredMixin, UpdateView):
     
     def form_valid(self, form):
         messages.success(self.request, 'Contrato actualizado correctamente.')
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        # After saving, update status if necessary (e.g., if dates changed)
+        self.object.update_status()
+        self.object.save(update_fields=['status'])
+        return response
     
     def get_success_url(self):
         return reverse_lazy('contracts:contract_detail', kwargs={'pk': self.object.pk})
@@ -109,8 +120,14 @@ def add_contract_increase(request, pk):
             
             # Update contract amount
             contract.amount = increase.new_amount
-            contract.save()
+            contract.save() # Saves the new amount
             
+            # Potentially update contract status if the increase implies a change relevant to status
+            # For now, contract.update_status() is mainly date-based, so less critical here
+            # but if it included logic based on activity/amount changes, it would be relevant.
+            # contract.update_status()
+            # contract.save(update_fields=['status']) 
+
             messages.success(request, 'Aumento agregado correctamente.')
             return redirect('contracts:contract_detail', pk=pk)
     else:
@@ -121,79 +138,4 @@ def add_contract_increase(request, pk):
         'contract': contract
     })
 
-
-class InvoiceListView(LoginRequiredMixin, ListView):
-    model = Invoice
-    template_name = 'contracts/invoice_list.html'
-    context_object_name = 'invoices'
-    paginate_by = 20
-
-
-class InvoiceDetailView(LoginRequiredMixin, DetailView):
-    model = Invoice
-    template_name = 'contracts/invoice_detail.html'
-    context_object_name = 'invoice'
-
-
-class InvoiceCreateView(LoginRequiredMixin, CreateView):
-    model = Invoice
-    form_class = InvoiceForm
-    template_name = 'contracts/invoice_form.html'
-    
-    def get_initial(self):
-        initial = super().get_initial()
-        contract_id = self.request.GET.get('contract')
-        if contract_id:
-            initial['contract'] = contract_id
-        return initial
-    
-    def get_success_url(self):
-        return reverse_lazy('contracts:invoice_detail', kwargs={'pk': self.object.pk})
-
-
-class InvoiceUpdateView(LoginRequiredMixin, UpdateView):
-    model = Invoice
-    form_class = InvoiceForm
-    template_name = 'contracts/invoice_form.html'
-    
-    def get_success_url(self):
-        return reverse_lazy('contracts:invoice_detail', kwargs={'pk': self.object.pk})
-
-
-class InvoiceDeleteView(LoginRequiredMixin, DeleteView):
-    model = Invoice
-    template_name = 'contracts/invoice_confirm_delete.html'
-    
-    def get_success_url(self):
-        return reverse_lazy('contracts:invoice_list')
-
-
-class InvoiceItemCreateView(LoginRequiredMixin, CreateView):
-    model = InvoiceItem
-    form_class = InvoiceItemForm
-    template_name = 'contracts/invoiceitem_form.html'
-    
-    def form_valid(self, form):
-        invoice_id = self.kwargs.get('invoice_pk')
-        form.instance.invoice_id = invoice_id
-        return super().form_valid(form)
-    
-    def get_success_url(self):
-        return reverse_lazy('contracts:invoice_detail', kwargs={'pk': self.object.invoice.pk})
-
-
-class InvoiceItemUpdateView(LoginRequiredMixin, UpdateView):
-    model = InvoiceItem
-    form_class = InvoiceItemForm
-    template_name = 'contracts/invoiceitem_form.html'
-    
-    def get_success_url(self):
-        return reverse_lazy('contracts:invoice_detail', kwargs={'pk': self.object.invoice.pk})
-
-
-class InvoiceItemDeleteView(LoginRequiredMixin, DeleteView):
-    model = InvoiceItem
-    template_name = 'contracts/invoiceitem_confirm_delete.html'
-    
-    def get_success_url(self):
-        return reverse_lazy('contracts:invoice_detail', kwargs={'pk': self.object.invoice.pk})
+# Removed InvoiceListView, InvoiceDetailView, InvoiceCreateView, InvoiceUpdateView, InvoiceDeleteView

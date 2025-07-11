@@ -24,6 +24,7 @@ DJANGO_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
 ]
 
 LOCAL_APPS = [
@@ -34,7 +35,7 @@ LOCAL_APPS = [
     'payments',
     'notifications',
     'core',
-    'accounting',  # Agregada app de contabilidad
+    'accounting',
     'locations',
 ]
 

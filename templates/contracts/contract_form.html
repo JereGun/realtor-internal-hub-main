@@ -1,23 +1,89 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
-{% block page_title %}{% if form.instance.pk %}Editar Contrato{% else %}Nuevo Contrato{% endif %}{% endblock %}
+{% block page_title %}
+    {% if form.instance.pk %}Editar Contrato #{{ form.instance.pk }}{% else %}Nuevo Contrato{% endif %}
+{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12 col-lg-8 mx-auto">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="h4 mb-0">{% if form.instance.pk %}Editar Contrato{% else %}Nuevo Contrato{% endif %}</h2>
-                </div>
-                <div class="card-body">
-                    <form method="post">
+<div class="container-fluid px-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2 mb-0">
+                    {% if form.instance.pk %}
+                        <i class="bi bi-pencil-square me-2"></i>Editar Contrato #{{ form.instance.pk }}
+                    {% else %}
+                        <i class="bi bi-file-earmark-plus-fill me-2"></i>Nuevo Contrato
+                    {% endif %}
+                </h1>
+                <a href="{% if form.instance.pk %}{% url 'contracts:contract_detail' form.instance.pk %}{% else %}{% url 'contracts:contract_list' %}{% endif %}" class="btn btn-light btn-sm">
+                    <i class="bi bi-arrow-left-circle me-1"></i> 
+                    {% if form.instance.pk %}Cancelar Cambios{% else %}Volver al listado{% endif %}
+                </a>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <form method="post" novalidate>
                         {% csrf_token %}
-                        {{ form|crispy }}
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                {{ form.property|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.customer|as_crispy_field }}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                {{ form.contract_type|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.status|as_crispy_field }}
+                            </div>
+
+                            <div class="col-md-6">
+                                {{ form.start_date|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.end_date|as_crispy_field }}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                {{ form.amount|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.currency|as_crispy_field }}
+                            </div>
+                            
+                            {% if not form.instance.pk %} {# Hide agent field on creation, it's set in view #}
+                            <div class="col-md-6" style="display:none;">
+                                {{ form.agent|as_crispy_field }}
+                            </div>
+                            {% else %}
+                            <div class="col-md-6">
+                                {{ form.agent|as_crispy_field }}
+                            </div>
+                            {% endif %}
+                            
+                            <div class="col-12">
+                                {{ form.terms|as_crispy_field }}
+                            </div>
+                            <div class="col-12">
+                                {{ form.notes|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
                         <div class="d-flex justify-content-end">
-                            <button type="submit" class="btn btn-primary me-2">Guardar</button>
-                            <a href="{% url 'contracts:contract_list' %}" class="btn btn-secondary">Cancelar</a>
+                            <a href="{% if form.instance.pk %}{% url 'contracts:contract_detail' form.instance.pk %}{% else %}{% url 'contracts:contract_list' %}{% endif %}" class="btn btn-outline-secondary me-2">
+                                <i class="bi bi-x-circle me-1"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle-fill me-1"></i> Guardar Contrato
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -25,4 +91,12 @@
         </div>
     </div>
 </div>
+
+{% block extra_js %}
+<script>
+// Add any specific JS for the form if needed, e.g., date pickers
+// For example, if using a date picker library:
+// flatpickr(".datepicker", { dateFormat: "Y-m-d" });
+</script>
+{% endblock %}
 {% endblock %}

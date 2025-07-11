@@ -1,96 +1,172 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
+{% load humanize %}
 
 {% block page_title %}Contratos{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
+<div class="container-fluid px-4">
     <div class="row">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h3 mb-0">Contratos</h1>
+            <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2 mb-0">Listado de Contratos</h1>
                 <a href="{% url 'contracts:contract_create' %}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Nuevo Contrato
+                    <i class="bi bi-plus-circle me-1"></i> Nuevo Contrato
                 </a>
             </div>
-            <div class="card mb-4">
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-search me-2"></i>Filtrar Contratos</h5>
+                </div>
                 <div class="card-body">
-                    <form method="get" class="row g-3">
+                    <form method="get" class="row g-3 align-items-center">
                         <div class="col-md-4">
                             {{ search_form.search|as_crispy_field }}
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             {{ search_form.contract_type|as_crispy_field }}
                         </div>
-                        <div class="col-md-4">
-                            {{ search_form.is_active|as_crispy_field }}
+                        <div class="col-md-3">
+                            {{ search_form.status|as_crispy_field }}
                         </div>
-                        <div class="col-md-12 d-flex align-items-end mt-2">
-                            <button type="submit" class="btn btn-secondary me-2">
-                                <i class="fas fa-search"></i> Buscar
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-info w-100 me-2">
+                                <i class="bi bi-funnel-fill me-1"></i> Filtrar
                             </button>
-                            <a href="{% url 'contracts:contract_list' %}" class="btn btn-outline-secondary">
-                                <i class="fas fa-times"></i> Limpiar
+                            <a href="{% url 'contracts:contract_list' %}" class="btn btn-outline-secondary w-100" title="Limpiar filtros">
+                                <i class="bi bi-eraser-fill"></i>
                             </a>
                         </div>
                     </form>
                 </div>
             </div>
-            <div class="card">
+
+            {% if contracts %}
+            <div class="card shadow-sm">
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead class="table-dark">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Propiedad</th>
-                                    <th>Cliente</th>
-                                    <th>Agente</th>
-                                    <th>Tipo</th>
-                                    <th>Monto</th>
-                                    <th>Activo</th>
-                                    <th>Fecha</th>
-                                    <th>Acciones</th>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Propiedad</th>
+                                    <th scope="col">Cliente</th>
+                                    <th scope="col">Tipo</th>
+                                    <th scope="col" class="text-end">Monto ({{ contracts.0.currency }})</th>
+                                    <th scope="col" class="text-center">Estado</th>
+                                    <th scope="col">Inicio</th>
+                                    <th scope="col">Fin</th>
+                                    <th scope="col" class="text-center">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for contract in contracts %}
                                 <tr>
-                                    <td>{{ contract.id }}</td>
-                                    <td>{{ contract.property }}</td>
-                                    <td>{{ contract.customer }}</td>
-                                    <td>{{ contract.agent }}</td>
-                                    <td>{{ contract.get_contract_type_display }}</td>
-                                    <td>{{ contract.amount }}</td>
-                                    <td>{% if contract.is_active %}Sí{% else %}No{% endif %}</td>
-                                    <td>{{ contract.created_at|date:'d/m/Y' }}</td>
+                                    <td>#{{ contract.id }}</td>
                                     <td>
-                                        <a href="{% url 'contracts:contract_detail' contract.pk %}" class="btn btn-sm btn-info">Ver</a>
-                                        <a href="{% url 'contracts:contract_edit' contract.pk %}" class="btn btn-sm btn-warning">Editar</a>
-                                        <a href="{% url 'contracts:contract_delete' contract.pk %}" class="btn btn-sm btn-danger">Eliminar</a>
+                                        <a href="{% url 'properties:property_detail' contract.property.pk %}" class="text-decoration-none">
+                                            {{ contract.property.title|truncatechars:30 }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'customers:customer_detail' contract.customer.pk %}" class="text-decoration-none">
+                                            {{ contract.customer.full_name|truncatechars:25 }}
+                                        </a>
+                                    </td>
+                                    <td>{{ contract.get_contract_type_display }}</td>
+                                    <td class="text-end">{{ contract.amount|intcomma }}</td>
+                                    <td class="text-center">
+                                        <span class="badge 
+                                            {% if contract.status == contract.STATUS_ACTIVE %} bg-success
+                                            {% elif contract.status == contract.STATUS_EXPIRING_SOON %} bg-warning text-dark
+                                            {% elif contract.status == contract.STATUS_DRAFT %} bg-secondary
+                                            {% elif contract.status == contract.STATUS_FINISHED %} bg-info text-dark
+                                            {% elif contract.status == contract.STATUS_CANCELLED %} bg-danger
+                                            {% else %} bg-light text-dark {% endif %}">
+                                            {{ contract.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ contract.start_date|date:"d/m/Y" }}</td>
+                                    <td>{{ contract.end_date|date:"d/m/Y"|default:"-" }}</td>
+                                    <td class="text-center">
+                                        <a href="{% url 'contracts:contract_detail' contract.pk %}" class="btn btn-sm btn-outline-primary" title="Ver Detalles">
+                                            <i class="bi bi-eye-fill"></i>
+                                        </a>
+                                        <a href="{% url 'contracts:contract_edit' contract.pk %}" class="btn btn-sm btn-outline-secondary" title="Editar">
+                                            <i class="bi bi-pencil-fill"></i>
+                                        </a>
+                                        <a href="{% url 'contracts:contract_delete' contract.pk %}" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                            <i class="bi bi-trash-fill"></i>
+                                        </a>
                                     </td>
                                 </tr>
-                                {% empty %}
-                                <tr><td colspan="9">No hay contratos.</td></tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
-                    {% if is_paginated %}
-                        <nav>
-                            <ul class="pagination">
-                                {% if page_obj.has_previous %}
-                                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a></li>
-                                {% endif %}
-                                <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
-                                {% if page_obj.has_next %}
-                                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a></li>
-                                {% endif %}
-                            </ul>
-                        </nav>
-                    {% endif %}
                 </div>
+                {% if is_paginated %}
+                <div class="card-footer bg-light">
+                    <nav aria-label="Paginación de contratos">
+                        <ul class="pagination justify-content-center mb-0">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1" aria-label="Primera">
+                                        <span aria-hidden="true">&laquo;&laquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}" aria-label="Anterior">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link" aria-hidden="true">&laquo;&laquo;</span>
+                                </li>
+                                <li class="page-item disabled">
+                                    <span class="page-link" aria-hidden="true">&laquo;</span>
+                                </li>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span></li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item"><a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}" aria-label="Siguiente">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.paginator.num_pages }}" aria-label="Última">
+                                        <span aria-hidden="true">&raquo;&raquo;</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link" aria-hidden="true">&raquo;</span>
+                                </li>
+                                <li class="page-item disabled">
+                                    <span class="page-link" aria-hidden="true">&raquo;&raquo;</span>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
             </div>
+            {% else %}
+            <div class="alert alert-info mt-4" role="alert">
+                <i class="bi bi-info-circle-fill me-2"></i> No se encontraron contratos que coincidan con los filtros aplicados o no hay contratos registrados.
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>

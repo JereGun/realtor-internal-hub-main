@@ -28,15 +28,37 @@
         </li>
 
         <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" id="accountingDropdown" role="button" data-bs-toggle="dropdown">
-                <i class="bi bi-calculator me-2"></i> Contabilidad
+            <a class="nav-link dropdown-toggle {% if request.resolver_match.app_name == 'contracts' %}active{% endif %}" href="#" id="contractsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-file-earmark-text me-2"></i> Contratos
             </a>
-            <ul class="dropdown-menu dropdown-menu-light">
+            <ul class="dropdown-menu dropdown-menu-light" aria-labelledby="contractsDropdown">
                 <li>
-                    <a class="dropdown-item" href="{% url 'accounting:invoice_list' %}">Facturas</a>
+                    <a class="dropdown-item {% if request.resolver_match.url_name == 'contract_list' and request.resolver_match.app_name == 'contracts' %}active{% endif %}" href="{% url 'contracts:contract_list' %}">
+                        Listar Contratos
+                    </a>
                 </li>
                 <li>
-                    <a class="dropdown-item" href="{% url 'accounting:invoice_create' %}">Nueva Factura</a>
+                    <a class="dropdown-item {% if request.resolver_match.url_name == 'contract_create' and request.resolver_match.app_name == 'contracts' %}active{% endif %}" href="{% url 'contracts:contract_create' %}">
+                        Nuevo Contrato
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle {% if request.resolver_match.app_name == 'accounting' %}active{% endif %}" href="#" id="accountingDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-calculator me-2"></i> Contabilidad
+            </a>
+            <ul class="dropdown-menu dropdown-menu-light" aria-labelledby="accountingDropdown">
+                <li>
+                    <a class="dropdown-item {% if request.resolver_match.url_name == 'invoice_list' and request.resolver_match.app_name == 'accounting' %}active{% endif %}" href="{% url 'accounting:invoice_list' %}">
+                        Facturas
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item {% if request.resolver_match.url_name == 'invoice_create' and request.resolver_match.app_name == 'accounting' %}active{% endif %}" href="{% url 'accounting:invoice_create' %}">
+                        Nueva Factura
+                    </a>
                 </li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item disabled" href="#">Reportes (próximamente)</a></li>
@@ -44,7 +66,7 @@
         </li>
 
         <li class="nav-item">
-            <a href="{% url 'agents:agent_list' %}" class="nav-link {% if request.resolver_match.url_name == 'agent_list' %}active{% endif %}">
+            <a href="{% url 'agents:agent_list' %}" class="nav-link {% if request.resolver_match.url_name == 'agent_list' and request.resolver_match.app_name == 'agents' %}active{% endif %}">
                 <i class="bi bi-person-badge me-2"></i> Agentes
             </a>
         </li>
@@ -68,21 +90,3 @@
         </ul>
     </div>
 </div>
-
-<script>
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    sidebar.classList.toggle('d-none');
-    const collapsed = sidebar.classList.contains('d-none');
-    localStorage.setItem('sidebarCollapsed', collapsed);
-    document.body.classList.toggle('sidebar-collapsed', collapsed);
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-    const sidebar = document.getElementById('sidebar');
-    if (localStorage.getItem('sidebarCollapsed') === 'true') {
-        sidebar.classList.add('d-none');
-        document.body.classList.add('sidebar-collapsed');
-    }
-});
-</script>

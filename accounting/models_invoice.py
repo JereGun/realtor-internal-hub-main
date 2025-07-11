@@ -2,7 +2,6 @@ from django.db import models
 from core.models import BaseModel
 from customers.models import Customer
 from properties.models import Property
-from contracts.models import Contract
 
 class Invoice(BaseModel):
     STATE_CHOICES = [

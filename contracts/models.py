@@ -16,6 +16,7 @@ class Contract(BaseModel):
     agent = models.ForeignKey('agents.Agent', on_delete=models.CASCADE, verbose_name="Agente")
     
     # Contract Details
+    is_active = models.BooleanField(default=True, verbose_name='Activo', help_text='Indica si el contrato está activo')
     contract_type = models.CharField(max_length=10, choices=CONTRACT_TYPES, verbose_name="Tipo de Contrato")
     start_date = models.DateField(verbose_name="Fecha de Inicio")
     end_date = models.DateField(blank=True, null=True, verbose_name="Fecha de Fin")
@@ -56,18 +57,15 @@ class Contract(BaseModel):
     def __str__(self):
         return f"Contrato {self.get_contract_type_display()} ({self.get_status_display()}) - {self.property.title} - {self.customer.full_name}"
     
-    @property
     def duration_in_days(self):
         """Calculates the duration of the contract in days if end_date is set."""
         if self.end_date and self.start_date:
             return (self.end_date - self.start_date).days
         return None
 
-    @property
     def is_rental(self):
         return self.contract_type == 'rental'
 
-    @property
     def is_expiring_soon(self, days_threshold=30):
         """Checks if a rental contract is expiring within the given threshold (default 30 days)."""
         if self.is_rental and self.end_date and self.status == self.STATUS_ACTIVE:
@@ -98,7 +96,6 @@ class Contract(BaseModel):
         # Consider saving the instance if status changed, or let the caller handle it.
         # self.save(update_fields=['status'])
 
-    @property
     def commission_amount(self):
         """Calculate commission based on agent's rate and contract amount."""
         if self.agent and hasattr(self.agent, 'commission_rate') and self.amount:

@@ -1,6 +1,5 @@
 from django.contrib import admin
-from .models import Contract, ContractIncrease, Invoice, InvoiceItem
-
+from .models import Contract, ContractIncrease
 
 class ContractIncreaseInline(admin.TabularInline):
     model = ContractIncrease
@@ -37,24 +36,3 @@ class ContractIncreaseAdmin(admin.ModelAdmin):
     list_filter = ('effective_date', 'contract__contract_type')
     search_fields = ('contract__property__title', 'contract__customer__first_name')
     date_hierarchy = 'effective_date'
-
-
-class InvoiceItemInline(admin.TabularInline):
-    model = InvoiceItem
-    extra = 0
-
-
-@admin.register(Invoice)
-class InvoiceAdmin(admin.ModelAdmin):
-    list_display = ('id', 'contract', 'issue_date', 'due_date', 'status', 'total')
-    list_filter = ('status', 'issue_date', 'due_date')
-    search_fields = ('contract__property__title', 'contract__customer__first_name', 'contract__customer__last_name')
-    date_hierarchy = 'issue_date'
-    inlines = [InvoiceItemInline]
-    readonly_fields = ('total',)
-
-
-@admin.register(InvoiceItem)
-class InvoiceItemAdmin(admin.ModelAdmin):
-    list_display = ('invoice', 'description', 'amount')
-    search_fields = ('description',)

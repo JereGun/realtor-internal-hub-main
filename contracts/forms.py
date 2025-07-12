@@ -5,20 +5,23 @@ from .models import Contract, ContractIncrease # Removed Invoice, InvoiceItem
 class ContractForm(forms.ModelForm):
     class Meta:
         model = Contract
-        exclude = ['created_at', 'updated_at'] # is_active was implicitly excluded, now status is included by default
+        exclude = ['created_at', 'updated_at']
         fields = [
-            'property', 'customer', 'agent', 'contract_type', 'start_date', 
-            'end_date', 'amount', 'currency', 'terms', 'notes', 'status'
+            'property', 'customer', 'agent', 'start_date', 'end_date', 'amount', 
+            'currency', 'frequency', 'increase_percentage', 'next_increase_date', 
+            'terms', 'notes', 'status'
         ]
         widgets = {
-            'property': forms.Select(attrs={'class': 'form-control'}),
+            'property': forms.Select(attrs={'class': 'form-control', 'id': 'id_property'}),
             'customer': forms.Select(attrs={'class': 'form-control'}),
-            'agent': forms.Select(attrs={'class': 'form-control'}), # Consider filtering agents if needed
-            'contract_type': forms.Select(attrs={'class': 'form-control'}),
+            'agent': forms.Select(attrs={'class': 'form-control'}),
             'start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
-            'currency': forms.TextInput(attrs={'class': 'form-control'}), # Could be Select if limited choices
+            'amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'id': 'id_amount'}),
+            'currency': forms.TextInput(attrs={'class': 'form-control'}),
+            'frequency': forms.Select(attrs={'class': 'form-control'}),
+            'increase_percentage': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'next_increase_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'terms': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
             'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'status': forms.Select(attrs={'class': 'form-control'}),
@@ -59,11 +62,6 @@ class ContractSearchForm(forms.Form):
         max_length=100,
         required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Buscar contratos...'})
-    )
-    contract_type = forms.ChoiceField(
-        choices=[('', 'Todos los tipos')] + Contract.CONTRACT_TYPES,
-        required=False,
-        widget=forms.Select(attrs={'class': 'form-control'})
     )
     status = forms.ChoiceField(
         # Add 'All' option dynamically

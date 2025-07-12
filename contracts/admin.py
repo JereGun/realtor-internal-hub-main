@@ -8,21 +8,24 @@ class ContractIncreaseInline(admin.TabularInline):
 
 @admin.register(Contract)
 class ContractAdmin(admin.ModelAdmin):
-    list_display = ('property', 'customer', 'agent', 'contract_type', 'amount', 'start_date', 'is_active')
-    list_filter = ('contract_type', 'is_active', 'agent', 'currency')
+    list_display = ('property', 'customer', 'agent', 'amount', 'start_date', 'is_active', 'frequency', 'increase_percentage', 'next_increase_date')
+    list_filter = ('is_active', 'agent', 'currency', 'frequency')
     search_fields = ('property__title', 'customer__first_name', 'customer__last_name', 'agent__first_name')
     date_hierarchy = 'start_date'
     inlines = [ContractIncreaseInline]
     
     fieldsets = (
         ('Información Básica', {
-            'fields': ('property', 'customer', 'agent', 'contract_type')
+            'fields': ('property', 'customer', 'agent')
         }),
         ('Fechas', {
             'fields': ('start_date', 'end_date')
         }),
         ('Información Financiera', {
             'fields': ('amount', 'currency')
+        }),
+        ('Aumento Automático de Precios', {
+            'fields': ('frequency', 'increase_percentage', 'next_increase_date')
         }),
         ('Detalles Adicionales', {
             'fields': ('terms', 'notes', 'is_active')
@@ -33,6 +36,6 @@ class ContractAdmin(admin.ModelAdmin):
 @admin.register(ContractIncrease)
 class ContractIncreaseAdmin(admin.ModelAdmin):
     list_display = ('contract', 'previous_amount', 'new_amount', 'increase_percentage', 'effective_date')
-    list_filter = ('effective_date', 'contract__contract_type')
+    list_filter = ('effective_date',)
     search_fields = ('contract__property__title', 'contract__customer__first_name')
     date_hierarchy = 'effective_date'

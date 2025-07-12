@@ -5,11 +5,14 @@ from decimal import Decimal
 
 class Contract(BaseModel):
     """Contract model"""
-    CONTRACT_TYPES = [
-        ('sale', 'Venta'),
-        ('rental', 'Alquiler'),
-    ]
     
+    FREQUENCY_CHOICES = [
+        ('monthly', 'Mensual'),
+        ('quarterly', 'Trimestral'),
+        ('semi-annually', 'Semestral'),
+        ('annually', 'Anual'),
+    ]
+
     # Basic Information
     property = models.ForeignKey('properties.Property', on_delete=models.CASCADE, verbose_name="Propiedad")
     customer = models.ForeignKey('customers.Customer', on_delete=models.CASCADE, verbose_name="Cliente")
@@ -17,7 +20,6 @@ class Contract(BaseModel):
     
     # Contract Details
     is_active = models.BooleanField(default=True, verbose_name='Activo', help_text='Indica si el contrato está activo')
-    contract_type = models.CharField(max_length=10, choices=CONTRACT_TYPES, verbose_name="Tipo de Contrato")
     start_date = models.DateField(verbose_name="Fecha de Inicio")
     end_date = models.DateField(blank=True, null=True, verbose_name="Fecha de Fin")
     
@@ -25,6 +27,11 @@ class Contract(BaseModel):
     amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Monto")
     currency = models.CharField(max_length=10, default='ARS', verbose_name="Moneda")
     
+    # Automatic Price Increase
+    frequency = models.CharField(max_length=20, choices=FREQUENCY_CHOICES, blank=True, null=True, verbose_name="Frecuencia de Aumento")
+    increase_percentage = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, verbose_name="Porcentaje de Aumento")
+    next_increase_date = models.DateField(blank=True, null=True, verbose_name="Fecha del Próximo Aumento")
+
     # Additional Information
     terms = models.TextField(blank=True, verbose_name="Términos y Condiciones")
     notes = models.TextField(blank=True, verbose_name="Notas")
@@ -55,7 +62,7 @@ class Contract(BaseModel):
         ordering = ['-created_at']
     
     def __str__(self):
-        return f"Contrato {self.get_contract_type_display()} ({self.get_status_display()}) - {self.property.title} - {self.customer.full_name}"
+        return f"Contrato ({self.get_status_display()}) - {self.property.title} - {self.customer.full_name}"
     
     def duration_in_days(self):
         """Calculates the duration of the contract in days if end_date is set."""
@@ -63,12 +70,9 @@ class Contract(BaseModel):
             return (self.end_date - self.start_date).days
         return None
 
-    def is_rental(self):
-        return self.contract_type == 'rental'
-
     def is_expiring_soon(self, days_threshold=30):
-        """Checks if a rental contract is expiring within the given threshold (default 30 days)."""
-        if self.is_rental and self.end_date and self.status == self.STATUS_ACTIVE:
+        """Checks if a contract is expiring within the given threshold (default 30 days)."""
+        if self.end_date and self.status == self.STATUS_ACTIVE:
             from django.utils import timezone
             return self.start_date <= timezone.now().date() <= self.end_date and \
                    (self.end_date - timezone.now().date()).days <= days_threshold

@@ -37,9 +37,6 @@
                             </div>
                             
                             <div class="col-md-6">
-                                {{ form.contract_type|as_crispy_field }}
-                            </div>
-                            <div class="col-md-6">
                                 {{ form.status|as_crispy_field }}
                             </div>
 
@@ -55,6 +52,16 @@
                             </div>
                             <div class="col-md-6">
                                 {{ form.currency|as_crispy_field }}
+                            </div>
+                            
+                            <div class="col-md-4">
+                                {{ form.frequency|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.increase_percentage|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.next_increase_date|as_crispy_field }}
                             </div>
                             
                             {% if not form.instance.pk %} {# Hide agent field on creation, it's set in view #}
@@ -87,16 +94,30 @@
                         </div>
                     </form>
                 </div>
-            </div>
+.            </div>
         </div>
     </div>
 </div>
 
 {% block extra_js %}
 <script>
-// Add any specific JS for the form if needed, e.g., date pickers
-// For example, if using a date picker library:
-// flatpickr(".datepicker", { dateFormat: "Y-m-d" });
+document.addEventListener('DOMContentLoaded', function() {
+    const propertySelect = document.getElementById('id_property');
+    const amountInput = document.getElementById('id_amount');
+
+    propertySelect.addEventListener('change', function() {
+        const propertyId = this.value;
+        if (propertyId) {
+            fetch(`/contracts/ajax/get_property_rental_price/?property_id=${propertyId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.rental_price) {
+                        amountInput.value = data.rental_price;
+                    }
+                });
+        }
+    });
+});
 </script>
 {% endblock %}
 {% endblock %}

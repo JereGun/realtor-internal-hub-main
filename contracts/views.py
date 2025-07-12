@@ -23,7 +23,6 @@ class ContractListView(LoginRequiredMixin, ListView):
         form = ContractSearchForm(self.request.GET)
         if form.is_valid():
             search = form.cleaned_data.get('search')
-            contract_type = form.cleaned_data.get('contract_type')
             is_active = form.cleaned_data.get('is_active')
             
             if search:
@@ -34,9 +33,6 @@ class ContractListView(LoginRequiredMixin, ListView):
                     Q(agent__first_name__icontains=search) |
                     Q(agent__last_name__icontains=search)
                 )
-            
-            if contract_type:
-                queryset = queryset.filter(contract_type=contract_type)
             
             if is_active:
                 queryset = queryset.filter(is_active=(is_active == 'true'))
@@ -65,6 +61,7 @@ class ContractDetailView(LoginRequiredMixin, DetailView):
             context['invoices'] = [] # Or handle as an error/log message
         return context
 
+from dateutil.relativedelta import relativedelta
 
 class ContractCreateView(LoginRequiredMixin, CreateView):
     model = Contract
@@ -73,6 +70,19 @@ class ContractCreateView(LoginRequiredMixin, CreateView):
     
     def form_valid(self, form):
         form.instance.agent = self.request.user
+        contract = form.save(commit=False)
+
+        if contract.start_date and contract.frequency:
+            if contract.frequency == 'monthly':
+                contract.next_increase_date = contract.start_date + relativedelta(months=1)
+            elif contract.frequency == 'quarterly':
+                contract.next_increase_date = contract.start_date + relativedelta(months=3)
+            elif contract.frequency == 'semi-annually':
+                contract.next_increase_date = contract.start_date + relativedelta(months=6)
+            elif contract.frequency == 'annually':
+                contract.next_increase_date = contract.start_date + relativedelta(years=1)
+        
+        contract.save()
         messages.success(self.request, 'Contrato creado correctamente.')
         return super().form_valid(form)
     
@@ -86,11 +96,25 @@ class ContractUpdateView(LoginRequiredMixin, UpdateView):
     template_name = 'contracts/contract_form.html'
     
     def form_valid(self, form):
+        contract = form.save(commit=False)
+
+        if contract.start_date and contract.frequency:
+            if contract.frequency == 'monthly':
+                contract.next_increase_date = contract.start_date + relativedelta(months=1)
+            elif contract.frequency == 'quarterly':
+                contract.next_increase_date = contract.start_date + relativedelta(months=3)
+            elif contract.frequency == 'semi-annually':
+                contract.next_increase_date = contract.start_date + relativedelta(months=6)
+            elif contract.frequency == 'annually':
+                contract.next_increase_date = contract.start_date + relativedelta(years=1)
+        else:
+            contract.next_increase_date = None
+
         messages.success(self.request, 'Contrato actualizado correctamente.')
         response = super().form_valid(form)
         # After saving, update status if necessary (e.g., if dates changed)
         self.object.update_status()
-        self.object.save(update_fields=['status'])
+        self.object.save(update_fields=['status', 'next_increase_date'])
         return response
     
     def get_success_url(self):
@@ -137,5 +161,16 @@ def add_contract_increase(request, pk):
         'form': form,
         'contract': contract
     })
+
+from django.http import JsonResponse
+from properties.models import Property
+
+def get_property_rental_price(request):
+    property_id = request.GET.get('property_id')
+    try:
+        property = Property.objects.get(id=property_id)
+        return JsonResponse({'rental_price': property.rental_price})
+    except Property.DoesNotExist:
+        return JsonResponse({'error': 'Property not found'}, status=404)
 
 # Removed InvoiceListView, InvoiceDetailView, InvoiceCreateView, InvoiceUpdateView, InvoiceDeleteView

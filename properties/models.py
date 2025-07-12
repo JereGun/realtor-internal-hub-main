@@ -67,9 +67,9 @@ class Property(BaseModel):
     street = models.CharField(max_length=200, verbose_name="Calle")
     number = models.CharField(max_length=20, verbose_name="Número")
     neighborhood = models.CharField(max_length=100, verbose_name="Barrio")
-    locality = models.CharField(max_length=100, verbose_name="Localidad")
-    province = models.CharField(max_length=100, verbose_name="Provincia")
-    country = models.CharField(max_length=100, default="Argentina", verbose_name="País")
+    country = models.ForeignKey('locations.Country', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="País")
+    province = models.ForeignKey('locations.State', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Provincia")
+    locality = models.ForeignKey('locations.City', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Localidad")
     
     # Property Details
     total_surface = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Superficie Total (m²)")
@@ -91,6 +91,7 @@ class Property(BaseModel):
     
     # Relationships
     agent = models.ForeignKey('agents.Agent', on_delete=models.CASCADE, verbose_name="Agente")
+    owner = models.ForeignKey('customers.Customer', on_delete=models.CASCADE, verbose_name="Dueño")
     features = models.ManyToManyField(Feature, blank=True, verbose_name="Características")
     tags = models.ManyToManyField(Tag, blank=True, verbose_name="Etiquetas")
     

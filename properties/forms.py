@@ -2,6 +2,7 @@
 from django import forms
 from django.forms import inlineformset_factory
 from .models import Property, PropertyImage, Feature, Tag, PropertyType, PropertyStatus
+from customers.models import Customer
 import json
 
 
@@ -38,6 +39,7 @@ class PropertyForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         
         # Configurar el campo agente según el contexto
+        # Importar aquí para evitar dependencias circulares
         if self.user:
             from agents.models import Agent
             
@@ -51,6 +53,11 @@ class PropertyForm(forms.ModelForm):
                 # Personalizar el label para mostrar mejor información
                 if self.user in active_agents:
                     self.fields['agent'].empty_label = None  # No mostrar empty label si hay un inicial
+        
+        # Poblar el queryset de dueños y hacerlo opcional
+        self.fields['owner'].queryset = Customer.objects.all().order_by('first_name', 'last_name')
+        self.fields['owner'].required = False
+        self.fields['owner'].empty_label = "Seleccionar Dueño (Opcional)"
     
     class Meta:
         model = Property
@@ -67,6 +74,11 @@ class PropertyForm(forms.ModelForm):
                 'class': 'form-control property-status-select',
                 'data-create-url': '#',
                 'data-field': 'property_status'
+            }),
+            'owner': forms.Select(attrs={
+                'class': 'form-control',
+                'data-toggle': 'tooltip',
+                'title': 'Dueño de la propiedad (opcional)'
             }),
             'street': forms.TextInput(attrs={'class': 'form-control'}),
             'number': forms.TextInput(attrs={'class': 'form-control'}),

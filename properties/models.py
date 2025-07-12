@@ -91,7 +91,7 @@ class Property(BaseModel):
     
     # Relationships
     agent = models.ForeignKey('agents.Agent', on_delete=models.CASCADE, verbose_name="Agente")
-    owner = models.ForeignKey('customers.Customer', on_delete=models.CASCADE, verbose_name="Dueño")
+    owner = models.ForeignKey('customers.Customer', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Dueño")
     features = models.ManyToManyField(Feature, blank=True, verbose_name="Características")
     tags = models.ManyToManyField(Tag, blank=True, verbose_name="Etiquetas")
     

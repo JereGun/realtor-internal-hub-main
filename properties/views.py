@@ -87,27 +87,15 @@ class PropertyCreateView(LoginRequiredMixin, CreateView):
         image_formset = context['image_formset']
         
         if form.is_valid() and image_formset.is_valid():
-            # Guardar la propiedad primero
+            # El método save del formulario está sobreescrito para manejar
+            # la creación de nuevas features y tags.
             self.object = form.save()
             
-            # Si el formulario tiene el método _save_m2m, llamarlo para guardar ManyToMany
-            if hasattr(form, '_save_m2m'):
-                form._save_m2m()
-            
-            # Guardar las imágenes
+            # El formset necesita la instancia de la propiedad antes de poder guardarse.
             image_formset.instance = self.object
-            images_saved = 0
+            image_formset.save()
             
-            for image_form in image_formset:
-                if image_form.cleaned_data and not image_form.cleaned_data.get('DELETE', False):
-                    if image_form.cleaned_data.get('image'):
-                        image_form.save()
-                        images_saved += 1
-            
-            if images_saved > 0:
-                messages.success(self.request, f'Propiedad creada correctamente con {images_saved} imagen(es).')
-            else:
-                messages.success(self.request, 'Propiedad creada correctamente.')
+            messages.success(self.request, 'Propiedad creada correctamente.')
             
             return redirect(self.get_success_url())
         else:
@@ -248,9 +236,9 @@ def create_feature_ajax(request):
             
             return JsonResponse({
                 'success': True,
-                'feature': {
+                'item': {
                     'id': feature.id,
-                    'name': feature.name
+                    'name': feature.name,
                 },
                 'created': created
             })
@@ -274,7 +262,7 @@ def create_tag_ajax(request):
             
             return JsonResponse({
                 'success': True,
-                'tag': {
+                'item': {
                     'id': tag.id,
                     'name': tag.name,
                     'color': tag.color
@@ -304,7 +292,7 @@ def create_property_type_ajax(request):
             
             return JsonResponse({
                 'success': True,
-                'property_type': {
+                'item': {
                     'id': property_type.id,
                     'name': property_type.name,
                     'description': property_type.description
@@ -334,7 +322,7 @@ def create_property_status_ajax(request):
             
             return JsonResponse({
                 'success': True,
-                'property_status': {
+                'item': {
                     'id': property_status.id,
                     'name': property_status.name,
                     'description': property_status.description

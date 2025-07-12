@@ -1,205 +1,134 @@
 {% extends 'base.html' %}
+{% load humanize %}
 
 {% block title %}{{ property.title }} - {{ block.super }}{% endblock %}
-{% block page_title %}Detalles de Propiedad{% endblock %}
+
+{% block page_title_content %}
+    <div class="d-flex justify-content-between align-items-center flex-wrap">
+        <div>
+            <h1 class="h2 mb-0">{{ property.title|truncatechars:60 }}</h1>
+            <p class="text-muted mb-0">
+                <i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ property.full_address }}
+            </p>
+        </div>
+        <div class="btn-toolbar mt-2 mt-md-0" role="toolbar" aria-label="Acciones de Propiedad">
+            <div class="btn-group me-2" role="group">
+                <a href="{% url 'properties:property_edit' property.pk %}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-pencil-fill me-1"></i> Editar
+                </a>
+                <a href="{% url 'properties:property_delete' property.pk %}" class="btn btn-danger btn-sm">
+                    <i class="bi bi-trash-fill me-1"></i> Eliminar
+                </a>
+            </div>
+            <div class="btn-group" role="group">
+                <a href="{% url 'properties:property_list' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left-circle-fill me-1"></i> Volver a Lista
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>{{ property.title }}</h2>
-    <div>
-        <a href="{% url 'properties:property_edit' property.pk %}" class="btn btn-primary">
-            <i class="bi bi-pencil"></i> Editar
-        </a>
-        <a href="{% url 'properties:add_image' property.pk %}" class="btn btn-success">
-            <i class="bi bi-camera"></i> Agregar Imagen
-        </a>
-        <a href="{% url 'properties:property_delete' property.pk %}" class="btn btn-danger">
-            <i class="bi bi-trash"></i> Eliminar
-        </a>
-        <a href="{% url 'properties:property_list' %}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Volver
-        </a>
-    </div>
-</div>
 
-<div class="row">
-    <!-- Imágenes -->
-    <div class="col-lg-8 mb-4">
-        {% if images %}
-            <div id="propertyCarousel" class="carousel slide" data-bs-ride="carousel">
-                <div class="carousel-inner">
-                    {% for image in images %}
-                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                        <img src="{{ image.image.url }}" class="d-block w-100" style="height: 400px; object-fit: cover;" alt="{{ image.description }}">
-                        <div class="carousel-caption d-flex justify-content-between align-items-end">
-                            <span class="badge bg-dark">{{ image.description }}</span>
-                            <a href="{% url 'properties:delete_image' property.pk image.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar esta imagen?')">
-                                <i class="bi bi-trash"></i>
-                            </a>
+<div class="row g-4">
+    <!-- Columna Izquierda: Galería y Descripción -->
+    <div class="col-lg-8">
+        <!-- Galería de Imágenes -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="bi bi-images me-2"></i>Galería de Imágenes</h5>
+            </div>
+            <div class="card-body p-2">
+                {% if images %}
+                    <div id="propertyCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
+                        <div class="carousel-indicators" style="bottom: -30px;">
+                            {% for image in images %}
+                            <button type="button" data-bs-target="#propertyCarousel" data-bs-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}" aria-current="{% if forloop.first %}true{% endif %}" aria-label="Imagen {{ forloop.counter }}"></button>
+                            {% endfor %}
                         </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                {% if images|length > 1 %}
-                <button class="carousel-control-prev" type="button" data-bs-target="#propertyCarousel" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon"></span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#propertyCarousel" data-bs-slide="next">
-                    <span class="carousel-control-next-icon"></span>
-                </button>
-                {% endif %}
-            </div>
-        {% else %}
-            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 400px;">
-                <div class="text-center">
-                    <i class="bi bi-camera text-muted" style="font-size: 4rem;"></i>
-                    <h4 class="text-muted">Sin imágenes</h4>
-                    <a href="{% url 'properties:add_image' property.pk %}" class="btn btn-primary">
-                        <i class="bi bi-camera"></i> Agregar Primera Imagen
-                    </a>
-                </div>
-            </div>
-        {% endif %}
-    </div>
-
-    <!-- Información Principal -->
-    <div class="col-lg-4">
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">Información General</h5>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <span class="badge bg-primary me-2">{{ property.property_type }}</span>
-                    <span class="badge bg-success">{{ property.property_status }}</span>
-                </div>
-                
-                <div class="mb-3">
-                    <strong><i class="bi bi-geo-alt text-primary"></i> Ubicación:</strong><br>
-                    {{ property.full_address }}
-                </div>
-
-                <div class="row text-center mb-3">
-                    <div class="col-4">
-                        <i class="bi bi-rulers text-primary"></i><br>
-                        <strong>{{ property.total_surface }}</strong><br>
-                        <small class="text-muted">m² totales</small>
-                    </div>
-                    <div class="col-4">
-                        <i class="bi bi-door-closed text-primary"></i><br>
-                        <strong>{{ property.bedrooms }}</strong><br>
-                        <small class="text-muted">dormitorios</small>
-                    </div>
-                    <div class="col-4">
-                        <i class="bi bi-droplet text-primary"></i><br>
-                        <strong>{{ property.bathrooms }}</strong><br>
-                        <small class="text-muted">baños</small>
-                    </div>
-                </div>
-
-                {% if property.covered_surface %}
-                <div class="mb-2">
-                    <strong>Superficie Cubierta:</strong> {{ property.covered_surface }} m²
-                </div>
-                {% endif %}
-
-                {% if property.garage %}
-                <div class="mb-2">
-                    <i class="bi bi-car-front text-success"></i> <strong>Con Garage</strong>
-                </div>
-                {% endif %}
-
-                {% if property.furnished %}
-                <div class="mb-2">
-                    <i class="bi bi-house text-success"></i> <strong>Amueblado</strong>
-                </div>
-                {% endif %}
-
-                <hr>
-
-                <!-- Precios -->
-                {% if property.sale_price %}
-                <div class="mb-2">
-                    <strong class="text-success">Precio de Venta:</strong><br>
-                    <span class="h4 text-success">${{ property.sale_price|floatformat:0 }}</span>
-                </div>
-                {% endif %}
-
-                {% if property.rental_price %}
-                <div class="mb-2">
-                    <strong class="text-primary">Precio de Alquiler:</strong><br>
-                    <span class="h5 text-primary">${{ property.rental_price|floatformat:0 }}/mes</span>
-                </div>
-                {% endif %}
-
-                {% if property.expenses %}
-                <div class="mb-2">
-                    <strong>Expensas:</strong> ${{ property.expenses|floatformat:0 }}
-                </div>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- Agente -->
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Agente a Cargo</h5>
-            </div>
-            <div class="card-body">
-                <div class="d-flex align-items-center">
-                    {% if property.agent.image_path %}
-                        <img src="{{ property.agent.image_path.url }}" width="50" height="50" class="rounded-circle me-3">
-                    {% else %}
-                        <i class="bi bi-person-circle me-3" style="font-size: 3rem;"></i>
-                    {% endif %}
-                    <div>
-                        <strong>{{ property.agent.full_name }}</strong><br>
-                        <small class="text-muted">{{ property.agent.email }}</small><br>
-                        {% if property.agent.phone %}
-                        <small class="text-muted">{{ property.agent.phone }}</small>
+                        <div class="carousel-inner rounded">
+                            {% for image in images %}
+                            <div class="carousel-item {% if forloop.first %}active{% endif %}" data-bs-interval="5000">
+                                <img src="{{ image.image.url }}" class="d-block w-100 property-detail-carousel-img" alt="{{ image.description|default:property.title }}">
+                                {% if image.description %}
+                                <div class="carousel-caption d-none d-md-block bg-dark bg-opacity-50 rounded px-2 py-1">
+                                    <p class="mb-0 small">{{ image.description }}</p>
+                                </div>
+                                {% endif %}
+                                {% if image.is_cover %}
+                                <span class="badge bg-primary position-absolute top-0 start-0 m-2"><i class="bi bi-star-fill me-1"></i> Portada</span>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% if images|length > 1 %}
+                        <button class="carousel-control-prev" type="button" data-bs-target="#propertyCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Anterior</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#propertyCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Siguiente</span>
+                        </button>
                         {% endif %}
                     </div>
-                </div>
+                     <div class="mt-4 text-center">
+                        <a href="{% url 'properties:property_edit' property.pk %}#headingImages" class="btn btn-success btn-sm">
+                            <i class="bi bi-camera-fill me-1"></i> Gestionar Imágenes
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-camera-reels text-muted display-4"></i>
+                        <h5 class="text-muted mt-2">Esta propiedad aún no tiene imágenes.</h5>
+                        <a href="{% url 'properties:add_image' property.pk %}" class="btn btn-primary mt-2">
+                            <i class="bi bi-plus-circle-fill me-1"></i> Agregar Imágenes
+                        </a>
+                    </div>
+                {% endif %}
             </div>
         </div>
-    </div>
-</div>
 
-<div class="row mt-4">
-    <!-- Descripción -->
-    <div class="col-lg-8">
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">Descripción</h5>
+        <!-- Descripción -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="bi bi-file-text-fill me-2"></i>Descripción Detallada</h5>
             </div>
             <div class="card-body">
-                <p>{{ property.description|linebreaks }}</p>
+                <p class="lead">{{ property.description|linebreaks }}</p>
             </div>
         </div>
 
-        <!-- Características Adicionales -->
-        {% if property.year_built or property.orientation or property.floors %}
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">Detalles Adicionales</h5>
+        <!-- Detalles Adicionales -->
+        {% if property.year_built or property.orientation or property.floors or property.covered_surface %}
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><i class="bi bi-bricks me-2"></i>Construcción y Orientación</h5>
             </div>
             <div class="card-body">
                 <div class="row">
+                    {% if property.covered_surface %}
+                    <div class="col-md-4 mb-3">
+                        <strong class="d-block text-primary"><i class="bi bi-aspect-ratio me-1"></i>Sup. Cubierta:</strong>
+                        {{ property.covered_surface|floatformat:"0" }} m²
+                    </div>
+                    {% endif %}
                     {% if property.year_built %}
-                    <div class="col-md-4 mb-2">
-                        <strong>Año de Construcción:</strong><br>
+                    <div class="col-md-4 mb-3">
+                        <strong class="d-block text-primary"><i class="bi bi-calendar-event me-1"></i>Año Construcción:</strong>
                         {{ property.year_built }}
                     </div>
                     {% endif %}
                     {% if property.orientation %}
-                    <div class="col-md-4 mb-2">
-                        <strong>Orientación:</strong><br>
+                    <div class="col-md-4 mb-3">
+                        <strong class="d-block text-primary"><i class="bi bi-compass me-1"></i>Orientación:</strong>
                         {{ property.orientation }}
                     </div>
                     {% endif %}
                     {% if property.floors %}
-                    <div class="col-md-4 mb-2">
-                        <strong>Plantas:</strong><br>
+                    <div class="col-md-4 mb-3">
+                        <strong class="d-block text-primary"><i class="bi bi-building me-1"></i>Plantas:</strong>
                         {{ property.floors }}
                     </div>
                     {% endif %}
@@ -208,33 +137,164 @@
         </div>
         {% endif %}
 
-        <!-- Características -->
-        {% if property.features.all %}
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">Características</h5>
+        <!-- Características y Etiquetas -->
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                {% if property.features.all %}
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="bi bi-check-circle-fill me-2 text-info"></i>Comodidades</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled">
+                        {% for feature in property.features.all %}
+                            <li class="mb-1"><i class="bi bi-check text-success me-1"></i>{{ feature.name }}</li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
             </div>
-            <div class="card-body">
-                {% for feature in property.features.all %}
-                    <span class="badge bg-info me-2 mb-2">{{ feature.name }}</span>
-                {% endfor %}
+            <div class="col-md-6 mb-4">
+                {% if property.tags.all %}
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="bi bi-tags-fill me-2 text-warning"></i>Etiquetas</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for tag in property.tags.all %}
+                            <span class="badge me-2 mb-2 p-2" style="background-color: {{ tag.color }}; color: #fff; font-size: 0.85rem;">
+                                {{ tag.name }}
+                            </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
-        {% endif %}
+    </div>
 
-        <!-- Etiquetas -->
-        {% if property.tags.all %}
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">Etiquetas</h5>
+    <!-- Columna Derecha: Información Principal y Agente -->
+    <div class="col-lg-4">
+        <!-- Información General -->
+        <div class="card shadow-sm mb-4 sticky-top" style="top: 20px;">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="bi bi-info-circle-fill me-2"></i>Resumen de la Propiedad</h5>
             </div>
             <div class="card-body">
-                {% for tag in property.tags.all %}
-                    <span class="badge me-2 mb-2" style="background-color: {{ tag.color }};">{{ tag.name }}</span>
-                {% endfor %}
+                <div class="mb-3 pb-3 border-bottom">
+                    <span class="badge fs-6 me-2 {% if property.property_status.name == 'Disponible' %}bg-success{% elif property.property_status.name == 'Vendida' %}bg-danger{% elif property.property_status.name == 'Alquilada' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                        <i class="bi bi-tag-fill me-1"></i> {{ property.property_status }}
+                    </span>
+                    <span class="badge bg-primary fs-6">
+                        <i class="bi bi-house-door-fill me-1"></i> {{ property.property_type }}
+                    </span>
+                </div>
+                
+                <div class="row text-center mb-3 pb-3 border-bottom">
+                    <div class="col-4">
+                        <i class="bi bi-rulers display-6 text-primary"></i><br>
+                        <strong class="d-block">{{ property.total_surface|floatformat:"0" }}</strong>
+                        <small class="text-muted">m² totales</small>
+                    </div>
+                    <div class="col-4">
+                        <i class="bi bi-door-closed-fill display-6 text-primary"></i><br>
+                        <strong class="d-block">{{ property.bedrooms }}</strong>
+                        <small class="text-muted">dorm.</small>
+                    </div>
+                    <div class="col-4">
+                        <i class="bi bi-droplet-fill display-6 text-primary"></i><br>
+                        <strong class="d-block">{{ property.bathrooms }}</strong>
+                        <small class="text-muted">baños</small>
+                    </div>
+                </div>
+
+                <ul class="list-group list-group-flush mb-3">
+                    {% if property.garage %}
+                    <li class="list-group-item px-0">
+                        <i class="bi bi-car-front-fill text-success me-2"></i> <strong>Con Garage</strong>
+                    </li>
+                    {% endif %}
+                    {% if property.furnished %}
+                    <li class="list-group-item px-0">
+                        <i class="bi bi-lamp-fill text-success me-2"></i> <strong>Amueblado</strong>
+                    </li>
+                    {% endif %}
+                </ul>
+
+                <!-- Precios -->
+                {% if property.sale_price %}
+                <div class="mb-3 p-3 bg-light rounded text-center">
+                    <h6 class="text-success mb-0">PRECIO DE VENTA</h6>
+                    <span class="h2 fw-bold text-success">${{ property.sale_price|floatformat:0|intcomma }}</span>
+                </div>
+                {% endif %}
+
+                {% if property.rental_price %}
+                <div class="mb-3 p-3 bg-light rounded text-center">
+                    <h6 class="text-info mb-0">PRECIO DE ALQUILER</h6>
+                    <span class="h4 fw-bold text-info">${{ property.rental_price|floatformat:0|intcomma }} <small>/mes</small></span>
+                </div>
+                {% endif %}
+
+                {% if property.expenses %}
+                <div class="text-center">
+                    <small class="text-muted">Expensas: ${{ property.expenses|floatformat:0|intcomma }}</small>
+                </div>
+                {% endif %}
             </div>
         </div>
-        {% endif %}
+
+        <!-- Agente -->
+        <div class="card shadow-sm mt-4 sticky-top" style="top: calc(20px + {% if property.sale_price and property.rental_price %}600px{% elif property.sale_price or property.rental_price %}520px{% else %}400px{% endif %});"> <!-- Adjust top based on price section height -->
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-person-badge-fill me-2"></i>Agente a Cargo</h5>
+            </div>
+            <div class="card-body text-center">
+                {% if property.agent.image_path %}
+                    <img src="{{ property.agent.image_path.url }}" width="80" height="80" class="rounded-circle mb-2 shadow-sm" alt="{{ property.agent.full_name }}">
+                {% else %}
+                    <i class="bi bi-person-circle mb-2 text-muted" style="font-size: 5rem;"></i>
+                {% endif %}
+                <h5 class="card-title mb-0">{{ property.agent.full_name }}</h5>
+                <p class="card-text text-muted small">{{ property.agent.role|default:"Agente Inmobiliario" }}</p>
+                <ul class="list-unstyled text-start small">
+                    <li><i class="bi bi-envelope-fill me-2 text-primary"></i>{{ property.agent.email }}</li>
+                    {% if property.agent.phone %}
+                    <li><i class="bi bi-telephone-fill me-2 text-primary"></i>{{ property.agent.phone }}</li>
+                    {% endif %}
+                </ul>
+                {% if property.agent.get_absolute_url %}
+                <a href="{{ property.agent.get_absolute_url }}" class="btn btn-outline-primary btn-sm mt-2">
+                    <i class="bi bi-person-lines-fill me-1"></i> Ver Perfil Agente
+                </a>
+                {% endif %}
+            </div>
+        </div>
     </div>
 </div>
+
+<style>
+.property-detail-carousel-img {
+    max-height: 550px; /* Ajusta según necesidad */
+    object-fit: cover;
+}
+.carousel-indicators [data-bs-target] {
+    background-color: #007bff; /* Color primario para indicadores */
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 5px;
+    margin-left: 5px;
+}
+.carousel-indicators .active {
+    background-color: #0056b3; /* Color más oscuro para indicador activo */
+}
+
+/* Asegurar que el contenido de la tarjeta de agente se muestre correctamente */
+.sticky-top { 
+    z-index: 1020; /* Bootstrap's default sticky-top z-index */
+}
+</style>
+
 {% endblock %}

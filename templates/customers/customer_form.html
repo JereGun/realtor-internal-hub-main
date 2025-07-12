@@ -67,13 +67,21 @@
                                     {{ form.neighborhood|as_crispy_field }}
                                 </div>
                                 <div class="col-md-6">
-                                    {{ form.locality|as_crispy_field }}
+                                    <label for="id_country" class="form-label">{{ form.country.label }}</label>
+                                    {{ form.country }}
+                                    {% if form.country.errors %}<div class="invalid-feedback d-block">{{ form.country.errors|first }}</div>{% endif %}
                                 </div>
                                 <div class="col-md-6">
-                                    {{ form.province|as_crispy_field }}
+                                    <label for="id_province" class="form-label">{{ form.province.label }}</label>
+                                    {{ form.province }}
+                                    {% if form.province.errors %}<div class="invalid-feedback d-block">{{ form.province.errors|first }}</div>{% endif %}
+                                    <div class="form-text">Selecciona un país primero.</div>
                                 </div>
                                 <div class="col-md-6">
-                                    {{ form.country|as_crispy_field }}
+                                    <label for="id_locality" class="form-label">{{ form.locality.label }}</label>
+                                    {{ form.locality }}
+                                    {% if form.locality.errors %}<div class="invalid-feedback d-block">{{ form.locality.errors|first }}</div>{% endif %}
+                                    <div class="form-text">Selecciona una provincia primero.</div>
                                 </div>
                             </div>
                         </fieldset>
@@ -121,90 +129,99 @@
     </div>
 </div>
 
+<!-- Incluir Select2 CSS y JS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 <script>
-// Bootstrap form validation
-(function() {
-    'use strict';
-    window.addEventListener('load', function() {
-        var forms = document.getElementsByClassName('needs-validation');
-        Array.prototype.filter.call(forms, function(form) {
-            form.addEventListener('submit', function(event) {
-                if (form.checkValidity() === false) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                form.classList.add('was-validated');
-            }, false);
-        });
-    }, false);
-})();
-
-// Ensure birth_date input is of type date and has a max date
-document.addEventListener('DOMContentLoaded', function() {
-    const birthDateInput = document.getElementById('id_birth_date');
-    if (birthDateInput) {
-        birthDateInput.setAttribute('type', 'date'); // Ensure it's date type
-        const today = new Date().toISOString().split('T')[0];
-        birthDateInput.setAttribute('max', today); // Prevent future dates
-    }
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-    const countrySelect = document.getElementById('id_country');
-    const provinceSelect = document.getElementById('id_province');
-    const localitySelect = document.getElementById('id_locality');
-
-    async function loadProvinces(countryId) {
-        if (!countryId) {
-            provinceSelect.innerHTML = '<option value="">---------</option>';
-            localitySelect.innerHTML = '<option value="">---------</option>';
-            return;
+$(document).ready(function() {
+    // Inicialización de Select2 para País
+    $('#id_country').select2({
+        theme: 'bootstrap-5',
+        placeholder: 'Selecciona un país',
+        allowClear: true,
+        ajax: {
+            url: "{% url 'properties:autocomplete_countries' %}",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return { term: params.term };
+            },
+            processResults: function (data) {
+                return { results: data.results };
+            },
+            cache: true
         }
-
-        try {
-            const response = await fetch(`/locations/api/states/?country_id=${countryId}`);
-            const provinces = await response.json();
-            
-            provinceSelect.innerHTML = '<option value="">---------</option>';
-            provinces.forEach(province => {
-                provinceSelect.innerHTML += `<option value="${province.id}">${province.name}</option>`;
-            });
-        } catch (error) {
-            console.error('Error cargando provincias:', error);
-        }
-    }
-
-    async function loadCities(stateId) {
-        if (!stateId) {
-            localitySelect.innerHTML = '<option value="">---------</option>';
-            return;
-        }
-
-        try {
-            const response = await fetch(`/locations/api/cities/?state_id=${stateId}`);
-            const cities = await response.json();
-            
-            localitySelect.innerHTML = '<option value="">---------</option>';
-            cities.forEach(city => {
-                localitySelect.innerHTML += `<option value="${city.id}">${city.name}</option>`;
-            });
-        } catch (error) {
-            console.error('Error cargando ciudades:', error);
-        }
-    }
-
-    countrySelect.addEventListener('change', function() {
-        loadProvinces(this.value);
     });
 
-    provinceSelect.addEventListener('change', function() {
-        loadCities(this.value);
+    // Inicialización de Select2 para Provincia (dependiente de País)
+    const provinceSelect = $('#id_province').select2({
+        theme: 'bootstrap-5',
+        placeholder: 'Selecciona una provincia',
+        allowClear: true,
+        ajax: {
+            url: "{% url 'properties:autocomplete_provinces' %}",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return {
+                    term: params.term,
+                    country_id: $('#id_country').val()
+                };
+            },
+            processResults: function (data) {
+                return { results: data.results };
+            },
+            cache: true
+        }
     });
 
-    // Cargar provincias iniciales si hay un país seleccionado
-    if (countrySelect.value) {
-        loadProvinces(countrySelect.value);
-    }
+    // Inicialización de Select2 para Localidad (dependiente de Provincia)
+    const localitySelect = $('#id_locality').select2({
+        theme: 'bootstrap-5',
+        placeholder: 'Selecciona una localidad',
+        allowClear: true,
+        ajax: {
+            url: "{% url 'properties:autocomplete_localities' %}",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return {
+                    term: params.term,
+                    province_id: $('#id_province').val()
+                };
+            },
+            processResults: function (data) {
+                return { results: data.results };
+            },
+            cache: true
+        }
+    });
+
+    // Manejo de dependencias
+    $('#id_country').on('change', function() {
+        // Limpiar selección de provincia y localidad
+        provinceSelect.val(null).trigger('change');
+        localitySelect.val(null).trigger('change');
+        // Habilitar/deshabilitar según la selección
+        provinceSelect.prop('disabled', !$(this).val());
+        localitySelect.prop('disabled', true);
+    });
+
+    $('#id_province').on('change', function() {
+        // Limpiar selección de localidad
+        localitySelect.val(null).trigger('change');
+        // Habilitar/deshabilitar según la selección
+        localitySelect.prop('disabled', !$(this).val());
+    });
+
+    // Estado inicial de los campos
+    const initialCountry = $('#id_country').val();
+    const initialProvince = $('#id_province').val();
+    provinceSelect.prop('disabled', !initialCountry);
+    localitySelect.prop('disabled', !initialProvince);
 });
 </script>
 {% endblock %}

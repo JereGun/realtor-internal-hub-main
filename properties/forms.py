@@ -1,4 +1,3 @@
-
 from django import forms
 from django.forms import inlineformset_factory
 from .models import Property, PropertyImage, Feature, Tag, PropertyType, PropertyStatus
@@ -75,17 +74,27 @@ class PropertyForm(forms.ModelForm):
                 'data-create-url': '#',
                 'data-field': 'property_status'
             }),
-            'owner': forms.Select(attrs={
-                'class': 'form-control',
+            'owner': forms.TextInput(attrs={ # Changed to TextInput
+                'class': 'form-control owner-autocomplete', # Added class for JS targeting
+                'placeholder': 'Buscar dueño...',
                 'data-toggle': 'tooltip',
                 'title': 'Dueño de la propiedad (opcional)'
             }),
             'street': forms.TextInput(attrs={'class': 'form-control'}),
             'number': forms.TextInput(attrs={'class': 'form-control'}),
             'neighborhood': forms.TextInput(attrs={'class': 'form-control'}),
-            'locality': forms.TextInput(attrs={'class': 'form-control'}),
-            'province': forms.TextInput(attrs={'class': 'form-control'}),
-            'country': forms.TextInput(attrs={'class': 'form-control'}),
+            'locality': forms.TextInput(attrs={ # Changed to TextInput
+                'class': 'form-control locality-autocomplete', # Added class for JS targeting
+                'placeholder': 'Buscar localidad...'
+            }),
+            'province': forms.TextInput(attrs={ # Changed to TextInput
+                'class': 'form-control province-autocomplete', # Added class for JS targeting
+                'placeholder': 'Buscar provincia...'
+            }),
+            'country': forms.TextInput(attrs={ # Changed to TextInput
+                'class': 'form-control country-autocomplete', # Added class for JS targeting
+                'placeholder': 'Buscar país...'
+            }),
             'total_surface': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'covered_surface': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'bedrooms': forms.NumberInput(attrs={'class': 'form-control'}),

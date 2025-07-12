@@ -22,4 +22,10 @@ urlpatterns = [
     path('ajax/property-statuses/create/', views.create_property_status_ajax, name='create_property_status_ajax'),
     path('ajax/property-types/', views.get_property_types_ajax, name='get_property_types_ajax'),
     path('ajax/property-statuses/', views.get_property_statuses_ajax, name='get_property_statuses_ajax'),
+    
+    # AJAX endpoints para autocompletado de Owner, Country, Province, Locality
+    path('ajax/owners/autocomplete/', views.autocomplete_owners, name='autocomplete_owners'),
+    path('ajax/countries/autocomplete/', views.autocomplete_countries, name='autocomplete_countries'),
+    path('ajax/provinces/autocomplete/', views.autocomplete_provinces, name='autocomplete_provinces'),
+    path('ajax/localities/autocomplete/', views.autocomplete_localities, name='autocomplete_localities'),
 ]

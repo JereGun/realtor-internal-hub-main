@@ -108,6 +108,19 @@
                                             </div>
                                             {% endif %}
                                         </div>
+                                        <div class="col-md-12">
+                                            <!-- Owner field with autocomplete -->
+                                            <label for="id_owner_select2" class="form-label">{{ form.owner.label }}</label>
+                                            <select id="id_owner_select2" name="owner_text_select2" class="form-control owner-autocomplete"
+                                                    data-autocomplete-url="{% url 'properties:autocomplete_owners' %}">
+                                                {% if form.instance.owner %}
+                                                <option value="{{ form.instance.owner.pk }}" selected>{{ form.instance.owner }}</option>
+                                                {% endif %}
+                                            </select>
+                                            <input type="hidden" name="{{ form.owner.name }}" id="{{ form.owner.id_for_label }}" value="{{ form.instance.owner.pk|default:'' }}">
+                                            {% if form.owner.errors %}<div class="invalid-feedback d-block">{{ form.owner.errors|first }}</div>{% endif %}
+                                            <div class="form-text">{{ form.owner.help_text|default:"Comienza a escribir para buscar un dueño." }}</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -126,9 +139,49 @@
                                         <div class="col-md-9">{{ form.street|as_crispy_field }}</div>
                                         <div class="col-md-3">{{ form.number|as_crispy_field }}</div>
                                         <div class="col-md-6">{{ form.neighborhood|as_crispy_field }}</div>
-                                        <div class="col-md-6">{{ form.locality|as_crispy_field }}</div>
-                                        <div class="col-md-6">{{ form.province|as_crispy_field }}</div>
-                                        <div class="col-md-6">{{ form.country|as_crispy_field }}</div>
+                                        
+                                        <!-- Country field with autocomplete -->
+                                        <div class="col-md-6">
+                                            <label for="id_country_select2" class="form-label">{{ form.country.label }}</label>
+                                            <select id="id_country_select2" name="country_text_select2" class="form-control country-autocomplete"
+                                                    data-autocomplete-url="{% url 'properties:autocomplete_countries' %}">
+                                                {% if form.instance.country %}
+                                                <option value="{{ form.instance.country.pk }}" selected>{{ form.instance.country.name }}</option>
+                                                {% endif %}
+                                            </select>
+                                            <input type="hidden" name="{{ form.country.name }}" id="{{ form.country.id_for_label }}" value="{{ form.instance.country.pk|default:'' }}">
+                                            {% if form.country.errors %}<div class="invalid-feedback d-block">{{ form.country.errors|first }}</div>{% endif %}
+                                        </div>
+
+                                        <!-- Province field with autocomplete -->
+                                        <div class="col-md-6">
+                                            <label for="id_province_select2" class="form-label">{{ form.province.label }}</label>
+                                            <select id="id_province_select2" name="province_text_select2" class="form-control province-autocomplete"
+                                                    data-autocomplete-url="{% url 'properties:autocomplete_provinces' %}"
+                                                    disabled>
+                                                {% if form.instance.province %}
+                                                <option value="{{ form.instance.province.pk }}" selected>{{ form.instance.province.name }}</option>
+                                                {% endif %}
+                                            </select>
+                                            <input type="hidden" name="{{ form.province.name }}" id="{{ form.province.id_for_label }}" value="{{ form.instance.province.pk|default:'' }}">
+                                            {% if form.province.errors %}<div class="invalid-feedback d-block">{{ form.province.errors|first }}</div>{% endif %}
+                                            <div class="form-text">Selecciona un país primero.</div>
+                                        </div>
+                                        
+                                        <!-- Locality field with autocomplete -->
+                                        <div class="col-md-6">
+                                            <label for="id_locality_select2" class="form-label">{{ form.locality.label }}</label>
+                                            <select id="id_locality_select2" name="locality_text_select2" class="form-control locality-autocomplete"
+                                                    data-autocomplete-url="{% url 'properties:autocomplete_localities' %}"
+                                                    disabled>
+                                                {% if form.instance.locality %}
+                                                <option value="{{ form.instance.locality.pk }}" selected>{{ form.instance.locality.name }}</option>
+                                                {% endif %}
+                                            </select>
+                                            <input type="hidden" name="{{ form.locality.name }}" id="{{ form.locality.id_for_label }}" value="{{ form.instance.locality.pk|default:'' }}">
+                                            {% if form.locality.errors %}<div class="invalid-feedback d-block">{{ form.locality.errors|first }}</div>{% endif %}
+                                            <div class="form-text">Selecciona una provincia primero.</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -403,6 +456,13 @@
 <!-- Toast Container -->
 <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1056"></div>
 
+<!-- Incluir Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Inicializar tooltips de Bootstrap (si se usan en el form)
@@ -673,10 +733,113 @@ document.addEventListener('DOMContentLoaded', function() {
         // For now, we assume Bootstrap classes are handled by Django rendering.
         // If Select2 or other JS widgets were used by crispy, they'd be re-initialized here.
     }
+
+    // Autocomplete con Select2
+    function initializeAutocomplete(selectElementId, hiddenInputId, url, placeholder, parentDropdown, extraParamsCallback) {
+        const selectElement = $(`#${selectElementId}`);
+        const hiddenInput = $(`#${hiddenInputId}`);
+
+        selectElement.select2({
+            theme: 'bootstrap-5',
+            placeholder: placeholder,
+            allowClear: true,
+            ajax: {
+                url: url,
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    let query = {
+                        term: params.term, // search term
+                        page: params.page || 1
+                    };
+                    if (extraParamsCallback) {
+                        Object.assign(query, extraParamsCallback());
+                    }
+                    return query;
+                },
+                processResults: function (data, params) {
+                    params.page = params.page || 1;
+                    return {
+                        results: data.results,
+                        pagination: {
+                            more: (params.page * 10) < (data.count_filtered || data.results.length) // Adjust if backend sends total count
+                        }
+                    };
+                },
+                cache: true
+            },
+            minimumInputLength: 1,
+            templateResult: function(data) { return data.text; }, // data.text already formatted in view
+            templateResult: function(data) { return data.text; },
+            templateSelection: function(data) { return data.text; },
+            dropdownParent: parentDropdown
+        });
+
+        selectElement.on('select2:select', function (e) {
+            var data = e.params.data;
+            hiddenInput.val(data.id);
+            
+            if (selectElementId === 'id_country_select2') {
+                $('#id_province_select2').prop('disabled', false).val(null).trigger('change');
+                $('#id_province_select2').parent().find('.form-text').text('Ahora puedes seleccionar una provincia.');
+                $('#id_locality_select2').prop('disabled', true).val(null).trigger('change');
+                 $('#id_locality_select2').parent().find('.form-text').text('Selecciona una provincia primero.');
+                 hiddenInput.val(data.id); // Update hidden field
+                 $('#id_province, #id_locality').val(''); // Clear dependent hidden fields
+            } else if (selectElementId === 'id_province_select2') {
+                $('#id_locality_select2').prop('disabled', false).val(null).trigger('change');
+                $('#id_locality_select2').parent().find('.form-text').text('Ahora puedes seleccionar una localidad.');
+                hiddenInput.val(data.id); // Update hidden field
+                $('#id_locality').val(''); // Clear dependent hidden field
+            }
+        });
+
+        selectElement.on('select2:clear', function (e) {
+            hiddenInput.val('');
+            if (selectElementId === 'id_country_select2') {
+                $('#id_province_select2').prop('disabled', true).val(null).trigger('change');
+                $('#id_province_select2').parent().find('.form-text').text('Selecciona un país primero.');
+                $('#id_locality_select2').prop('disabled', true).val(null).trigger('change');
+                $('#id_locality_select2').parent().find('.form-text').text('Selecciona una provincia primero.');
+                $('#id_province, #id_locality').val(''); // Clear dependent hidden fields
+            } else if (selectElementId === 'id_province_select2') {
+                $('#id_locality_select2').prop('disabled', true).val(null).trigger('change');
+                $('#id_locality_select2').parent().find('.form-text').text('Selecciona una provincia primero.');
+                $('#id_locality').val(''); // Clear dependent hidden field
+            }
+        });
+    }
+
+    initializeAutocomplete('id_owner_select2', 'id_owner', '{% url "properties:autocomplete_owners" %}', 'Buscar y seleccionar dueño...');
+    
+    initializeAutocomplete('id_country_select2', 'id_country', '{% url "properties:autocomplete_countries" %}', 'Buscar y seleccionar país...');
+    
+    initializeAutocomplete('id_province_select2', 'id_province', '{% url "properties:autocomplete_provinces" %}', 'Buscar y seleccionar provincia...', null, function() {
+        return { country_id: $('#id_country').val() };
+    });
+    
+    initializeAutocomplete('id_locality_select2', 'id_locality', '{% url "properties:autocomplete_localities" %}', 'Buscar y seleccionar localidad...', null, function() {
+        return { province_id: $('#id_province').val() };
+    });
+
+    // Enable/disable province/locality based on initial values (edit mode)
+    if ($('#id_country').val()) {
+        $('#id_province_select2').prop('disabled', false);
+        $('#id_province_select2').parent().find('.form-text').text('Ahora puedes seleccionar una provincia.');
+    }
+    if ($('#id_province').val()) {
+        $('#id_locality_select2').prop('disabled', false);
+        $('#id_locality_select2').parent().find('.form-text').text('Ahora puedes seleccionar una localidad.');
+    }
+
 });
 </script>
 
 <style>
+/* Ensure Select2 dropdowns appear above other elements, especially modals */
+.select2-container--open {
+    z-index: 10050 !important; /* Higher than Bootstrap modal z-index (1050) */
+}
 .accordion-button:not(.collapsed) {
     color: var(--bs-primary);
     background-color: var(--bs-primary-bg-subtle);

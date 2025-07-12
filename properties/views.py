@@ -8,6 +8,8 @@ from django.urls import reverse_lazy
 from django.db.models import Q
 from django.http import JsonResponse
 from .models import Property, PropertyImage, Feature, Tag, PropertyType, PropertyStatus
+from locations.models import Country, State, City # Added for autocompletion
+from customers.models import Customer # Added for owner autocompletion
 from .forms import PropertyForm, PropertyImageForm, PropertySearchForm, PropertyImageFormSet
 import json
 
@@ -359,3 +361,40 @@ def get_property_statuses_ajax(request):
     } for ps in property_statuses]
     
     return JsonResponse({'property_statuses': statuses_data})
+
+
+@login_required
+def autocomplete_owners(request):
+    term = request.GET.get('term', '')
+    owners = Customer.objects.filter(
+        Q(first_name__icontains=term) | Q(last_name__icontains=term) | Q(email__icontains=term)
+    )[:10]
+    results = [{'id': owner.id, 'text': f"{owner.first_name} {owner.last_name} ({owner.email})"} for owner in owners]
+    return JsonResponse({'results': results})
+
+@login_required
+def autocomplete_countries(request):
+    term = request.GET.get('term', '')
+    countries = Country.objects.filter(name__icontains=term)[:10]
+    results = [{'id': country.id, 'text': country.name} for country in countries]
+    return JsonResponse({'results': results})
+
+@login_required
+def autocomplete_provinces(request):
+    term = request.GET.get('term', '')
+    country_id = request.GET.get('country_id')
+    provinces = State.objects.filter(name__icontains=term)
+    if country_id:
+        provinces = provinces.filter(country_id=country_id)
+    results = [{'id': province.id, 'text': province.name} for province in provinces[:10]]
+    return JsonResponse({'results': results})
+
+@login_required
+def autocomplete_localities(request):
+    term = request.GET.get('term', '')
+    province_id = request.GET.get('province_id')
+    localities = City.objects.filter(name__icontains=term)
+    if province_id:
+        localities = localities.filter(state_id=province_id)
+    results = [{'id': locality.id, 'text': locality.name} for locality in localities[:10]]
+    return JsonResponse({'results': results})

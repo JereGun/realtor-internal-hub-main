@@ -11,9 +11,9 @@ class InvoiceLineInline(admin.TabularInline):
     extra = 1
 
 class InvoiceAdmin(admin.ModelAdmin):
-    list_display = ("number", "customer", "date", "due_date", "total_amount", "state", "property")
+    list_display = ("number", "customer", "date", "due_date", "total_amount", "state")
     search_fields = ("number", "customer__full_name", "description")
-    list_filter = ("state", "property")
+    list_filter = ("state",)
     inlines = [InvoiceLineInline]
     readonly_fields = ("total_amount",)
 

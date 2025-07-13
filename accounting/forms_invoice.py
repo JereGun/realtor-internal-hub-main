@@ -6,7 +6,7 @@ class InvoiceForm(forms.ModelForm):
     class Meta:
         model = Invoice
         fields = [
-            'number', 'date', 'due_date', 'customer', 'description', 'total_amount', 'state', 'contract', 'property'
+            'number', 'date', 'due_date', 'customer', 'description', 'total_amount', 'state'
         ]
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date'}),

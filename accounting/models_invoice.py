@@ -15,10 +15,8 @@ class Invoice(BaseModel):
     due_date = models.DateField()
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='invoices')
     description = models.TextField()
-    total_amount = models.DecimalField(max_digits=14, decimal_places=2)
+    total_amount = models.DecimalField(max_digits=14, decimal_places=2, default=0.0)
     state = models.CharField(max_length=16, choices=STATE_CHOICES, default='draft')
-    contract = models.ForeignKey('contracts.Contract', on_delete=models.SET_NULL, null=True, blank=True, related_name='accounting_invoices')
-    property = models.ForeignKey(Property, on_delete=models.SET_NULL, null=True, blank=True, related_name='invoices')
 
     class Meta:
         verbose_name = 'Factura'
@@ -38,10 +36,9 @@ class Invoice(BaseModel):
         self.state = 'sent'
         self.save(update_fields=['state'])
 
-    def compute_taxes(self):
-        # Lógica de cálculo de impuestos (placeholder)
+    def compute_total(self):
         self.total_amount = sum(line.amount for line in self.lines.all())
-        self.save(update_fields=['total_amount'])
+        self.save()
 
 class InvoiceLine(BaseModel):
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE, related_name='lines')

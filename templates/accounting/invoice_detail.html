@@ -16,8 +16,6 @@
                     <dl class="row">
                         <dt class="col-sm-4">Cliente</dt>
                         <dd class="col-sm-8">{{ invoice.customer.full_name }}</dd>
-                        <dt class="col-sm-4">Contrato</dt>
-                        <dd class="col-sm-8">{{ invoice.contract|default:'-' }}</dd>
                         <dt class="col-sm-4">Fecha de emisión</dt>
                         <dd class="col-sm-8">{{ invoice.issue_date|date:'d/m/Y' }}</dd>
                         <dt class="col-sm-4">Vencimiento</dt>

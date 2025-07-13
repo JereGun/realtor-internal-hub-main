@@ -30,8 +30,6 @@
                                 <div class="col-md-4">{{ form.due_date|as_crispy_field }}</div>
                                 <div class="col-md-6">{{ form.customer|as_crispy_field }}</div>
                                 <div class="col-md-6">{{ form.state|as_crispy_field }}</div>
-                                <div class="col-md-6">{{ form.contract|as_crispy_field }}</div>
-                                <div class="col-md-6">{{ form.property|as_crispy_field }}</div>
                                 <div class="col-12">{{ form.description|as_crispy_field }}</div>
                                  <!-- Total Amount field will be updated by JS, so make it readonly or hidden if not manually editable -->
                                 <div class="col-md-6" style="display:none;">{{ form.total_amount|as_crispy_field }}</div>
@@ -247,9 +245,7 @@ document.addEventListener('DOMContentLoaded', function () {
              cell.classList.add('text-center', 'text-muted', 'py-3');
         }
 
-        const taxRate = 0.21; // Example tax rate (21%)
-        const taxes = subtotal * taxRate;
-        const total = subtotal + taxes;
+        const total = subtotal;
 
         previewSubtotal.textContent = `$${subtotal.toFixed(2)}`;
         previewTaxes.textContent = `$${taxes.toFixed(2)}`;

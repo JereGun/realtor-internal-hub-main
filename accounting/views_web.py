@@ -57,7 +57,7 @@ def invoice_create(request):
             invoice.save()
             formset.instance = invoice
             formset.save()
-            invoice.compute_taxes()
+            invoice.compute_total()
             messages.success(request, 'Factura creada correctamente')
             return redirect('accounting:invoice_detail', pk=invoice.pk)
         else:
@@ -85,7 +85,7 @@ def invoice_update(request, pk):
         if form.is_valid() and formset.is_valid():
             form.save()
             formset.save()
-            invoice.compute_taxes()
+            invoice.compute_total()
             messages.success(request, 'Factura actualizada correctamente')
             return redirect('accounting:invoice_detail', pk=invoice.pk)
         else:

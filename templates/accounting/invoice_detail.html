@@ -81,6 +81,7 @@
                     {% endif %}
                 </div>
             </div>
+            <a href="{% url 'accounting:invoice_pdf' invoice.pk %}" class="btn btn-info">Descargar PDF</a>
             <a href="{% url 'accounting:invoice_list' %}" class="btn btn-secondary">Volver a la lista</a>
         </div>
     </div>

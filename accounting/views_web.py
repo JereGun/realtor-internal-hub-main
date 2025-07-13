@@ -6,11 +6,13 @@ from django.core.paginator import Paginator
 from django.contrib import messages
 from django.utils import timezone
 from django.forms import modelform_factory
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from weasyprint import HTML
 
 @login_required
 def accounting_dashboard(request):
-    # Aquí puedes agregar lógica para calcular ingresos, gastos, etc.
-    # Por ahora, solo renderizamos la plantilla.
+    # Logica de gastos
     return render(request, 'accounting/accounting_dashboard.html')
 
 @login_required
@@ -194,3 +196,15 @@ def invoiceline_delete(request, pk):
         messages.success(request, 'Línea de factura eliminada correctamente.')
         return redirect('accounting:invoice_detail', pk=invoice_pk)
     return render(request, 'accounting/invoiceline_confirm_delete.html', {'invoiceline': invoiceline})
+
+@login_required
+def invoice_pdf(request, pk):
+    invoice = get_object_or_404(Invoice, pk=pk)
+    html_string = render_to_string('accounting/invoice_pdf.html', {'invoice': invoice})
+
+    html = HTML(string=html_string)
+    pdf = html.write_pdf()
+
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="factura_{invoice.number}.pdf"'
+    return response

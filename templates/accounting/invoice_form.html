@@ -325,14 +325,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initial preview render
     updatePreview();
 
-    // Prepare empty form template (if not already available and needed for complex addFormsetRow)
-    // This is a simplified approach. For complex forms, you might need a hidden template div.
-    // Create a hidden div with the empty form structure if it's not directly available
-    // For this example, we'll assume the structure can be derived or is simple.
-    // If your formset has a specific empty_form structure provided by Django, use that.
-    // Example: const emptyFormTemplate = {{ formset.empty_form|crispy }}; (would need JS processing)
-    // For now, addFormsetRow reconstructs it, which is fine for simple cases.
-
 });
 </script>
 

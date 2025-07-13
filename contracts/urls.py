@@ -11,6 +11,7 @@ urlpatterns = [
     path('<int:pk>/edit/', views.ContractUpdateView.as_view(), name='contract_edit'),
     path('<int:pk>/delete/', views.ContractDeleteView.as_view(), name='contract_delete'),
     path('<int:pk>/add-increase/', views.add_contract_increase, name='add_increase'),
+    path('<int:contract_id>/create-invoice/', views.create_invoice_from_contract, name='create_invoice_from_contract'),
     
     # AJAX
     path('ajax/get_property_rental_price/', views.get_property_rental_price, name='get_property_rental_price'),

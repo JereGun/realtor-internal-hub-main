@@ -2,6 +2,7 @@ from django.db import models
 from core.models import BaseModel
 from customers.models import Customer
 from properties.models import Property
+from contracts.models import Contract
 
 class Invoice(BaseModel):
     STATE_CHOICES = [
@@ -14,6 +15,14 @@ class Invoice(BaseModel):
     date = models.DateField()
     due_date = models.DateField()
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='invoices')
+    contract = models.ForeignKey(
+        'contracts.Contract',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='invoices',
+        verbose_name="Contrato"
+    )
     description = models.TextField()
     total_amount = models.DecimalField(max_digits=14, decimal_places=2, default=0.0)
     state = models.CharField(max_length=16, choices=STATE_CHOICES, default='draft')

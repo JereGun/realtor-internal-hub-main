@@ -5,10 +5,9 @@ from django.contrib import messages
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.db.models import Q
-# Removed Invoice, InvoiceItem from models import
 from .models import Contract, ContractIncrease
-# Removed InvoiceForm, InvoiceItemForm from forms import
 from .forms import ContractForm, ContractIncreaseForm, ContractSearchForm
+from accounting.models_invoice import Invoice, InvoiceLine
 
 class ContractListView(LoginRequiredMixin, ListView):
     model = Contract
@@ -54,10 +53,7 @@ class ContractDetailView(LoginRequiredMixin, DetailView):
         context['increases'] = self.object.increases.all()
         # Point to accounting_invoices from the accounting app's Invoice model
         # Ensure 'accounting_invoices' is the correct related_name in accounting.models_invoice.Invoice
-        if hasattr(self.object, 'accounting_invoices'):
-            context['invoices'] = self.object.accounting_invoices.prefetch_related('lines').all() 
-        else:
-            context['invoices'] = [] # Or handle as an error/log message
+        context['invoices'] = self.object.invoices.prefetch_related('lines').all()
         return context
 
 from dateutil.relativedelta import relativedelta
@@ -187,4 +183,33 @@ def get_property_rental_price(request):
     except Property.DoesNotExist:
         return JsonResponse({'error': 'Property not found'}, status=404)
 
-# Removed InvoiceListView, InvoiceDetailView, InvoiceCreateView, InvoiceUpdateView, InvoiceDeleteView
+from accounting.models_invoice import Invoice, InvoiceLine
+from django.utils import timezone
+
+@login_required
+def create_invoice_from_contract(request, contract_id):
+    """
+    Creates a new invoice from a contract, pre-filling customer and amount.
+    """
+    contract = get_object_or_404(Contract, pk=contract_id)
+
+    # Create a new invoice
+    invoice = Invoice.objects.create(
+        customer=contract.customer,
+        contract=contract,
+        date=timezone.now().date(),
+        due_date=timezone.now().date() + timezone.timedelta(days=15),
+        description=f"Alquiler de {contract.property.title}",
+        total_amount=contract.amount,
+        state='draft'
+    )
+
+    # Create an invoice line for the rent
+    InvoiceLine.objects.create(
+        invoice=invoice,
+        concept=f"Alquiler mes {timezone.now().strftime('%B %Y')}",
+        amount=contract.amount
+    )
+
+    messages.success(request, f"Factura creada para el contrato {contract.id}.")
+    return redirect('accounting:invoice_edit', pk=invoice.pk)

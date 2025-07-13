@@ -1,13 +1,14 @@
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, View
 from django.urls import reverse_lazy
 from django.db.models import Q
 from django.utils import timezone
 from .models import TaskNotification
 from .forms import TaskNotificationForm, TaskSearchForm
+from agents.models import Agent
 
 
 class TaskNotificationListView(LoginRequiredMixin, ListView):
@@ -17,7 +18,8 @@ class TaskNotificationListView(LoginRequiredMixin, ListView):
     paginate_by = 20
     
     def get_queryset(self):
-        queryset = TaskNotification.objects.select_related('agent', 'property', 'customer', 'contract')
+        # LoginRequiredMixin asegura que request.user es un usuario autenticado (un Agent).
+        queryset = TaskNotification.objects.filter(agent=self.request.user).select_related('property', 'customer', 'contract')
         
         form = TaskSearchForm(self.request.GET)
         if form.is_valid():
@@ -28,9 +30,7 @@ class TaskNotificationListView(LoginRequiredMixin, ListView):
             if search:
                 queryset = queryset.filter(
                     Q(title__icontains=search) |
-                    Q(description__icontains=search) |
-                    Q(agent__first_name__icontains=search) |
-                    Q(agent__last_name__icontains=search)
+                    Q(description__icontains=search)
                 )
             
             if status:
@@ -100,3 +100,10 @@ class TaskNotificationDeleteView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(request, 'Tarea eliminada correctamente.')
         return super().delete(request, *args, **kwargs)
+
+class MarkNotificationAsReadView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        notification = TaskNotification.objects.get(pk=pk)
+        notification.status = 'completed'
+        notification.save()
+        return redirect('notifications:task_list')

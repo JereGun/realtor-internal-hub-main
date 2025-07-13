@@ -10,7 +10,6 @@ from .models import Contract, ContractIncrease
 # Removed InvoiceForm, InvoiceItemForm from forms import
 from .forms import ContractForm, ContractIncreaseForm, ContractSearchForm
 
-
 class ContractListView(LoginRequiredMixin, ListView):
     model = Contract
     template_name = 'contracts/contract_list.html'
@@ -23,7 +22,7 @@ class ContractListView(LoginRequiredMixin, ListView):
         form = ContractSearchForm(self.request.GET)
         if form.is_valid():
             search = form.cleaned_data.get('search')
-            is_active = form.cleaned_data.get('is_active')
+            status = form.cleaned_data.get('status')
             
             if search:
                 queryset = queryset.filter(
@@ -34,8 +33,8 @@ class ContractListView(LoginRequiredMixin, ListView):
                     Q(agent__last_name__icontains=search)
                 )
             
-            if is_active:
-                queryset = queryset.filter(is_active=(is_active == 'true'))
+            if status:
+                queryset = queryset.filter(status=status)
         
         return queryset.order_by('-created_at')
     
@@ -68,10 +67,18 @@ class ContractCreateView(LoginRequiredMixin, CreateView):
     form_class = ContractForm
     template_name = 'contracts/contract_form.html'
     
+    def get_initial(self):
+        """Pre-selects the logged-in agent but allows it to be changed."""
+        initial = super().get_initial()
+        initial['agent'] = self.request.user
+        return initial
+    
     def form_valid(self, form):
-        form.instance.agent = self.request.user
+        # Creamos el objeto en memoria sin guardarlo aún en la BD.
+        # El agente seleccionado en el formulario ya está en `form.instance`.
         contract = form.save(commit=False)
 
+        # Calculamos la fecha del próximo aumento
         if contract.start_date and contract.frequency:
             if contract.frequency == 'monthly':
                 contract.next_increase_date = contract.start_date + relativedelta(months=1)
@@ -82,12 +89,19 @@ class ContractCreateView(LoginRequiredMixin, CreateView):
             elif contract.frequency == 'annually':
                 contract.next_increase_date = contract.start_date + relativedelta(years=1)
         
+        # Guardamos el objeto una sola vez con todos los datos.
         contract.save()
+        self.object = contract # Asignamos el objeto a la vista
+        
         messages.success(self.request, 'Contrato creado correctamente.')
-        return super().form_valid(form)
+        return redirect(self.get_success_url())
     
     def get_success_url(self):
         return reverse_lazy('contracts:contract_detail', kwargs={'pk': self.object.pk})
+
+    def form_invalid(self, form):
+        print(form.errors)
+        return super().form_invalid(form)
 
 
 class ContractUpdateView(LoginRequiredMixin, UpdateView):
@@ -96,8 +110,10 @@ class ContractUpdateView(LoginRequiredMixin, UpdateView):
     template_name = 'contracts/contract_form.html'
     
     def form_valid(self, form):
+        # Obtenemos la instancia del contrato con los datos del formulario, sin guardar en BD.
         contract = form.save(commit=False)
 
+        # Recalculamos la fecha del próximo aumento
         if contract.start_date and contract.frequency:
             if contract.frequency == 'monthly':
                 contract.next_increase_date = contract.start_date + relativedelta(months=1)
@@ -110,12 +126,15 @@ class ContractUpdateView(LoginRequiredMixin, UpdateView):
         else:
             contract.next_increase_date = None
 
+        # Actualizamos el estado del contrato basado en las fechas
+        contract.update_status()
+        
+        # Guardamos el objeto una sola vez con todos los cambios.
+        contract.save()
+        self.object = contract
+
         messages.success(self.request, 'Contrato actualizado correctamente.')
-        response = super().form_valid(form)
-        # After saving, update status if necessary (e.g., if dates changed)
-        self.object.update_status()
-        self.object.save(update_fields=['status', 'next_increase_date'])
-        return response
+        return redirect(self.get_success_url())
     
     def get_success_url(self):
         return reverse_lazy('contracts:contract_detail', kwargs={'pk': self.object.pk})
@@ -145,12 +164,7 @@ def add_contract_increase(request, pk):
             # Update contract amount
             contract.amount = increase.new_amount
             contract.save() # Saves the new amount
-            
-            # Potentially update contract status if the increase implies a change relevant to status
-            # For now, contract.update_status() is mainly date-based, so less critical here
-            # but if it included logic based on activity/amount changes, it would be relevant.
-            # contract.update_status()
-            # contract.save(update_fields=['status']) 
+
 
             messages.success(request, 'Aumento agregado correctamente.')
             return redirect('contracts:contract_detail', pk=pk)

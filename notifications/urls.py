@@ -10,4 +10,5 @@ urlpatterns = [
     path('create/', views.TaskNotificationCreateView.as_view(), name='task_create'),
     path('<int:pk>/edit/', views.TaskNotificationUpdateView.as_view(), name='task_edit'),
     path('<int:pk>/delete/', views.TaskNotificationDeleteView.as_view(), name='task_delete'),
+    path('<int:pk>/mark-as-read/', views.MarkNotificationAsReadView.as_view(), name='mark_as_read'),
 ]

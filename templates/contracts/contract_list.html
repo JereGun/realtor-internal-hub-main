@@ -25,9 +25,6 @@
                             {{ search_form.search|as_crispy_field }}
                         </div>
                         <div class="col-md-3">
-                            {{ search_form.contract_type|as_crispy_field }}
-                        </div>
-                        <div class="col-md-3">
                             {{ search_form.status|as_crispy_field }}
                         </div>
                         <div class="col-md-2 d-flex align-items-end">
@@ -52,7 +49,6 @@
                                     <th scope="col">ID</th>
                                     <th scope="col">Propiedad</th>
                                     <th scope="col">Cliente</th>
-                                    <th scope="col">Tipo</th>
                                     <th scope="col" class="text-end">Monto ({{ contracts.0.currency }})</th>
                                     <th scope="col" class="text-center">Estado</th>
                                     <th scope="col">Inicio</th>
@@ -74,8 +70,7 @@
                                             {{ contract.customer.full_name|truncatechars:25 }}
                                         </a>
                                     </td>
-                                    <td>{{ contract.get_contract_type_display }}</td>
-                                    <td class="text-end">{{ contract.amount|intcomma }}</td>
+                                    <td class="text-end">${{ contract.amount|intcomma }}</td>
                                     <td class="text-center">
                                         <span class="badge 
                                             {% if contract.status == contract.STATUS_ACTIVE %} bg-success

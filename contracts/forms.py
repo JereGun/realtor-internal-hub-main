@@ -5,7 +5,6 @@ from .models import Contract, ContractIncrease # Removed Invoice, InvoiceItem
 class ContractForm(forms.ModelForm):
     class Meta:
         model = Contract
-        exclude = ['created_at', 'updated_at']
         fields = [
             'property', 'customer', 'agent', 'start_date', 'end_date', 'amount', 
             'currency', 'frequency', 'increase_percentage', 'next_increase_date', 
@@ -14,7 +13,7 @@ class ContractForm(forms.ModelForm):
         widgets = {
             'property': forms.Select(attrs={'class': 'form-control', 'id': 'id_property'}),
             'customer': forms.Select(attrs={'class': 'form-control'}),
-            'agent': forms.Select(attrs={'class': 'form-control'}),
+            'agent': forms.Select(attrs={'class': 'form-control','id': 'id_agent'}),
             'start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'id': 'id_amount'}),
@@ -29,19 +28,17 @@ class ContractForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # If agent is linked to request.user, it might be better to set it in the view
-        # and make the field read-only or not included in the form if it's always the current user.
-        # For now, assuming agent is selectable or pre-filled as needed.
-        if self.instance and self.instance.pk: # For existing instances
-             # Make status read-only if contract is finished or cancelled?
+
+        if self.instance and self.instance.pk:
+
             if self.instance.status in [Contract.STATUS_FINISHED, Contract.STATUS_CANCELLED]:
                 self.fields['status'].widget.attrs['disabled'] = True
-                # Or for all fields:
-                # for field_name in self.fields:
-                #     self.fields[field_name].widget.attrs['disabled'] = True
         
         # Ensure status choices are correctly populated
         self.fields['status'].choices = Contract.STATUS_CHOICES
+        from agents.models import Agent
+        self.fields['agent'].queryset = Agent.objects.filter(is_active=True).order_by('first_name', 'last_name')
+        self.fields['agent'].empty_label = None 
 
 
 class ContractIncreaseForm(forms.ModelForm):

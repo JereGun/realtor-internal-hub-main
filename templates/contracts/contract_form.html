@@ -28,6 +28,19 @@
                     <form method="post" novalidate>
                         {% csrf_token %}
                         
+                        {% if form.errors %}
+                            <div class="alert alert-danger">
+                                <strong>Errores:</strong>
+                                <ul>
+                                    {% for field, errors in form.errors.items %}
+                                        {% for error in errors %}
+                                            <li>{{ field }}: {{ error }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+
                         <div class="row g-3">
                             <div class="col-md-6">
                                 {{ form.property|as_crispy_field }}
@@ -64,15 +77,15 @@
                                 {{ form.next_increase_date|as_crispy_field }}
                             </div>
                             
-                            {% if not form.instance.pk %} {# Hide agent field on creation, it's set in view #}
-                            <div class="col-md-6" style="display:none;">
-                                {{ form.agent|as_crispy_field }}
-                            </div>
-                            {% else %}
                             <div class="col-md-6">
                                 {{ form.agent|as_crispy_field }}
+                                {% if not form.instance.pk %} {# Solo mostrar en creación #}
+                                <div class="form-text text-muted">
+                                    <i class="bi bi-info-circle"></i>
+                                    Por defecto eres tú como agente, pero puedes cambiarlo si es necesario.
+                                </div>
+                                {% endif %}
                             </div>
-                            {% endif %}
                             
                             <div class="col-12">
                                 {{ form.terms|as_crispy_field }}

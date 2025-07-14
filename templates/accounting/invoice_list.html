@@ -2,9 +2,96 @@
 {% block title %}Facturas{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
+<div class="container-fluid mt-5">
     <div class="row">
         <div class="col-12 col-lg-10 mx-auto">
+            <!-- Modal de confirmación de eliminación -->
+            <div class="modal fade" id="deleteInvoiceModal" tabindex="-1" aria-labelledby="deleteInvoiceModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteInvoiceModalLabel">Eliminar Factura</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            ¿Estás seguro de que deseas eliminar la factura #<span id="invoiceNumber"></span>?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <form id="deleteInvoiceForm" method="POST" action="">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger" onclick="event.preventDefault(); handleDelete();">Eliminar</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                function handleDelete() {
+                    // Obtener el formulario
+                    const form = document.getElementById('deleteInvoiceForm');
+                    
+                    // Crear un objeto FormData
+                    const formData = new FormData(form);
+                    
+                    // Enviar la solicitud usando fetch
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Cerrar el modal
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('deleteInvoiceModal'));
+                            modal.hide();
+                            
+                            // Recargar la página después de un breve delay
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 500);
+                        } else {
+                            // Mostrar el error específico si existe
+                            if (data.error) {
+                                alert(`Error: ${data.error}`);
+                            } else {
+                                alert('Factura eliminada correctamente. La página se recargará en breve.');
+                                // Recargar la página después de un breve delay
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 500);
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error al eliminar la factura. Por favor, inténtalo nuevamente.');
+                    });
+                }
+
+                document.addEventListener('DOMContentLoaded', function() {
+                    const deleteButtons = document.querySelectorAll('[data-bs-target="#deleteInvoiceModal"]');
+                    const invoiceNumberElement = document.getElementById('invoiceNumber');
+                    const deleteInvoiceForm = document.getElementById('deleteInvoiceForm');
+
+                    deleteButtons.forEach(button => {
+                        button.addEventListener('click', function() {
+                            const invoiceId = this.dataset.invoiceId;
+                            const invoiceNumber = this.dataset.invoiceNumber;
+                            invoiceNumberElement.textContent = invoiceNumber;
+                            deleteInvoiceForm.action = `{% url 'accounting:invoice_delete' 0 %}`.replace('0', invoiceId);
+                        });
+                    });
+                });
+            </script>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Encabezado -->
             <div class="d-flex justify-content-between align-items-center mb-4">
@@ -41,7 +128,7 @@
                                     <td>{{ invoice.due_date|date:'d/m/Y' }}</td>
                                     <td>
                                         <span class="badge {% if invoice.status == 'pagada' %}bg-success{% elif invoice.status == 'vencida' %}bg-danger{% else %}bg-secondary{% endif %}">
-                                            {{ invoice.get_state_display }}
+                                            {{ invoice.get_status_display }}
                                         </span>
                                     </td>
                                     <td class="text-end">${{ invoice.total|floatformat:2 }}</td>
@@ -53,7 +140,9 @@
                                             <a href="{% url 'accounting:invoice_update' invoice.pk %}" class="btn btn-sm btn-outline-secondary" title="Editar">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
-                                            <a href="#" class="btn btn-sm btn-outline-danger" title="Eliminar">Eliminar</a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteInvoiceModal" data-invoice-id="{{ invoice.pk }}" data-invoice-number="{{ invoice.number|default:invoice.id }}">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -69,8 +158,25 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 </div>
+
+<style>
+    .container-fluid {
+        max-width: 100%;
+        padding-right: 15px;
+        padding-left: 15px;
+        margin-right: auto;
+        margin-left: auto;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .table-responsive {
+        overflow-x: auto;
+    }
+</style>
 {% endblock %}

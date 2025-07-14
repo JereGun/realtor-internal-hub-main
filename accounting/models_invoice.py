@@ -3,7 +3,7 @@ from core.models import BaseModel
 from customers.models import Customer
 
 class Invoice(BaseModel):
-    STATE_CHOICES = [
+    STATUS_CHOICES = [
         ('draft', 'Borrador'),
         ('sent', 'Enviada'),
         ('paid', 'Pagada'),
@@ -23,7 +23,7 @@ class Invoice(BaseModel):
     )
     description = models.TextField()
     total_amount = models.DecimalField(max_digits=14, decimal_places=2, default=0.0)
-    state = models.CharField(max_length=16, choices=STATE_CHOICES, default='draft')
+    status = models.CharField(max_length=16, choices=STATUS_CHOICES, default='draft')
 
     class Meta:
         verbose_name = 'Factura'
@@ -40,14 +40,14 @@ class Invoice(BaseModel):
     def update_status(self):
         balance = self.get_balance()
         if balance <= 0:
-            self.state = 'paid'
-        elif self.state == 'paid' and balance > 0:
-            self.state = 'sent'  # o el estado que corresponda
+            self.status = 'paid'
+        elif self.status == 'paid' and balance > 0:
+            self.status = 'sent'  # o el estado que corresponda
         self.save()
 
     def mark_as_sent(self):
-        self.state = 'sent'
-        self.save(update_fields=['state'])
+        self.status = 'sent'
+        self.save(update_fields=['status'])
 
     def compute_total(self):
         self.total_amount = sum(line.amount for line in self.lines.all())

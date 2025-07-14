@@ -47,6 +47,39 @@ def invoice_detail(request, pk):
     })
 
 @login_required
+def invoice_delete(request, pk):
+    try:
+        # Primero verificamos si la factura existe
+        invoice = get_object_or_404(Invoice, pk=pk)
+        
+        if request.method == 'POST':
+            # Eliminamos la factura
+            invoice.delete()
+            
+            # Si es una petición AJAX, devolvemos éxito
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': True})
+            
+            # Si es una petición normal, redirigimos
+            messages.success(request, 'Factura eliminada correctamente')
+            return redirect('accounting:invoice_list')
+        
+        # Si es GET, mostramos el modal de confirmación
+        return render(request, 'accounting/invoice_confirm_delete.html', {'invoice': invoice})
+    except Invoice.DoesNotExist:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': 'Factura no encontrada'}, status=404)
+        else:
+            messages.error(request, 'Factura no encontrada')
+            return redirect('accounting:invoice_list')
+    except Exception as e:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+        else:
+            messages.error(request, f'Error al eliminar la factura: {str(e)}')
+            return redirect('accounting:invoice_list')
+
+@login_required
 def invoice_create(request):
     if request.method == 'POST':
         form = InvoiceForm(request.POST)

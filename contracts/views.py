@@ -193,17 +193,30 @@ def create_invoice_from_contract(request, contract_id):
     """
     contract = get_object_or_404(Contract, pk=contract_id)
 
-    # Create a new invoice
-    invoice = Invoice.objects.create(
-        customer=contract.customer,
-        contract=contract,
-        date=timezone.now().date(),
-        due_date=timezone.now().date() + timezone.timedelta(days=15),
-        description=f"Alquiler de {contract.property.title}",
-        total_amount=contract.amount,
-        state='draft'
-    )
-
+    try:
+        # Create a new invoice with initial values
+        invoice = Invoice.objects.create(
+            customer=contract.customer,
+            contract=contract,
+            date=timezone.now().date(),
+            due_date=contract.end_date if contract.end_date else timezone.now().date() + timezone.timedelta(days=30),
+            description=f'Factura por contrato {contract}',
+            total_amount=contract.amount
+        )
+        
+        # Create a single invoice line with the contract amount
+        InvoiceLine.objects.create(
+            invoice=invoice,
+            concept=f'Alquiler de {contract.property.title}',
+            amount=contract.amount
+        )
+        
+        messages.success(request, f'Factura {invoice.number} creada correctamente.')
+        return redirect('accounting:invoice_detail', pk=invoice.pk)
+        
+    except Exception as e:
+        messages.error(request, f'Error al crear la factura: {str(e)}')
+        return redirect('contracts:contract_detail', pk=contract_id)
     # Create an invoice line for the rent
     InvoiceLine.objects.create(
         invoice=invoice,

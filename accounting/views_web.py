@@ -10,6 +10,7 @@ from django.http import HttpResponse, JsonResponse
 from django.template.loader import render_to_string
 from weasyprint import HTML
 from django.db.models import Q
+from .services import send_invoice_email
 
 @login_required
 def accounting_dashboard(request):
@@ -272,3 +273,18 @@ def invoice_pdf(request, pk):
     response = HttpResponse(pdf, content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="factura_{invoice.number}.pdf"'
     return response
+
+@login_required
+def send_invoice_by_email(request, pk):
+    invoice = get_object_or_404(Invoice, pk=pk)
+    if invoice.status not in ['validated', 'sent']:
+        messages.error(request, "Solo se pueden enviar facturas validadas o ya enviadas.")
+        return redirect('accounting:invoice_detail', pk=pk)
+    
+    try:
+        send_invoice_email(invoice)
+        invoice.mark_as_sent()
+        messages.success(request, 'Factura enviada por correo electrónico')
+    except Exception as e:
+        messages.error(request, f'Error al enviar el correo: {str(e)}')
+    return redirect('accounting:invoice_detail', pk=pk)

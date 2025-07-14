@@ -80,6 +80,9 @@
                 </div>
             </div>
             <a href="{% url 'accounting:invoice_pdf' invoice.pk %}" class="btn btn-info">Descargar PDF</a>
+            {% if invoice.status == 'validated' or invoice.status == 'sent' %}
+            <a href="{% url 'accounting:send_invoice_email' invoice.pk %}" class="btn btn-primary">Enviar por Correo</a>
+            {% endif %}
             <a href="{% url 'accounting:invoice_list' %}" class="btn btn-secondary">Volver a la lista</a>
         </div>
     </div>

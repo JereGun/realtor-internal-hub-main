@@ -37,11 +37,11 @@
                                 <tr>
                                     <td>{{ invoice.number|default:invoice.id }}</td>
                                     <td>{{ invoice.customer.full_name }}</td>
-                                    <td>{{ invoice.issue_date|date:'d/m/Y' }}</td>
+                                    <td>{{ invoice.date|date:'d/m/Y' }}</td>
                                     <td>{{ invoice.due_date|date:'d/m/Y' }}</td>
                                     <td>
                                         <span class="badge {% if invoice.status == 'pagada' %}bg-success{% elif invoice.status == 'vencida' %}bg-danger{% else %}bg-secondary{% endif %}">
-                                            {{ invoice.get_status_display }}
+                                            {{ invoice.get_state_display }}
                                         </span>
                                     </td>
                                     <td class="text-end">${{ invoice.total|floatformat:2 }}</td>

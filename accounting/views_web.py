@@ -114,43 +114,53 @@ def payment_detail(request, pk):
     return render(request, 'accounting/payment_detail.html', {'payment': payment})
 
 @login_required
-def payment_create(request):
-    PaymentForm = modelform_factory(Payment, fields=('invoice', 'date', 'amount', 'method', 'notes'))
+def payment_create(request, invoice_pk):
+    invoice = get_object_or_404(Invoice, pk=invoice_pk)
+    PaymentForm = modelform_factory(Payment, fields=('date', 'amount', 'method', 'notes'))
     if request.method == 'POST':
         form = PaymentForm(request.POST)
         if form.is_valid():
-            payment = form.save()
+            payment = form.save(commit=False)
+            payment.invoice = invoice
+            payment.save()
+            invoice.update_status()
             messages.success(request, 'Pago registrado correctamente.')
-            return redirect('accounting:payment_detail', pk=payment.pk)
+            return redirect('accounting:invoice_detail', pk=invoice.pk)
         else:
             messages.error(request, 'Error al registrar el pago. Revise los datos.')
     else:
         form = PaymentForm(initial={'date': timezone.now().date()})
-    return render(request, 'accounting/payment_form.html', {'form': form})
+    return render(request, 'accounting/payment_form.html', {'form': form, 'invoice': invoice})
+
 
 @login_required
 def payment_update(request, pk):
     payment = get_object_or_404(Payment, pk=pk)
-    PaymentForm = modelform_factory(Payment, fields=('invoice', 'date', 'amount', 'method', 'notes'))
+    invoice = payment.invoice
+    PaymentForm = modelform_factory(Payment, fields=('date', 'amount', 'method', 'notes'))
     if request.method == 'POST':
         form = PaymentForm(request.POST, instance=payment)
         if form.is_valid():
             form.save()
+            invoice.update_status()
             messages.success(request, 'Pago actualizado correctamente.')
-            return redirect('accounting:payment_detail', pk=payment.pk)
+            return redirect('accounting:invoice_detail', pk=invoice.pk)
         else:
             messages.error(request, 'Error al actualizar el pago. Revise los datos.')
     else:
         form = PaymentForm(instance=payment)
-    return render(request, 'accounting/payment_form.html', {'form': form})
+    return render(request, 'accounting/payment_form.html', {'form': form, 'invoice': invoice})
+
 
 @login_required
 def payment_delete(request, pk):
     payment = get_object_or_404(Payment, pk=pk)
+    invoice = payment.invoice
     if request.method == 'POST':
         payment.delete()
+        invoice.update_status()
         messages.success(request, 'Pago eliminado correctamente.')
-        return redirect('accounting:payment_list')
+        return redirect('accounting:invoice_detail', pk=invoice.pk)
     return render(request, 'accounting/payment_confirm_delete.html', {'payment': payment})
 
 @login_required

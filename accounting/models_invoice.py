@@ -1,8 +1,6 @@
 from django.db import models
 from core.models import BaseModel
 from customers.models import Customer
-from properties.models import Property
-from contracts.models import Contract
 
 class Invoice(BaseModel):
     STATE_CHOICES = [
@@ -35,11 +33,17 @@ class Invoice(BaseModel):
     def __str__(self):
         return f"Factura Nº{self.number} - {self.customer}"
 
-    def mark_as_paid(self):
-        total_paid = sum(p.amount for p in self.payments.all())
-        if total_paid >= self.total_amount:
+    def get_balance(self):
+        paid_amount = self.payments.aggregate(total=models.Sum('amount'))['total'] or 0
+        return self.total_amount - paid_amount
+
+    def update_status(self):
+        balance = self.get_balance()
+        if balance <= 0:
             self.state = 'paid'
-            self.save(update_fields=['state'])
+        elif self.state == 'paid' and balance > 0:
+            self.state = 'sent'  # o el estado que corresponda
+        self.save()
 
     def mark_as_sent(self):
         self.state = 'sent'

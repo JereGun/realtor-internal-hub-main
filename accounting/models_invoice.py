@@ -5,6 +5,7 @@ from customers.models import Customer
 class Invoice(BaseModel):
     STATUS_CHOICES = [
         ('draft', 'Borrador'),
+        ('validated', 'Validada'),
         ('sent', 'Enviada'),
         ('paid', 'Pagada'),
         ('cancelled', 'Cancelada'),

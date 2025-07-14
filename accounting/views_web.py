@@ -6,9 +6,10 @@ from django.core.paginator import Paginator
 from django.contrib import messages
 from django.utils import timezone
 from django.forms import modelform_factory
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template.loader import render_to_string
 from weasyprint import HTML
+from django.db.models import Q
 
 @login_required
 def accounting_dashboard(request):
@@ -18,10 +19,30 @@ def accounting_dashboard(request):
 @login_required
 def invoice_list(request):
     invoice_list = Invoice.objects.select_related('customer').order_by('-date')
+    
+    # Búsqueda
+    query = request.GET.get('q')
+    if query:
+        invoice_list = invoice_list.filter(
+            Q(number__icontains=query) |
+            Q(customer__first_name__icontains=query) |
+            Q(customer__last_name__icontains=query)
+        )
+
+    # Filtro por estado
+    status = request.GET.get('status')
+    if status:
+        invoice_list = invoice_list.filter(status=status)
+
     paginator = Paginator(invoice_list, 25)  # 25 facturas por página
     page_number = request.GET.get('page')
     invoices = paginator.get_page(page_number)
-    return render(request, 'accounting/invoice_list.html', {'invoices': invoices})
+    
+    return render(request, 'accounting/invoice_list.html', {
+        'invoices': invoices,
+        'query': query,
+        'status': status
+    })
 
 @login_required
 def invoice_detail(request, pk):

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block page_title %}
+    Notificaciones
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2 mb-0">
+            <i class="bi bi-bell-fill me-2"></i>Notificaciones
+        </h1>
+        <form method="post" action="{% url 'user_notifications:mark_all_as_read' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary btn-sm">Marcar todas como leídas</button>
+        </form>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="list-group">
+                {% for notification in notifications %}
+                    <a href="#" class="list-group-item list-group-item-action {% if not notification.is_read %}list-group-item-light{% endif %}">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">{{ notification.title }}</h5>
+                            <small>{{ notification.created_at|date:"d/m/Y H:i" }}</small>
+                        </div>
+                        <p class="mb-1">{{ notification.message }}</p>
+                        {% if not notification.is_read %}
+                            <form method="post" action="{% url 'user_notifications:mark_as_read' notification.pk %}" class="mt-2">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success btn-sm">Marcar como leída</button>
+                            </form>
+                        {% endif %}
+                    </a>
+                {% empty %}
+                    <div class="list-group-item">
+                        <p class="mb-0 text-center">No hay notificaciones.</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

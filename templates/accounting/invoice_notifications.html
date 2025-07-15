@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Notificaciones de Facturas</h2>
+        <div class="btn-group">
+            <button type="button" class="btn btn-outline-primary" onclick="markAllAsRead()">Marcar todas como leídas</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            {% if not notifications %}
+                <div class="text-center py-4">
+                    <i class="bi bi-bell-slash fs-1 text-secondary mb-3"></i>
+                    <h5 class="text-muted">No hay notificaciones</h5>
+                    <p class="text-muted">No tienes notificaciones de facturas pendientes.</p>
+                </div>
+            {% else %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Estado</th>
+                                <th>Tipo</th>
+                                <th>Factura</th>
+                                <th>Cliente</th>
+                                <th>Mensaje</th>
+                                <th>Vencimiento</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for notification in notifications %}
+                            <tr class="{% if not notification.is_read %}table-warning{% endif %}">
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" 
+                                               id="notification_{{ notification.id }}" 
+                                               onchange="markAsRead({{ notification.id }})"
+                                               {% if notification.is_read %}checked{% endif %}>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{{ notification.get_type_badge_class }}">
+                                        {{ notification.get_type_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'accounting:invoice_detail' notification.invoice.id %}" class="text-decoration-none">
+                                        <strong>{{ notification.invoice.number }}</strong>
+                                    </a>
+                                </td>
+                                <td>{{ notification.customer.name }}</td>
+                                <td>{{ notification.message }}</td>
+                                <td>
+                                    {% if notification.due_date %}
+                                        <span class="text-muted">{{ notification.due_date|date:"d/m/Y" }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small class="text-muted">{{ notification.created_at|date:"d/m/Y H:i" }}</small>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function markAsRead(notificationId) {
+    const checkbox = document.getElementById(`notification_${notificationId}`);
+    const url = `/api/accounting/invoice-notifications/${notificationId}/mark-as-read/`;
+    
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ is_read: checkbox.checked })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log(`Notificación ${notificationId} marcada como ${checkbox.checked ? 'leída' : 'no leída'}`);
+            updateUnreadCount();
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+function markAllAsRead() {
+    const checkboxes = document.querySelectorAll('.form-check-input');
+    const promises = [];
+    
+    checkboxes.forEach(checkbox => {
+        if (!checkbox.checked) {
+            const notificationId = checkbox.id.replace('notification_', '');
+            promises.push(markAsRead(notificationId));
+            checkbox.checked = true;
+        }
+    });
+    
+    Promise.all(promises)
+        .then(() => {
+            console.log('Todas las notificaciones marcadas como leídas');
+            updateUnreadCount();
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+// Función para actualizar el contador de notificaciones no leídas en el navbar
+function updateUnreadCount() {
+    // Esto se implementará cuando tengamos el endpoint para obtener el nuevo conteo
+    // Por ahora, solo actualizamos visualmente
+    const badge = document.querySelector('.navbar .nav-link .badge');
+    if (badge) {
+        const unreadCount = parseInt(badge.textContent) - 1;
+        if (unreadCount > 0) {
+            badge.textContent = unreadCount;
+        } else {
+            badge.remove();
+        }
+    }
+}
+</script>
+{% endblock %}

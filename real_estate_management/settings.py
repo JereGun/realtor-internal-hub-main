@@ -5,6 +5,12 @@ Django settings for real_estate_management project.
 from pathlib import Path
 import os
 from decouple import config
+from celery import Celery
+
+# Initialize Celery
+app = Celery('real_estate_management')
+app.config_from_object('django.conf:settings', namespace='CELERY')
+app.autodiscover_tasks()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -15,6 +21,14 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-your-secret-key-here'
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=lambda v: [s.strip() for s in v.split(',')])
+
+# Celery Configuration
+CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='redis://localhost:6379/0')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'America/Argentina/Buenos_Aires'
 
 # Application definition
 DJANGO_APPS = [
@@ -43,6 +57,7 @@ THIRD_PARTY_APPS = [
     'crispy_forms',
     'crispy_bootstrap4',
     'rest_framework',  # Agregada DRF
+    'celery',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS
@@ -82,8 +97,8 @@ WSGI_APPLICATION = 'real_estate_management.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME', default='real_estate_db'),
-        'USER': config('DB_USER', default='postgres'),
+        'NAME': config('DB_NAME', default='test'),
+        'USER': config('DB_USER', default='testuser'),
         'PASSWORD': config('DB_PASSWORD', default='password'),
         'HOST': config('DB_HOST', default='localhost'),
         'PORT': config('DB_PORT', default='5432'),

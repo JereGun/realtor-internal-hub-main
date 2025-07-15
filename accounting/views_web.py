@@ -1,15 +1,14 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models_invoice import Invoice, InvoiceLine, Payment
-from .forms_invoice import InvoiceForm, InvoiceLineFormSet, InvoiceLineForm
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.utils import timezone
-from django.forms import modelform_factory
 from django.http import HttpResponse, JsonResponse
 from django.template.loader import render_to_string
-from weasyprint import HTML
 from django.db.models import Q
+from .models import InvoiceNotification
+from .models_invoice import Invoice, InvoiceLine, Payment
+from .forms_invoice import InvoiceForm, InvoiceLineFormSet, InvoiceLineForm
 from .services import send_invoice_email
 
 @login_required
@@ -133,6 +132,9 @@ def invoice_create(request):
 @login_required
 def invoice_update(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
+
+    if invoice.status != 'draft':
+        return JsonResponse({'error': 'Solo se pueden editar facturas en estado "Borrador".'}, status=403)
     
     if request.method == 'POST':
         form = InvoiceForm(request.POST, instance=invoice)
@@ -142,7 +144,7 @@ def invoice_update(request, pk):
             formset.save()
             invoice.compute_total()
             messages.success(request, 'Factura actualizada correctamente')
-            return redirect('accounting:invoice_detail', pk=invoice.pk)
+            return JsonResponse({'success': True, 'redirect_url': reverse('accounting:invoice_detail', kwargs={'pk': invoice.pk})})
         else:
             messages.error(request, 'Error al actualizar la factura. Revise los datos.')
     else:
@@ -187,6 +189,48 @@ def payment_create(request, invoice_pk):
         form = PaymentForm(initial={'date': timezone.now().date()})
     return render(request, 'accounting/payment_form.html', {'form': form, 'invoice': invoice})
 
+
+@login_required
+@login_required
+def invoice_notifications(request):
+    notifications = InvoiceNotification.objects.filter(
+        customer__agent=request.user
+    ).order_by('-created_at')
+    
+    # Obtener el número de notificaciones no leídas
+    unread_notifications_count = notifications.filter(is_read=False).count()
+    
+    paginator = Paginator(notifications, 25)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'accounting/invoice_notifications.html', {
+        'notifications': page_obj,
+        'unread_notifications_count': unread_notifications_count
+    })
+
+@login_required
+def mark_notification_as_read(request, pk):
+    notification = get_object_or_404(InvoiceNotification, pk=pk)
+    
+    if request.method == 'POST':
+        notification.is_read = True
+        notification.save()
+        return JsonResponse({'success': True})
+    
+    return JsonResponse({'success': False}, status=400)
+
+@login_required
+def mark_all_notifications_as_read(request):
+    if request.method == 'POST':
+        notifications = InvoiceNotification.objects.filter(
+            customer__agent=request.user,
+            is_read=False
+        )
+        notifications.update(is_read=True)
+        return JsonResponse({'success': True})
+    
+    return JsonResponse({'success': False}, status=400)
 
 @login_required
 def payment_update(request, pk):

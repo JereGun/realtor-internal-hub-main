@@ -128,10 +128,6 @@
                                 <span class="text-muted">Subtotal:</span>
                                 <span id="preview-subtotal">$0.00</span>
                             </div>
-                            <div class="d-flex justify-content-between mb-1" style="display: none;">
-                                <span class="text-muted">Impuestos (IVA 21%):</span> <!-- Asumiendo IVA 21% -->
-                                <span id="preview-taxes">$0.00</span>
-                            </div>
                             <hr class="my-1">
                             <div class="d-flex justify-content-between fw-bold h5 mt-2">
                                 <span>TOTAL:</span>
@@ -149,13 +145,32 @@
     </div>
 </div>
 
+<!-- Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="errorModalLabel">Error</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="errorModalBody">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const invoiceForm = document.getElementById('invoiceForm');
-    const formsetContainer = document.getElementById('invoice-items-formset');
+    try {
+        const invoiceForm = document.getElementById('invoiceForm');
+        const formsetContainer = document.getElementById('invoice-items-formset');
     const addItemButton = document.getElementById('add-item-btn');
     const totalFormsInput = document.querySelector('input[name="lines-TOTAL_FORMS"]');
-    const initialFormsInput = document.querySelector('input[name="lines-INITIAL_FORMS"]'); // Corrected selector
+    const initialFormsInput = document.querySelector('input[name="lines-INITIAL_FORMS"]');
 
     // Preview elements
     const previewNumber = document.getElementById('preview-number');
@@ -253,17 +268,42 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function addFormsetRow() {
         const formIdx = parseInt(totalFormsInput.value);
-        const emptyFormHtml = document.getElementById('empty-form').innerHTML.replace(/__prefix__/g, formIdx);
+        const emptyFormHtml = document.querySelector('.invoice-item-row').innerHTML;
         
         const newRowDiv = document.createElement('div');
         newRowDiv.classList.add('row', 'g-2', 'mb-2', 'align-items-center', 'invoice-item-row');
-        newRowDiv.innerHTML = `
-            <div class="col-md-6">${emptyFormHtml.match(/<div class="col-md-6">([\s\S]*?)<\/div>/)[1]}</div>
-            <div class="col-md-4">${emptyFormHtml.match(/<div class="col-md-4">([\s\S]*?)<\/div>/)[1]}</div>
-            <div class="col-md-2 text-end pt-3">
-                <button type="button" class="btn btn-sm btn-outline-danger remove-item-btn"><i class="bi bi-trash"></i></button>
-            </div>
-        `;
+        
+        // Clone the first form row and update the indices
+        const firstRow = document.querySelector('.invoice-item-row');
+        if (!firstRow) return;
+        
+        const newRow = firstRow.cloneNode(true);
+        
+        // Update all input names and IDs
+        newRow.querySelectorAll('input, select, textarea').forEach(input => {
+            const name = input.name.replace(/\d+/, formIdx);
+            const id = input.id ? input.id.replace(/\d+/, formIdx) : null;
+            input.name = name;
+            if (id) input.id = id;
+            
+            // Clear values for new form
+            if (input.type === 'text' || input.type === 'number') {
+                input.value = '';
+            }
+        });
+        
+        // Add remove button
+        const removeDiv = document.createElement('div');
+        removeDiv.className = 'col-md-2 text-end pt-3';
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'btn btn-sm btn-outline-danger remove-item-btn';
+        removeBtn.innerHTML = '<i class="bi bi-trash"></i>';
+        removeBtn.type = 'button';
+        removeDiv.appendChild(removeBtn);
+        newRow.appendChild(removeDiv);
+        
+        formsetContainer.appendChild(newRow);
+        totalFormsInput.value = formIdx + 1;
         // Manually extract and set up crispy fields if they are complex.
         // This simplified version assumes simple input fields.
         // For complex fields, you might need to re-initialize JS widgets or use a more robust templating approach.
@@ -323,6 +363,42 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initial preview render
     updatePreview();
 
+    invoiceForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        console.log('Form submission intercepted.');
+
+        const formData = new FormData(invoiceForm);
+        fetch(invoiceForm.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            }
+        })
+        .then(response => {
+            if (response.status === 403) {
+                return response.json().then(data => {
+                    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                    document.getElementById('errorModalBody').textContent = data.error;
+                    errorModal.show();
+                });
+            }
+            if (response.ok) {
+                return response.json().then(data => {
+                    if (data.success) {
+                        window.location.href = data.redirect_url;
+                    }
+                });
+            } else {
+                // Handle other errors
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+    } catch (e) {
+        console.error('An error occurred in the invoice form script:', e);
+    }
 });
 </script>
 

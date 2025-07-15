@@ -74,6 +74,24 @@
             expandBtn.style.display = isCollapsed ? 'block' : 'none';
         }
         
+        // Función para actualizar el contador de notificaciones en el navbar
+        function updateNotificationBadge(count) {
+            const badge = document.querySelector('.nav-link .badge');
+            if (count > 0) {
+                if (!badge) {
+                    const link = document.querySelector('.nav-link[href*="notifications"]');
+                    const span = document.createElement('span');
+                    span.className = 'badge bg-danger rounded-pill';
+                    span.textContent = count;
+                    link.appendChild(span);
+                } else {
+                    badge.textContent = count;
+                }
+            } else if (badge) {
+                badge.remove();
+            }
+        }
+        
         window.addEventListener('DOMContentLoaded', () => {
             const sidebar = document.getElementById('sidebar');
             const expandBtn = document.getElementById('expandSidebarBtn');

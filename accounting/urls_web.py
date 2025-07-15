@@ -20,4 +20,7 @@ urlpatterns = [
     path('payments/<int:pk>/', views_web.payment_detail, name='payment_detail'),
     path('payments/<int:pk>/edit/', views_web.payment_update, name='payment_update'),
     path('payments/<int:pk>/delete/', views_web.payment_delete, name='payment_delete'),
+    path('notifications/', views_web.invoice_notifications, name='invoice_notifications'),
+    path('notifications/<int:pk>/mark-as-read/', views_web.mark_notification_as_read, name='mark_notification_as_read'),
+    path('notifications/mark-all-as-read/', views_web.mark_all_notifications_as_read, name='mark_all_notifications_as_read'),
 ]

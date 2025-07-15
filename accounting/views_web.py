@@ -6,7 +6,6 @@ from django.utils import timezone
 from django.http import HttpResponse, JsonResponse
 from django.template.loader import render_to_string
 from django.db.models import Q
-from .models import InvoiceNotification
 from .models_invoice import Invoice, InvoiceLine, Payment
 from .forms_invoice import InvoiceForm, InvoiceLineFormSet, InvoiceLineForm
 from .services import send_invoice_email

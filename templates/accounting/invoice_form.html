@@ -19,7 +19,7 @@
                     </a>
                 </div>
                 <div class="card-body p-4">
-                    <form method="post" id="invoiceForm">
+                    <form method="post" id="invoiceForm" action="{% url 'accounting:invoice_update' invoice.pk %}">
                         {% csrf_token %}
                         
                         <fieldset class="mb-4">
@@ -377,24 +377,36 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         })
         .then(response => {
-            if (response.status === 403) {
-                return response.json().then(data => {
-                    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
-                    document.getElementById('errorModalBody').textContent = data.error;
-                    errorModal.show();
-                });
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
             }
-            if (response.ok) {
-                return response.json().then(data => {
-                    if (data.success) {
-                        window.location.href = data.redirect_url;
-                    }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                window.location.href = data.redirect_url;
+            } else if (data.errors) {
+                const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                const errorList = document.createElement('ul');
+                errorList.className = 'list-unstyled';
+                Object.entries(data.errors).forEach(([field, errors]) => {
+                    errors.forEach(error => {
+                        const li = document.createElement('li');
+                        li.textContent = `${field}: ${error}`;
+                        errorList.appendChild(li);
+                    });
                 });
-            } else {
-                // Handle other errors
+                document.getElementById('errorModalBody').innerHTML = '';
+                document.getElementById('errorModalBody').appendChild(errorList);
+                errorModal.show();
             }
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            console.error('Error:', error);
+            const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+            document.getElementById('errorModalBody').textContent = 'Error al procesar la solicitud. Por favor, inténtelo de nuevo.';
+            errorModal.show();
+        });
     });
     } catch (e) {
         console.error('An error occurred in the invoice form script:', e);

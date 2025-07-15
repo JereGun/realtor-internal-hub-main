@@ -1,5 +1,6 @@
 
 from django import forms
+from django.utils import formats
 from .models import Customer
 from locations.models import State, City # Import State and City
 
@@ -17,7 +18,10 @@ class CustomerForm(forms.ModelForm):
             'street': forms.TextInput(attrs={'class': 'form-control'}),
             'number': forms.TextInput(attrs={'class': 'form-control'}),
             'neighborhood': forms.TextInput(attrs={'class': 'form-control'}),
-            'birth_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'birth_date': forms.DateInput(
+                attrs={'class': 'form-control', 'type': 'date'},
+                format='%Y-%m-%d'
+            ),
             'profession': forms.TextInput(attrs={'class': 'form-control'}),
             'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             # Los campos ForeignKey (country, province, locality) usarán los widgets por defecto (Select)

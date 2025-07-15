@@ -20,11 +20,32 @@ class InvoiceCreateView(CreateView):
     template_name = 'invoicing/invoice_form.html'
     success_url = reverse_lazy('invoicing:invoice_list')
 
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+
 class InvoiceUpdateView(UpdateView):
     model = Invoice
     form_class = InvoiceForm
     template_name = 'invoicing/invoice_form.html'
     success_url = reverse_lazy('invoicing:invoice_list')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'redirect_url': self.get_success_url()
+            })
+        return response
+
+    def form_invalid(self, form):
+        response = super().form_invalid(form)
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': False,
+                'errors': form.errors
+            }, status=400)
+        return response
 
 class InvoiceDeleteView(DeleteView):
     model = Invoice

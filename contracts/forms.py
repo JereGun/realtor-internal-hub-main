@@ -1,5 +1,19 @@
 from django import forms
+from django.utils import formats
 from .models import Contract, ContractIncrease # Removed Invoice, InvoiceItem
+
+
+class DateInput(forms.DateInput):
+    def format_value(self, value):
+        if isinstance(value, str):
+            # Convertir el formato dd/MM/yyyy a yyyy-MM-dd
+            try:
+                parts = value.split('/')
+                if len(parts) == 3:
+                    return f"{parts[2]}-{parts[1]}-{parts[0]}"
+            except:
+                pass
+        return super().format_value(value)
 
 
 class ContractForm(forms.ModelForm):
@@ -14,13 +28,13 @@ class ContractForm(forms.ModelForm):
             'property': forms.Select(attrs={'class': 'form-control', 'id': 'id_property'}),
             'customer': forms.Select(attrs={'class': 'form-control'}),
             'agent': forms.Select(attrs={'class': 'form-control','id': 'id_agent'}),
-            'start_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'end_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'start_date': DateInput(attrs={'class': 'form-control', 'type': 'date'}, format='%Y-%m-%d'),
+            'end_date': DateInput(attrs={'class': 'form-control', 'type': 'date'}, format='%Y-%m-%d'),
             'amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'id': 'id_amount'}),
             'currency': forms.TextInput(attrs={'class': 'form-control'}),
             'frequency': forms.Select(attrs={'class': 'form-control'}),
             'increase_percentage': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
-            'next_increase_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'next_increase_date': DateInput(attrs={'class': 'form-control', 'type': 'date'}, format='%Y-%m-%d'),
             'terms': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
             'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'status': forms.Select(attrs={'class': 'form-control'}),
@@ -49,7 +63,7 @@ class ContractIncreaseForm(forms.ModelForm):
             'previous_amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'new_amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'increase_percentage': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
-            'effective_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'effective_date': DateInput(attrs={'class': 'form-control', 'type': 'date'}, format='%Y-%m-%d'),
             'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
 

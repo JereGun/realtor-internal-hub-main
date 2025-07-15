@@ -4,24 +4,22 @@ from core.models import BaseModel
 
 class Customer(BaseModel):
     """Customer model"""
-    # Personal Information
+    # Informacion Personal
     first_name = models.CharField(max_length=150, verbose_name="Nombre")
     last_name = models.CharField(max_length=150, verbose_name="Apellido")
     email = models.EmailField(unique=True, verbose_name="Email")
     phone = models.CharField(max_length=20, verbose_name="Teléfono")
     document = models.CharField(max_length=20, unique=True, verbose_name="Documento")
     
-    # Address Information
+    # Informacion de Direccion
     street = models.CharField(max_length=200, blank=True, verbose_name="Calle")
     number = models.CharField(max_length=20, blank=True, verbose_name="Número")
     neighborhood = models.CharField(max_length=100, blank=True, verbose_name="Barrio")
-    
-    # Nuevos campos ForeignKey para la dirección utilizando la app locations
     country = models.ForeignKey('locations.Country', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="País")
     province = models.ForeignKey('locations.State', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Provincia")
     locality = models.ForeignKey('locations.City', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Localidad")
     
-    # Additional Information
+    # Informacion Adicional
     birth_date = models.DateField(blank=True, null=True, verbose_name="Fecha de Nacimiento")
     profession = models.CharField(max_length=100, blank=True, verbose_name="Profesión")
     notes = models.TextField(blank=True, verbose_name="Notas")
@@ -41,5 +39,8 @@ class Customer(BaseModel):
     @property
     def full_address(self):
         if self.street and self.number:
-            return f"{self.street} {self.number}, {self.neighborhood}, {self.locality}, {self.province}"
+            return f"{self.street} {self.number}, {self.neighborhood}"
         return ""
+
+    def get_full_name(self):
+        return f"{self.first_name} {self.last_name}"

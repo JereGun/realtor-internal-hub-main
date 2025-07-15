@@ -64,8 +64,6 @@
                                         <th>Nombre</th>
                                         <th>Email</th>
                                         <th>Teléfono</th>
-                                        <th>Tipo</th>
-                                        <th>Estado</th>
                                         <th>Fecha Registro</th>
                                         <th>Acciones</th>
                                     </tr>
@@ -80,16 +78,6 @@
                                         </td>
                                         <td>{{ customer.email|default:"-" }}</td>
                                         <td>{{ customer.phone|default:"-" }}</td>
-                                        <td>
-                                            <span class="badge bg-info">{{ customer.get_customer_type_display }}</span>
-                                        </td>
-                                        <td>
-                                            {% if customer.is_active %}
-                                                <span class="badge bg-success">Activo</span>
-                                            {% else %}
-                                                <span class="badge bg-danger">Inactivo</span>
-                                            {% endif %}
-                                        </td>
                                         <td>{{ customer.created_at|date:"d/m/Y" }}</td>
                                         <td>
                                             <div class="btn-group btn-group-sm" role="group">

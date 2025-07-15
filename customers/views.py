@@ -48,6 +48,11 @@ class CustomerDetailView(LoginRequiredMixin, DetailView):
     template_name = 'customers/customer_detail.html'
     context_object_name = 'customer'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['active_contracts'] = self.object.contract_set.filter(is_active=True)
+        return context
+
 
 class CustomerCreateView(LoginRequiredMixin, CreateView):
     model = Customer

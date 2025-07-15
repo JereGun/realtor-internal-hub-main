@@ -167,6 +167,3 @@ class ContractIncrease(BaseModel):
             self.increase_percentage = None 
             
         super().save(*args, **kwargs)
-
-# End of ContractIncrease model
-# Invoice and InvoiceItem models are now managed by the 'accounting' app.

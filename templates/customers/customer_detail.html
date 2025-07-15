@@ -45,6 +45,11 @@
                                     <h6 class="text-muted">Apellido</h6>
                                     <p class="mb-3">{{ customer.last_name }}</p>
 
+                                    <h6 class="text-muted">Documento</h6>
+                                    <p class="mb-3">{{ customer.document }}</p>
+
+                                </div>
+                                <div class="col-md-6">
                                     <h6 class="text-muted">Email</h6>
                                     <p class="mb-3">
                                         {% if customer.email %}
@@ -60,39 +65,6 @@
                                             <a href="tel:{{ customer.phone }}">{{ customer.phone }}</a>
                                         {% else %}
                                             <span class="text-muted">No especificado</span>
-                                        {% endif %}
-                                    </p>
-                                </div>
-                                <div class="col-md-6">
-                                    <h6 class="text-muted">Tipo de Cliente</h6>
-                                    <p class="mb-3">
-                                        <span class="badge bg-info fs-6">{{ customer.get_customer_type_display }}</span>
-                                    </p>
-
-                                    <h6 class="text-muted">Estado</h6>
-                                    <p class="mb-3">
-                                        {% if customer.is_active %}
-                                            <span class="badge bg-success fs-6">Activo</span>
-                                        {% else %}
-                                            <span class="badge bg-danger fs-6">Inactivo</span>
-                                        {% endif %}
-                                    </p>
-
-                                    <h6 class="text-muted">Presupuesto</h6>
-                                    <p class="mb-3">
-                                        {% if customer.budget %}
-                                            ${{ customer.budget|floatformat:0 }}
-                                        {% else %}
-                                            <span class="text-muted">No especificado</span>
-                                        {% endif %}
-                                    </p>
-
-                                    <h6 class="text-muted">Agente Asignado</h6>
-                                    <p class="mb-3">
-                                        {% if customer.agent %}
-                                            {{ customer.agent.get_full_name }}
-                                        {% else %}
-                                            <span class="text-muted">Sin asignar</span>
                                         {% endif %}
                                     </p>
                                 </div>
@@ -121,17 +93,14 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <h6 class="text-muted">Dirección</h6>
-                                    <p class="mb-3">{{ customer.address|default:"No especificada" }}</p>
+                                    <p class="mb-3">{{ customer.full_address|default:"No especificada" }}</p>
 
                                     <h6 class="text-muted">Ciudad</h6>
-                                    <p class="mb-3">{{ customer.city|default:"No especificada" }}</p>
+                                    <p class="mb-3">{{ customer.locality.name|default:"No especificada" }}</p>
                                 </div>
                                 <div class="col-md-6">
                                     <h6 class="text-muted">Estado/Provincia</h6>
-                                    <p class="mb-3">{{ customer.state|default:"No especificado" }}</p>
-
-                                    <h6 class="text-muted">Código Postal</h6>
-                                    <p class="mb-3">{{ customer.zip_code|default:"No especificado" }}</p>
+                                    <p class="mb-3">{{ customer.province.name|default:"No especificado" }}</p>
 
                                     <h6 class="text-muted">País</h6>
                                     <p class="mb-3">{{ customer.country|default:"No especificado" }}</p>
@@ -146,7 +115,7 @@
                     <div class="card">
                         <div class="card-header">
                             <h5 class="mb-0">
-                                <i class="fas fa-home"></i> Propiedades Relacionadas
+                                <i class="fas fa-file-contract"></i> Contratos Activos
                             </h5>
                         </div>
                         <div class="card-body">
@@ -155,24 +124,36 @@
                                     <thead>
                                         <tr>
                                             <th>Propiedad</th>
-                                            <th>Tipo</th>
                                             <th>Estado</th>
-                                            <th>Precio</th>
+                                            <th>Fecha de Inicio</th>
+                                            <th>Fecha de Fin</th>
+                                            <th>Monto</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for property in customer.properties.all %}
+                                        {% for contract in active_contracts %}
                                         <tr>
                                             <td>
-                                                <a href="{% url 'properties:property_detail' property.pk %}" class="text-decoration-none">
-                                                    {{ property.title }}
+                                                <a href="{% url 'properties:property_detail' contract.property.pk %}" class="text-decoration-none">
+                                                    {{ contract.property.title }}
                                                 </a>
                                             </td>
-                                            <td>{{ property.get_property_type_display }}</td>
                                             <td>
-                                                <span class="badge bg-secondary">{{ property.get_status_display }}</span>
+                                                <span class="badge bg-{{ contract.get_status_display|lower }}">{{ contract.get_status_display }}</span>
                                             </td>
-                                            <td>${{ property.price|floatformat:0 }}</td>
+                                            <td>{{ contract.start_date|date:"d/m/Y" }}</td>
+                                            <td>
+                                                {% if contract.end_date %}
+                                                    {{ contract.end_date|date:"d/m/Y" }}
+                                                {% else %}
+                                                    <span class="text-muted">Indefinido</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>${{ contract.amount|floatformat:2 }}</td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted">No hay contratos activos</td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>

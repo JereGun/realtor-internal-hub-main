@@ -112,6 +112,12 @@ python manage.py createsuperuser
 python manage.py loaddata initial_data.json
 ```
 
+### 9. Generar datos de prueba (opcional)
+Para poblar la base de datos con datos de prueba generados con Faker, ejecuta:
+```bash
+./load_test_data.sh
+```
+
 ### 9. Ejecutar el servidor
 ```bash
 python manage.py runserver

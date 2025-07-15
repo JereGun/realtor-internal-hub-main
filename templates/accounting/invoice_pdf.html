@@ -17,6 +17,7 @@
         .invoice-box table tr.item td{ border-bottom: 1px solid #eee; }
         .invoice-box table tr.item.last td { border-bottom: none; }
         .invoice-box table tr.total td:nth-child(2) { border-top: 2px solid #eee; font-weight: bold; }
+        .company-logo { max-width: 150px; max-height: 75px; }
     </style>
 </head>
 <body>
@@ -27,7 +28,11 @@
                     <table>
                         <tr>
                             <td class="title">
-                                Mi Empresa
+                                {% if company.logo %}
+                                    <img src="{{ company.logo.path }}" alt="Logotipo de la empresa" class="company-logo">
+                                {% else %}
+                                    {{ company.name }}
+                                {% endif %}
                             </td>
                             <td>
                                 Factura #: {{ invoice.number }}<br>
@@ -43,9 +48,14 @@
                     <table>
                         <tr>
                             <td>
-                                {{ invoice.customer.first_name }}<br>
+                                <strong>{{ company.name }}</strong><br>
+                                {{ company.address }}<br>
+                                {{ company.tax_id }}
+                            </td>
+                            <td>
+                                <strong>{{ invoice.customer.get_full_name }}</strong><br>
                                 {{ invoice.customer.address }}<br>
-                                {{ invoice.customer.locality }}, {{ invoice.customer.state }} {{ invoice.customer.zip_code }}
+                                {{ invoice.customer.city }}, {{ invoice.customer.postal_code }}
                             </td>
                         </tr>
                     </table>
@@ -58,12 +68,12 @@
             {% for line in invoice.lines.all %}
             <tr class="item">
                 <td>{{ line.concept }}</td>
-                <td>{{ line.amount }}</td>
+                <td>{{ line.amount|floatformat:2 }} €</td>
             </tr>
             {% endfor %}
             <tr class="total">
                 <td></td>
-                <td>Total: {{ invoice.total_amount }}</td>
+                <td>Total: {{ invoice.total_amount|floatformat:2 }} €</td>
             </tr>
         </table>
     </div>

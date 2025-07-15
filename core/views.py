@@ -1,4 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import Company
+from .forms import CompanyForm
 from contracts.models import Contract
 from payments.models import ContractPayment
 from django.db.models import Sum, Q
@@ -54,3 +57,22 @@ def dashboard(request):
         'last_operations': last_operations,
     }
     return render(request, 'dashboard.html', context)
+
+
+def company_settings(request):
+    # Intentamos obtener la primera compañía, si no existe, la creamos
+    company, created = Company.objects.get_or_create(
+        id=1,
+        defaults={'name': 'Mi Empresa'}
+    )
+
+    if request.method == 'POST':
+        form = CompanyForm(request.POST, request.FILES, instance=company)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Los datos de la empresa se han actualizado correctamente.')
+            return redirect('core:company_settings')
+    else:
+        form = CompanyForm(instance=company)
+
+    return render(request, 'core/company_settings.html', {'form': form})

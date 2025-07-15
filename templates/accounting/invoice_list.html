@@ -154,7 +154,7 @@
                                 {{ invoice.get_status_display }}
                             </span>
                         </td>
-                        <td class="text-end">${{ invoice.total|floatformat:2 }}</td>
+                        <td class="text-end">${{ invoice.total_amount|floatformat:2 }}</td>
                         <td class="text-center">
                             <div class="btn-group" role="group">
                                 <a href="{% url 'accounting:invoice_detail' invoice.pk %}" class="btn btn-sm btn.outline-primary" title="Ver">

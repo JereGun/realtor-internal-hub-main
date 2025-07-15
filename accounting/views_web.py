@@ -262,12 +262,15 @@ def invoiceline_delete(request, pk):
         return redirect('accounting:invoice_detail', pk=invoice_pk)
     return render(request, 'accounting/invoiceline_confirm_delete.html', {'invoiceline': invoiceline})
 
+from core.models import Company
+
 @login_required
 def invoice_pdf(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
-    html_string = render_to_string('accounting/invoice_pdf.html', {'invoice': invoice})
+    company = Company.objects.first()
+    html_string = render_to_string('accounting/invoice_pdf.html', {'invoice': invoice, 'company': company})
 
-    html = HTML(string=html_string)
+    html = HTML(string=html_string, base_url=request.build_absolute_uri())
     pdf = html.write_pdf()
 
     response = HttpResponse(pdf, content_type='application/pdf')

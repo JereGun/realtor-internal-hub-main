@@ -39,11 +39,20 @@ class InvoiceUpdateView(UpdateView):
         return response
 
     def form_invalid(self, form):
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Form validation failed: {form.errors}")
+        logger.error(f"Request data: {self.request.POST}")
+        
         response = super().form_invalid(form)
         if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
             return JsonResponse({
                 'success': False,
-                'errors': form.errors
+                'errors': form.errors,
+                'debug_info': {
+                    'form_data': str(self.request.POST),
+                    'form_errors': str(form.errors)
+                }
             }, status=400)
         return response
 

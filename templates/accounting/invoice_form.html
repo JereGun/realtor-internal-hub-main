@@ -366,8 +366,40 @@ document.addEventListener('DOMContentLoaded', function () {
     invoiceForm.addEventListener('submit', function (e) {
         e.preventDefault();
         console.log('Form submission intercepted.');
-
-        const formData = new FormData(invoiceForm);
+        
+        // Crear FormData manualmente para asegurar que todos los campos se agreguen correctamente
+        const formData = new FormData();
+        
+        // Agregar CSRF token
+        formData.append('csrfmiddlewaretoken', document.querySelector('input[name="csrfmiddlewaretoken"]').value);
+        
+        // Agregar campos del formulario principal
+        Array.from(invoiceForm.elements).forEach(element => {
+            if (element.name && element.name !== 'csrfmiddlewaretoken') {
+                formData.append(element.name, element.value);
+            }
+        });
+        
+        // Agregar formset
+        const formsetRows = document.querySelectorAll('.invoice-item-row');
+        formsetRows.forEach((row, index) => {
+            const conceptInput = row.querySelector('input[name$="-concept"]');
+            const amountInput = row.querySelector('input[name$="-amount"]');
+            const deleteCheckbox = row.querySelector('input[name$="-DELETE"]');
+            
+            if (conceptInput && amountInput) {
+                formData.append(`form-INITIAL_FORMS`, index + 1);
+                formData.append(`form-TOTAL_FORMS`, formsetRows.length);
+                formData.append(`form-MAX_NUM_FORMS`, 1000);
+                
+                formData.append(`form-${index}-concept`, conceptInput.value);
+                formData.append(`form-${index}-amount`, amountInput.value);
+                formData.append(`form-${index}-DELETE`, deleteCheckbox ? deleteCheckbox.checked : false);
+            }
+        });
+        
+        console.log('Final FormData:', formData);
+        
         fetch(invoiceForm.action, {
             method: 'POST',
             body: formData,

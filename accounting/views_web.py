@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.contrib import messages
@@ -145,7 +146,7 @@ def invoice_update(request, pk):
             messages.success(request, 'Factura actualizada correctamente')
             return JsonResponse({'success': True, 'redirect_url': reverse('accounting:invoice_detail', kwargs={'pk': invoice.pk})})
         else:
-            messages.error(request, 'Error al actualizar la factura. Revise los datos.')
+            return JsonResponse({'success': False, 'error': 'Error al actualizar la factura. Revise los datos.'}, status=400)
     else:
         form = InvoiceForm(instance=invoice)
         formset = InvoiceLineFormSet(instance=invoice)

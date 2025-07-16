@@ -1,0 +1,48 @@
+{% extends "public_base.html" %}
+
+{% block title %}Sobre Nosotros{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1>Sobre Nuestra Agencia Inmobiliaria</h1>
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="lead">Bienvenido a nuestra agencia inmobiliaria, donde hacemos realidad sus sueños de propiedad. Con años de experiencia en el mercado, nuestro equipo de agentes profesionales está dedicado a brindar un servicio excepcional y ayudarle a encontrar su hogar perfecto.</p>
+                    
+                    <h3>Nuestra Misión</h3>
+                    <p>Proporcionar a nuestros clientes la mejor experiencia inmobiliaria combinando experiencia profesional, conocimiento del mercado y servicio personalizado. Nos esforzamos por superar las expectativas en cada paso del proceso de compra o venta.</p>
+
+                    <h3>¿Por qué Elegirnos?</h3>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> Agentes Experimentados</li>
+                        <li><i class="fas fa-check text-success"></i> Conocimiento Extensivo del Mercado</li>
+                        <li><i class="fas fa-check text-success"></i> Servicio Personalizado</li>
+                        <li><i class="fas fa-check text-success"></i> Precios Competitivos</li>
+                        <li><i class="fas fa-check text-success"></i> Red Profesional</li>
+                    </ul>
+                </div>
+                
+                <div class="col-md-6">
+                    {% if company.logo %}
+                    <img src="{{ company.logo.url }}" class="img-fluid mb-4" alt="Logo de la Empresa">
+                    {% endif %}
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Información de Contacto</h5>
+                            <p class="card-text">
+                                <strong>Dirección:</strong> {{ company.address }}<br>
+                                <strong>Teléfono:</strong> {{ company.phone }}<br>
+                                <strong>Email:</strong> {{ company.email }}<br>
+                                <strong>Sitio Web:</strong> <a href="{{ company.website }}">{{ company.website }}</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

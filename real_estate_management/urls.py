@@ -9,7 +9,8 @@ from django.views.generic import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('core.urls')),  # Dashboard como home
+    path('', include('public.urls')),
+    path('app/', include('core.urls')),  # Dashboard como home
     path('agents/', include('agents.urls')),
     path('properties/', include('properties.urls')),
     path('customers/', include('customers.urls')),

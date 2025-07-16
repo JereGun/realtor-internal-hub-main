@@ -13,6 +13,43 @@ from customers.models import Customer # Added for owner autocompletion
 from .forms import PropertyForm, PropertyImageForm, PropertySearchForm, PropertyImageFormSet
 import json
 
+# Vista pública para mostrar propiedades
+class PublicPropertyListView(ListView):
+    model = Property
+    template_name = 'public/properties.html'
+    context_object_name = 'properties'
+    paginate_by = 12
+    
+    def get_queryset(self):
+        queryset = Property.objects.filter(property_status__name='Disponible')
+        
+        # Obtener parámetros de búsqueda
+        property_type = self.request.GET.get('property_type')
+        min_price = self.request.GET.get('min_price')
+        max_price = self.request.GET.get('max_price')
+        location = self.request.GET.get('location')
+        
+        # Aplicar filtros
+        if property_type:
+            queryset = queryset.filter(property_type_id=property_type)
+        
+        if min_price:
+            queryset = queryset.filter(sale_price__gte=min_price)
+        
+        if max_price:
+            queryset = queryset.filter(sale_price__lte=max_price)
+        
+        if location:
+            queryset = queryset.filter(locality_id=location)
+        
+        return queryset.order_by('-created_at')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['property_types'] = PropertyType.objects.all()
+        context['locations'] = City.objects.all()
+        return context
+
 
 class PropertyListView(LoginRequiredMixin, ListView):
     model = Property

@@ -1,0 +1,42 @@
+{% extends "public_base.html" %}
+
+{% block title %}Nuestros Agentes{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1>Nuestros Agentes</h1>
+            <p class="lead">Conozca nuestro equipo de agentes inmobiliarios profesionales dedicados a ayudarle a encontrar su hogar perfecto.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for agent in agents %}
+        <div class="col-md-4 mb-4">
+            <div class="card text-center">
+                {% if agent.image_path %}
+                <img src="{{ agent.image_path.url }}" class="card-img-top rounded-circle mx-auto d-block" alt="{{ agent.full_name }}" style="width: 150px; height: 150px; object-fit: cover;">
+                {% else %}
+                <div class="card-img-top rounded-circle mx-auto d-block bg-light" style="width: 150px; height: 150px;"></div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ agent.full_name }}</h5>
+                    <p class="card-text">
+                        <strong>Matrícula:</strong> {{ agent.license_number }}<br>
+                        <strong>Tasa de Comisión:</strong> {{ agent.commission_rate }}%<br>
+                        <strong>Email:</strong> {{ agent.email }}<br>
+                        <strong>Teléfono:</strong> {{ agent.phone }}
+                    </p>
+                    <a href="{% url 'public:agent_detail' agent.id %}" class="btn btn-primary">Ver Perfil</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p class="text-center">No se encontraron agentes.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

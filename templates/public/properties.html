@@ -1,0 +1,198 @@
+{% extends "public_base.html" %}
+{% load humanize %}
+
+{% block title %}Propiedades{% endblock %}
+
+{% block content %}
+<!-- Sección Hero -->
+<div class="container-fluid bg-light py-5 mb-4">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-4 fw-bold mb-4">Encuentra tu hogar ideal</h1>
+                <p class="lead mb-4">Explora nuestra selección de propiedades premium en ubicaciones privilegiadas</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros de Búsqueda -->
+<div class="container mb-5">
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <h5 class="card-title mb-4"><i class="bi bi-funnel me-2"></i>Encuentra tu propiedad perfecta</h5>
+            <form method="get" class="row g-3 align-items-center">
+                <div class="col-md-3">
+                    <label for="property_type" class="form-label">Tipo de Propiedad</label>
+                    <select name="property_type" class="form-select" id="property_type">
+                        <option value="">Todos los tipos</option>
+                        {% for type in property_types %}
+                        <option value="{{ type.id }}">{{ type.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="min_price" class="form-label">Precio Mínimo</label>
+                    <input type="number" name="min_price" class="form-control" id="min_price" placeholder="Mínimo">
+                </div>
+                <div class="col-md-3">
+                    <label for="max_price" class="form-label">Precio Máximo</label>
+                    <input type="number" name="max_price" class="form-control" id="max_price" placeholder="Máximo">
+                </div>
+                <div class="col-md-3">
+                    <label for="location" class="form-label">Ubicación</label>
+                    <select name="location" class="form-select" id="location">
+                        <option value="">Todas las ubicaciones</option>
+                        {% for location in locations %}
+                        <option value="{{ location.id }}">{{ location.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-search me-2"></i>Buscar Propiedades
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Grid de Propiedades -->
+<div class="container">
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for property in properties %}
+        <div class="col">
+            <div class="card h-100 shadow-sm property-card">
+                {% if property.cover_image %}
+                <img src="{{ property.cover_image.image.url }}" class="card-img-top property-card-img" alt="{{ property.title }}">
+                {% endif %}
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h5 class="card-title mb-0">{{ property.title }}</h5>
+                        <div class="badge bg-primary text-white">{{ property.property_type.name }}</div>
+                    </div>
+                    <p class="card-text text-muted mb-3">{{ property.description|truncatewords:20 }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="h4 mb-0">${{ property.price|intcomma }}</span>
+                            <small class="text-muted d-block">{{ property.full_address }}</small>
+                        </div>
+                        <a href="{% url 'public:property_detail' property.id %}" class="btn btn-outline-primary">
+                            <i class="bi bi-arrow-right-circle me-1"></i>Ver Detalles
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5 my-5">
+                <i class="bi bi-building-slash display-1 text-muted"></i>
+                <h3 class="text-muted mt-3">No se encontraron propiedades</h3>
+                <p class="text-muted">Ajusta los filtros de búsqueda para encontrar más propiedades</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+<nav aria-label="Paginación de propiedades" class="mt-5">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?{{ request.GET.urlencode }}&page=1" aria-label="Primera">
+                    <i class="bi bi-chevron-double-left"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?{{ request.GET.urlencode }}&page={{ page_obj.previous_page_number }}" aria-label="Anterior">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+        {% endif %}
+        
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?{{ request.GET.urlencode }}&page={{ num }}">{{ num }}</a>
+                </li>
+            {% elif num == page_obj.number|add:'-3' or num == page_obj.number|add:'3' %}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?{{ request.GET.urlencode }}&page={{ page_obj.next_page_number }}" aria-label="Siguiente">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?{{ request.GET.urlencode }}&page={{ page_obj.paginator.num_pages }}" aria-label="Última">
+                    <i class="bi bi-chevron-double-right"></i>
+                </a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+<style>
+.property-card {
+    transition: transform .2s ease-out, box-shadow .2s ease-out;
+}
+.property-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+}
+.property-card-img {
+    height: 250px;
+    object-fit: cover;
+}
+
+/* Estilos del formulario de búsqueda */
+.form-select,
+.form-control {
+    border-radius: 8px;
+    padding: .75rem 1rem;
+}
+
+/* Estilos de la sección hero */
+.bg-light {
+    background-color: #f8f9fa !important;
+}
+
+/* Estilos de la paginación */
+.page-link {
+    border-radius: 8px;
+    padding: .5rem 1rem;
+}
+.page-item.active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+/* Estilos generales */
+.card {
+    border-radius: 12px;
+    border: none;
+    overflow: hidden;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .property-card-img {
+        height: 200px;
+    }
+}
+</style>
+{% endblock %}

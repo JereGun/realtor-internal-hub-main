@@ -5,6 +5,10 @@ from . import views
 app_name = 'properties'
 
 urlpatterns = [
+    # URL pública para propiedades
+    path('public/propiedades/', views.PublicPropertyListView.as_view(), name='public_property_list'),
+    
+    # URLs internas
     path('', views.PropertyListView.as_view(), name='property_list'),
     path('<int:pk>/', views.PropertyDetailView.as_view(), name='property_detail'),
     path('create/', views.PropertyCreateView.as_view(), name='property_create'),

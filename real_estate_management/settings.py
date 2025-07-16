@@ -42,6 +42,7 @@ DJANGO_APPS = [
 ]
 
 LOCAL_APPS = [
+    'public',
     'agents',
     'properties',
     'customers',

@@ -1,22 +1,121 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
+{% load accounting_filters %}
 
 {% block content %}
 <div class="container-fluid mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Notificaciones de Facturas</h2>
         <div class="btn-group">
-            <button type="button" class="btn btn-outline-primary" onclick="markAllAsRead()">Marcar todas como leídas</button>
+            <a href="{% url 'user_notifications:notification_preferences' %}" class="btn btn-outline-secondary me-2">
+                <i class="bi bi-gear"></i> Configurar preferencias
+            </a>
+            <button type="button" class="btn btn-outline-primary" onclick="markAllAsRead()">
+                <i class="bi bi-check-all"></i> Marcar todas como leídas
+            </button>
         </div>
     </div>
 
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Filtros</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" id="filter-form" class="row g-3">
+                <!-- Filtro por tipo de notificación -->
+                <div class="col-md-3">
+                    <label for="type" class="form-label">Tipo de notificación</label>
+                    <select name="type" id="type" class="form-select" onchange="this.form.submit()">
+                        {% for value, text in notification_type_choices %}
+                            <option value="{{ value }}" {% if selected_type == value %}selected{% endif %}>
+                                {{ text }} ({{ notification_counts|get_item:value }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Filtro por estado de lectura -->
+                <div class="col-md-3">
+                    <label for="read_status" class="form-label">Estado</label>
+                    <select name="read_status" id="read_status" class="form-select" onchange="this.form.submit()">
+                        {% for value, text in read_status_choices %}
+                            <option value="{{ value }}" {% if selected_read_status == value %}selected{% endif %}>
+                                {{ text }} {% if value != 'all' %}({{ notification_counts|get_item:value }}){% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Filtro por fecha desde -->
+                <div class="col-md-3">
+                    <label for="date_from" class="form-label">Fecha desde</label>
+                    <input type="date" class="form-control" id="date_from" name="date_from" value="{{ date_from }}">
+                </div>
+                
+                <!-- Filtro por fecha hasta -->
+                <div class="col-md-3">
+                    <label for="date_to" class="form-label">Fecha hasta</label>
+                    <input type="date" class="form-control" id="date_to" name="date_to" value="{{ date_to }}">
+                </div>
+                
+                <!-- Botones de acción -->
+                <div class="col-12 d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary me-2">Aplicar filtros</button>
+                    <a href="{% url 'accounting:invoice_notifications' %}" class="btn btn-outline-secondary">Limpiar filtros</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Resumen de notificaciones -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Total</h5>
+                    <p class="card-text display-6">{{ notification_counts.all }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-dark bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Por vencer</h5>
+                    <p class="card-text display-6">{{ notification_counts.invoice_due_soon }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-danger">
+                <div class="card-body">
+                    <h5 class="card-title">Vencidas</h5>
+                    <p class="card-text display-6">{{ notification_counts.invoice_overdue }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Pagos recibidos</h5>
+                    <p class="card-text display-6">{{ notification_counts.invoice_payment_received }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de notificaciones -->
     <div class="card">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Notificaciones</h5>
+            <span class="badge bg-primary">{{ notifications.paginator.count }} resultados</span>
+        </div>
         <div class="card-body">
             {% if not notifications %}
                 <div class="text-center py-4">
                     <i class="bi bi-bell-slash fs-1 text-secondary mb-3"></i>
                     <h5 class="text-muted">No hay notificaciones</h5>
-                    <p class="text-muted">No tienes notificaciones de facturas pendientes.</p>
+                    <p class="text-muted">No se encontraron notificaciones con los filtros seleccionados.</p>
                 </div>
             {% else %}
                 <div class="table-responsive">
@@ -30,6 +129,7 @@
                                 <th>Mensaje</th>
                                 <th>Vencimiento</th>
                                 <th>Fecha</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -44,30 +144,92 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="badge bg-{{ notification.get_type_badge_class }}">
-                                        {{ notification.get_type_display }}
+                                    <span class="badge {% if notification.notification_type == 'invoice_due_soon' %}bg-warning text-dark{% elif notification.notification_type == 'invoice_overdue' %}bg-danger{% elif notification.notification_type == 'invoice_payment_received' %}bg-success{% else %}bg-info{% endif %}">
+                                        {{ notification.get_notification_type_display }}
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="{% url 'accounting:invoice_detail' notification.invoice.id %}" class="text-decoration-none">
-                                        <strong>{{ notification.invoice.number }}</strong>
-                                    </a>
+                                    {% if notification.related_object %}
+                                        <a href="{% url 'accounting:invoice_detail' notification.related_object.id %}" class="text-decoration-none">
+                                            <strong>{{ notification.related_object.number }}</strong>
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
                                 </td>
-                                <td>{{ notification.customer.name }}</td>
+                                <td>
+                                    {% if notification.related_object %}
+                                        {{ notification.related_object.customer.first_name }} {{ notification.related_object.customer.last_name }}
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </td>
                                 <td>{{ notification.message }}</td>
                                 <td>
-                                    {% if notification.due_date %}
-                                        <span class="text-muted">{{ notification.due_date|date:"d/m/Y" }}</span>
+                                    {% if notification.related_object and notification.related_object.due_date %}
+                                        <span class="text-muted">{{ notification.related_object.due_date|date:"d/m/Y" }}</span>
                                     {% endif %}
                                 </td>
                                 <td>
                                     <small class="text-muted">{{ notification.created_at|date:"d/m/Y H:i" }}</small>
+                                </td>
+                                <td>
+                                    {% if notification.related_object %}
+                                        <a href="{% url 'accounting:invoice_detail' notification.related_object.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i> Ver factura
+                                        </a>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
+                
+                <!-- Paginación -->
+                {% if notifications.paginator.num_pages > 1 %}
+                <div class="d-flex justify-content-center mt-4">
+                    <nav aria-label="Navegación de páginas">
+                        <ul class="pagination">
+                            {% if notifications.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if selected_type != 'all' %}&type={{ selected_type }}{% endif %}{% if selected_read_status != 'all' %}&read_status={{ selected_read_status }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" aria-label="Primera">
+                                        <span aria-hidden="true">&laquo;&laquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ notifications.previous_page_number }}{% if selected_type != 'all' %}&type={{ selected_type }}{% endif %}{% if selected_read_status != 'all' %}&read_status={{ selected_read_status }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" aria-label="Anterior">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for i in notifications.paginator.page_range %}
+                                {% if notifications.number == i %}
+                                    <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                                {% elif i > notifications.number|add:'-3' and i < notifications.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ i }}{% if selected_type != 'all' %}&type={{ selected_type }}{% endif %}{% if selected_read_status != 'all' %}&read_status={{ selected_read_status }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}">{{ i }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if notifications.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ notifications.next_page_number }}{% if selected_type != 'all' %}&type={{ selected_type }}{% endif %}{% if selected_read_status != 'all' %}&read_status={{ selected_read_status }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" aria-label="Siguiente">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ notifications.paginator.num_pages }}{% if selected_type != 'all' %}&type={{ selected_type }}{% endif %}{% if selected_read_status != 'all' %}&read_status={{ selected_read_status }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" aria-label="Última">
+                                        <span aria-hidden="true">&raquo;&raquo;</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
             {% endif %}
         </div>
     </div>
@@ -76,20 +238,19 @@
 <script>
 function markAsRead(notificationId) {
     const checkbox = document.getElementById(`notification_${notificationId}`);
-    const url = `/api/accounting/invoice-notifications/${notificationId}/mark-as-read/`;
+    const url = `{% url 'accounting:mark_notification_as_read' 0 %}`.replace('0', notificationId);
     
     fetch(url, {
         method: 'POST',
         headers: {
             'X-CSRFToken': '{{ csrf_token }}',
             'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ is_read: checkbox.checked })
+        }
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            console.log(`Notificación ${notificationId} marcada como ${checkbox.checked ? 'leída' : 'no leída'}`);
+            console.log(`Notificación ${notificationId} marcada como leída`);
             updateUnreadCount();
         }
     })
@@ -97,36 +258,42 @@ function markAsRead(notificationId) {
 }
 
 function markAllAsRead() {
-    const checkboxes = document.querySelectorAll('.form-check-input');
-    const promises = [];
-    
-    checkboxes.forEach(checkbox => {
-        if (!checkbox.checked) {
-            const notificationId = checkbox.id.replace('notification_', '');
-            promises.push(markAsRead(notificationId));
-            checkbox.checked = true;
+    fetch(`{% url 'accounting:mark_all_notifications_as_read' %}`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
         }
-    });
-    
-    Promise.all(promises)
-        .then(() => {
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
             console.log('Todas las notificaciones marcadas como leídas');
+            // Marcar todas las casillas como leídas
+            document.querySelectorAll('.form-check-input').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+            // Actualizar el contador
             updateUnreadCount();
-        })
-        .catch(error => console.error('Error:', error));
+            // Quitar el resaltado de las filas
+            document.querySelectorAll('tr.table-warning').forEach(row => {
+                row.classList.remove('table-warning');
+            });
+        }
+    })
+    .catch(error => console.error('Error:', error));
 }
 
 // Función para actualizar el contador de notificaciones no leídas en el navbar
 function updateUnreadCount() {
-    // Esto se implementará cuando tengamos el endpoint para obtener el nuevo conteo
-    // Por ahora, solo actualizamos visualmente
+    // Actualizar visualmente el contador
     const badge = document.querySelector('.navbar .nav-link .badge');
     if (badge) {
         const unreadCount = parseInt(badge.textContent) - 1;
         if (unreadCount > 0) {
             badge.textContent = unreadCount;
         } else {
-            badge.remove();
+            badge.style.display = 'none';
         }
     }
 }

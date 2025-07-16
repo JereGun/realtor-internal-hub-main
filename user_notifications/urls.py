@@ -1,10 +1,11 @@
 from django.urls import path
+from django.views.generic import RedirectView
 from . import views
 
 app_name = 'user_notifications'
 
 urlpatterns = [
-    path('', views.NotificationListView.as_view(), name='notification_list'),
-    path('<int:pk>/mark-as-read/', views.MarkAsReadView.as_view(), name='mark_as_read'),
-    path('mark-all-as-read/', views.MarkAllAsReadView.as_view(), name='mark_all_as_read'),
+    # Redirigir la URL principal a la vista de notificaciones de facturas
+    path('', RedirectView.as_view(pattern_name='accounting:invoice_notifications'), name='notification_list'),
+    path('preferences/', views.notification_preferences, name='notification_preferences'),
 ]

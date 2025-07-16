@@ -1,6 +1,7 @@
 from datetime import timedelta
 from django.utils import timezone
 from user_notifications.services import create_notification
+from user_notifications.models_preferences import NotificationPreference
 from ..models_invoice import Invoice
 
 class InvoiceNotificationService:
@@ -26,6 +27,42 @@ class InvoiceNotificationService:
         invoice_content_type = ContentType.objects.get_for_model(Invoice)
         
         for invoice in invoices:
+            agent = invoice.customer.agent
+            
+            # Verificar las preferencias del usuario
+            try:
+                preferences = NotificationPreference.objects.get(agent=agent)
+                
+                # Si el usuario no quiere recibir notificaciones de facturas por vencer, continuar con la siguiente factura
+                if not preferences.receive_invoice_due_soon:
+                    continue
+                
+                # Verificar si la factura vence dentro del número de días configurado por el usuario
+                days_until_due = (invoice.due_date - today).days
+                if days_until_due > preferences.days_before_due_date:
+                    continue
+                
+                # Verificar la frecuencia de notificaciones
+                if preferences.notification_frequency != 'immediately':
+                    # Para notificaciones diarias o semanales, verificar si ya se envió una notificación reciente
+                    time_window = 1  # días (para frecuencia diaria)
+                    if preferences.notification_frequency == 'weekly':
+                        time_window = 7  # días (para frecuencia semanal)
+                    
+                    recent_notification = Notification.objects.filter(
+                        agent=agent,
+                        notification_type='invoice_due_soon',
+                        content_type=invoice_content_type,
+                        object_id=invoice.id,
+                        created_at__gte=timezone.now() - timedelta(days=time_window)
+                    ).exists()
+                    
+                    if recent_notification:
+                        continue
+            except NotificationPreference.DoesNotExist:
+                # Si no hay preferencias configuradas, usar valores predeterminados
+                pass
+            
             # Verificar si ya existe una notificación similar en las últimas 24 horas
             existing_notification = Notification.objects.filter(
                 notification_type='invoice_due_soon',
@@ -37,7 +74,7 @@ class InvoiceNotificationService:
             if not existing_notification:
                 days_until_due = (invoice.due_date - today).days
                 create_notification(
-                    agent=invoice.customer.agent,
+                    agent=agent,
                     title=f"Factura por vencer: {invoice.number}",
                     message=f"La factura {invoice.number} vence en {days_until_due} días.",
                     notification_type='invoice_due_soon',
@@ -67,6 +104,37 @@ class InvoiceNotificationService:
         invoice_content_type = ContentType.objects.get_for_model(Invoice)
         
         for invoice in invoices:
+            agent = invoice.customer.agent
+            
+            # Verificar las preferencias del usuario
+            try:
+                preferences = NotificationPreference.objects.get(agent=agent)
+                
+                # Si el usuario no quiere recibir notificaciones de facturas vencidas, continuar con la siguiente factura
+                if not preferences.receive_invoice_overdue:
+                    continue
+                
+                # Verificar la frecuencia de notificaciones
+                if preferences.notification_frequency != 'immediately':
+                    # Para notificaciones diarias o semanales, verificar si ya se envió una notificación reciente
+                    time_window = 1  # días (para frecuencia diaria)
+                    if preferences.notification_frequency == 'weekly':
+                        time_window = 7  # días (para frecuencia semanal)
+                    
+                    recent_notification = Notification.objects.filter(
+                        agent=agent,
+                        notification_type='invoice_overdue',
+                        content_type=invoice_content_type,
+                        object_id=invoice.id,
+                        created_at__gte=timezone.now() - timedelta(days=time_window)
+                    ).exists()
+                    
+                    if recent_notification:
+                        continue
+            except NotificationPreference.DoesNotExist:
+                # Si no hay preferencias configuradas, usar valores predeterminados
+                pass
+            
             # Verificar si ya existe una notificación similar en las últimas 24 horas
             existing_notification = Notification.objects.filter(
                 notification_type='invoice_overdue',
@@ -78,7 +146,7 @@ class InvoiceNotificationService:
             if not existing_notification:
                 days_overdue = (today - invoice.due_date).days
                 create_notification(
-                    agent=invoice.customer.agent,
+                    agent=agent,
                     title=f"Factura vencida: {invoice.number}",
                     message=f"La factura {invoice.number} está vencida desde hace {days_overdue} días.",
                     notification_type='invoice_overdue',

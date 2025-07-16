@@ -71,7 +71,7 @@
             </a>
         </li>
         <li class="nav-item">
-            <a href="{% url 'user_notifications:notification_list' %}" class="nav-link {% if request.resolver_match.url_name == 'notification_list' and request.resolver_match.app_name == 'user_notifications' %}active{% endif %}">
+            <a href="{% url 'accounting:invoice_notifications' %}" class="nav-link {% if request.resolver_match.url_name == 'invoice_notifications' and request.resolver_match.app_name == 'accounting' %}active{% endif %}">
                 <i class="bi bi-bell me-2"></i> Notificaciones
                 {% if unread_notifications_count > 0 %}
                     <span class="badge bg-danger rounded-pill">{{ unread_notifications_count }}</span>

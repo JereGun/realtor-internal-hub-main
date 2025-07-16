@@ -8,12 +8,13 @@ from django.http import HttpResponse, JsonResponse
 from django.template.loader import render_to_string
 from django.db.models import Q, Sum
 from django.forms import modelform_factory
+from django.contrib.contenttypes.models import ContentType
 from weasyprint import HTML
 from .models_invoice import Invoice, InvoiceLine, Payment
-from .models_notification import InvoiceNotification
 from .forms_invoice import InvoiceForm, InvoiceLineFormSet, InvoiceLineForm
 from .services import send_invoice_email
 from core.models import Company
+from user_notifications.models import Notification
 
 
 @login_required
@@ -426,16 +427,106 @@ def quick_payment_create(request, invoice_pk):
 
 @login_required
 def invoice_notifications(request):
-    notifications = InvoiceNotification.objects.filter(
-        customer__agent=request.user
-    ).order_by("-created_at")
+    # Tipos de notificaciones relacionadas con facturas
+    notification_types = [
+        "invoice_due_soon",
+        "invoice_overdue",
+        "invoice_payment_received",
+        "invoice_status_change",
+    ]
 
-    # Obtener el número de notificaciones no leídas
-    unread_notifications_count = notifications.filter(is_read=False).count()
+    # Filtros
+    notification_type = request.GET.get("type")
+    read_status = request.GET.get("read_status")
+    date_from = request.GET.get("date_from")
+    date_to = request.GET.get("date_to")
 
+    # Filtrar notificaciones relacionadas con facturas
+    notifications = Notification.objects.filter(
+        agent=request.user, notification_type__in=notification_types
+    )
+
+    # Aplicar filtros adicionales si se proporcionan
+    if notification_type and notification_type != "all":
+        notifications = notifications.filter(notification_type=notification_type)
+
+    if read_status:
+        if read_status == "read":
+            notifications = notifications.filter(is_read=True)
+        elif read_status == "unread":
+            notifications = notifications.filter(is_read=False)
+
+    if date_from:
+        try:
+            date_from = timezone.datetime.strptime(date_from, "%Y-%m-%d").date()
+            notifications = notifications.filter(created_at__date__gte=date_from)
+        except ValueError:
+            messages.warning(
+                request, "Formato de fecha 'desde' incorrecto. Use YYYY-MM-DD."
+            )
+
+    if date_to:
+        try:
+            date_to = timezone.datetime.strptime(date_to, "%Y-%m-%d").date()
+            notifications = notifications.filter(created_at__date__lte=date_to)
+        except ValueError:
+            messages.warning(
+                request, "Formato de fecha 'hasta' incorrecto. Use YYYY-MM-DD."
+            )
+
+    # Ordenar por fecha de creación (más recientes primero)
+    notifications = notifications.order_by("-created_at")
+
+    # Obtener el número de notificaciones no leídas (total, no solo las filtradas)
+    unread_notifications_count = Notification.objects.filter(
+        agent=request.user, notification_type__in=notification_types, is_read=False
+    ).count()
+
+    # Obtener conteos por tipo para mostrar en los filtros
+    notification_counts = {
+        "all": Notification.objects.filter(
+            agent=request.user, notification_type__in=notification_types
+        ).count(),
+        "invoice_due_soon": Notification.objects.filter(
+            agent=request.user, notification_type="invoice_due_soon"
+        ).count(),
+        "invoice_overdue": Notification.objects.filter(
+            agent=request.user, notification_type="invoice_overdue"
+        ).count(),
+        "invoice_payment_received": Notification.objects.filter(
+            agent=request.user, notification_type="invoice_payment_received"
+        ).count(),
+        "invoice_status_change": Notification.objects.filter(
+            agent=request.user, notification_type="invoice_status_change"
+        ).count(),
+        "read": Notification.objects.filter(
+            agent=request.user, notification_type__in=notification_types, is_read=True
+        ).count(),
+        "unread": Notification.objects.filter(
+            agent=request.user, notification_type__in=notification_types, is_read=False
+        ).count(),
+    }
+
+    # Paginación
     paginator = Paginator(notifications, 25)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
+
+    # Preparar opciones para el filtro de tipo de notificación
+    notification_type_choices = [
+        ("all", "Todas"),
+        ("invoice_due_soon", "Vencimiento Próximo"),
+        ("invoice_overdue", "Factura Vencida"),
+        ("invoice_payment_received", "Pago Recibido"),
+        ("invoice_status_change", "Cambio de Estado"),
+    ]
+
+    # Preparar opciones para el filtro de estado de lectura
+    read_status_choices = [
+        ("all", "Todos"),
+        ("read", "Leídas"),
+        ("unread", "No leídas"),
+    ]
 
     return render(
         request,
@@ -443,13 +534,28 @@ def invoice_notifications(request):
         {
             "notifications": page_obj,
             "unread_notifications_count": unread_notifications_count,
+            "notification_counts": notification_counts,
+            "notification_type_choices": notification_type_choices,
+            "read_status_choices": read_status_choices,
+            "selected_type": notification_type or "all",
+            "selected_read_status": read_status or "all",
+            "date_from": (
+                date_from.strftime("%Y-%m-%d")
+                if hasattr(date_from, "strftime")
+                else date_from
+            ),
+            "date_to": (
+                date_to.strftime("%Y-%m-%d")
+                if hasattr(date_to, "strftime")
+                else date_to
+            ),
         },
     )
 
 
 @login_required
 def mark_notification_as_read(request, pk):
-    notification = get_object_or_404(InvoiceNotification, pk=pk)
+    notification = get_object_or_404(Notification, pk=pk, agent=request.user)
 
     if request.method == "POST":
         notification.is_read = True
@@ -462,10 +568,17 @@ def mark_notification_as_read(request, pk):
 @login_required
 def mark_all_notifications_as_read(request):
     if request.method == "POST":
-        notifications = InvoiceNotification.objects.filter(
-            customer__agent=request.user, is_read=False
-        )
-        notifications.update(is_read=True)
+        # Actualizar todas las notificaciones de facturas no leídas del usuario
+        Notification.objects.filter(
+            agent=request.user,
+            is_read=False,
+            notification_type__in=[
+                "invoice_due_soon",
+                "invoice_overdue",
+                "invoice_payment_received",
+                "invoice_status_change",
+            ],
+        ).update(is_read=True)
         return JsonResponse({"success": True})
 
     return JsonResponse({"success": False}, status=400)

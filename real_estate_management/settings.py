@@ -39,7 +39,11 @@ DJANGO_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'django.contrib.sites',  # Agregado para el modelo Site
 ]
+
+# Configuración del modelo Site
+SITE_ID = 1
 
 LOCAL_APPS = [
     'public',

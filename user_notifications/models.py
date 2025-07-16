@@ -3,6 +3,9 @@ from core.models import BaseModel
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
+# Importar el modelo de preferencias de notificaciones
+from .models_preferences import NotificationPreference
+
 
 class Notification(BaseModel):
     """Notification model"""

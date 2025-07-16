@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Preferencias de Notificaciones</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <h5 class="mb-3">Tipos de notificaciones</h5>
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                {{ form.receive_invoice_due_soon|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.receive_invoice_overdue|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.receive_invoice_payment|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.receive_invoice_status_change|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <h5 class="mb-3">Configuración de frecuencia</h5>
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                {{ form.notification_frequency|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.days_before_due_date|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <h5 class="mb-3">Notificaciones por correo electrónico</h5>
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                {{ form.email_notifications|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end">
+                            <a href="{% url 'accounting:invoice_notifications' %}" class="btn btn-outline-secondary me-2">Cancelar</a>
+                            <button type="submit" class="btn btn-primary">Guardar preferencias</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

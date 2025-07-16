@@ -1,26 +1,37 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView, View
-from django.urls import reverse_lazy
-from .models import Notification
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models_preferences import NotificationPreference
+from .forms import NotificationPreferenceForm
 
-class NotificationListView(LoginRequiredMixin, ListView):
-    model = Notification
-    template_name = 'user_notifications/notification_list.html'
-    context_object_name = 'notifications'
-    paginate_by = 20
-
-    def get_queryset(self):
-        return Notification.objects.filter(agent=self.request.user).order_by('-created_at')
-
-class MarkAsReadView(LoginRequiredMixin, View):
-    def post(self, request, pk):
-        notification = Notification.objects.get(pk=pk)
-        notification.is_read = True
-        notification.save()
-        return redirect('user_notifications:notification_list')
-
-class MarkAllAsReadView(LoginRequiredMixin, View):
-    def post(self, request):
-        Notification.objects.filter(agent=request.user, is_read=False).update(is_read=True)
-        return redirect('user_notifications:notification_list')
+@login_required
+def notification_preferences(request):
+    """Vista para configurar las preferencias de notificaciones"""
+    
+    # Obtener o crear las preferencias del usuario
+    preferences, created = NotificationPreference.objects.get_or_create(
+        agent=request.user,
+        defaults={
+            'receive_invoice_due_soon': True,
+            'receive_invoice_overdue': True,
+            'receive_invoice_payment': True,
+            'receive_invoice_status_change': True,
+            'notification_frequency': 'immediately',
+            'days_before_due_date': 7,
+            'email_notifications': False,
+        }
+    )
+    
+    if request.method == 'POST':
+        form = NotificationPreferenceForm(request.POST, instance=preferences)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Preferencias de notificaciones actualizadas correctamente")
+            return redirect('user_notifications:notification_preferences')
+    else:
+        form = NotificationPreferenceForm(instance=preferences)
+    
+    return render(request, 'user_notifications/notification_preferences.html', {
+        'form': form,
+        'preferences': preferences,
+    })

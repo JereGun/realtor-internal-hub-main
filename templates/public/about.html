@@ -1,48 +1,635 @@
 {% extends "public_base.html" %}
 
-{% block title %}Sobre Nosotros{% endblock %}
+{% block title %}Sobre Nosotros - 15 Años de Experiencia Inmobiliaria | Inmobiliaria Premium{% endblock %}
+
+{% block meta_description %}Conoce la historia de Inmobiliaria Premium. Más de 15 años de experiencia, 500+ familias felices, 1000+ propiedades vendidas. Valores, misión y equipo profesional comprometido con tu hogar ideal.{% endblock %}
+
+{% block meta_keywords %}sobre nosotros, historia inmobiliaria, experiencia inmobiliaria, valores empresariales, equipo profesional, 15 años experiencia, inmobiliaria confiable, misión empresarial{% endblock %}
+
+{% block og_title %}Sobre Inmobiliaria Premium - 15 Años Construyendo Sueños{% endblock %}
+{% block og_description %}Descubre nuestra historia: 15+ años de experiencia, 500+ familias felices, 1000+ propiedades vendidas. Conoce nuestros valores, misión y el equipo que hará realidad tu sueño inmobiliario.{% endblock %}
+
+{% block structured_data %}
+{
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "mainEntity": {
+        "@type": "RealEstateAgent",
+        "name": "Inmobiliaria Premium",
+        "foundingDate": "2008",
+        "description": "Inmobiliaria especializada en venta y alquiler de propiedades con más de 15 años de experiencia en el mercado",
+        "url": "{{ request.scheme }}://{{ request.get_host }}",
+        "telephone": "+54-11-1234-5678",
+        "email": "info@inmobiliaria.com",
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Av. Principal 123",
+            "addressLocality": "Ciudad",
+            "addressRegion": "Provincia",
+            "addressCountry": "AR"
+        },
+        "openingHours": [
+            "Mo-Fr 09:00-18:00",
+            "Sa 09:00-14:00"
+        ],
+        "sameAs": [
+            "https://www.facebook.com/inmobiliariapremium",
+            "https://www.instagram.com/inmobiliariapremium",
+            "https://www.linkedin.com/company/inmobiliariapremium"
+        ],
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "reviewCount": "500",
+            "bestRating": "5"
+        },
+        "hasOfferCatalog": {
+            "@type": "OfferCatalog",
+            "name": "Servicios Inmobiliarios",
+            "itemListElement": [
+                {
+                    "@type": "Offer",
+                    "itemOffered": {
+                        "@type": "Service",
+                        "name": "Venta de Propiedades",
+                        "description": "Servicio profesional de venta de propiedades residenciales y comerciales"
+                    }
+                },
+                {
+                    "@type": "Offer",
+                    "itemOffered": {
+                        "@type": "Service",
+                        "name": "Alquiler de Propiedades",
+                        "description": "Gestión integral de alquileres de propiedades"
+                    }
+                },
+                {
+                    "@type": "Offer",
+                    "itemOffered": {
+                        "@type": "Service",
+                        "name": "Tasaciones",
+                        "description": "Tasaciones profesionales de propiedades"
+                    }
+                },
+                {
+                    "@type": "Offer",
+                    "itemOffered": {
+                        "@type": "Service",
+                        "name": "Asesoramiento Inmobiliario",
+                        "description": "Consultoría y asesoramiento personalizado en bienes raíces"
+                    }
+                }
+            ]
+        },
+        "knowsAbout": [
+            "Venta de propiedades",
+            "Alquiler de propiedades",
+            "Tasaciones inmobiliarias",
+            "Asesoramiento inmobiliario",
+            "Mercado inmobiliario local",
+            "Inversiones inmobiliarias"
+        ],
+        "areaServed": {
+            "@type": "Place",
+            "name": "Argentina"
+        }
+    }
+}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-about {
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.9), rgba(59, 130, 246, 0.8)), 
+                    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>');
+        color: white;
+        padding: 6rem 0;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero-about::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+        animation: float 20s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+    
+    .stats-section {
+        background: var(--light-color);
+        padding: 5rem 0;
+    }
+    
+    .stat-card {
+        text-align: center;
+        padding: 2rem;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: none;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    }
+    
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .stat-label {
+        font-size: 1.1rem;
+        color: var(--secondary-color);
+        font-weight: 500;
+    }
+    
+    .value-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: none;
+        height: 100%;
+    }
+    
+    .value-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+    
+    .value-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 2rem;
+        color: white;
+    }
+    
+    .team-member {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: none;
+    }
+    
+    .team-member:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+    }
+    
+    .team-photo {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+    }
+    
+    .team-photo-placeholder {
+        width: 100%;
+        height: 300px;
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 4rem;
+    }
+    
+    .contact-section {
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        color: white;
+        padding: 5rem 0;
+    }
+    
+    .contact-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+    }
+    
+    .contact-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.5rem;
+    }
+    
+    .timeline {
+        position: relative;
+        padding: 2rem 0;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--primary-color);
+        transform: translateX(-50%);
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 3rem;
+    }
+    
+    .timeline-content {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        width: 45%;
+    }
+    
+    .timeline-item:nth-child(odd) .timeline-content {
+        margin-left: auto;
+    }
+    
+    .timeline-item:nth-child(even) .timeline-content {
+        margin-right: auto;
+    }
+    
+    .timeline-dot {
+        position: absolute;
+        left: 50%;
+        top: 2rem;
+        width: 20px;
+        height: 20px;
+        background: var(--primary-color);
+        border-radius: 50%;
+        transform: translateX(-50%);
+        border: 4px solid white;
+        box-shadow: 0 0 0 4px var(--primary-color);
+    }
+    
+    @media (max-width: 768px) {
+        .timeline::before {
+            left: 2rem;
+        }
+        
+        .timeline-content {
+            width: calc(100% - 4rem);
+            margin-left: 4rem !important;
+        }
+        
+        .timeline-dot {
+            left: 2rem;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-12">
-            <h1>Sobre Nuestra Agencia Inmobiliaria</h1>
-            <div class="row">
-                <div class="col-md-6">
-                    <p class="lead">Bienvenido a nuestra agencia inmobiliaria, donde hacemos realidad sus sueños de propiedad. Con años de experiencia en el mercado, nuestro equipo de agentes profesionales está dedicado a brindar un servicio excepcional y ayudarle a encontrar su hogar perfecto.</p>
-                    
-                    <h3>Nuestra Misión</h3>
-                    <p>Proporcionar a nuestros clientes la mejor experiencia inmobiliaria combinando experiencia profesional, conocimiento del mercado y servicio personalizado. Nos esforzamos por superar las expectativas en cada paso del proceso de compra o venta.</p>
-
-                    <h3>¿Por qué Elegirnos?</h3>
-                    <ul class="list-unstyled">
-                        <li><i class="fas fa-check text-success"></i> Agentes Experimentados</li>
-                        <li><i class="fas fa-check text-success"></i> Conocimiento Extensivo del Mercado</li>
-                        <li><i class="fas fa-check text-success"></i> Servicio Personalizado</li>
-                        <li><i class="fas fa-check text-success"></i> Precios Competitivos</li>
-                        <li><i class="fas fa-check text-success"></i> Red Profesional</li>
-                    </ul>
+<!-- Hero Section -->
+<section class="hero-about">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <h1 class="display-3 fw-bold mb-4 fade-in-up">Sobre Nosotros</h1>
+                <p class="lead mb-4 fade-in-up">Más de 15 años construyendo sueños y conectando familias con sus hogares ideales</p>
+                <div class="d-flex justify-content-center gap-3 fade-in-up">
+                    <a href="{% url 'public:properties' %}" class="btn btn-light btn-lg">
+                        <i class="bi bi-buildings me-2"></i>Ver Propiedades
+                    </a>
+                    <a href="{% url 'public:agents' %}" class="btn btn-outline-light btn-lg">
+                        <i class="bi bi-people me-2"></i>Conocer Equipo
+                    </a>
                 </div>
-                
-                <div class="col-md-6">
-                    {% if company.logo %}
-                    <img src="{{ company.logo.url }}" class="img-fluid mb-4" alt="Logo de la Empresa">
-                    {% endif %}
-                    
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Información de Contacto</h5>
-                            <p class="card-text">
-                                <strong>Dirección:</strong> {{ company.address }}<br>
-                                <strong>Teléfono:</strong> {{ company.phone }}<br>
-                                <strong>Email:</strong> {{ company.email }}<br>
-                                <strong>Sitio Web:</strong> <a href="{{ company.website }}">{{ company.website }}</a>
-                            </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="stat-card">
+                    <span class="stat-number">500+</span>
+                    <span class="stat-label">Familias Felices</span>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="stat-card">
+                    <span class="stat-number">15+</span>
+                    <span class="stat-label">Años de Experiencia</span>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="stat-card">
+                    <span class="stat-number">1000+</span>
+                    <span class="stat-label">Propiedades Vendidas</span>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="stat-card">
+                    <span class="stat-number">98%</span>
+                    <span class="stat-label">Satisfacción Cliente</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Mission & Vision -->
+<section class="section-padding">
+    <div class="container">
+        <div class="row align-items-center mb-5">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h2 class="display-5 fw-bold mb-4">Nuestra Historia</h2>
+                <p class="lead mb-4">Fundada en 2008, Inmobiliaria Premium nació con la visión de revolucionar el mercado inmobiliario local, ofreciendo un servicio personalizado y de excelencia.</p>
+                <p class="mb-4">Comenzamos como una pequeña oficina con grandes sueños y la determinación de hacer la diferencia en la vida de nuestros clientes. Hoy, somos líderes en el mercado, pero mantenemos los mismos valores que nos definieron desde el primer día.</p>
+                <p class="mb-0">Cada propiedad que vendemos, cada familia que ayudamos a encontrar su hogar, es parte de nuestra historia y la razón por la que seguimos creciendo.</p>
+            </div>
+            <div class="col-lg-6">
+                <div class="position-relative">
+                    <div class="bg-primary rounded-4 p-4" style="transform: rotate(-3deg);">
+                        <div class="bg-white rounded-3 p-4" style="transform: rotate(3deg);">
+                            <div class="text-center">
+                                <i class="bi bi-building display-1 text-primary mb-3"></i>
+                                <h4 class="fw-bold text-primary">15 Años de Confianza</h4>
+                                <p class="text-muted mb-0">Construyendo relaciones duraderas</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
+
+<!-- Values Section -->
+<section class="section-padding bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">Nuestros Valores</h2>
+            <p class="lead text-muted">Los principios que guían cada una de nuestras acciones</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="value-card text-center">
+                    <div class="value-icon">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Confianza</h4>
+                    <p class="text-muted">Construimos relaciones basadas en la transparencia, honestidad y compromiso con nuestros clientes.</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="value-card text-center">
+                    <div class="value-icon">
+                        <i class="bi bi-star"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Excelencia</h4>
+                    <p class="text-muted">Nos esforzamos por superar las expectativas en cada transacción y brindar un servicio excepcional.</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="value-card text-center">
+                    <div class="value-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Compromiso</h4>
+                    <p class="text-muted">Estamos dedicados a encontrar la solución perfecta para cada cliente, sin importar el desafío.</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="value-card text-center">
+                    <div class="value-icon">
+                        <i class="bi bi-lightbulb"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Innovación</h4>
+                    <p class="text-muted">Adoptamos las últimas tecnologías y métodos para ofrecer la mejor experiencia inmobiliaria.</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="value-card text-center">
+                    <div class="value-icon">
+                        <i class="bi bi-heart"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Pasión</h4>
+                    <p class="text-muted">Amamos lo que hacemos y esa pasión se refleja en cada proyecto que emprendemos.</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="value-card text-center">
+                    <div class="value-icon">
+                        <i class="bi bi-globe"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Responsabilidad</h4>
+                    <p class="text-muted">Actuamos con responsabilidad social y ambiental en todas nuestras operaciones.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Timeline Section -->
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">Nuestra Trayectoria</h2>
+            <p class="lead text-muted">Los hitos más importantes de nuestro crecimiento</p>
+        </div>
+        
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <h4 class="fw-bold text-primary">2008 - Fundación</h4>
+                    <p class="mb-0">Iniciamos operaciones con un equipo de 3 personas y la visión de transformar el mercado inmobiliario local.</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <h4 class="fw-bold text-primary">2012 - Primera Expansión</h4>
+                    <p class="mb-0">Abrimos nuestra segunda oficina y alcanzamos las 100 propiedades vendidas en un año.</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <h4 class="fw-bold text-primary">2016 - Digitalización</h4>
+                    <p class="mb-0">Lanzamos nuestra plataforma digital y sistema de gestión interno, mejorando la experiencia del cliente.</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <h4 class="fw-bold text-primary">2020 - Liderazgo Regional</h4>
+                    <p class="mb-0">Nos convertimos en la inmobiliaria líder de la región con más de 500 familias atendidas.</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <h4 class="fw-bold text-primary">2024 - Innovación Continua</h4>
+                    <p class="mb-0">Implementamos nuevas tecnologías y expandimos nuestros servicios para seguir siendo pioneros.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team Preview -->
+{% if agents %}
+<section class="section-padding bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">Nuestro Equipo</h2>
+            <p class="lead text-muted">Conoce a los profesionales que harán realidad tus sueños inmobiliarios</p>
+        </div>
+        
+        <div class="row">
+            {% for agent in agents|slice:":4" %}
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="team-member">
+                    {% if agent.image_path %}
+                    <img src="{{ agent.image_path.url }}" class="team-photo" alt="{{ agent.get_full_name }}">
+                    {% else %}
+                    <div class="team-photo-placeholder">
+                        <i class="bi bi-person"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="p-4 text-center">
+                        <h5 class="fw-bold mb-2">{{ agent.get_full_name }}</h5>
+                        <p class="text-primary mb-3">Agente Inmobiliario</p>
+                        {% if agent.bio %}
+                        <p class="text-muted small mb-3">{{ agent.bio|truncatewords:15 }}</p>
+                        {% endif %}
+                        <div class="d-flex justify-content-center gap-2">
+                            {% if agent.phone %}
+                            <a href="tel:{{ agent.phone }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-telephone"></i>
+                            </a>
+                            {% endif %}
+                            {% if agent.email %}
+                            <a href="mailto:{{ agent.email }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-envelope"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{% url 'public:agents' %}" class="btn btn-primary btn-lg">
+                <i class="bi bi-people me-2"></i>Ver Todo el Equipo
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Contact Section -->
+<section class="contact-section">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">¿Listo para encontrar tu hogar ideal?</h2>
+            <p class="lead mb-0">Contáctanos hoy mismo y comienza tu journey inmobiliario con nosotros</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="contact-card">
+                    <div class="contact-icon">
+                        <i class="bi bi-geo-alt"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Ubicación</h5>
+                    <p class="mb-0">Av. Principal 123<br>Ciudad, Provincia</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="contact-card">
+                    <div class="contact-icon">
+                        <i class="bi bi-telephone"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Teléfono</h5>
+                    <p class="mb-0">+54 11 1234-5678<br>+54 11 8765-4321</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="contact-card">
+                    <div class="contact-icon">
+                        <i class="bi bi-envelope"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Email</h5>
+                    <p class="mb-0">info@inmobiliaria.com<br>ventas@inmobiliaria.com</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="contact-card">
+                    <div class="contact-icon">
+                        <i class="bi bi-clock"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2">Horarios</h5>
+                    <p class="mb-0">Lun - Vie: 9:00 - 18:00<br>Sáb: 9:00 - 14:00</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-5">
+            <div class="d-flex flex-column flex-md-row gap-3 justify-content-center">
+                <a href="{% url 'public:properties' %}" class="btn btn-light btn-lg">
+                    <i class="bi bi-search me-2"></i>Explorar Propiedades
+                </a>
+                <a href="tel:+541112345678" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-telephone me-2"></i>Llamar Ahora
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}

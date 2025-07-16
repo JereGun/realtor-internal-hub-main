@@ -1,42 +1,292 @@
 {% extends "public_base.html" %}
 
-{% block title %}Nuestros Agentes{% endblock %}
+{% block title %}Agentes Inmobiliarios Profesionales | Inmobiliaria Premium{% endblock %}
+
+{% block meta_description %}Conoce a nuestro equipo de agentes inmobiliarios profesionales. Expertos en venta y alquiler de propiedades con años de experiencia. Atención personalizada y servicio de calidad.{% endblock %}
+
+{% block meta_keywords %}agentes inmobiliarios, profesionales inmobiliarios, expertos en propiedades, venta de propiedades, alquiler de propiedades, asesoramiento inmobiliario, equipo profesional{% endblock %}
+
+{% block og_title %}Agentes Inmobiliarios Expertos - Inmobiliaria Premium{% endblock %}
+{% block og_description %}Nuestro equipo de agentes profesionales te ayudará a encontrar tu propiedad ideal. Experiencia, conocimiento del mercado y atención personalizada.{% endblock %}
+
+{% block structured_data %}
+{
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Agentes Inmobiliarios",
+    "description": "Equipo de agentes inmobiliarios profesionales",
+    "numberOfItems": {{ agents.count|default:0 }},
+    "itemListElement": [
+        {% for agent in agents %}
+        {
+            "@type": "ListItem",
+            "position": {{ forloop.counter }},
+            "item": {
+                "@type": "RealEstateAgent",
+                "@id": "{{ request.scheme }}://{{ request.get_host }}{% url 'public:agents' %}#agent-{{ agent.id }}",
+                "name": "{{ agent.get_full_name }}",
+                "jobTitle": "Agente Inmobiliario",
+                {% if agent.bio %}"description": "{{ agent.bio|striptags|truncatewords:30 }}",{% endif %}
+                {% if agent.phone %}"telephone": "{{ agent.phone }}",{% endif %}
+                {% if agent.email %}"email": "{{ agent.email }}",{% endif %}
+                {% if agent.image_path %}"image": "{{ request.scheme }}://{{ request.get_host }}{{ agent.image_path.url }}",{% endif %}
+                "worksFor": {
+                    "@type": "RealEstateAgent",
+                    "name": "Inmobiliaria Premium"
+                },
+                "hasOfferCatalog": {
+                    "@type": "OfferCatalog",
+                    "name": "Propiedades Gestionadas",
+                    "numberOfItems": {{ agent.property_set.count }}
+                }
+            }
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ]
+}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .agent-card {
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        background: white;
+    }
+    
+    .agent-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+    }
+    
+    .agent-photo {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    }
+    
+    .agent-photo-placeholder {
+        width: 100%;
+        height: 300px;
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 4rem;
+    }
+    
+    .agent-info {
+        padding: 2rem;
+    }
+    
+    .agent-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--dark-color);
+        margin-bottom: 0.5rem;
+    }
+    
+    .agent-title {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    
+    .agent-stats {
+        background: var(--light-color);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        display: block;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        color: var(--secondary-color);
+    }
+    
+    .contact-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .contact-btn {
+        flex: 1;
+        padding: 0.75rem;
+        border-radius: 10px;
+        text-decoration: none;
+        text-align: center;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .contact-btn-primary {
+        background: var(--primary-color);
+        color: white;
+    }
+    
+    .contact-btn-primary:hover {
+        background: var(--accent-color);
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .contact-btn-outline {
+        border: 2px solid var(--primary-color);
+        color: var(--primary-color);
+        background: white;
+    }
+    
+    .contact-btn-outline:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .hero-agents {
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.9), rgba(59, 130, 246, 0.8));
+        color: white;
+        padding: 5rem 0;
+        text-align: center;
+        margin-bottom: 5rem;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-12">
-            <h1>Nuestros Agentes</h1>
-            <p class="lead">Conozca nuestro equipo de agentes inmobiliarios profesionales dedicados a ayudarle a encontrar su hogar perfecto.</p>
+<!-- Hero Section -->
+<section class="hero-agents">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold mb-4">Nuestro Equipo de Expertos</h1>
+                <p class="lead mb-0">Conoce a nuestros agentes inmobiliarios profesionales, comprometidos con encontrar la propiedad perfecta para ti.</p>
+            </div>
         </div>
     </div>
+</section>
 
+<!-- Agents Grid -->
+<div class="container">
     <div class="row">
         {% for agent in agents %}
-        <div class="col-md-4 mb-4">
-            <div class="card text-center">
+        <div class="col-lg-4 col-md-6 mb-5">
+            <div class="agent-card">
+                <!-- Agent Photo -->
                 {% if agent.image_path %}
-                <img src="{{ agent.image_path.url }}" class="card-img-top rounded-circle mx-auto d-block" alt="{{ agent.full_name }}" style="width: 150px; height: 150px; object-fit: cover;">
+                <img src="{{ agent.image_path.url }}" class="agent-photo" alt="{{ agent.get_full_name }}">
                 {% else %}
-                <div class="card-img-top rounded-circle mx-auto d-block bg-light" style="width: 150px; height: 150px;"></div>
+                <div class="agent-photo-placeholder">
+                    <i class="bi bi-person"></i>
+                </div>
                 {% endif %}
-                <div class="card-body">
-                    <h5 class="card-title">{{ agent.full_name }}</h5>
-                    <p class="card-text">
-                        <strong>Matrícula:</strong> {{ agent.license_number }}<br>
-                        <strong>Tasa de Comisión:</strong> {{ agent.commission_rate }}%<br>
-                        <strong>Email:</strong> {{ agent.email }}<br>
-                        <strong>Teléfono:</strong> {{ agent.phone }}
-                    </p>
-                    <a href="{% url 'public:agent_detail' agent.id %}" class="btn btn-primary">Ver Perfil</a>
+                
+                <!-- Agent Info -->
+                <div class="agent-info">
+                    <h3 class="agent-name">{{ agent.get_full_name }}</h3>
+                    <p class="agent-title">Agente Inmobiliario</p>
+                    
+                    {% if agent.bio %}
+                    <p class="text-muted mb-3">{{ agent.bio|truncatewords:20 }}</p>
+                    {% endif %}
+                    
+                    <!-- Agent Stats -->
+                    <div class="agent-stats">
+                        <div class="row">
+                            <div class="col-4 stat-item">
+                                <span class="stat-number">{{ agent.property_set.count }}</span>
+                                <span class="stat-label">Propiedades</span>
+                            </div>
+                            <div class="col-4 stat-item">
+                                <span class="stat-number">5</span>
+                                <span class="stat-label">Años Exp.</span>
+                            </div>
+                            <div class="col-4 stat-item">
+                                <span class="stat-number">4.9</span>
+                                <span class="stat-label">Rating</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact Information -->
+                    <div class="mb-3">
+                        {% if agent.phone %}
+                        <p class="mb-2">
+                            <i class="bi bi-telephone me-2 text-primary"></i>
+                            <strong>{{ agent.phone }}</strong>
+                        </p>
+                        {% endif %}
+                        
+                        {% if agent.email %}
+                        <p class="mb-2">
+                            <i class="bi bi-envelope me-2 text-primary"></i>
+                            {{ agent.email }}
+                        </p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Contact Buttons -->
+                    <div class="contact-buttons">
+                        {% if agent.phone %}
+                        <a href="tel:{{ agent.phone }}" class="contact-btn contact-btn-primary">
+                            <i class="bi bi-telephone me-1"></i>Llamar
+                        </a>
+                        {% endif %}
+                        
+                        {% if agent.email %}
+                        <a href="mailto:{{ agent.email }}" class="contact-btn contact-btn-outline">
+                            <i class="bi bi-envelope me-1"></i>Email
+                        </a>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
         {% empty %}
-        <div class="col-12">
-            <p class="text-center">No se encontraron agentes.</p>
+        <div class="col-12 text-center">
+            <div class="py-5">
+                <i class="bi bi-people display-1 text-muted mb-4"></i>
+                <h3 class="text-muted">No hay agentes disponibles</h3>
+                <p class="text-muted">Pronto tendremos más agentes para atenderte.</p>
+            </div>
         </div>
         {% endfor %}
     </div>
 </div>
+
+<!-- CTA Section -->
+<section class="section-padding bg-light mt-5">
+    <div class="container text-center">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <h2 class="display-5 fw-bold mb-4">¿Necesitas ayuda personalizada?</h2>
+                <p class="lead mb-4">Nuestros agentes están listos para ayudarte a encontrar la propiedad perfecta. Contáctanos y recibe asesoramiento profesional sin compromiso.</p>
+                
+                <div class="d-flex flex-column flex-md-row gap-3 justify-content-center">
+                    <a href="{% url 'public:properties' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-search me-2"></i>Ver Propiedades
+                    </a>
+                    <a href="tel:+541112345678" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-telephone me-2"></i>Llamar Ahora
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}

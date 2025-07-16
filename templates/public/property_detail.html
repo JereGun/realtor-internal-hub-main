@@ -1,0 +1,494 @@
+{% extends "public_base.html" %}
+{% load humanize %}
+
+{% block title %}{{ property.title }} - {{ property.property_type.name }} en {{ property.locality.name|default:property.neighborhood }} | Inmobiliaria Premium{% endblock %}
+
+{% block meta_description %}{{ property.title }} - {{ property.property_type.name }} de {{ property.bedrooms }} dormitorios y {{ property.bathrooms }} baños en {{ property.locality.name|default:property.neighborhood }}. {{ property.total_surface }}m². {% if property.sale_price %}Precio: ${{ property.sale_price|floatformat:0|intcomma }}{% elif property.rental_price %}Alquiler: ${{ property.rental_price|floatformat:0|intcomma }}/mes{% endif %}.{% endblock %}
+
+{% block meta_keywords %}{{ property.title }}, {{ property.property_type.name }}, {{ property.locality.name|default:property.neighborhood }}, {{ property.bedrooms }} dormitorios, {{ property.bathrooms }} baños, {{ property.total_surface }}m², {% if property.sale_price %}venta{% else %}alquiler{% endif %}, inmobiliaria{% endblock %}
+
+{% block og_title %}{{ property.title }} - {{ property.property_type.name }} en {{ property.locality.name|default:property.neighborhood }}{% endblock %}
+{% block og_description %}{{ property.description|truncatewords:25 }} - {{ property.bedrooms }} dormitorios, {{ property.bathrooms }} baños, {{ property.total_surface }}m².{% endblock %}
+{% block og_image %}{% if property.cover_image %}{{ request.scheme }}://{{ request.get_host }}{{ property.cover_image.image.url }}{% else %}{{ request.scheme }}://{{ request.get_host }}{% load static %}{% static 'images/property-default.jpg' %}{% endif %}{% endblock %}
+{% block og_type %}article{% endblock %}
+
+{% block canonical_url %}{{ request.scheme }}://{{ request.get_host }}{% url 'public:property_detail' property.id %}{% endblock %}
+
+{% block structured_data %}
+{
+    "@context": "https://schema.org",
+    "@type": "Accommodation",
+    "@id": "{{ request.scheme }}://{{ request.get_host }}{% url 'public:property_detail' property.id %}",
+    "name": "{{ property.title }}",
+    "description": "{{ property.description|striptags }}",
+    "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'public:property_detail' property.id %}",
+    "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "{{ property.street }} {{ property.number }}",
+        "addressLocality": "{{ property.locality.name|default:property.neighborhood }}",
+        "addressRegion": "{{ property.province.name|default:'Argentina' }}",
+        "addressCountry": "AR"
+    },
+    "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "{{ property.latitude|default:'-34.6037' }}",
+        "longitude": "{{ property.longitude|default:'-58.3816' }}"
+    },
+    "offers": {
+        "@type": "Offer",
+        "price": "{% if property.sale_price %}{{ property.sale_price }}{% elif property.rental_price %}{{ property.rental_price }}{% endif %}",
+        "priceCurrency": "ARS",
+        "availability": "https://schema.org/InStock",
+        "validFrom": "{{ property.created_at|date:'c' }}",
+        "seller": {
+            "@type": "RealEstateAgent",
+            "name": "{{ property.agent.get_full_name }}",
+            "telephone": "{{ property.agent.phone }}",
+            "email": "{{ property.agent.email }}"
+        }
+    },
+    "floorSize": {
+        "@type": "QuantitativeValue",
+        "value": {{ property.total_surface }},
+        "unitCode": "MTK"
+    },
+    "numberOfRooms": {{ property.bedrooms }},
+    "numberOfBathroomsTotal": {{ property.bathrooms }},
+    "petsAllowed": false,
+    "smokingAllowed": false,
+    {% if property.images.all %}
+    "image": [
+        {% for image in property.images.all %}
+        "{{ request.scheme }}://{{ request.get_host }}{{ image.image.url }}"{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ],
+    {% endif %}
+    "amenityFeature": [
+        {% for feature in property.features.all %}
+        {
+            "@type": "LocationFeatureSpecification",
+            "name": "{{ feature.name }}",
+            "value": true
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ],
+    "additionalProperty": [
+        {
+            "@type": "PropertyValue",
+            "name": "Garage",
+            "value": {% if property.garage %}true{% else %}false{% endif %}
+        },
+        {
+            "@type": "PropertyValue",
+            "name": "Amueblado",
+            "value": {% if property.furnished %}true{% else %}false{% endif %}
+        }
+        {% if property.year_built %},
+        {
+            "@type": "PropertyValue",
+            "name": "Año de construcción",
+            "value": {{ property.year_built }}
+        }
+        {% endif %}
+        {% if property.expenses %},
+        {
+            "@type": "PropertyValue",
+            "name": "Expensas",
+            "value": {{ property.expenses }}
+        }
+        {% endif %}
+    ]
+}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .property-hero {
+        position: relative;
+        height: 60vh;
+        overflow: hidden;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+    }
+    
+    .property-hero img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .property-hero-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0,0,0,0.7));
+        color: white;
+        padding: 2rem;
+    }
+    
+    .price-display {
+        background: var(--accent-color);
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 15px;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .price-amount {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    .feature-badge {
+        background: var(--light-color);
+        border: 2px solid var(--primary-color);
+        color: var(--primary-color);
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-weight: 600;
+        margin: 0.25rem;
+        display: inline-block;
+    }
+    
+    .info-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+    }
+    
+    .agent-card {
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        color: white;
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+    }
+    
+    .agent-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        border: 4px solid white;
+        margin: 0 auto 1rem;
+        object-fit: cover;
+    }
+    
+    .gallery-thumbnail {
+        height: 100px;
+        object-fit: cover;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .gallery-thumbnail:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    
+    .similar-property-card {
+        border-radius: 15px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .similar-property-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    
+    .contact-form {
+        background: var(--light-color);
+        border-radius: 20px;
+        padding: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'public:home' %}">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'public:properties' %}">Propiedades</a></li>
+            <li class="breadcrumb-item active">{{ property.title }}</li>
+        </ol>
+    </nav>
+    
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Property Hero Image -->
+            <div class="property-hero">
+                {% if property.cover_image %}
+                <img src="{{ property.cover_image.image.url }}" alt="{{ property.title }}">
+                {% else %}
+                <div class="bg-light d-flex align-items-center justify-content-center h-100">
+                    <i class="bi bi-image text-muted" style="font-size: 5rem;"></i>
+                </div>
+                {% endif %}
+                
+                <div class="property-hero-overlay">
+                    <h1 class="display-6 fw-bold mb-2">{{ property.title }}</h1>
+                    <p class="lead mb-0">
+                        <i class="bi bi-geo-alt me-2"></i>{{ property.full_address }}
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Property Gallery -->
+            {% if property.images.all %}
+            <div class="mb-4">
+                <h4 class="mb-3">Galería de Imágenes</h4>
+                <div class="row g-2">
+                    {% for image in property.images.all %}
+                    <div class="col-3">
+                        <img src="{{ image.image.url }}" class="gallery-thumbnail w-100" 
+                             alt="{{ image.description }}" 
+                             data-bs-toggle="modal" 
+                             data-bs-target="#imageModal"
+                             data-bs-image="{{ image.image.url }}">
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Property Details -->
+            <div class="info-card">
+                <h3 class="mb-4">Detalles de la Propiedad</h3>
+                
+                <div class="row mb-4">
+                    <div class="col-md-3 col-6 text-center mb-3">
+                        <div class="border rounded p-3">
+                            <i class="bi bi-door-open fs-2 text-primary mb-2 d-block"></i>
+                            <strong class="d-block">{{ property.bedrooms }}</strong>
+                            <small class="text-muted">Dormitorios</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6 text-center mb-3">
+                        <div class="border rounded p-3">
+                            <i class="bi bi-droplet fs-2 text-primary mb-2 d-block"></i>
+                            <strong class="d-block">{{ property.bathrooms }}</strong>
+                            <small class="text-muted">Baños</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6 text-center mb-3">
+                        <div class="border rounded p-3">
+                            <i class="bi bi-arrows-expand fs-2 text-primary mb-2 d-block"></i>
+                            <strong class="d-block">{{ property.total_surface|floatformat:0 }}</strong>
+                            <small class="text-muted">m² Totales</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6 text-center mb-3">
+                        <div class="border rounded p-3">
+                            <i class="bi bi-car-front fs-2 text-primary mb-2 d-block"></i>
+                            <strong class="d-block">{% if property.garage %}Sí{% else %}No{% endif %}</strong>
+                            <small class="text-muted">Garage</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Información General</h5>
+                        <ul class="list-unstyled">
+                            <li><strong>Tipo:</strong> {{ property.property_type.name }}</li>
+                            <li><strong>Estado:</strong> {{ property.property_status.name }}</li>
+                            {% if property.year_built %}
+                            <li><strong>Año de construcción:</strong> {{ property.year_built }}</li>
+                            {% endif %}
+                            {% if property.covered_surface %}
+                            <li><strong>Superficie cubierta:</strong> {{ property.covered_surface|floatformat:0 }} m²</li>
+                            {% endif %}
+                            {% if property.floors %}
+                            <li><strong>Plantas:</strong> {{ property.floors }}</li>
+                            {% endif %}
+                            {% if property.orientation %}
+                            <li><strong>Orientación:</strong> {{ property.orientation }}</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Características Adicionales</h5>
+                        <ul class="list-unstyled">
+                            <li><strong>Amueblado:</strong> {% if property.furnished %}Sí{% else %}No{% endif %}</li>
+                            {% if property.expenses %}
+                            <li><strong>Expensas:</strong> ${{ property.expenses|floatformat:0|intcomma }}</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Description -->
+            <div class="info-card">
+                <h3 class="mb-3">Descripción</h3>
+                <p class="lead">{{ property.description|linebreaks }}</p>
+            </div>
+            
+            <!-- Features -->
+            {% if property.features.all %}
+            <div class="info-card">
+                <h3 class="mb-3">Características</h3>
+                <div>
+                    {% for feature in property.features.all %}
+                    <span class="feature-badge">{{ feature.name }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Tags -->
+            {% if property.tags.all %}
+            <div class="info-card">
+                <h3 class="mb-3">Etiquetas</h3>
+                <div>
+                    {% for tag in property.tags.all %}
+                    <span class="badge" style="background-color: {{ tag.color }}; color: white; margin: 0.25rem;">
+                        {{ tag.name }}
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Price -->
+            <div class="price-display">
+                {% if property.sale_price %}
+                <h3 class="price-amount">${{ property.sale_price|floatformat:0|intcomma }}</h3>
+                <p class="mb-0">Precio de Venta</p>
+                {% elif property.rental_price %}
+                <h3 class="price-amount">${{ property.rental_price|floatformat:0|intcomma }}</h3>
+                <p class="mb-0">Precio de Alquiler / mes</p>
+                {% endif %}
+            </div>
+            
+            <!-- Agent Info -->
+            <div class="agent-card mb-4">
+                <div class="agent-avatar bg-white d-flex align-items-center justify-content-center mx-auto">
+                    {% if property.agent.image_path %}
+                    <img src="{{ property.agent.image_path.url }}" class="agent-avatar" alt="{{ property.agent.get_full_name }}">
+                    {% else %}
+                    <i class="bi bi-person fs-2 text-primary"></i>
+                    {% endif %}
+                </div>
+                <h5 class="fw-bold">{{ property.agent.get_full_name }}</h5>
+                <p class="mb-3">Agente Inmobiliario</p>
+                {% if property.agent.phone %}
+                <a href="tel:{{ property.agent.phone }}" class="btn btn-light mb-2 w-100">
+                    <i class="bi bi-telephone me-2"></i>{{ property.agent.phone }}
+                </a>
+                {% endif %}
+                {% if property.agent.email %}
+                <a href="mailto:{{ property.agent.email }}" class="btn btn-outline-light w-100">
+                    <i class="bi bi-envelope me-2"></i>Enviar Email
+                </a>
+                {% endif %}
+            </div>
+            
+            <!-- Contact Form -->
+            <div class="contact-form">
+                <h4 class="mb-3">Solicitar Información</h4>
+                <form>
+                    <div class="mb-3">
+                        <input type="text" class="form-control" placeholder="Tu nombre" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="email" class="form-control" placeholder="Tu email" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="tel" class="form-control" placeholder="Tu teléfono">
+                    </div>
+                    <div class="mb-3">
+                        <textarea class="form-control" rows="4" placeholder="Mensaje (opcional)"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-send me-2"></i>Enviar Consulta
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Similar Properties -->
+    {% if similar_properties %}
+    <div class="mt-5">
+        <h2 class="mb-4">Propiedades Similares</h2>
+        <div class="row">
+            {% for similar in similar_properties %}
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="card similar-property-card">
+                    {% if similar.cover_image %}
+                    <img src="{{ similar.cover_image.image.url }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ similar.title }}">
+                    {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                        <i class="bi bi-image text-muted fs-2"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="card-body">
+                        <h6 class="card-title">{{ similar.title|truncatechars:30 }}</h6>
+                        <p class="text-muted small mb-2">
+                            <i class="bi bi-geo-alt me-1"></i>{{ similar.locality }}
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <strong class="text-primary">
+                                {% if similar.sale_price %}
+                                    ${{ similar.sale_price|floatformat:0|intcomma }}
+                                {% elif similar.rental_price %}
+                                    ${{ similar.rental_price|floatformat:0|intcomma }}/mes
+                                {% endif %}
+                            </strong>
+                            <a href="{% url 'public:property_detail' similar.id %}" class="btn btn-sm btn-outline-primary">Ver</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Image Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <img id="modalImage" src="" class="w-100" alt="Property Image">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Image modal functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const imageModal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        
+        imageModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const imageSrc = button.getAttribute('data-bs-image');
+            modalImage.src = imageSrc;
+        });
+    });
+</script>
+{% endblock %}

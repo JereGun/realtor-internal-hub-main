@@ -1,7 +1,58 @@
 {% extends "public_base.html" %}
 {% load humanize %}
 
-{% block title %}Propiedades{% endblock %}
+{% block title %}Propiedades en Venta y Alquiler | Inmobiliaria Premium{% endblock %}
+
+{% block meta_description %}Explora nuestra amplia selección de propiedades en venta y alquiler. Casas, departamentos y locales comerciales en las mejores ubicaciones. Filtros avanzados para encontrar tu propiedad ideal.{% endblock %}
+
+{% block meta_keywords %}propiedades en venta, propiedades en alquiler, casas, departamentos, locales comerciales, bienes raíces, inmuebles, filtros de búsqueda, propiedades premium{% endblock %}
+
+{% block og_title %}Propiedades en Venta y Alquiler - Inmobiliaria Premium{% endblock %}
+{% block og_description %}Descubre {{ properties.paginator.count|default:"cientos de" }} propiedades disponibles. Usa nuestros filtros avanzados para encontrar tu hogar perfecto.{% endblock %}
+
+{% block structured_data %}
+{
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Propiedades Disponibles",
+    "description": "Lista de propiedades en venta y alquiler",
+    "numberOfItems": {{ properties.paginator.count|default:0 }},
+    "itemListElement": [
+        {% for property in properties %}
+        {
+            "@type": "ListItem",
+            "position": {{ forloop.counter }},
+            "item": {
+                "@type": "Accommodation",
+                "@id": "{{ request.scheme }}://{{ request.get_host }}{% url 'public:property_detail' property.id %}",
+                "name": "{{ property.title }}",
+                "description": "{{ property.description|truncatewords:30|striptags }}",
+                "address": {
+                    "@type": "PostalAddress",
+                    "streetAddress": "{{ property.street }} {{ property.number }}",
+                    "addressLocality": "{{ property.locality.name|default:property.neighborhood }}",
+                    "addressRegion": "{{ property.province.name|default:'Argentina' }}",
+                    "addressCountry": "AR"
+                },
+                "offers": {
+                    "@type": "Offer",
+                    "price": "{% if property.sale_price %}{{ property.sale_price }}{% elif property.rental_price %}{{ property.rental_price }}{% endif %}",
+                    "priceCurrency": "ARS",
+                    "availability": "https://schema.org/InStock"
+                },
+                "floorSize": {
+                    "@type": "QuantitativeValue",
+                    "value": {{ property.total_surface }},
+                    "unitCode": "MTK"
+                },
+                "numberOfRooms": {{ property.bedrooms }},
+                "numberOfBathroomsTotal": {{ property.bathrooms }}
+            }
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ]
+}
+{% endblock %}
 
 {% block content %}
 <!-- Sección Hero -->
@@ -12,55 +63,164 @@
                 <h1 class="display-4 fw-bold mb-4">Encuentra tu hogar ideal</h1>
                 <p class="lead mb-4">Explora nuestra selección de propiedades premium en ubicaciones privilegiadas</p>
             </div>
+            <div class="col-md-4 text-md-end">
+                <button class="btn btn-outline-primary d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#filtersOffcanvas">
+                    <i class="bi bi-funnel me-2"></i>Filtros
+                </button>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Filtros de Búsqueda -->
-<div class="container mb-5">
-    <div class="card shadow-sm">
-        <div class="card-body p-4">
-            <h5 class="card-title mb-4"><i class="bi bi-funnel me-2"></i>Encuentra tu propiedad perfecta</h5>
-            <form method="get" class="row g-3 align-items-center">
-                <div class="col-md-3">
-                    <label for="property_type" class="form-label">Tipo de Propiedad</label>
-                    <select name="property_type" class="form-select" id="property_type">
-                        <option value="">Todos los tipos</option>
-                        {% for type in property_types %}
-                        <option value="{{ type.id }}">{{ type.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label for="min_price" class="form-label">Precio Mínimo</label>
-                    <input type="number" name="min_price" class="form-control" id="min_price" placeholder="Mínimo">
-                </div>
-                <div class="col-md-3">
-                    <label for="max_price" class="form-label">Precio Máximo</label>
-                    <input type="number" name="max_price" class="form-control" id="max_price" placeholder="Máximo">
-                </div>
-                <div class="col-md-3">
-                    <label for="location" class="form-label">Ubicación</label>
-                    <select name="location" class="form-select" id="location">
-                        <option value="">Todas las ubicaciones</option>
-                        {% for location in locations %}
-                        <option value="{{ location.id }}">{{ location.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-12 text-end">
-                    <button type="submit" class="btn btn-primary px-4">
-                        <i class="bi bi-search me-2"></i>Buscar Propiedades
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Grid de Propiedades -->
 <div class="container">
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    <div class="row">
+        <!-- Sidebar de Filtros (Desktop) -->
+        <div class="col-lg-3 d-none d-lg-block">
+            <div class="sticky-top" style="top: 100px;">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-funnel me-2"></i>Filtros de Búsqueda</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="get" id="searchForm">
+                            <!-- Búsqueda General -->
+                            <div class="mb-4">
+                                <label for="search" class="form-label fw-bold">Búsqueda General</label>
+                                <input type="text" name="search" class="form-control" id="search" 
+                                       placeholder="Ej: departamento, centro..." 
+                                       value="{{ current_filters.search }}">
+                            </div>
+                            
+                            <!-- Ubicación -->
+                            <div class="mb-4">
+                                <label for="location_search" class="form-label fw-bold">Ubicación</label>
+                                <div class="position-relative">
+                                    <input type="text" name="location_search" class="form-control" id="location_search" 
+                                           placeholder="Ciudad, barrio, provincia..." 
+                                           value="{{ current_filters.location_search }}"
+                                           autocomplete="off">
+                                    <div id="location-suggestions" class="position-absolute w-100 bg-white border rounded shadow-sm" style="top: 100%; z-index: 1000; display: none; max-height: 200px; overflow-y: auto;"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Tipo de Propiedad -->
+                            <div class="mb-4">
+                                <label for="property_type" class="form-label fw-bold">Tipo de Propiedad</label>
+                                <select name="property_type" class="form-select" id="property_type">
+                                    <option value="">Todos los tipos</option>
+                                    {% for type in property_types %}
+                                    <option value="{{ type.id }}" {% if current_filters.property_type == type.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ type.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <!-- Rango de Precios -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Rango de Precios</label>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <input type="number" name="min_price" class="form-control" id="min_price" 
+                                               placeholder="Mínimo" value="{{ current_filters.min_price }}">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="number" name="max_price" class="form-control" id="max_price" 
+                                               placeholder="Máximo" value="{{ current_filters.max_price }}">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Dormitorios -->
+                            <div class="mb-4">
+                                <label for="bedrooms" class="form-label fw-bold">Dormitorios</label>
+                                <select name="bedrooms" class="form-select" id="bedrooms">
+                                    <option value="">Cualquiera</option>
+                                    <option value="1" {% if current_filters.bedrooms == "1" %}selected{% endif %}>1</option>
+                                    <option value="2" {% if current_filters.bedrooms == "2" %}selected{% endif %}>2</option>
+                                    <option value="3" {% if current_filters.bedrooms == "3" %}selected{% endif %}>3</option>
+                                    <option value="4+" {% if current_filters.bedrooms == "4+" %}selected{% endif %}>4+</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Baños -->
+                            <div class="mb-4">
+                                <label for="bathrooms" class="form-label fw-bold">Baños</label>
+                                <select name="bathrooms" class="form-select" id="bathrooms">
+                                    <option value="">Cualquiera</option>
+                                    <option value="1" {% if current_filters.bathrooms == "1" %}selected{% endif %}>1</option>
+                                    <option value="2" {% if current_filters.bathrooms == "2" %}selected{% endif %}>2</option>
+                                    <option value="3+" {% if current_filters.bathrooms == "3+" %}selected{% endif %}>3+</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Garage -->
+                            <div class="mb-4">
+                                <label for="garage" class="form-label fw-bold">Garage</label>
+                                <select name="garage" class="form-select" id="garage">
+                                    <option value="">Cualquiera</option>
+                                    <option value="true" {% if current_filters.garage == "true" %}selected{% endif %}>Con Garage</option>
+                                    <option value="false" {% if current_filters.garage == "false" %}selected{% endif %}>Sin Garage</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Superficie -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Superficie (m²)</label>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <input type="number" name="min_surface" class="form-control" id="min_surface" 
+                                               placeholder="Mín." value="{{ current_filters.min_surface }}">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="number" name="max_surface" class="form-control" id="max_surface" 
+                                               placeholder="Máx." value="{{ current_filters.max_surface }}">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Botones -->
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-search me-2"></i>Buscar
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="clearFilters()">
+                                    <i class="bi bi-x-circle me-2"></i>Limpiar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contenido Principal -->
+        <div class="col-lg-9">
+            <!-- Resultados Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="mb-1">Propiedades Disponibles</h4>
+                    <p class="text-muted mb-0">
+                        {% if properties %}
+                            Mostrando {{ properties.start_index }}-{{ properties.end_index }} de {{ properties.paginator.count }} propiedades
+                        {% else %}
+                            No se encontraron propiedades
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    <select class="form-select form-select-sm" style="width: auto;" onchange="sortProperties(this.value)">
+                        <option value="">Ordenar por</option>
+                        <option value="price_asc">Precio: Menor a Mayor</option>
+                        <option value="price_desc">Precio: Mayor a Menor</option>
+                        <option value="newest">Más Recientes</option>
+                        <option value="surface_desc">Mayor Superficie</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Grid de Propiedades -->
+            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
         {% for property in properties %}
         <div class="col">
             <div class="card h-100 shadow-sm property-card">
@@ -73,10 +233,31 @@
                         <div class="badge bg-primary text-white">{{ property.property_type.name }}</div>
                     </div>
                     <p class="card-text text-muted mb-3">{{ property.description|truncatewords:20 }}</p>
+                    <div class="row text-center mb-3">
+                        <div class="col-4">
+                            <small class="text-muted d-block">Dormitorios</small>
+                            <strong>{{ property.bedrooms }}</strong>
+                        </div>
+                        <div class="col-4">
+                            <small class="text-muted d-block">Baños</small>
+                            <strong>{{ property.bathrooms }}</strong>
+                        </div>
+                        <div class="col-4">
+                            <small class="text-muted d-block">m²</small>
+                            <strong>{{ property.total_surface|floatformat:0 }}</strong>
+                        </div>
+                    </div>
+                    
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <span class="h4 mb-0">${{ property.price|intcomma }}</span>
-                            <small class="text-muted d-block">{{ property.full_address }}</small>
+                            <span class="h4 mb-0">
+                                {% if property.sale_price %}
+                                    ${{ property.sale_price|floatformat:0|intcomma }}
+                                {% elif property.rental_price %}
+                                    ${{ property.rental_price|floatformat:0|intcomma }}/mes
+                                {% endif %}
+                            </span>
+                            <small class="text-muted d-block">{{ property.full_address|truncatechars:30 }}</small>
                         </div>
                         <a href="{% url 'public:property_detail' property.id %}" class="btn btn-outline-primary">
                             <i class="bi bi-arrow-right-circle me-1"></i>Ver Detalles
@@ -94,6 +275,125 @@
             </div>
         </div>
         {% endfor %}
+    </div>
+        </div>
+    </div>
+</div>
+
+<!-- Offcanvas para Filtros en Móviles -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="filtersOffcanvas">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title"><i class="bi bi-funnel me-2"></i>Filtros de Búsqueda</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form method="get" id="mobileSearchForm">
+            <!-- Búsqueda General -->
+            <div class="mb-4">
+                <label for="mobile_search" class="form-label fw-bold">Búsqueda General</label>
+                <input type="text" name="search" class="form-control" id="mobile_search" 
+                       placeholder="Ej: departamento, centro..." 
+                       value="{{ current_filters.search }}">
+            </div>
+            
+            <!-- Ubicación -->
+            <div class="mb-4">
+                <label for="mobile_location_search" class="form-label fw-bold">Ubicación</label>
+                <div class="position-relative">
+                    <input type="text" name="location_search" class="form-control" id="mobile_location_search" 
+                           placeholder="Ciudad, barrio, provincia..." 
+                           value="{{ current_filters.location_search }}"
+                           autocomplete="off">
+                    <div id="mobile-location-suggestions" class="position-absolute w-100 bg-white border rounded shadow-sm" style="top: 100%; z-index: 1000; display: none; max-height: 200px; overflow-y: auto;"></div>
+                </div>
+            </div>
+            
+            <!-- Tipo de Propiedad -->
+            <div class="mb-4">
+                <label for="mobile_property_type" class="form-label fw-bold">Tipo de Propiedad</label>
+                <select name="property_type" class="form-select" id="mobile_property_type">
+                    <option value="">Todos los tipos</option>
+                    {% for type in property_types %}
+                    <option value="{{ type.id }}" {% if current_filters.property_type == type.id|stringformat:"s" %}selected{% endif %}>
+                        {{ type.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <!-- Rango de Precios -->
+            <div class="mb-4">
+                <label class="form-label fw-bold">Rango de Precios</label>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <input type="number" name="min_price" class="form-control" 
+                               placeholder="Mínimo" value="{{ current_filters.min_price }}">
+                    </div>
+                    <div class="col-6">
+                        <input type="number" name="max_price" class="form-control" 
+                               placeholder="Máximo" value="{{ current_filters.max_price }}">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Dormitorios -->
+            <div class="mb-4">
+                <label for="mobile_bedrooms" class="form-label fw-bold">Dormitorios</label>
+                <select name="bedrooms" class="form-select" id="mobile_bedrooms">
+                    <option value="">Cualquiera</option>
+                    <option value="1" {% if current_filters.bedrooms == "1" %}selected{% endif %}>1</option>
+                    <option value="2" {% if current_filters.bedrooms == "2" %}selected{% endif %}>2</option>
+                    <option value="3" {% if current_filters.bedrooms == "3" %}selected{% endif %}>3</option>
+                    <option value="4+" {% if current_filters.bedrooms == "4+" %}selected{% endif %}>4+</option>
+                </select>
+            </div>
+            
+            <!-- Baños -->
+            <div class="mb-4">
+                <label for="mobile_bathrooms" class="form-label fw-bold">Baños</label>
+                <select name="bathrooms" class="form-select" id="mobile_bathrooms">
+                    <option value="">Cualquiera</option>
+                    <option value="1" {% if current_filters.bathrooms == "1" %}selected{% endif %}>1</option>
+                    <option value="2" {% if current_filters.bathrooms == "2" %}selected{% endif %}>2</option>
+                    <option value="3+" {% if current_filters.bathrooms == "3+" %}selected{% endif %}>3+</option>
+                </select>
+            </div>
+            
+            <!-- Garage -->
+            <div class="mb-4">
+                <label for="mobile_garage" class="form-label fw-bold">Garage</label>
+                <select name="garage" class="form-select" id="mobile_garage">
+                    <option value="">Cualquiera</option>
+                    <option value="true" {% if current_filters.garage == "true" %}selected{% endif %}>Con Garage</option>
+                    <option value="false" {% if current_filters.garage == "false" %}selected{% endif %}>Sin Garage</option>
+                </select>
+            </div>
+            
+            <!-- Superficie -->
+            <div class="mb-4">
+                <label class="form-label fw-bold">Superficie (m²)</label>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <input type="number" name="min_surface" class="form-control" 
+                               placeholder="Mín." value="{{ current_filters.min_surface }}">
+                    </div>
+                    <div class="col-6">
+                        <input type="number" name="max_surface" class="form-control" 
+                               placeholder="Máx." value="{{ current_filters.max_surface }}">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Botones -->
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search me-2"></i>Buscar
+                </button>
+                <button type="button" class="btn btn-outline-secondary" onclick="clearMobileFilters()">
+                    <i class="bi bi-x-circle me-2"></i>Limpiar
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -194,5 +494,181 @@
         height: 200px;
     }
 }
+
+/* Estilos para autocompletado */
+.location-suggestion {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s;
+}
+
+.location-suggestion:hover {
+    background-color: #f8f9fa;
+}
+
+.location-suggestion:last-child {
+    border-bottom: none;
+}
+
+.location-suggestion .suggestion-text {
+    font-weight: 500;
+    color: #333;
+}
+
+.location-suggestion .suggestion-type {
+    font-size: 0.8rem;
+    color: #666;
+    text-transform: uppercase;
+}
 </style>
+
+<script>
+// Variables globales
+let locationTimeout;
+let mobileLocationTimeout;
+
+// Autocompletado de ubicaciones para desktop
+document.getElementById('location_search').addEventListener('input', function() {
+    clearTimeout(locationTimeout);
+    const query = this.value.trim();
+    const suggestionsDiv = document.getElementById('location-suggestions');
+    
+    if (query.length < 2) {
+        suggestionsDiv.style.display = 'none';
+        return;
+    }
+    
+    locationTimeout = setTimeout(() => {
+        fetch(`{% url 'public:location_autocomplete' %}?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                displayLocationSuggestions(data.results, suggestionsDiv, 'location_search');
+            })
+            .catch(error => console.error('Error:', error));
+    }, 300);
+});
+
+// Autocompletado de ubicaciones para móvil
+document.getElementById('mobile_location_search').addEventListener('input', function() {
+    clearTimeout(mobileLocationTimeout);
+    const query = this.value.trim();
+    const suggestionsDiv = document.getElementById('mobile-location-suggestions');
+    
+    if (query.length < 2) {
+        suggestionsDiv.style.display = 'none';
+        return;
+    }
+    
+    mobileLocationTimeout = setTimeout(() => {
+        fetch(`{% url 'public:location_autocomplete' %}?q=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                displayLocationSuggestions(data.results, suggestionsDiv, 'mobile_location_search');
+            })
+            .catch(error => console.error('Error:', error));
+    }, 300);
+});
+
+// Función para mostrar sugerencias
+function displayLocationSuggestions(results, suggestionsDiv, inputId) {
+    if (results.length === 0) {
+        suggestionsDiv.style.display = 'none';
+        return;
+    }
+    
+    let html = '';
+    results.forEach(result => {
+        html += `
+            <div class="location-suggestion" onclick="selectLocation('${result.text}', '${inputId}')">
+                <div class="suggestion-text">${result.text}</div>
+                <div class="suggestion-type">${result.type}</div>
+            </div>
+        `;
+    });
+    
+    suggestionsDiv.innerHTML = html;
+    suggestionsDiv.style.display = 'block';
+}
+
+// Función para seleccionar ubicación
+function selectLocation(text, inputId) {
+    document.getElementById(inputId).value = text;
+    document.getElementById(inputId === 'location_search' ? 'location-suggestions' : 'mobile-location-suggestions').style.display = 'none';
+}
+
+// Ocultar sugerencias al hacer clic fuera
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('#location_search') && !e.target.closest('#location-suggestions')) {
+        document.getElementById('location-suggestions').style.display = 'none';
+    }
+    if (!e.target.closest('#mobile_location_search') && !e.target.closest('#mobile-location-suggestions')) {
+        document.getElementById('mobile-location-suggestions').style.display = 'none';
+    }
+});
+
+// Función para limpiar filtros (desktop)
+function clearFilters() {
+    document.getElementById('searchForm').reset();
+    // Limpiar la URL manteniendo solo la página base
+    window.location.href = '{% url "public:properties" %}';
+}
+
+// Función para limpiar filtros (móvil)
+function clearMobileFilters() {
+    document.getElementById('mobileSearchForm').reset();
+    window.location.href = '{% url "public:properties" %}';
+}
+
+// Función para ordenar propiedades
+function sortProperties(sortBy) {
+    if (!sortBy) return;
+    
+    const url = new URL(window.location);
+    url.searchParams.set('sort', sortBy);
+    url.searchParams.delete('page'); // Reset pagination
+    window.location.href = url.toString();
+}
+
+// Sincronizar formularios desktop y móvil
+function syncForms() {
+    const desktopForm = document.getElementById('searchForm');
+    const mobileForm = document.getElementById('mobileSearchForm');
+    
+    // Sincronizar valores del formulario móvil con el desktop
+    const mobileInputs = mobileForm.querySelectorAll('input, select');
+    mobileInputs.forEach(input => {
+        const desktopInput = desktopForm.querySelector(`[name="${input.name}"]`);
+        if (desktopInput) {
+            input.value = desktopInput.value;
+        }
+    });
+}
+
+// Ejecutar sincronización al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    syncForms();
+    
+    // Agregar event listeners para sincronizar en tiempo real
+    const allInputs = document.querySelectorAll('#searchForm input, #searchForm select, #mobileSearchForm input, #mobileSearchForm select');
+    allInputs.forEach(input => {
+        input.addEventListener('change', syncForms);
+    });
+});
+
+// Mejorar la experiencia de filtrado en tiempo real (opcional)
+document.addEventListener('DOMContentLoaded', function() {
+    const filterInputs = document.querySelectorAll('#searchForm select');
+    filterInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            // Auto-submit después de un pequeño delay para mejor UX
+            setTimeout(() => {
+                if (this.value !== '') {
+                    document.getElementById('searchForm').submit();
+                }
+            }, 100);
+        });
+    });
+});
+</script>
 {% endblock %}

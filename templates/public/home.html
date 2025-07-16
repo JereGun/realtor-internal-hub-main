@@ -1,13 +1,424 @@
 {% extends "public_base.html" %}
+{% load humanize %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Inmobiliaria Premium - Encuentra tu Hogar Ideal | Venta y Alquiler de Propiedades{% endblock %}
+
+{% block meta_description %}Inmobiliaria Premium: Más de 15 años ayudando a encontrar el hogar perfecto. Venta y alquiler de casas, departamentos y propiedades. Servicio profesional, agentes expertos y atención personalizada.{% endblock %}
+
+{% block meta_keywords %}inmobiliaria, propiedades, casas en venta, departamentos en alquiler, bienes raíces, agentes inmobiliarios, hogar ideal, venta de propiedades, alquiler de propiedades, inmobiliaria premium{% endblock %}
+
+{% block og_title %}Inmobiliaria Premium - Tu Hogar Ideal Te Espera{% endblock %}
+{% block og_description %}Descubre más de {{ total_properties }} propiedades disponibles. 15+ años de experiencia, 500+ familias felices. Encuentra tu hogar perfecto con nosotros.{% endblock %}
+
+{% block structured_data %}
+{
+    "@context": "https://schema.org",
+    "@type": "RealEstateAgent",
+    "name": "Inmobiliaria Premium",
+    "description": "Inmobiliaria especializada en venta y alquiler de propiedades con más de 15 años de experiencia",
+    "url": "{{ request.scheme }}://{{ request.get_host }}",
+    "telephone": "+54-11-1234-5678",
+    "email": "info@inmobiliaria.com",
+    "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Av. Principal 123",
+        "addressLocality": "Ciudad",
+        "addressRegion": "Provincia",
+        "addressCountry": "AR"
+    },
+    "openingHours": [
+        "Mo-Fr 09:00-18:00",
+        "Sa 09:00-14:00"
+    ],
+    "sameAs": [
+        "https://www.facebook.com/inmobiliariapremium",
+        "https://www.instagram.com/inmobiliariapremium",
+        "https://www.linkedin.com/company/inmobiliariapremium"
+    ],
+    "hasOfferCatalog": {
+        "@type": "OfferCatalog",
+        "name": "Propiedades Disponibles",
+        "itemListElement": [
+            {% for property in featured_properties %}
+            {
+                "@type": "Offer",
+                "itemOffered": {
+                    "@type": "Accommodation",
+                    "name": "{{ property.title }}",
+                    "description": "{{ property.description|truncatewords:20 }}",
+                    "address": {
+                        "@type": "PostalAddress",
+                        "streetAddress": "{{ property.street }} {{ property.number }}",
+                        "addressLocality": "{{ property.locality.name }}",
+                        "addressRegion": "{{ property.province.name }}",
+                        "addressCountry": "AR"
+                    }
+                },
+                "price": "{% if property.sale_price %}{{ property.sale_price }}{% elif property.rental_price %}{{ property.rental_price }}{% endif %}",
+                "priceCurrency": "ARS"
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ]
+    }
+}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.9), rgba(59, 130, 246, 0.8)), 
+                    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>');
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 1.5rem;
+        line-height: 1.2;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.25rem;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 2rem;
+        font-weight: 400;
+    }
+    
+    .search-box {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stats-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        color: white;
+    }
+    
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--accent-color);
+    }
+    
+    .feature-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 2rem;
+        color: white;
+    }
+    
+    .property-card-home {
+        border-radius: 20px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .property-card-home:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+    }
+    
+    .property-image {
+        height: 250px;
+        object-fit: cover;
+        width: 100%;
+    }
+    
+    .price-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: var(--accent-color);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
+        .search-box {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="jumbotron">
-  <h1 class="display-4">Welcome to our Real Estate</h1>
-  <p class="lead">Your dream home is just a click away.</p>
-  <hr class="my-4">
-  <p>Explore our properties and find the perfect place to live.</p>
-  <a class="btn btn-primary btn-lg" href="{% url 'public:properties' %}" role="button">View Properties</a>
-</div>
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <div class="hero-content fade-in-up">
+                    <h1 class="hero-title">Encuentra tu hogar perfecto</h1>
+                    <p class="hero-subtitle">Descubre propiedades excepcionales en las mejores ubicaciones. Tu nuevo hogar te está esperando.</p>
+                    
+                    <div class="d-flex gap-3 mb-4">
+                        <a href="{% url 'public:properties' %}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-search me-2"></i>Explorar Propiedades
+                        </a>
+                        <a href="{% url 'public:about' %}" class="btn btn-outline-light btn-lg">
+                            <i class="bi bi-info-circle me-2"></i>Conocer Más
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="search-box fade-in-up">
+                    <h4 class="mb-4 text-center">Búsqueda Rápida</h4>
+                    <form action="{% url 'public:properties' %}" method="get">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Tipo de Propiedad</label>
+                                <select name="property_type" class="form-select">
+                                    <option value="">Todos los tipos</option>
+                                    {% for type in property_types %}
+                                    <option value="{{ type.id }}">{{ type.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Dormitorios</label>
+                                <select name="bedrooms" class="form-select">
+                                    <option value="">Cualquiera</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4+">4+</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Precio Máximo</label>
+                                <input type="number" name="max_price" class="form-control" placeholder="Precio máximo">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Ubicación</label>
+                                <input type="text" name="location_search" class="form-control" placeholder="Ciudad, barrio...">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Buscar por palabra clave</label>
+                                <input type="text" name="search" class="form-control" placeholder="Ej: departamento, centro, garage...">
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-search me-2"></i>Buscar Propiedades
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stats -->
+        <div class="row mt-5">
+            <div class="col-md-3 mb-4">
+                <div class="stats-card">
+                    <div class="stats-number">{{ total_properties }}+</div>
+                    <div>Propiedades Disponibles</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="stats-card">
+                    <div class="stats-number">500+</div>
+                    <div>Clientes Satisfechos</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="stats-card">
+                    <div class="stats-number">15+</div>
+                    <div>Años de Experiencia</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4">
+                <div class="stats-card">
+                    <div class="stats-number">24/7</div>
+                    <div>Atención al Cliente</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Properties -->
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">Propiedades Destacadas</h2>
+            <p class="lead text-muted">Descubre nuestras propiedades más exclusivas y populares</p>
+        </div>
+        
+        <div class="row">
+            {% for property in featured_properties %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card property-card-home">
+                    <div class="position-relative">
+                        {% if property.cover_image %}
+                        <img src="{{ property.cover_image.image.url }}" class="property-image" alt="{{ property.title }}">
+                        {% else %}
+                        <div class="property-image bg-light d-flex align-items-center justify-content-center">
+                            <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="price-badge">
+                            {% if property.sale_price %}
+                                ${{ property.sale_price|floatformat:0|intcomma }}
+                            {% elif property.rental_price %}
+                                ${{ property.rental_price|floatformat:0|intcomma }}/mes
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <h5 class="card-title mb-0">{{ property.title }}</h5>
+                            <span class="badge bg-primary">{{ property.property_type.name }}</span>
+                        </div>
+                        
+                        <p class="text-muted mb-3">
+                            <i class="bi bi-geo-alt me-1"></i>{{ property.full_address|truncatechars:40 }}
+                        </p>
+                        
+                        <div class="row text-center mb-3">
+                            <div class="col-4">
+                                <small class="text-muted d-block">Dormitorios</small>
+                                <strong>{{ property.bedrooms }}</strong>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted d-block">Baños</small>
+                                <strong>{{ property.bathrooms }}</strong>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted d-block">m²</small>
+                                <strong>{{ property.total_surface|floatformat:0 }}</strong>
+                            </div>
+                        </div>
+                        
+                        <a href="{% url 'public:property_detail' property.id %}" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-eye me-2"></i>Ver Detalles
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center">
+                <p class="text-muted">No hay propiedades destacadas disponibles en este momento.</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div class="text-center mt-5">
+            <a href="{% url 'public:properties' %}" class="btn btn-primary btn-lg">
+                <i class="bi bi-buildings me-2"></i>Ver Todas las Propiedades
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="section-padding bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">¿Por qué elegirnos?</h2>
+            <p class="lead text-muted">Ofrecemos el mejor servicio inmobiliario con años de experiencia</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="text-center">
+                    <div class="feature-icon">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Confianza y Seguridad</h5>
+                    <p class="text-muted">Transacciones 100% seguras con asesoramiento legal completo.</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="text-center">
+                    <div class="feature-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Equipo Experto</h5>
+                    <p class="text-muted">Agentes profesionales con amplia experiencia en el mercado.</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="text-center">
+                    <div class="feature-icon">
+                        <i class="bi bi-clock"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Atención 24/7</h5>
+                    <p class="text-muted">Estamos disponibles cuando nos necesites, todos los días del año.</p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="text-center">
+                    <div class="feature-icon">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <h5 class="fw-bold mb-3">Mejor Precio</h5>
+                    <p class="text-muted">Garantizamos los mejores precios del mercado y tasaciones precisas.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="section-padding" style="background: linear-gradient(135deg, var(--primary-color), var(--accent-color));">
+    <div class="container text-center text-white">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <h2 class="display-5 fw-bold mb-4">¿Listo para encontrar tu hogar ideal?</h2>
+                <p class="lead mb-4">Nuestro equipo de expertos está aquí para ayudarte en cada paso del camino. Desde la búsqueda hasta la firma del contrato.</p>
+                
+                <div class="d-flex flex-column flex-md-row gap-3 justify-content-center">
+                    <a href="{% url 'public:properties' %}" class="btn btn-light btn-lg">
+                        <i class="bi bi-search me-2"></i>Buscar Propiedades
+                    </a>
+                    <a href="{% url 'public:agents' %}" class="btn btn-outline-light btn-lg">
+                        <i class="bi bi-telephone me-2"></i>Contactar Agente
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}

@@ -1,0 +1,59 @@
+{% load static %}
+
+<!-- Breadcrumbs -->
+<nav aria-label="breadcrumb" class="breadcrumb-nav">
+    <div class="container">
+        <ol class="breadcrumb bg-transparent p-0 mb-0">
+            <li class="breadcrumb-item">
+                <a href="{% url 'public:home' %}" class="text-decoration-none">
+                    <i class="bi bi-house me-1"></i>Inicio
+                </a>
+            </li>
+            {% block breadcrumb_items %}{% endblock %}
+        </ol>
+    </div>
+</nav>
+
+<!-- Structured Data for Breadcrumbs -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Inicio",
+            "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'public:home' %}"
+        }
+        {% block breadcrumb_structured_data %}{% endblock %}
+    ]
+}
+</script>
+
+<style>
+.breadcrumb-nav {
+    background: var(--light-color);
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    content: "›";
+    color: var(--secondary-color);
+    font-weight: bold;
+}
+
+.breadcrumb-item a {
+    color: var(--primary-color);
+    transition: color 0.3s ease;
+}
+
+.breadcrumb-item a:hover {
+    color: var(--accent-color);
+}
+
+.breadcrumb-item.active {
+    color: var(--secondary-color);
+}
+</style>

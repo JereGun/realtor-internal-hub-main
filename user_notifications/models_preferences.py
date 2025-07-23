@@ -2,7 +2,13 @@ from django.db import models
 from core.models import BaseModel
 
 class NotificationPreference(BaseModel):
-    """Modelo para almacenar las preferencias de notificaciones de los usuarios"""
+    """
+    Modelo que almacena las preferencias de notificaciones de los agentes.
+    
+    Permite a cada agente personalizar qué tipos de notificaciones desea recibir,
+    con qué frecuencia y a través de qué canales. Incluye configuraciones específicas
+    para notificaciones relacionadas con facturas, vencimientos y cambios de estado.
+    """
     
     FREQUENCY_CHOICES = [
         ('immediately', 'Inmediatamente'),

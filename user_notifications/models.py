@@ -8,7 +8,13 @@ from .models_preferences import NotificationPreference
 
 
 class Notification(BaseModel):
-    """Notification model"""
+    """
+    Modelo que representa notificaciones enviadas a los agentes del sistema.
+    
+    Almacena información sobre diferentes tipos de notificaciones relacionadas
+    con facturas, contratos y otros eventos del sistema. Permite relacionar
+    la notificación con cualquier otro modelo mediante una relación genérica.
+    """
     TYPE_CHOICES = [
         ('invoice_due_soon', 'Vencimiento Próximo'),
         ('invoice_overdue', 'Factura Vencida'),

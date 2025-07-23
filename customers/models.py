@@ -3,7 +3,12 @@ from django.db import models
 from core.models import BaseModel
 
 class Customer(BaseModel):
-    """Customer model"""
+    """
+    Modelo de Cliente que almacena información de los clientes del sistema inmobiliario.
+    
+    Contiene datos personales, información de contacto, dirección y datos adicionales
+    relevantes para la gestión de clientes, ya sean propietarios o inquilinos.
+    """
     # Informacion Personal
     first_name = models.CharField(max_length=150, verbose_name="Nombre")
     last_name = models.CharField(max_length=150, verbose_name="Apellido")
@@ -34,13 +39,34 @@ class Customer(BaseModel):
     
     @property
     def full_name(self):
+        """
+        Propiedad que devuelve el nombre completo del cliente.
+        
+        Returns:
+            str: Nombre y apellido concatenados del cliente.
+        """
         return f"{self.first_name} {self.last_name}"
     
     @property
     def full_address(self):
+        """
+        Propiedad que devuelve la dirección completa del cliente.
+        
+        Returns:
+            str: Dirección completa formateada si hay calle y número, o cadena vacía si no hay datos.
+        """
         if self.street and self.number:
             return f"{self.street} {self.number}, {self.neighborhood}"
         return ""
 
     def get_full_name(self):
+        """
+        Método que devuelve el nombre completo del cliente.
+        
+        Este método proporciona compatibilidad con interfaces que esperan
+        un método get_full_name() en lugar de una propiedad.
+        
+        Returns:
+            str: Nombre completo del cliente (nombre y apellido concatenados).
+        """
         return f"{self.first_name} {self.last_name}"

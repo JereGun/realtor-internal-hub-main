@@ -4,7 +4,12 @@ from core.models import BaseModel
 
 
 class PropertyType(BaseModel):
-    """Property type model (Casa, Departamento, Local, etc.)"""
+    """
+    Modelo que representa los diferentes tipos de propiedades inmobiliarias.
+    
+    Almacena categorías como Casa, Departamento, Local, Oficina, etc.,
+    que se utilizan para clasificar las propiedades en el sistema.
+    """
     name = models.CharField(max_length=100, unique=True, verbose_name="Tipo")
     description = models.TextField(blank=True, verbose_name="Descripción")
     
@@ -17,7 +22,12 @@ class PropertyType(BaseModel):
 
 
 class PropertyStatus(BaseModel):
-    """Property status model (Disponible, Vendida, Alquilada, etc.)"""
+    """
+    Modelo que representa los diferentes estados de una propiedad inmobiliaria.
+    
+    Almacena estados como Disponible, Vendida, Alquilada, En Construcción, etc.,
+    que indican la situación actual de comercialización de la propiedad.
+    """
     name = models.CharField(max_length=100, unique=True, verbose_name="Estado")
     description = models.TextField(blank=True, verbose_name="Descripción")
     
@@ -30,7 +40,12 @@ class PropertyStatus(BaseModel):
 
 
 class Feature(BaseModel):
-    """Property features model (Piscina, Garage, etc.)"""
+    """
+    Modelo que representa las características o amenidades de una propiedad.
+    
+    Almacena características como Piscina, Garage, Jardín, Seguridad 24hs, etc.,
+    que pueden asociarse a las propiedades para describir sus comodidades.
+    """
     name = models.CharField(max_length=100, unique=True, verbose_name="Característica")
     description = models.TextField(blank=True, verbose_name="Descripción")
     
@@ -43,7 +58,13 @@ class Feature(BaseModel):
 
 
 class Tag(BaseModel):
-    """Property tags model"""
+    """
+    Modelo que representa etiquetas para categorizar propiedades.
+    
+    Las etiquetas permiten clasificar y filtrar propiedades según características
+    especiales como 'Oportunidad', 'Destacada', 'Recién Reducida', etc.
+    Cada etiqueta tiene un color asociado para su visualización en la interfaz.
+    """
     name = models.CharField(max_length=50, unique=True, verbose_name="Etiqueta")
     color = models.CharField(max_length=7, default="#007bff", verbose_name="Color")
     
@@ -56,7 +77,13 @@ class Tag(BaseModel):
 
 
 class Property(BaseModel):
-    """Main Property model"""
+    """
+    Modelo principal de Propiedad inmobiliaria.
+    
+    Almacena toda la información relacionada con una propiedad, incluyendo datos básicos,
+    ubicación, características físicas, información financiera y relaciones con otros
+    modelos como agentes, propietarios, características y etiquetas.
+    """
     # Listing type choices
     LISTING_TYPE_CHOICES = [
         ('rent', 'Alquiler'),
@@ -113,17 +140,36 @@ class Property(BaseModel):
     
     @property
     def full_address(self):
+        """
+        Devuelve la dirección completa de la propiedad formateada.
+        
+        Returns:
+            str: Dirección completa incluyendo calle, número, barrio, localidad y provincia.
+        """
         return f"{self.street} {self.number}, {self.neighborhood}, {self.locality}, {self.province}"
     
     @property
     def cover_image(self):
+        """
+        Devuelve la imagen principal o de portada de la propiedad.
+        
+        Returns:
+            PropertyImage: La primera imagen marcada como portada (is_cover=True),
+            o None si no existe ninguna imagen de portada.
+        """
         return self.images.filter(is_cover=True).first()
         
     @property
     def display_price(self):
         """
-        Returns the appropriate price to display based on the listing type.
-        For 'both' type, returns a dictionary with both prices.
+        Devuelve el precio apropiado para mostrar según el tipo de listado.
+        
+        Para propiedades en alquiler, devuelve el precio de alquiler.
+        Para propiedades en venta, devuelve el precio de venta.
+        Para propiedades en ambas categorías, devuelve un diccionario con ambos precios.
+        
+        Returns:
+            dict: Diccionario con el tipo de listado, precio(s) y etiqueta(s) correspondiente(s).
         """
         if self.listing_type == 'rent':
             return {'type': 'rent', 'price': self.rental_price, 'label': 'Alquiler'}
@@ -140,7 +186,13 @@ class Property(BaseModel):
 
 
 class PropertyImage(BaseModel):
-    """Property images model"""
+    """
+    Modelo que representa las imágenes asociadas a una propiedad.
+    
+    Permite almacenar múltiples imágenes para cada propiedad, con la posibilidad
+    de marcar una de ellas como imagen principal o de portada. Incluye un mecanismo
+    para garantizar que solo una imagen sea marcada como portada por propiedad.
+    """
     property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='images', verbose_name="Propiedad")
     image = models.ImageField(upload_to='properties/', verbose_name="Imagen")
     is_cover = models.BooleanField(default=False, verbose_name="Imagen de Portada")

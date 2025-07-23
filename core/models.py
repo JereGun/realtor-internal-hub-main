@@ -3,7 +3,12 @@ from django.db import models
 
 
 class BaseModel(models.Model):
-    """Base model with common fields"""
+    """
+    Modelo base abstracto que proporciona campos comunes para todos los modelos del sistema.
+    
+    Incluye campos para el seguimiento de la creación y actualización de registros,
+    permitiendo una auditoría básica de los datos en el sistema.
+    """
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -12,7 +17,13 @@ class BaseModel(models.Model):
 
 
 class Company(models.Model):
-    """Model to store company information"""
+    """
+    Modelo para almacenar información de la empresa inmobiliaria.
+    
+    Contiene datos básicos de la empresa como nombre, dirección, información
+    de contacto, logotipo e identificación fiscal, necesarios para la
+    generación de documentos y configuración del sistema.
+    """
     name = models.CharField(max_length=255, help_text="Nombre de la empresa")
     address = models.CharField(max_length=255, blank=True, null=True, help_text="Dirección de la empresa")
     phone = models.CharField(max_length=20, blank=True, null=True, help_text="Teléfono de contacto")

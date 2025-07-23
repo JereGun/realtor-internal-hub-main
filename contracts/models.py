@@ -4,7 +4,13 @@ from decimal import Decimal
 
 
 class Contract(BaseModel):
-    """Contract model"""
+    """
+    Modelo de Contrato que representa acuerdos entre clientes y propietarios.
+    
+    Almacena información detallada sobre contratos inmobiliarios, incluyendo
+    datos de la propiedad, cliente, agente, fechas, montos, términos de aumento
+    y estado actual del contrato. Gestiona la lógica de estados y aumentos periódicos.
+    """
     
     FREQUENCY_CHOICES = [
         ('monthly', 'Mensual'),
@@ -65,13 +71,29 @@ class Contract(BaseModel):
         return f"Contrato ({self.get_status_display()}) - {self.property.title} - {self.customer.full_name}"
     
     def duration_in_days(self):
-        """Calculates the duration of the contract in days if end_date is set."""
+        """
+        Calcula la duración del contrato en días.
+        
+        Returns:
+            int: Número de días entre la fecha de inicio y fin del contrato,
+                 o None si no hay fecha de fin establecida.
+        """
         if self.end_date and self.start_date:
             return (self.end_date - self.start_date).days
         return None
 
     def is_expiring_soon(self, days_threshold=30):
-        """Checks if a contract is expiring within the given threshold (default 30 days)."""
+        """
+        Verifica si un contrato está próximo a vencer dentro del umbral especificado.
+        
+        Args:
+            days_threshold (int): Número de días para considerar que un contrato está próximo a vencer.
+                                 Por defecto es 30 días.
+        
+        Returns:
+            bool: True si el contrato está activo y vence dentro del umbral especificado,
+                  False en caso contrario.
+        """
         if self.end_date and self.status == self.STATUS_ACTIVE:
             from django.utils import timezone
             return self.start_date <= timezone.now().date() <= self.end_date and \
@@ -79,8 +101,13 @@ class Contract(BaseModel):
         return False
 
     def update_status(self):
-        """Updates the contract status based on dates. 
-           This could be called periodically by a cron job or upon model save.
+        """
+        Actualiza el estado del contrato basándose en las fechas actuales.
+        
+        Evalúa la fecha actual en relación con las fechas de inicio y fin del contrato
+        para determinar su estado (borrador, activo, próximo a vencer, finalizado).
+        Este método puede ser llamado periódicamente por un trabajo programado
+        o al guardar el modelo.
         """
         from django.utils import timezone
         today = timezone.now().date()
@@ -101,7 +128,15 @@ class Contract(BaseModel):
         # self.save(update_fields=['status'])
 
     def commission_amount(self):
-        """Calculate commission based on agent's rate and contract amount."""
+        """
+        Calcula la comisión del agente basada en su tasa y el monto del contrato.
+        
+        Utiliza el atributo commission_rate del agente (si existe) para calcular
+        el monto de la comisión como un porcentaje del valor del contrato.
+        
+        Returns:
+            Decimal: Monto de la comisión calculada, o 0.00 si no se puede calcular.
+        """
         if self.agent and hasattr(self.agent, 'commission_rate') and self.amount:
             # Ensure agent has commission_rate attribute
             commission_rate = getattr(self.agent, 'commission_rate', Decimal('0.00'))
@@ -112,7 +147,14 @@ class Contract(BaseModel):
 
 
 class ContractIncrease(BaseModel):
-    """Contract increase model for rental adjustments"""
+    """
+    Modelo que registra los aumentos de precio en contratos de alquiler.
+    
+    Almacena información sobre cada ajuste de precio realizado a un contrato,
+    incluyendo el monto anterior, el nuevo monto, el porcentaje de aumento,
+    la fecha efectiva y notas adicionales. Incluye validaciones para garantizar
+    la integridad de los datos de aumento.
+    """
     contract = models.ForeignKey(Contract, on_delete=models.CASCADE, related_name='increases', verbose_name="Contrato")
     previous_amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Monto Anterior")
     new_amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Nuevo Monto")
@@ -130,9 +172,15 @@ class ContractIncrease(BaseModel):
     
     def clean(self):
         """
-        Validates the ContractIncrease instance before saving, ensuring:
-        - Effective date is logical with respect to contract dates and previous increases.
-        - Previous amount is positive if new amount is also provided (for percentage calculation).
+        Valida la instancia de ContractIncrease antes de guardarla.
+        
+        Realiza las siguientes validaciones:
+        - La fecha efectiva es lógica respecto a las fechas del contrato y aumentos previos.
+        - El monto anterior es positivo si se proporciona un nuevo monto (para cálculo de porcentaje).
+        
+        Raises:
+            ValidationError: Si alguna de las validaciones falla, con mensajes específicos
+                            para cada tipo de error.
         """
         from django.core.exceptions import ValidationError
         # Validate effective_date
@@ -158,6 +206,17 @@ class ContractIncrease(BaseModel):
         super().clean()
 
     def save(self, *args, **kwargs):
+        """
+        Guarda la instancia de ContractIncrease y calcula automáticamente el porcentaje de aumento.
+        
+        Si el porcentaje de aumento no está establecido o es cero, lo calcula automáticamente
+        basándose en el monto anterior y el nuevo monto. Si el monto anterior no es válido
+        o no está establecido, establece el porcentaje de aumento como None.
+        
+        Args:
+            *args: Argumentos variables para el método save.
+            **kwargs: Argumentos de palabras clave para el método save.
+        """
         # Calculate increase percentage if not provided and amounts are valid
         if self.previous_amount and self.new_amount and self.previous_amount > 0:
             if self.increase_percentage is None or self.increase_percentage == 0: # Recalculate if not set or zero

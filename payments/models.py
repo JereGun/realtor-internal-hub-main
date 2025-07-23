@@ -4,7 +4,13 @@ from core.models import BaseModel
 
 
 class PaymentMethod(BaseModel):
-    """Payment method model"""
+    """
+    Modelo que representa los métodos de pago disponibles en el sistema.
+    
+    Almacena información sobre las diferentes formas de pago que pueden
+    utilizarse en las transacciones, como efectivo, transferencia bancaria,
+    tarjeta de crédito, etc.
+    """
     name = models.CharField(max_length=100, unique=True, verbose_name="Método de Pago")
     description = models.TextField(blank=True, verbose_name="Descripción")
     is_active = models.BooleanField(default=True, verbose_name="Activo")
@@ -18,7 +24,13 @@ class PaymentMethod(BaseModel):
 
 
 class ContractPayment(BaseModel):
-    """Contract payment model"""
+    """
+    Modelo que representa los pagos asociados a contratos inmobiliarios.
+    
+    Registra información detallada sobre cada pago, incluyendo el contrato asociado,
+    método de pago, montos, fechas de vencimiento y pago, estado actual y datos
+    adicionales como número de recibo y notas.
+    """
     PAYMENT_STATUS = [
         ('pending', 'Pendiente'),
         ('paid', 'Pagado'),
@@ -50,5 +62,14 @@ class ContractPayment(BaseModel):
     
     @property
     def is_overdue(self):
+        """
+        Determina si el pago está vencido.
+        
+        Un pago se considera vencido si su estado es 'pendiente' y
+        la fecha de vencimiento es anterior a la fecha actual.
+        
+        Returns:
+            bool: True si el pago está vencido, False en caso contrario.
+        """
         from django.utils import timezone
         return self.status == 'pending' and self.due_date < timezone.now().date()

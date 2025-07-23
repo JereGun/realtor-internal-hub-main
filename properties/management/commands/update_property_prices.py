@@ -4,9 +4,32 @@ from decimal import Decimal
 import random
 
 class Command(BaseCommand):
+    """
+    Comando de Django para actualizar los precios de las propiedades inmobiliarias.
+    
+    Este comando actualiza los precios de venta y alquiler de las propiedades
+    según su tipo de listado (venta, alquiler o ambos). También puede convertir
+    algunas propiedades de un tipo de listado a otro para mantener una distribución
+    equilibrada en el sistema.
+    """
     help = 'Actualiza los precios de las propiedades según su tipo de listado'
 
     def handle(self, *args, **options):
+        """
+        Ejecuta el comando de actualización de precios de propiedades.
+        
+        Este método implementa la lógica principal del comando:
+        1. Actualiza los precios de propiedades en venta
+        2. Actualiza los precios de propiedades en alquiler
+        3. Actualiza los precios de propiedades en venta y alquiler
+        4. Convierte algunas propiedades de venta a alquiler si hay pocas en alquiler
+        5. Convierte algunas propiedades a venta y alquiler si hay pocas en esta categoría
+        6. Muestra un resumen de la distribución de propiedades
+        
+        Args:
+            *args: Argumentos posicionales (no utilizados)
+            **options: Opciones del comando (no utilizadas)
+        """
         # Actualizar propiedades en venta
         sale_properties = Property.objects.filter(listing_type='sale')
         for prop in sale_properties:

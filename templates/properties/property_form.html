@@ -221,8 +221,11 @@
                             <div id="collapseFinancial" class="accordion-collapse collapse" aria-labelledby="headingFinancial" data-bs-parent="#propertyFormAccordion">
                                 <div class="accordion-body">
                                     <div class="row g-3">
-                                        <div class="col-md-4">{{ form.sale_price|as_crispy_field }}</div>
-                                        <div class="col-md-4">{{ form.rental_price|as_crispy_field }}</div>
+                                        <div class="col-md-12 mb-3">
+                                            {{ form.listing_type|as_crispy_field }}
+                                        </div>
+                                        <div class="col-md-4" id="sale_price_container">{{ form.sale_price|as_crispy_field }}</div>
+                                        <div class="col-md-4" id="rental_price_container">{{ form.rental_price|as_crispy_field }}</div>
                                         <div class="col-md-4">{{ form.expenses|as_crispy_field }}</div>
                                     </div>
                                 </div>
@@ -887,4 +890,37 @@ document.addEventListener('DOMContentLoaded', function() {
     display: block; /* Django default might be none */
 }
 </style>
+
+<!-- Script para controlar la visibilidad de los campos de precio según el tipo de listado -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Función para mostrar/ocultar campos de precio según el tipo de listado
+        function togglePriceFields() {
+            const listingType = document.getElementById('id_listing_type').value;
+            const salePriceContainer = document.getElementById('sale_price_container');
+            const rentalPriceContainer = document.getElementById('rental_price_container');
+            
+            if (listingType === 'sale') {
+                salePriceContainer.style.display = 'block';
+                rentalPriceContainer.style.display = 'none';
+                document.getElementById('id_rental_price').value = '';
+            } else if (listingType === 'rent') {
+                salePriceContainer.style.display = 'none';
+                rentalPriceContainer.style.display = 'block';
+                document.getElementById('id_sale_price').value = '';
+            } else { // both
+                salePriceContainer.style.display = 'block';
+                rentalPriceContainer.style.display = 'block';
+            }
+        }
+        
+        // Asignar el evento change al campo listing_type
+        const listingTypeSelect = document.getElementById('id_listing_type');
+        if (listingTypeSelect) {
+            listingTypeSelect.addEventListener('change', togglePriceFields);
+            // Ejecutar al cargar la página para establecer el estado inicial
+            togglePriceFields();
+        }
+    });
+</script>
 {% endblock %}

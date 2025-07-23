@@ -8,7 +8,6 @@ from django.http import HttpResponse, JsonResponse
 from django.template.loader import render_to_string
 from django.db.models import Q, Sum
 from django.forms import modelform_factory
-from django.contrib.contenttypes.models import ContentType
 from weasyprint import HTML
 from .models_invoice import Invoice, InvoiceLine, Payment
 from .forms_invoice import InvoiceForm, InvoiceLineFormSet, InvoiceLineForm
@@ -21,51 +20,39 @@ from user_notifications.models import Notification
 def accounting_dashboard(request):
     # Obtener estadísticas de facturas
     total_invoices = Invoice.objects.count()
-    pending_invoices = Invoice.objects.filter(status__in=["validated", "sent"]).count()
-    paid_invoices = Invoice.objects.filter(status="paid").count()
-    cancelled_invoices = Invoice.objects.filter(status="cancelled").count()
-
+    pending_invoices = Invoice.objects.filter(status__in=['validated', 'sent']).count()
+    paid_invoices = Invoice.objects.filter(status='paid').count()
+    cancelled_invoices = Invoice.objects.filter(status='cancelled').count()
+    
     # Calcular totales por estado
-    total_pending = (
-        Invoice.objects.filter(status__in=["validated", "sent"]).aggregate(
-            total=Sum("total_amount")
-        )["total"]
-        or 0
-    )
-    total_paid = (
-        Invoice.objects.filter(status="paid").aggregate(total=Sum("total_amount"))[
-            "total"
-        ]
-        or 0
-    )
-
+    total_pending = Invoice.objects.filter(status__in=['validated', 'sent']).aggregate(
+        total=Sum('total_amount'))['total'] or 0
+    total_paid = Invoice.objects.filter(status='paid').aggregate(
+        total=Sum('total_amount'))['total'] or 0
+    
     # Facturas recientes
-    recent_invoices = Invoice.objects.select_related("customer").order_by("-date")[:10]
-
+    recent_invoices = Invoice.objects.select_related('customer').order_by('-date')[:10]
+    
     # Pagos recientes
-    recent_payments = Payment.objects.select_related("invoice").order_by("-date")[:10]
-
+    recent_payments = Payment.objects.select_related('invoice').order_by('-date')[:10]
+    
     # Facturas vencidas
-    overdue_invoices = (
-        Invoice.objects.filter(
-            status__in=["validated", "sent"], due_date__lt=timezone.now().date()
-        )
-        .select_related("customer")
-        .order_by("due_date")
-    )
-
+    overdue_invoices = Invoice.objects.filter(
+        status__in=["validated", "sent"], due_date__lt=timezone.now().date()
+    ).select_related("customer").order_by("due_date")
+    
     context = {
-        "total_invoices": total_invoices,
-        "pending_invoices": pending_invoices,
-        "paid_invoices": paid_invoices,
-        "cancelled_invoices": cancelled_invoices,
-        "total_pending": total_pending,
-        "total_paid": total_paid,
-        "recent_invoices": recent_invoices,
-        "recent_payments": recent_payments,
-        "overdue_invoices": overdue_invoices,
+        'total_invoices': total_invoices,
+        'pending_invoices': pending_invoices,
+        'paid_invoices': paid_invoices,
+        'cancelled_invoices': cancelled_invoices,
+        'total_pending': total_pending,
+        'total_paid': total_paid,
+        'recent_invoices': recent_invoices,
+        'recent_payments': recent_payments,
+        'overdue_invoices': overdue_invoices,
     }
-
+    
     return render(request, "accounting/accounting_dashboard.html", context)
 
 
@@ -86,34 +73,48 @@ def invoice_list(request):
     status = request.GET.get("status")
     if status:
         invoice_list = invoice_list.filter(status=status)
-
+    
     # Filtro por cliente
     customer_id = request.GET.get("customer")
     if customer_id:
         invoice_list = invoice_list.filter(customer_id=customer_id)
-
-    # Filtro por fecha desde
+    
+    # Filtro por fecha de emisión desde
     date_from = request.GET.get("date_from")
     if date_from:
         try:
             date_from = timezone.datetime.strptime(date_from, "%Y-%m-%d").date()
             invoice_list = invoice_list.filter(date__gte=date_from)
         except ValueError:
-            messages.warning(
-                request, "Formato de fecha 'desde' incorrecto. Use YYYY-MM-DD."
-            )
-
-    # Filtro por fecha hasta
+            messages.warning(request, "Formato de fecha de emisión 'desde' incorrecto. Use YYYY-MM-DD.")
+    
+    # Filtro por fecha de emisión hasta
     date_to = request.GET.get("date_to")
     if date_to:
         try:
             date_to = timezone.datetime.strptime(date_to, "%Y-%m-%d").date()
             invoice_list = invoice_list.filter(date__lte=date_to)
         except ValueError:
-            messages.warning(
-                request, "Formato de fecha 'hasta' incorrecto. Use YYYY-MM-DD."
-            )
-
+            messages.warning(request, "Formato de fecha de emisión 'hasta' incorrecto. Use YYYY-MM-DD.")
+    
+    # Filtro por fecha de vencimiento desde
+    due_date_from = request.GET.get("due_date_from")
+    if due_date_from:
+        try:
+            due_date_from = timezone.datetime.strptime(due_date_from, "%Y-%m-%d").date()
+            invoice_list = invoice_list.filter(due_date__gte=due_date_from)
+        except ValueError:
+            messages.warning(request, "Formato de fecha de vencimiento 'desde' incorrecto. Use YYYY-MM-DD.")
+    
+    # Filtro por fecha de vencimiento hasta
+    due_date_to = request.GET.get("due_date_to")
+    if due_date_to:
+        try:
+            due_date_to = timezone.datetime.strptime(due_date_to, "%Y-%m-%d").date()
+            invoice_list = invoice_list.filter(due_date__lte=due_date_to)
+        except ValueError:
+            messages.warning(request, "Formato de fecha de vencimiento 'hasta' incorrecto. Use YYYY-MM-DD.")
+    
     # Filtro por monto mínimo
     min_amount = request.GET.get("min_amount")
     if min_amount:
@@ -122,7 +123,7 @@ def invoice_list(request):
             invoice_list = invoice_list.filter(total_amount__gte=min_amount)
         except ValueError:
             messages.warning(request, "El monto mínimo debe ser un número.")
-
+    
     # Filtro por monto máximo
     max_amount = request.GET.get("max_amount")
     if max_amount:
@@ -131,22 +132,29 @@ def invoice_list(request):
             invoice_list = invoice_list.filter(total_amount__lte=max_amount)
         except ValueError:
             messages.warning(request, "El monto máximo debe ser un número.")
-
+    
     # Filtro por facturas vencidas
     overdue = request.GET.get("overdue")
     if overdue == "yes":
         invoice_list = invoice_list.filter(
             status__in=["validated", "sent"], due_date__lt=timezone.now().date()
         )
+    
+    # Filtro por contrato
+    contract = request.GET.get("contract")
+    if contract:
+        if contract == "with_contract":
+            invoice_list = invoice_list.filter(contract__isnull=False)
+        elif contract == "without_contract":
+            invoice_list = invoice_list.filter(contract__isnull=True)
 
     paginator = Paginator(invoice_list, 25)  # 25 facturas por página
     page_number = request.GET.get("page")
     invoices = paginator.get_page(page_number)
-
+    
     # Obtener lista de clientes para el filtro
     from customers.models import Customer
-
-    customers = Customer.objects.all().order_by("last_name", "first_name")
+    customers = Customer.objects.all().order_by('last_name', 'first_name')
 
     return render(
         request,
@@ -159,16 +167,27 @@ def invoice_list(request):
             "date_from": (
                 date_from
                 if isinstance(date_from, str)
-                else date_from.strftime("%Y-%m-%d") if date_from else ""
+                else date_from.strftime("%Y-%m-%d") if hasattr(date_from, 'strftime') else ""
             ),
             "date_to": (
                 date_to
                 if isinstance(date_to, str)
-                else date_to.strftime("%Y-%m-%d") if date_to else ""
+                else date_to.strftime("%Y-%m-%d") if hasattr(date_to, 'strftime') else ""
+            ),
+            "due_date_from": (
+                due_date_from
+                if isinstance(due_date_from, str)
+                else due_date_from.strftime("%Y-%m-%d") if hasattr(due_date_from, 'strftime') else ""
+            ),
+            "due_date_to": (
+                due_date_to
+                if isinstance(due_date_to, str)
+                else due_date_to.strftime("%Y-%m-%d") if hasattr(due_date_to, 'strftime') else ""
             ),
             "min_amount": min_amount,
             "max_amount": max_amount,
             "overdue": overdue,
+            "contract": contract,
             "customers": customers,
         },
     )
@@ -541,12 +560,12 @@ def invoice_notifications(request):
             "selected_read_status": read_status or "all",
             "date_from": (
                 date_from.strftime("%Y-%m-%d")
-                if hasattr(date_from, "strftime")
+                if hasattr(date_from, 'strftime')
                 else date_from
             ),
             "date_to": (
                 date_to.strftime("%Y-%m-%d")
-                if hasattr(date_to, "strftime")
+                if hasattr(date_to, 'strftime')
                 else date_to
             ),
         },
@@ -790,7 +809,7 @@ def invoice_reactivate(request, pk):
         else:
             # Si no tiene pagos, volver a estado validado
             invoice.status = "validated"
-
+        
         invoice.save(update_fields=["status"])
 
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
@@ -854,7 +873,7 @@ def invoice_validate(request, pk):
 def invoice_duplicate(request, pk):
     """Función para duplicar una factura existente"""
     original_invoice = get_object_or_404(Invoice, pk=pk)
-
+    
     if request.method == "POST":
         # Crear una nueva factura basada en la original
         new_invoice = Invoice.objects.create(
@@ -866,27 +885,102 @@ def invoice_duplicate(request, pk):
             status="draft",
             user=request.user,
             # Generar un nuevo número de factura
-            number=f"COPIA-{original_invoice.number}",
+            number=f"COPIA-{original_invoice.number}"
         )
-
+        
         # Duplicar las líneas de la factura
         for line in original_invoice.lines.all():
             InvoiceLine.objects.create(
-                invoice=new_invoice, concept=line.concept, amount=line.amount
+                invoice=new_invoice,
+                concept=line.concept,
+                amount=line.amount
             )
-
+        
         # Calcular el total
         new_invoice.compute_total()
-
-        messages.success(
-            request,
-            "Factura duplicada correctamente. Revise los datos antes de validarla.",
-        )
+        
+        messages.success(request, "Factura duplicada correctamente. Revise los datos antes de validarla.")
         return redirect("accounting:invoice_update", pk=new_invoice.pk)
-
+    
     # Si es GET, mostrar confirmación
     return render(
-        request,
-        "accounting/invoice_confirm_duplicate.html",
-        {"invoice": original_invoice},
+        request, "accounting/invoice_confirm_duplicate.html", {"invoice": original_invoice}
     )
+
+
+@login_required
+def send_bulk_emails(request):
+    """
+    Vista para enviar correos electrónicos de manera masiva a las facturas seleccionadas.
+    """
+    if request.method != "POST":
+        return redirect("accounting:invoice_list")
+    
+    # Obtener los IDs de las facturas seleccionadas
+    invoice_ids = request.POST.getlist("invoice_ids")
+    
+    if not invoice_ids:
+        messages.warning(request, "No se seleccionaron facturas para enviar correos.")
+        return redirect("accounting:invoice_list")
+    
+    # Obtener las facturas seleccionadas que cumplan con los requisitos:
+    # 1. El cliente debe tener correo electrónico
+    # 2. La factura debe estar en estado "validated" o "sent"
+    invoices = Invoice.objects.filter(
+        id__in=invoice_ids,
+        status__in=["validated", "sent"]
+    ).select_related("customer").filter(
+        customer__email__isnull=False
+    ).exclude(
+        customer__email=""
+    )
+    
+    # Contar facturas procesadas y errores
+    success_count = 0
+    error_count = 0
+    no_email_count = 0
+    invalid_status_count = 0
+    
+    # Procesar cada factura
+    for invoice in invoices:
+        try:
+            # Verificar si el cliente tiene correo electrónico
+            if not invoice.customer.email:
+                no_email_count += 1
+                continue
+            
+            # Verificar si la factura está en un estado válido
+            if invoice.status not in ["validated", "sent"]:
+                invalid_status_count += 1
+                continue
+            
+            # Enviar el correo electrónico
+            send_invoice_email(invoice)
+            
+            # Marcar la factura como enviada si estaba validada
+            if invoice.status == "validated":
+                invoice.mark_as_sent()
+            
+            success_count += 1
+        
+        except Exception as e:
+            error_count += 1
+            # Registrar el error para depuración
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error al enviar correo para factura {invoice.id}: {str(e)}")
+    
+    # Mostrar mensajes según los resultados
+    if success_count > 0:
+        messages.success(request, f"Se enviaron correctamente {success_count} correos electrónicos.")
+    
+    if error_count > 0:
+        messages.error(request, f"Ocurrieron {error_count} errores al enviar correos. Revise el registro para más detalles.")
+    
+    if no_email_count > 0:
+        messages.warning(request, f"{no_email_count} facturas fueron omitidas porque los clientes no tienen correo electrónico.")
+    
+    if invalid_status_count > 0:
+        messages.warning(request, f"{invalid_status_count} facturas fueron omitidas porque no están en estado 'Validada' o 'Enviada'.")
+    
+    return redirect("accounting:invoice_list")

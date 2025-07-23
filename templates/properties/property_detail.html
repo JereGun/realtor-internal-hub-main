@@ -222,19 +222,23 @@
                     {% endif %}
                 </ul>
 
-                <!-- Precios -->
-                {% if property.sale_price %}
-                <div class="mb-3 p-3 bg-light rounded text-center">
-                    <h6 class="text-success mb-0">PRECIO DE VENTA</h6>
-                    <span class="h2 fw-bold text-success">${{ property.sale_price|floatformat:0|intcomma }}</span>
-                </div>
+                <!-- Precios según tipo de listado -->
+                {% if property.listing_type == 'sale' or property.listing_type == 'both' %}
+                    {% if property.sale_price %}
+                    <div class="mb-3 p-3 bg-light rounded text-center">
+                        <h6 class="text-success mb-0">PRECIO DE VENTA</h6>
+                        <span class="h2 fw-bold text-success">${{ property.sale_price|floatformat:0|intcomma }}</span>
+                    </div>
+                    {% endif %}
                 {% endif %}
 
-                {% if property.rental_price %}
-                <div class="mb-3 p-3 bg-light rounded text-center">
-                    <h6 class="text-info mb-0">PRECIO DE ALQUILER</h6>
-                    <span class="h4 fw-bold text-info">${{ property.rental_price|floatformat:0|intcomma }} <small>/mes</small></span>
-                </div>
+                {% if property.listing_type == 'rent' or property.listing_type == 'both' %}
+                    {% if property.rental_price %}
+                    <div class="mb-3 p-3 bg-light rounded text-center">
+                        <h6 class="text-info mb-0">PRECIO DE ALQUILER</h6>
+                        <span class="h4 fw-bold text-info">${{ property.rental_price|floatformat:0|intcomma }} <small>/mes</small></span>
+                    </div>
+                    {% endif %}
                 {% endif %}
 
                 {% if property.expenses %}

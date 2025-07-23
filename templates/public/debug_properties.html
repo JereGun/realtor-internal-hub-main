@@ -1,0 +1,81 @@
+{% extends "public_base.html" %}
+
+{% block title %}Debug Propiedades{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1>Debug Propiedades</h1>
+    
+    <div class="row mb-4">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Resumen</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Total de propiedades:</strong> {{ properties|length }}</p>
+                    <p><strong>Propiedades en venta:</strong> {{ sale_count }}</p>
+                    <p><strong>Propiedades en alquiler:</strong> {{ rent_count }}</p>
+                    <p><strong>Propiedades en venta y alquiler:</strong> {{ both_count }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Propiedades</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Título</th>
+                                    <th>Tipo de Listado</th>
+                                    <th>Precio de Venta</th>
+                                    <th>Precio de Alquiler</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for property in properties %}
+                                <tr>
+                                    <td>{{ property.id }}</td>
+                                    <td>{{ property.title }}</td>
+                                    <td>
+                                        {% if property.listing_type == 'sale' %}
+                                            <span class="badge bg-success">Venta</span>
+                                        {% elif property.listing_type == 'rent' %}
+                                            <span class="badge bg-primary">Alquiler</span>
+                                        {% else %}
+                                            <span class="badge bg-info">Venta y Alquiler</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if property.sale_price %}
+                                            ${{ property.sale_price|floatformat:0|intcomma }}
+                                        {% else %}
+                                            <span class="text-muted">No establecido</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if property.rental_price %}
+                                            ${{ property.rental_price|floatformat:0|intcomma }}/mes
+                                        {% else %}
+                                            <span class="text-muted">No establecido</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

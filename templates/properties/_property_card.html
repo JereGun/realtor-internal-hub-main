@@ -46,11 +46,15 @@
             </div>
             
             <div class="my-2 flex-grow-1">
-                {% if property.sale_price %}
-                    <p class="mb-1"><strong class="text-success h5">Venta: ${{ property.sale_price|floatformat:0|intcomma }}</strong></p>
+                {% if property.listing_type == 'sale' or property.listing_type == 'both' %}
+                    {% if property.sale_price %}
+                        <p class="mb-1"><strong class="text-success h5">Venta: ${{ property.sale_price|floatformat:0|intcomma }}</strong></p>
+                    {% endif %}
                 {% endif %}
-                {% if property.rental_price %}
-                    <p class="mb-0"><strong class="text-info h6">Alquiler: ${{ property.rental_price|floatformat:0|intcomma }}/mes</strong></p>
+                {% if property.listing_type == 'rent' or property.listing_type == 'both' %}
+                    {% if property.rental_price %}
+                        <p class="mb-0"><strong class="text-info h6">Alquiler: ${{ property.rental_price|floatformat:0|intcomma }}/mes</strong></p>
+                    {% endif %}
                 {% endif %}
             </div>
             

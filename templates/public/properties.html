@@ -154,6 +154,17 @@
                                 </select>
                             </div>
                             
+                            <!-- Tipo de Listado -->
+                            <div class="mb-4">
+                                <label for="listing_type" class="form-label fw-bold">Tipo de Listado</label>
+                                <select name="listing_type" class="form-select" id="listing_type">
+                                    <option value="">Todos</option>
+                                    <option value="sale" {% if current_filters.listing_type == "sale" %}selected{% endif %}>Venta</option>
+                                    <option value="rent" {% if current_filters.listing_type == "rent" %}selected{% endif %}>Alquiler</option>
+                                    <option value="both" {% if current_filters.listing_type == "both" %}selected{% endif %}>Venta y Alquiler</option>
+                                </select>
+                            </div>
+                            
                             <!-- Garage -->
                             <div class="mb-4">
                                 <label for="garage" class="form-label fw-bold">Garage</label>
@@ -224,9 +235,18 @@
         {% for property in properties %}
         <div class="col">
             <div class="card h-100 shadow-sm property-card">
-                {% if property.cover_image %}
-                <img src="{{ property.cover_image.image.url }}" class="card-img-top property-card-img" alt="{{ property.title }}">
-                {% endif %}
+                <div class="position-relative">
+                    {% if property.cover_image %}
+                    <img src="{{ property.cover_image.image.url }}" class="card-img-top property-card-img" alt="{{ property.title }}">
+                    {% endif %}
+                    <!-- Etiqueta de tipo de listado -->
+                    <div class="listing-type-ribbon 
+                        {% if property.listing_type == 'sale' %}sale{% elif property.listing_type == 'rent' %}rent{% else %}both{% endif %}">
+                        {% if property.listing_type == 'sale' %}VENTA
+                        {% elif property.listing_type == 'rent' %}ALQUILER
+                        {% else %}VENTA Y ALQUILER{% endif %}
+                    </div>
+                </div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start mb-3">
                         <h5 class="card-title mb-0">{{ property.title }}</h5>
@@ -251,10 +271,37 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <span class="h4 mb-0">
-                                {% if property.sale_price %}
-                                    ${{ property.sale_price|floatformat:0|intcomma }}
-                                {% elif property.rental_price %}
-                                    ${{ property.rental_price|floatformat:0|intcomma }}/mes
+                                {% if property.listing_type == 'sale' %}
+                                    {% if property.sale_price %}
+                                        ${{ property.sale_price|floatformat:0|intcomma }}
+                                    {% else %}
+                                        <span class="text-muted">Consultar precio</span>
+                                    {% endif %}
+                                {% elif property.listing_type == 'rent' %}
+                                    {% if property.rental_price %}
+                                        ${{ property.rental_price|floatformat:0|intcomma }}/mes
+                                    {% else %}
+                                        <span class="text-muted">Consultar precio</span>
+                                    {% endif %}
+                                {% else %}
+                                    <div class="dual-price">
+                                        <div class="sale-price">
+                                            <span class="price-label">Venta:</span>
+                                            {% if property.sale_price %}
+                                                <span class="price-value">${{ property.sale_price|floatformat:0|intcomma }}</span>
+                                            {% else %}
+                                                <span class="price-value text-muted">Consultar</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="rent-price">
+                                            <span class="price-label">Alquiler:</span>
+                                            {% if property.rental_price %}
+                                                <span class="price-value text-info">${{ property.rental_price|floatformat:0|intcomma }}/mes</span>
+                                            {% else %}
+                                                <span class="price-value text-muted">Consultar</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
                                 {% endif %}
                             </span>
                             <small class="text-muted d-block">{{ property.full_address|truncatechars:30 }}</small>
@@ -356,6 +403,17 @@
                     <option value="1" {% if current_filters.bathrooms == "1" %}selected{% endif %}>1</option>
                     <option value="2" {% if current_filters.bathrooms == "2" %}selected{% endif %}>2</option>
                     <option value="3+" {% if current_filters.bathrooms == "3+" %}selected{% endif %}>3+</option>
+                </select>
+            </div>
+            
+            <!-- Tipo de Listado (Móvil) -->
+            <div class="mb-4">
+                <label for="mobile_listing_type" class="form-label fw-bold">Tipo de Listado</label>
+                <select name="listing_type" class="form-select" id="mobile_listing_type">
+                    <option value="">Todos</option>
+                    <option value="sale" {% if current_filters.listing_type == "sale" %}selected{% endif %}>Venta</option>
+                    <option value="rent" {% if current_filters.listing_type == "rent" %}selected{% endif %}>Alquiler</option>
+                    <option value="both" {% if current_filters.listing_type == "both" %}selected{% endif %}>Venta y Alquiler</option>
                 </select>
             </div>
             
@@ -520,6 +578,66 @@
     font-size: 0.8rem;
     color: #666;
     text-transform: uppercase;
+}
+
+/* Estilos para precios duales */
+.dual-price {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.sale-price, .rent-price {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+}
+
+.price-label {
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.sale-price .price-label {
+    color: #28a745;
+}
+
+.rent-price .price-label {
+    color: #007bff;
+}
+
+.price-value {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+/* Estilos para las etiquetas de tipo de listado */
+.listing-type-ribbon {
+    position: absolute;
+    top: 15px;
+    right: -30px;
+    padding: 5px 30px;
+    transform: rotate(45deg);
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: white;
+    text-align: center;
+    z-index: 2;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    letter-spacing: 1px;
+}
+
+.listing-type-ribbon.sale {
+    background-color: #28a745;
+}
+
+.listing-type-ribbon.rent {
+    background-color: #007bff;
+}
+
+.listing-type-ribbon.both {
+    background: linear-gradient(90deg, #28a745 0%, #007bff 100%);
 }
 </style>
 

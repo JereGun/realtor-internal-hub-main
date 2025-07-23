@@ -28,4 +28,5 @@ urlpatterns = [
     path('notifications/', views_web.invoice_notifications, name='invoice_notifications'),
     path('notifications/<int:pk>/mark-as-read/', views_web.mark_notification_as_read, name='mark_notification_as_read'),
     path('notifications/mark-all-as-read/', views_web.mark_all_notifications_as_read, name='mark_all_notifications_as_read'),
+    path('invoices/send-bulk-emails/', views_web.send_bulk_emails, name='send_bulk_emails'),
 ]

@@ -57,11 +57,19 @@ class Tag(BaseModel):
 
 class Property(BaseModel):
     """Main Property model"""
+    # Listing type choices
+    LISTING_TYPE_CHOICES = [
+        ('rent', 'Alquiler'),
+        ('sale', 'Venta'),
+        ('both', 'Alquiler y Venta')
+    ]
+    
     # Basic Information
     title = models.CharField(max_length=200, verbose_name="Título")
     description = models.TextField(verbose_name="Descripción")
     property_type = models.ForeignKey(PropertyType, on_delete=models.CASCADE, verbose_name="Tipo")
     property_status = models.ForeignKey(PropertyStatus, on_delete=models.CASCADE, verbose_name="Estado")
+    listing_type = models.CharField(max_length=10, choices=LISTING_TYPE_CHOICES, default='sale', verbose_name="Tipo de Listado")
     
     # Address fields (no separate address table)
     street = models.CharField(max_length=200, verbose_name="Calle")
@@ -110,6 +118,25 @@ class Property(BaseModel):
     @property
     def cover_image(self):
         return self.images.filter(is_cover=True).first()
+        
+    @property
+    def display_price(self):
+        """
+        Returns the appropriate price to display based on the listing type.
+        For 'both' type, returns a dictionary with both prices.
+        """
+        if self.listing_type == 'rent':
+            return {'type': 'rent', 'price': self.rental_price, 'label': 'Alquiler'}
+        elif self.listing_type == 'sale':
+            return {'type': 'sale', 'price': self.sale_price, 'label': 'Venta'}
+        else:  # both
+            return {
+                'type': 'both',
+                'rent_price': self.rental_price,
+                'sale_price': self.sale_price,
+                'rent_label': 'Alquiler',
+                'sale_label': 'Venta'
+            }
 
 
 class PropertyImage(BaseModel):

@@ -52,6 +52,7 @@ def properties(request):
     max_surface = request.GET.get("max_surface")
     search = request.GET.get("search")
     sort_by = request.GET.get("sort")
+    listing_type = request.GET.get("listing_type")  # Nuevo filtro para tipo de listado
 
     # Query base - solo propiedades disponibles
     properties = (
@@ -118,6 +119,17 @@ def properties(request):
             | Q(description__icontains=search)
             | Q(neighborhood__icontains=search)
         )
+        
+    # Filtro por tipo de listado
+    if listing_type:
+        if listing_type == 'sale':
+            properties = properties.filter(listing_type='sale')
+        elif listing_type == 'rent':
+            properties = properties.filter(listing_type='rent')
+        elif listing_type == 'both':
+            properties = properties.filter(listing_type='both')
+    
+    # Ya no necesitamos la información de depuración
 
     # Aplicar ordenamiento
     if sort_by == "price_asc":
@@ -174,6 +186,7 @@ def properties(request):
             "min_surface": min_surface,
             "max_surface": max_surface,
             "search": search,
+            "listing_type": listing_type,
         },
     }
     return render(request, "public/properties.html", context)

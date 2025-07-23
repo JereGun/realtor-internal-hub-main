@@ -96,31 +96,160 @@
 
 <!-- Filtros y Búsqueda -->
 <div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Filtros</h5>
+        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFilters" aria-expanded="false" aria-controls="advancedFilters">
+            <i class="bi bi-sliders me-1"></i> Filtros avanzados
+        </button>
+    </div>
     <div class="card-body">
-        <form method="get" action="{% url 'accounting:invoice_list' %}" class="row g-3 align-items-center">
+        <form method="get" action="{% url 'accounting:invoice_list' %}" id="filter-form" class="row g-3">
+            <!-- Filtros básicos -->
             <div class="col-md-6">
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-search"></i></span>
-                    <input type="text" name="q" class="form-control" placeholder="Buscar por Nro o Cliente..." value="{{ request.GET.q }}">
+                    <input type="text" name="q" class="form-control" placeholder="Buscar por Nro o Cliente..." value="{{ query }}">
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="input-group">
                     <label class="input-group-text" for="statusFilter"><i class="bi bi-filter-circle"></i></label>
-                    <select name="status" class="form-select" id="statusFilter" onchange="this.form.submit()">
+                    <select name="status" class="form-select" id="statusFilter">
                         <option value="">Todos los estados</option>
-                        <option value="draft" {% if request.GET.status == 'draft' %}selected{% endif %}>Borrador</option>
-                        <option value="sent" {% if request.GET.status == 'sent' %}selected{% endif %}>Enviada</option>
-                        <option value="paid" {% if request.GET.status == 'paid' %}selected{% endif %}>Pagada</option>
-                        <option value="cancelled" {% if request.GET.status == 'cancelled' %}selected{% endif %}>Cancelada</option>
+                        <option value="draft" {% if status == 'draft' %}selected{% endif %}>Borrador</option>
+                        <option value="validated" {% if status == 'validated' %}selected{% endif %}>Validada</option>
+                        <option value="sent" {% if status == 'sent' %}selected{% endif %}>Enviada</option>
+                        <option value="paid" {% if status == 'paid' %}selected{% endif %}>Pagada</option>
+                        <option value="cancelled" {% if status == 'cancelled' %}selected{% endif %}>Cancelada</option>
                     </select>
                 </div>
             </div>
             <div class="col-md-2 text-end">
-                <button type="submit" class="btn btn-secondary">Filtrar</button>
+                <button type="submit" class="btn btn-secondary">
+                    <i class="bi bi-funnel me-1"></i> Filtrar
+                </button>
                 <a href="{% url 'accounting:invoice_list' %}" class="btn btn-outline-secondary" title="Limpiar filtros">
                     <i class="bi bi-x-lg"></i>
                 </a>
+            </div>
+            
+            <!-- Filtros avanzados (colapsables) -->
+            <div class="collapse col-12" id="advancedFilters">
+                <div class="card card-body bg-light mt-2">
+                    <div class="row g-3">
+                        <!-- Filtro por cliente -->
+                        <div class="col-md-6">
+                            <label for="customerFilter" class="form-label">Cliente</label>
+                            <select name="customer" id="customerFilter" class="form-select">
+                                <option value="">Todos los clientes</option>
+                                {% for customer in customers %}
+                                    <option value="{{ customer.id }}" {% if customer_id|stringformat:"s" == customer.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ customer.last_name }}, {{ customer.first_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Filtro por facturas vencidas -->
+                        <div class="col-md-6">
+                            <label class="form-label d-block">Facturas vencidas</label>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="overdueSwitch" name="overdue" value="yes" {% if overdue == 'yes' %}checked{% endif %}>
+                                <label class="form-check-label" for="overdueSwitch">Mostrar solo facturas vencidas</label>
+                            </div>
+                        </div>
+                        
+                        <!-- Filtro por fecha de emisión -->
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha de emisión</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+                                        <input type="date" class="form-control" name="date_from" placeholder="Desde" value="{{ date_from }}">
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+                                        <input type="date" class="form-control" name="date_to" placeholder="Hasta" value="{{ date_to }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Filtro por fecha de vencimiento -->
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha de vencimiento</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-calendar-x"></i></span>
+                                        <input type="date" class="form-control" name="due_date_from" placeholder="Desde" value="{{ due_date_from }}">
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="bi bi-calendar-x"></i></span>
+                                        <input type="date" class="form-control" name="due_date_to" placeholder="Hasta" value="{{ due_date_to }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Filtro por monto -->
+                        <div class="col-md-6">
+                            <label class="form-label">Monto</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" step="0.01" min="0" class="form-control" name="min_amount" placeholder="Mínimo" value="{{ min_amount }}">
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" step="0.01" min="0" class="form-control" name="max_amount" placeholder="Máximo" value="{{ max_amount }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Filtro por contrato -->
+                        <div class="col-md-6">
+                            <label for="contractFilter" class="form-label">Contrato</label>
+                            <select name="contract" id="contractFilter" class="form-select">
+                                <option value="">Todos los contratos</option>
+                                <option value="with_contract" {% if contract == 'with_contract' %}selected{% endif %}>Con contrato</option>
+                                <option value="without_contract" {% if contract == 'without_contract' %}selected{% endif %}>Sin contrato</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Acciones masivas -->
+<div class="card shadow-sm border-0 mb-3">
+    <div class="card-body">
+        <form id="bulk-actions-form" method="post" action="{% url 'accounting:send_bulk_emails' %}">
+            {% csrf_token %}
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="select-all" onchange="toggleAllCheckboxes(this)">
+                        <label class="form-check-label" for="select-all">Seleccionar todas</label>
+                    </div>
+                    <span id="selected-count" class="badge bg-primary ms-2">0</span> facturas seleccionadas
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary" id="send-bulk-emails" disabled>
+                        <i class="bi bi-envelope me-1"></i> Enviar correos
+                    </button>
+                </div>
             </div>
         </form>
     </div>
@@ -133,6 +262,11 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
+                        <th scope="col" width="40">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="select-all-header" onchange="toggleAllCheckboxes(this)">
+                            </div>
+                        </th>
                         <th scope="col">Nro</th>
                         <th scope="col">Cliente</th>
                         <th scope="col">Emisión</th>
@@ -145,24 +279,45 @@
                 <tbody>
                     {% for invoice in invoices %}
                     <tr>
+                        <td>
+                            <div class="form-check">
+                                <input class="form-check-input invoice-checkbox" type="checkbox" 
+                                       name="invoice_ids" value="{{ invoice.pk }}" 
+                                       data-has-email="{% if invoice.customer.email %}true{% else %}false{% endif %}"
+                                       data-status="{{ invoice.status }}"
+                                       onchange="updateSelectedCount()">
+                            </div>
+                        </td>
                         <td>{{ invoice.number|default:invoice.id }}</td>
-                        <td>{{ invoice.customer.full_name }}</td>
+                        <td>
+                            {{ invoice.customer.full_name }}
+                            {% if not invoice.customer.email %}
+                                <span class="badge bg-warning text-dark" title="Este cliente no tiene correo electrónico">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                </span>
+                            {% endif %}
+                        </td>
                         <td>{{ invoice.date|date:'d/m/Y' }}</td>
                         <td>{{ invoice.due_date|date:'d/m/Y' }}</td>
                         <td>
-                            <span class="badge {% if invoice.status == 'pagada' %}bg-success{% elif invoice.status == 'vencida' %}bg-danger{% else %}bg-secondary{% endif %}">
+                            <span class="badge {% if invoice.status == 'paid' %}bg-success{% elif invoice.status == 'validated' %}bg-info{% elif invoice.status == 'sent' %}bg-primary{% elif invoice.status == 'cancelled' %}bg-danger{% else %}bg-secondary{% endif %}">
                                 {{ invoice.get_status_display }}
                             </span>
                         </td>
                         <td class="text-end">${{ invoice.total_amount|floatformat:2 }}</td>
                         <td class="text-center">
                             <div class="btn-group" role="group">
-                                <a href="{% url 'accounting:invoice_detail' invoice.pk %}" class="btn btn-sm btn.outline-primary" title="Ver">
+                                <a href="{% url 'accounting:invoice_detail' invoice.pk %}" class="btn btn-sm btn-outline-primary" title="Ver">
                                     <i class="bi bi-eye"></i>
                                 </a>
                                 <a href="{% url 'accounting:invoice_update' invoice.pk %}" class="btn btn-sm btn-outline-secondary" title="Editar">
                                     <i class="bi bi-pencil"></i>
                                 </a>
+                                {% if invoice.customer.email and invoice.status in 'validated,sent' %}
+                                <a href="{% url 'accounting:send_invoice_email' invoice.pk %}" class="btn btn-sm btn-outline-info" title="Enviar por correo">
+                                    <i class="bi bi-envelope"></i>
+                                </a>
+                                {% endif %}
                                 <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteInvoiceModal" data-invoice-id="{{ invoice.pk }}" data-invoice-number="{{ invoice.number|default:invoice.id }}">
                                     <i class="bi bi-trash"></i>
                                 </button>
@@ -171,7 +326,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="text-center py-4 text-muted">
+                        <td colspan="8" class="text-center py-4 text-muted">
                             <i class="bi bi-inbox me-2"></i>No hay facturas registradas.
                         </td>
                     </tr>
@@ -181,4 +336,114 @@
         </div>
     </div>
 </div>
+
+<!-- Modal de confirmación de envío masivo -->
+<div class="modal fade" id="bulkEmailModal" tabindex="-1" aria-labelledby="bulkEmailModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bulkEmailModalLabel">Enviar correos masivos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Se enviarán correos electrónicos a los clientes de <span id="email-count" class="fw-bold">0</span> facturas seleccionadas.</p>
+                <div id="warning-no-email" class="alert alert-warning d-none">
+                    <i class="bi bi-exclamation-triangle me-2"></i> Algunas facturas seleccionadas pertenecen a clientes sin correo electrónico y serán omitidas.
+                </div>
+                <div id="warning-invalid-status" class="alert alert-warning d-none">
+                    <i class="bi bi-exclamation-triangle me-2"></i> Solo se enviarán correos de facturas en estado "Validada" o "Enviada".
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="confirm-send-emails">Enviar correos</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Función para actualizar el contador de facturas seleccionadas
+    function updateSelectedCount() {
+        const checkboxes = document.querySelectorAll('.invoice-checkbox:checked');
+        const count = checkboxes.length;
+        document.getElementById('selected-count').textContent = count;
+        
+        // Habilitar o deshabilitar el botón de envío masivo
+        const sendButton = document.getElementById('send-bulk-emails');
+        sendButton.disabled = count === 0;
+        
+        // Actualizar el estado de los checkboxes de seleccionar todos
+        const allCheckboxes = document.querySelectorAll('.invoice-checkbox');
+        const selectAllHeader = document.getElementById('select-all-header');
+        const selectAll = document.getElementById('select-all');
+        
+        if (count === 0) {
+            selectAllHeader.checked = false;
+            selectAll.checked = false;
+            selectAllHeader.indeterminate = false;
+            selectAll.indeterminate = false;
+        } else if (count === allCheckboxes.length) {
+            selectAllHeader.checked = true;
+            selectAll.checked = true;
+            selectAllHeader.indeterminate = false;
+            selectAll.indeterminate = false;
+        } else {
+            selectAllHeader.indeterminate = true;
+            selectAll.indeterminate = true;
+        }
+    }
+    
+    // Función para seleccionar o deseleccionar todas las facturas
+    function toggleAllCheckboxes(checkbox) {
+        const checkboxes = document.querySelectorAll('.invoice-checkbox');
+        checkboxes.forEach(cb => {
+            cb.checked = checkbox.checked;
+        });
+        
+        // Sincronizar los dos checkboxes de seleccionar todos
+        const selectAllHeader = document.getElementById('select-all-header');
+        const selectAll = document.getElementById('select-all');
+        selectAllHeader.checked = checkbox.checked;
+        selectAll.checked = checkbox.checked;
+        selectAllHeader.indeterminate = false;
+        selectAll.indeterminate = false;
+        
+        updateSelectedCount();
+    }
+    
+    // Configurar el formulario de acciones masivas
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('bulk-actions-form');
+        const sendButton = document.getElementById('send-bulk-emails');
+        const confirmButton = document.getElementById('confirm-send-emails');
+        const bulkEmailModal = new bootstrap.Modal(document.getElementById('bulkEmailModal'));
+        
+        // Mostrar modal de confirmación al hacer clic en el botón de envío
+        sendButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const checkboxes = document.querySelectorAll('.invoice-checkbox:checked');
+            const emailCount = Array.from(checkboxes).filter(cb => cb.dataset.hasEmail === 'true' && (cb.dataset.status === 'validated' || cb.dataset.status === 'sent')).length;
+            
+            document.getElementById('email-count').textContent = emailCount;
+            
+            // Mostrar advertencia si hay clientes sin correo electrónico
+            const hasNoEmail = Array.from(checkboxes).some(cb => cb.dataset.hasEmail === 'false');
+            document.getElementById('warning-no-email').classList.toggle('d-none', !hasNoEmail);
+            
+            // Mostrar advertencia si hay facturas con estado inválido
+            const hasInvalidStatus = Array.from(checkboxes).some(cb => cb.dataset.status !== 'validated' && cb.dataset.status !== 'sent');
+            document.getElementById('warning-invalid-status').classList.toggle('d-none', !hasInvalidStatus);
+            
+            bulkEmailModal.show();
+        });
+        
+        // Enviar el formulario al confirmar
+        confirmButton.addEventListener('click', function() {
+            form.submit();
+            bulkEmailModal.hide();
+        });
+    });
+</script>
 {% endblock %}

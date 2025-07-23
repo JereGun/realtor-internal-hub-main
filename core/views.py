@@ -8,13 +8,18 @@ from django.db.models import Sum, Q
 from datetime import datetime
 
 def dashboard(request):
-    # Ventas de propiedades (contratos de tipo 'venta')
-    sales = Contract.objects.filter(contract_type='sale')
+    # Necesitamos determinar qué contratos son de venta y cuáles de alquiler
+    # Como no existe el campo contract_type, podemos usar otro criterio
+    # Por ejemplo, podemos asumir que los contratos con status='finished' son ventas
+    # y los contratos con status='active' son alquileres (esto es solo un ejemplo)
+    
+    # Ventas de propiedades (asumiendo que son contratos finalizados)
+    sales = Contract.objects.filter(status='finished')
     sales_total = sales.aggregate(total=Sum('amount'))['total'] or 0
     sales_count = sales.count()
 
-    # Ingresos por alquileres (pagos de contratos de tipo 'rent' y pagos completados)
-    rent_contracts = Contract.objects.filter(contract_type='rent')
+    # Ingresos por alquileres (asumiendo que son contratos activos)
+    rent_contracts = Contract.objects.filter(status='active')
     rent_payments = ContractPayment.objects.filter(contract__in=rent_contracts, status='paid')
     rent_income = rent_payments.aggregate(total=Sum('amount'))['total'] or 0
     rent_count = rent_payments.count()

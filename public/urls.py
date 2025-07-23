@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from . import debug_views
 
 app_name = 'public'
 
@@ -13,4 +14,6 @@ urlpatterns = [
     # SEO URLs
     path('sitemap.xml', views.sitemap_xml, name='sitemap'),
     path('robots.txt', views.robots_txt, name='robots'),
+    # Debug URLs
+    path('debug/properties/', debug_views.debug_properties, name='debug_properties'),
 ]

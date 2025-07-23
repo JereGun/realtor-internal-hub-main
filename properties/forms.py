@@ -101,8 +101,13 @@ class PropertyForm(forms.ModelForm):
             'bathrooms': forms.NumberInput(attrs={'class': 'form-control'}),
             'garage': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'furnished': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'sale_price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
-            'rental_price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'listing_type': forms.Select(attrs={
+                'class': 'form-control',
+                'id': 'id_listing_type',
+                'onchange': 'togglePriceFields()'
+            }),
+            'sale_price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'id': 'id_sale_price'}),
+            'rental_price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'id': 'id_rental_price'}),
             'expenses': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'year_built': forms.NumberInput(attrs={'class': 'form-control'}),
             'orientation': forms.TextInput(attrs={'class': 'form-control'}),

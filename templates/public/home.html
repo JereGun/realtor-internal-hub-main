@@ -155,12 +155,34 @@
         position: absolute;
         top: 1rem;
         right: 1rem;
-        background: var(--accent-color);
         color: white;
         padding: 0.5rem 1rem;
         border-radius: 25px;
         font-weight: 600;
         font-size: 0.9rem;
+    }
+    
+    .sale-badge {
+        background-color: #28a745;
+    }
+    
+    .rent-badge {
+        background-color: #007bff;
+    }
+    
+    .dual-badge {
+        background: none;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .dual-badge .sale-badge,
+    .dual-badge .rent-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        text-align: center;
     }
     
     @media (max-width: 768px) {
@@ -191,6 +213,15 @@
                         </a>
                         <a href="{% url 'public:about' %}" class="btn btn-outline-light btn-lg">
                             <i class="bi bi-info-circle me-2"></i>Conocer Más
+                        </a>
+                    </div>
+                    
+                    <div class="d-flex gap-3 mb-4">
+                        <a href="{% url 'public:properties' %}?listing_type=sale" class="btn btn-success btn-lg">
+                            <i class="bi bi-house-door me-2"></i>Propiedades en Venta
+                        </a>
+                        <a href="{% url 'public:properties' %}?listing_type=rent" class="btn btn-info btn-lg text-white">
+                            <i class="bi bi-key me-2"></i>Propiedades en Alquiler
                         </a>
                     </div>
                 </div>
@@ -294,13 +325,40 @@
                         </div>
                         {% endif %}
                         
-                        <div class="price-badge">
-                            {% if property.sale_price %}
-                                ${{ property.sale_price|floatformat:0|intcomma }}
-                            {% elif property.rental_price %}
-                                ${{ property.rental_price|floatformat:0|intcomma }}/mes
-                            {% endif %}
-                        </div>
+                        {% if property.listing_type == 'both' %}
+                            <div class="price-badge dual-badge">
+                                <div class="sale-badge">
+                                    {% if property.sale_price %}
+                                        ${{ property.sale_price|floatformat:0|intcomma }}
+                                    {% else %}
+                                        Consultar
+                                    {% endif %}
+                                </div>
+                                <div class="rent-badge">
+                                    {% if property.rental_price %}
+                                        ${{ property.rental_price|floatformat:0|intcomma }}/mes
+                                    {% else %}
+                                        Consultar
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="price-badge {% if property.listing_type == 'sale' %}sale-badge{% else %}rent-badge{% endif %}">
+                                {% if property.listing_type == 'sale' %}
+                                    {% if property.sale_price %}
+                                        ${{ property.sale_price|floatformat:0|intcomma }}
+                                    {% else %}
+                                        Consultar precio
+                                    {% endif %}
+                                {% else %}
+                                    {% if property.rental_price %}
+                                        ${{ property.rental_price|floatformat:0|intcomma }}/mes
+                                    {% else %}
+                                        Consultar precio
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        {% endif %}
                     </div>
                     
                     <div class="card-body p-4">

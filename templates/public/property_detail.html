@@ -209,6 +209,101 @@
         border-radius: 20px;
         padding: 2rem;
     }
+    
+    .listing-type-badge {
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    }
+    
+    .listing-type-badge.sale {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .listing-type-badge.rent {
+        background-color: #007bff;
+        color: white;
+    }
+    
+    .listing-type-badge.both {
+        background: linear-gradient(90deg, #28a745 0%, #007bff 100%);
+        color: white;
+    }
+    
+    /* Estilos para la visualización de precios duales */
+    .dual-price-display {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        margin-top: 20px;
+    }
+    
+    .sale-price-section, .rent-price-section {
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+    }
+    
+    .sale-price-section {
+        background-color: rgba(40, 167, 69, 0.1);
+        border: 2px solid #28a745;
+    }
+    
+    .rent-price-section {
+        background-color: rgba(0, 123, 255, 0.1);
+        border: 2px solid #007bff;
+    }
+    
+    .price-type-label {
+        display: inline-block;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+        margin-bottom: 10px;
+    }
+    
+    .price-type-label.sale {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    .price-type-label.rent {
+        background-color: #007bff;
+        color: white;
+    }
+    
+    /* Estilos para precios duales en propiedades similares */
+    .dual-price-small {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        font-size: 0.9rem;
+    }
+    
+    .dual-price-small div {
+        padding: 2px 5px;
+        border-radius: 4px;
+    }
+    
+    .dual-price-small div:first-child {
+        background-color: rgba(40, 167, 69, 0.1);
+        border-left: 3px solid #28a745;
+    }
+    
+    .dual-price-small div.text-info {
+        background-color: rgba(0, 123, 255, 0.1);
+        border-left: 3px solid #007bff;
+    }
 </style>
 {% endblock %}
 
@@ -366,12 +461,45 @@
         <div class="col-lg-4">
             <!-- Price -->
             <div class="price-display">
-                {% if property.sale_price %}
-                <h3 class="price-amount">${{ property.sale_price|floatformat:0|intcomma }}</h3>
-                <p class="mb-0">Precio de Venta</p>
-                {% elif property.rental_price %}
-                <h3 class="price-amount">${{ property.rental_price|floatformat:0|intcomma }}</h3>
-                <p class="mb-0">Precio de Alquiler / mes</p>
+                {% if property.listing_type == 'sale' %}
+                    <div class="listing-type-badge sale">VENTA</div>
+                    {% if property.sale_price %}
+                    <h3 class="price-amount">${{ property.sale_price|floatformat:0|intcomma }}</h3>
+                    <p class="mb-0">Precio de Venta</p>
+                    {% else %}
+                    <h3 class="price-amount text-muted">Consultar precio</h3>
+                    <p class="mb-0">Contacte para más información</p>
+                    {% endif %}
+                {% elif property.listing_type == 'rent' %}
+                    <div class="listing-type-badge rent">ALQUILER</div>
+                    {% if property.rental_price %}
+                    <h3 class="price-amount">${{ property.rental_price|floatformat:0|intcomma }}</h3>
+                    <p class="mb-0">Precio de Alquiler / mes</p>
+                    {% else %}
+                    <h3 class="price-amount text-muted">Consultar precio</h3>
+                    <p class="mb-0">Contacte para más información</p>
+                    {% endif %}
+                {% else %}
+                    <div class="listing-type-badge both">VENTA Y ALQUILER</div>
+                    <div class="dual-price-display">
+                        <div class="sale-price-section">
+                            <h5 class="price-type-label sale">VENTA</h5>
+                            {% if property.sale_price %}
+                            <h3 class="price-amount">${{ property.sale_price|floatformat:0|intcomma }}</h3>
+                            {% else %}
+                            <h3 class="price-amount text-muted">Consultar precio</h3>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="rent-price-section">
+                            <h5 class="price-type-label rent">ALQUILER</h5>
+                            {% if property.rental_price %}
+                            <h3 class="price-amount">${{ property.rental_price|floatformat:0|intcomma }}/mes</h3>
+                            {% else %}
+                            <h3 class="price-amount text-muted">Consultar precio</h3>
+                            {% endif %}
+                        </div>
+                    </div>
                 {% endif %}
             </div>
             
@@ -445,10 +573,30 @@
                         </p>
                         <div class="d-flex justify-content-between align-items-center">
                             <strong class="text-primary">
-                                {% if similar.sale_price %}
-                                    ${{ similar.sale_price|floatformat:0|intcomma }}
-                                {% elif similar.rental_price %}
-                                    ${{ similar.rental_price|floatformat:0|intcomma }}/mes
+                                {% if similar.listing_type == 'sale' %}
+                                    {% if similar.sale_price %}
+                                        ${{ similar.sale_price|floatformat:0|intcomma }}
+                                    {% else %}
+                                        <span class="text-muted">Consultar</span>
+                                    {% endif %}
+                                {% elif similar.listing_type == 'rent' %}
+                                    {% if similar.rental_price %}
+                                        ${{ similar.rental_price|floatformat:0|intcomma }}/mes
+                                    {% else %}
+                                        <span class="text-muted">Consultar</span>
+                                    {% endif %}
+                                {% else %}
+                                    <div class="dual-price-small">
+                                        {% if similar.sale_price %}
+                                            <div>${{ similar.sale_price|floatformat:0|intcomma }}</div>
+                                        {% endif %}
+                                        {% if similar.rental_price %}
+                                            <div class="text-info">${{ similar.rental_price|floatformat:0|intcomma }}/mes</div>
+                                        {% endif %}
+                                        {% if not similar.sale_price and not similar.rental_price %}
+                                            <span class="text-muted">Consultar</span>
+                                        {% endif %}
+                                    </div>
                                 {% endif %}
                             </strong>
                             <a href="{% url 'public:property_detail' similar.id %}" class="btn btn-sm btn-outline-primary">Ver</a>

@@ -6,32 +6,46 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid px-4">
+<div class="container-fluid mt-4">
     <div class="row justify-content-center">
         <div class="col-lg-10 col-xl-8">
-            <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2 mb-0">
-                    {% if form.instance.pk %}
-                        <i class="bi bi-pencil-square me-2"></i>Editar Contrato #{{ form.instance.pk }}
-                    {% else %}
-                        <i class="bi bi-file-earmark-plus-fill me-2"></i>Nuevo Contrato
-                    {% endif %}
-                </h1>
-                <a href="{% if form.instance.pk %}{% url 'contracts:contract_detail' form.instance.pk %}{% else %}{% url 'contracts:contract_list' %}{% endif %}" class="btn btn-light btn-sm">
-                    <i class="bi bi-arrow-left-circle me-1"></i> 
+            <!-- Encabezado -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 text-dark mb-1">
+                        {% if form.instance.pk %}
+                            <i class="bi bi-pencil-square me-2 text-primary"></i>Editar Contrato
+                        {% else %}
+                            <i class="bi bi-file-earmark-plus me-2 text-primary"></i>Nuevo Contrato
+                        {% endif %}
+                    </h1>
+                    <p class="text-muted mb-0">
+                        {% if form.instance.pk %}
+                            Actualice la información del contrato #{{ form.instance.pk }}
+                        {% else %}
+                            Complete la información del nuevo contrato inmobiliario
+                        {% endif %}
+                    </p>
+                </div>
+                <a href="{% if form.instance.pk %}{% url 'contracts:contract_detail' form.instance.pk %}{% else %}{% url 'contracts:contract_list' %}{% endif %}" 
+                   class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>
                     {% if form.instance.pk %}Cancelar Cambios{% else %}Volver al listado{% endif %}
                 </a>
             </div>
 
-            <div class="card shadow-sm">
+            <div class="card shadow-sm border-light">
                 <div class="card-body p-4">
-                    <form method="post" novalidate>
+                    <form method="post" novalidate id="contractForm">
                         {% csrf_token %}
                         
                         {% if form.errors %}
-                            <div class="alert alert-danger">
-                                <strong>Errores:</strong>
-                                <ul>
+                            <div class="alert alert-danger border-danger">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
+                                    <strong>Errores en el formulario:</strong>
+                                </div>
+                                <ul class="mb-0">
                                     {% for field, errors in form.errors.items %}
                                         {% for error in errors %}
                                             <li>{{ field }}: {{ error }}</li>
@@ -41,57 +55,212 @@
                             </div>
                         {% endif %}
 
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                {{ form.property|as_crispy_field }}
-                            </div>
-                            <div class="col-md-6">
-                                {{ form.customer|as_crispy_field }}
-                            </div>
-                            
-                            <div class="col-md-6">
-                                {{ form.status|as_crispy_field }}
-                            </div>
-
-                            <div class="col-md-6">
-                                {{ form.start_date|as_crispy_field }}
-                            </div>
-                            <div class="col-md-6">
-                                {{ form.end_date|as_crispy_field }}
+                        <!-- Información Básica -->
+                        <div class="row mb-5">
+                            <div class="col-12">
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="bg-primary rounded-circle p-2 me-3">
+                                        <i class="bi bi-info-circle text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-primary mb-1 fw-bold">Información Básica</h4>
+                                        <p class="text-muted small mb-0">Datos principales del contrato</p>
+                                    </div>
+                                </div>
                             </div>
                             
-                            <div class="col-md-6">
-                                {{ form.amount|as_crispy_field }}
-                            </div>
-                            <div class="col-md-6">
-                                {{ form.currency|as_crispy_field }}
-                            </div>
-                            
-                            <div class="col-md-4">
-                                {{ form.frequency|as_crispy_field }}
-                            </div>
-                            <div class="col-md-4">
-                                {{ form.increase_percentage|as_crispy_field }}
-                            </div>
-                            <div class="col-md-4">
-                                {{ form.next_increase_date|as_crispy_field }}
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.property.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-house text-primary me-1"></i>{{ form.property.label }}
+                                </label>
+                                {{ form.property }}
+                                {% if form.property.errors %}
+                                    <div class="text-danger small mt-1">{{ form.property.errors }}</div>
+                                {% endif %}
                             </div>
                             
-                            <div class="col-md-6">
-                                {{ form.agent|as_crispy_field }}
-                                {% if not form.instance.pk %} {# Solo mostrar en creación #}
-                                <div class="form-text text-muted">
-                                    <i class="bi bi-info-circle"></i>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.customer.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-person text-success me-1"></i>{{ form.customer.label }}
+                                </label>
+                                {{ form.customer }}
+                                {% if form.customer.errors %}
+                                    <div class="text-danger small mt-1">{{ form.customer.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.agent.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-person-badge text-info me-1"></i>{{ form.agent.label }}
+                                </label>
+                                {{ form.agent }}
+                                {% if form.agent.errors %}
+                                    <div class="text-danger small mt-1">{{ form.agent.errors }}</div>
+                                {% endif %}
+                                {% if not form.instance.pk %}
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
                                     Por defecto eres tú como agente, pero puedes cambiarlo si es necesario.
                                 </div>
                                 {% endif %}
                             </div>
                             
-                            <div class="col-12">
-                                {{ form.terms|as_crispy_field }}
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.status.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-flag text-warning me-1"></i>{{ form.status.label }}
+                                </label>
+                                {{ form.status }}
+                                {% if form.status.errors %}
+                                    <div class="text-danger small mt-1">{{ form.status.errors }}</div>
+                                {% endif %}
                             </div>
+                        </div>
+
+                        <!-- Información Temporal y Financiera -->
+                        <div class="row mb-5">
                             <div class="col-12">
-                                {{ form.notes|as_crispy_field }}
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="bg-success rounded-circle p-2 me-3">
+                                        <i class="bi bi-calendar-dollar text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-success mb-1 fw-bold">Fechas y Montos</h4>
+                                        <p class="text-muted small mb-0">Información temporal y financiera</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.start_date.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-calendar-check text-success me-1"></i>{{ form.start_date.label }}
+                                </label>
+                                {{ form.start_date }}
+                                {% if form.start_date.errors %}
+                                    <div class="text-danger small mt-1">{{ form.start_date.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.end_date.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-calendar-x text-danger me-1"></i>{{ form.end_date.label }}
+                                </label>
+                                {{ form.end_date }}
+                                {% if form.end_date.errors %}
+                                    <div class="text-danger small mt-1">{{ form.end_date.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Deje vacío para un contrato sin fecha de finalización
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-8 mb-3">
+                                <label for="{{ form.amount.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-currency-dollar text-warning me-1"></i>{{ form.amount.label }}
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    {{ form.amount }}
+                                </div>
+                                {% if form.amount.errors %}
+                                    <div class="text-danger small mt-1">{{ form.amount.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.currency.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-cash text-info me-1"></i>{{ form.currency.label }}
+                                </label>
+                                {{ form.currency }}
+                                {% if form.currency.errors %}
+                                    <div class="text-danger small mt-1">{{ form.currency.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Información de Aumentos -->
+                        <div class="row mb-5">
+                            <div class="col-12">
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="bg-warning rounded-circle p-2 me-3">
+                                        <i class="bi bi-graph-up-arrow text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-warning mb-1 fw-bold">Aumentos Programados</h4>
+                                        <p class="text-muted small mb-0">Configuración de aumentos automáticos (opcional)</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.frequency.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-clock text-warning me-1"></i>{{ form.frequency.label }}
+                                </label>
+                                {{ form.frequency }}
+                                {% if form.frequency.errors %}
+                                    <div class="text-danger small mt-1">{{ form.frequency.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Frecuencia con la que se revisarán los aumentos
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.next_increase_date.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-calendar-plus text-warning me-1"></i>{{ form.next_increase_date.label }}
+                                </label>
+                                {{ form.next_increase_date }}
+                                {% if form.next_increase_date.errors %}
+                                    <div class="text-danger small mt-1">{{ form.next_increase_date.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Fecha en la que se debe revisar el próximo aumento
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Términos y Condiciones -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="bg-info rounded-circle p-2 me-3">
+                                        <i class="bi bi-file-text text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-info mb-1 fw-bold">Términos y Condiciones</h4>
+                                        <p class="text-muted small mb-0">Información adicional del contrato</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-12 mb-3">
+                                <label for="{{ form.terms.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-file-text text-primary me-1"></i>{{ form.terms.label }}
+                                </label>
+                                {{ form.terms }}
+                                {% if form.terms.errors %}
+                                    <div class="text-danger small mt-1">{{ form.terms.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Especifique los términos y condiciones del contrato
+                                </div>
+                            </div>
+                            
+                            <div class="col-12 mb-3">
+                                <label for="{{ form.notes.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-sticky text-warning me-1"></i>{{ form.notes.label }}
+                                </label>
+                                {{ form.notes }}
+                                {% if form.notes.errors %}
+                                    <div class="text-danger small mt-1">{{ form.notes.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Notas adicionales o comentarios internos
+                                </div>
                             </div>
                         </div>
                         
@@ -115,20 +284,145 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const contractForm = document.getElementById('contractForm');
     const propertySelect = document.getElementById('id_property');
     const amountInput = document.getElementById('id_amount');
+    const startDateInput = document.getElementById('id_start_date');
+    const endDateInput = document.getElementById('id_end_date');
 
-    propertySelect.addEventListener('change', function() {
-        const propertyId = this.value;
-        if (propertyId) {
-            fetch(`/contracts/ajax/get_property_rental_price/?property_id=${propertyId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.rental_price) {
-                        amountInput.value = data.rental_price;
-                    }
-                });
+    // Auto-completar monto basado en la propiedad seleccionada
+    if (propertySelect) {
+        propertySelect.addEventListener('change', function() {
+            const propertyId = this.value;
+            if (propertyId) {
+                fetch(`/contracts/ajax/get_property_rental_price/?property_id=${propertyId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.rental_price && amountInput) {
+                            amountInput.value = data.rental_price;
+                            // Mostrar toast de información
+                            showInfoToast('Monto actualizado automáticamente basado en la propiedad seleccionada');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error al obtener precio de la propiedad:', error);
+                    });
+            }
+        });
+    }
+
+    // Validación de fechas
+    if (startDateInput && endDateInput) {
+        function validateDates() {
+            const startDate = new Date(startDateInput.value);
+            const endDate = new Date(endDateInput.value);
+            
+            if (startDateInput.value && endDateInput.value && startDate >= endDate) {
+                endDateInput.setCustomValidity('La fecha de fin debe ser posterior a la fecha de inicio');
+                endDateInput.classList.add('is-invalid');
+                return false;
+            } else {
+                endDateInput.setCustomValidity('');
+                endDateInput.classList.remove('is-invalid');
+                return true;
+            }
         }
+
+        startDateInput.addEventListener('change', validateDates);
+        endDateInput.addEventListener('change', validateDates);
+    }
+
+    // Validación del formulario
+    if (contractForm) {
+        contractForm.addEventListener('submit', function(e) {
+            let isValid = true;
+            
+            // Limpiar errores previos
+            document.querySelectorAll('.is-invalid').forEach(field => {
+                field.classList.remove('is-invalid');
+            });
+
+            // Validar campos requeridos
+            const requiredFields = ['property', 'customer', 'agent', 'start_date', 'amount'];
+            requiredFields.forEach(fieldName => {
+                const field = document.getElementById(`id_${fieldName}`);
+                if (field && !field.value.trim()) {
+                    isValid = false;
+                    field.classList.add('is-invalid');
+                }
+            });
+
+            // Validar monto
+            if (amountInput && amountInput.value) {
+                const amount = parseFloat(amountInput.value);
+                if (amount <= 0) {
+                    isValid = false;
+                    amountInput.classList.add('is-invalid');
+                    showErrorToast('El monto debe ser mayor a cero');
+                }
+            }
+
+            // Validar fechas
+            if (!validateDates()) {
+                isValid = false;
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+                showErrorToast('Por favor, corrija los errores en el formulario antes de continuar');
+            }
+        });
+    }
+
+    // Función para mostrar toast de información
+    function showInfoToast(message) {
+        showToast(message, 'info');
+    }
+
+    // Función para mostrar toast de error
+    function showErrorToast(message) {
+        showToast(message, 'error');
+    }
+
+    // Función genérica para mostrar toasts
+    function showToast(message, type = 'info') {
+        let toastContainer = document.querySelector('.toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            document.body.appendChild(toastContainer);
+        }
+        
+        const iconClass = type === 'error' ? 'bi-exclamation-triangle-fill text-danger' : 'bi-info-circle-fill text-info';
+        const headerText = type === 'error' ? 'Error' : 'Información';
+        
+        const toastHtml = `
+            <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <i class="${iconClass} me-2"></i>
+                    <strong class="me-auto">${headerText}</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            </div>
+        `;
+        
+        toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+        const toast = new bootstrap.Toast(toastContainer.lastElementChild);
+        toast.show();
+        
+        toastContainer.lastElementChild.addEventListener('hidden.bs.toast', function() {
+            this.remove();
+        });
+    }
+
+    // Limpiar clases de error al escribir
+    document.querySelectorAll('.form-control').forEach(input => {
+        input.addEventListener('input', function() {
+            this.classList.remove('is-invalid');
+        });
     });
 });
 </script>

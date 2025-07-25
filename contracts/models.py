@@ -1,4 +1,6 @@
 from django.db import models
+from django.core.exceptions import ValidationError
+from django.utils import timezone
 from core.models import BaseModel
 from decimal import Decimal
 
@@ -33,9 +35,8 @@ class Contract(BaseModel):
     amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Monto")
     currency = models.CharField(max_length=10, default='ARS', verbose_name="Moneda")
     
-    # Automatic Price Increase
+    # Automatic Price Increase (without percentage - agent will set new amount directly)
     frequency = models.CharField(max_length=20, choices=FREQUENCY_CHOICES, blank=True, null=True, verbose_name="Frecuencia de Aumento")
-    increase_percentage = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, verbose_name="Porcentaje de Aumento")
     next_increase_date = models.DateField(blank=True, null=True, verbose_name="Fecha del Próximo Aumento")
 
     # Additional Information
@@ -44,14 +45,12 @@ class Contract(BaseModel):
 
     STATUS_DRAFT = 'draft'
     STATUS_ACTIVE = 'active'
-    STATUS_EXPIRING_SOON = 'expiring_soon' # Podría ser manejado por una propiedad también
     STATUS_FINISHED = 'finished'
     STATUS_CANCELLED = 'cancelled'
     
     STATUS_CHOICES = [
         (STATUS_DRAFT, 'Borrador'),
         (STATUS_ACTIVE, 'Activo'),
-        (STATUS_EXPIRING_SOON, 'Próximo a Vencer'),
         (STATUS_FINISHED, 'Finalizado'),
         (STATUS_CANCELLED, 'Cancelado'),
     ]
@@ -66,9 +65,119 @@ class Contract(BaseModel):
         verbose_name = "Contrato"
         verbose_name_plural = "Contratos"
         ordering = ['-created_at']
+        
+        # Constraints de base de datos
+        constraints = [
+            # Evitar contratos duplicados para la misma propiedad y cliente en fechas superpuestas
+            models.UniqueConstraint(
+                fields=['property', 'customer', 'start_date'],
+                name='unique_property_customer_start_date',
+                violation_error_message="Ya existe un contrato para esta propiedad y cliente en la misma fecha de inicio."
+            ),
+            # Validar que el monto sea positivo
+            models.CheckConstraint(
+                check=models.Q(amount__gt=0),
+                name='positive_amount',
+                violation_error_message="El monto del contrato debe ser mayor a cero."
+            ),
+            # Validar que la fecha de fin sea posterior a la fecha de inicio (cuando existe)
+            models.CheckConstraint(
+                check=models.Q(end_date__isnull=True) | models.Q(end_date__gt=models.F('start_date')),
+                name='end_date_after_start_date',
+                violation_error_message="La fecha de fin debe ser posterior a la fecha de inicio."
+            ),
+
+        ]
+        
+        # Índices para mejorar performance
+        indexes = [
+            models.Index(fields=['property', 'status']),
+            models.Index(fields=['customer', 'status']),
+            models.Index(fields=['agent', 'status']),
+            models.Index(fields=['start_date', 'end_date']),
+            models.Index(fields=['next_increase_date']),
+            models.Index(fields=['is_active', 'status']),
+        ]
     
     def __str__(self):
         return f"Contrato ({self.get_status_display()}) - {self.property.title} - {self.customer.full_name}"
+    
+    def clean(self):
+        """
+        Validaciones personalizadas del modelo Contract.
+        
+        Realiza validaciones que no se pueden hacer con constraints de base de datos,
+        como validaciones que requieren lógica compleja o consultas a otros modelos.
+        
+        Raises:
+            ValidationError: Si alguna validación falla.
+        """
+        errors = {}
+        
+        # Validar fechas
+        if self.start_date and self.end_date:
+            if self.start_date >= self.end_date:
+                errors['end_date'] = "La fecha de fin debe ser posterior a la fecha de inicio."
+            
+            # Validar que el contrato no sea demasiado largo (más de 10 años)
+            if (self.end_date - self.start_date).days > 3650:  # 10 años
+                errors['end_date'] = "La duración del contrato no puede exceder 10 años."
+        
+        # Validar que la fecha de inicio no sea muy antigua (más de 1 año atrás)
+        if self.start_date:
+            one_year_ago = timezone.now().date().replace(year=timezone.now().date().year - 1)
+            if self.start_date < one_year_ago:
+                errors['start_date'] = "La fecha de inicio no puede ser anterior a un año atrás."
+        
+        # Validar monto
+        if self.amount is not None and self.amount <= 0:
+            errors['amount'] = "El monto debe ser mayor a cero."
+        
+        # Validar que no existan contratos activos superpuestos para la misma propiedad
+        if self.property_id and self.start_date:
+            overlapping_contracts = Contract.objects.filter(
+                property=self.property,
+                status__in=[self.STATUS_ACTIVE, self.STATUS_DRAFT]
+            ).exclude(pk=self.pk)
+            
+            for contract in overlapping_contracts:
+                # Verificar superposición de fechas
+                if self._dates_overlap(
+                    self.start_date, self.end_date,
+                    contract.start_date, contract.end_date
+                ):
+                    errors['start_date'] = f"Ya existe un contrato activo para esta propiedad que se superpone con las fechas seleccionadas (Contrato #{contract.pk})."
+                    break
+        
+        # Validar fecha de próximo aumento
+        if self.next_increase_date:
+            if self.start_date and self.next_increase_date < self.start_date:
+                errors['next_increase_date'] = "La fecha del próximo aumento no puede ser anterior a la fecha de inicio."
+            
+            if self.end_date and self.next_increase_date > self.end_date:
+                errors['next_increase_date'] = "La fecha del próximo aumento no puede ser posterior a la fecha de fin."
+        
+        if errors:
+            raise ValidationError(errors)
+    
+    def _dates_overlap(self, start1, end1, start2, end2):
+        """
+        Verifica si dos rangos de fechas se superponen.
+        
+        Args:
+            start1, end1: Primer rango de fechas
+            start2, end2: Segundo rango de fechas
+            
+        Returns:
+            bool: True si los rangos se superponen
+        """
+        # Si alguna fecha de fin es None, se considera que el contrato no tiene fin
+        if end1 is None:
+            end1 = timezone.now().date().replace(year=9999)  # Fecha muy lejana
+        if end2 is None:
+            end2 = timezone.now().date().replace(year=9999)
+            
+        return start1 <= end2 and start2 <= end1
     
     def duration_in_days(self):
         """
@@ -105,27 +214,29 @@ class Contract(BaseModel):
         Actualiza el estado del contrato basándose en las fechas actuales.
         
         Evalúa la fecha actual en relación con las fechas de inicio y fin del contrato
-        para determinar su estado (borrador, activo, próximo a vencer, finalizado).
+        para determinar su estado (borrador, activo, finalizado). Los contratos se
+        finalizan automáticamente cuando pasa la fecha de fin.
         Este método puede ser llamado periódicamente por un trabajo programado
         o al guardar el modelo.
         """
         from django.utils import timezone
         today = timezone.now().date()
 
+        # No cambiar estados ya finalizados a menos que se haga explícitamente
         if self.status == self.STATUS_CANCELLED or self.status == self.STATUS_FINISHED:
-            return # Do not change already finalized states unless explicitly done
+            return
 
+        # Finalizar automáticamente si pasó la fecha de fin
         if self.end_date and today > self.end_date:
             self.status = self.STATUS_FINISHED
+            self.is_active = False
+        # Si aún no empezó, mantener como borrador
         elif self.start_date > today:
-            self.status = self.STATUS_DRAFT # Or perhaps a 'Pending Start' status
-        elif self.is_expiring_soon: # Check before active if it's expiring soon
-            self.status = self.STATUS_EXPIRING_SOON
+            self.status = self.STATUS_DRAFT
+        # Si está en el período activo, marcar como activo
         elif self.start_date <= today and (not self.end_date or today <= self.end_date):
             self.status = self.STATUS_ACTIVE
-        
-        # Consider saving the instance if status changed, or let the caller handle it.
-        # self.save(update_fields=['status'])
+            self.is_active = True
 
     def commission_amount(self):
         """
@@ -144,6 +255,14 @@ class Contract(BaseModel):
                 commission_rate = Decimal('0.00')
             return self.amount * (commission_rate / Decimal('100'))
         return Decimal('0.00')
+
+    def save(self, *args, **kwargs):
+        """
+        Guarda el contrato y actualiza automáticamente su estado basándose en las fechas.
+        """
+        # Actualizar estado antes de guardar
+        self.update_status()
+        super().save(*args, **kwargs)
 
 
 class ContractIncrease(BaseModel):
@@ -166,6 +285,39 @@ class ContractIncrease(BaseModel):
         verbose_name = "Aumento de Contrato"
         verbose_name_plural = "Aumentos de Contratos"
         ordering = ['-effective_date']
+        
+        # Constraints de base de datos
+        constraints = [
+            # Evitar aumentos duplicados en la misma fecha para el mismo contrato
+            models.UniqueConstraint(
+                fields=['contract', 'effective_date'],
+                name='unique_contract_increase_date',
+                violation_error_message="Ya existe un aumento para este contrato en la misma fecha."
+            ),
+            # Validar que los montos sean positivos
+            models.CheckConstraint(
+                check=models.Q(previous_amount__gt=0),
+                name='positive_previous_amount',
+                violation_error_message="El monto anterior debe ser mayor a cero."
+            ),
+            models.CheckConstraint(
+                check=models.Q(new_amount__gt=0),
+                name='positive_new_amount',
+                violation_error_message="El nuevo monto debe ser mayor a cero."
+            ),
+            # Validar que el porcentaje de aumento sea razonable
+            models.CheckConstraint(
+                check=models.Q(increase_percentage__gte=-100, increase_percentage__lte=1000),
+                name='reasonable_increase_percentage_range',
+                violation_error_message="El porcentaje de aumento debe estar entre -100% y 1000%."
+            ),
+        ]
+        
+        # Índices para mejorar performance
+        indexes = [
+            models.Index(fields=['contract', 'effective_date']),
+            models.Index(fields=['effective_date']),
+        ]
     
     def __str__(self):
         return f"Aumento {self.increase_percentage}% - {self.contract}"

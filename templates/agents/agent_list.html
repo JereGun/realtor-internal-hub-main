@@ -4,206 +4,372 @@
 {% block page_title %}Agentes{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>
-        <i class="bi bi-people"></i> Lista de Agentes
-    </h2>
-    <div>
-        <a href="{% url 'agents:agent_create' %}" class="btn btn-primary">
-            <i class="bi bi-person-plus"></i> Nuevo Agente
-        </a>
-    </div>
-</div>
-
-<!-- Filtros y búsqueda -->
-<div class="card mb-4">
-    <div class="card-body">
-        <form method="get" class="row g-3">
-            <div class="col-md-4">
-                <input type="text" name="search" class="form-control" placeholder="Buscar por nombre, email o matrícula..." value="{{ request.GET.search }}">
-            </div>
-            <div class="col-md-3">
-                <select name="status" class="form-control">
-                    <option value="">Todos los estados</option>
-                    <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Activos</option>
-                    <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inactivos</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <select name="sort" class="form-control">
-                    <option value="name" {% if request.GET.sort == 'name' %}selected{% endif %}>Ordenar por nombre</option>
-                    <option value="email" {% if request.GET.sort == 'email' %}selected{% endif %}>Ordenar por email</option>
-                    <option value="commission" {% if request.GET.sort == 'commission' %}selected{% endif %}>Ordenar por comisión</option>
-                    <option value="properties" {% if request.GET.sort == 'properties' %}selected{% endif %}>Ordenar por propiedades</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-outline-primary w-100">
-                    <i class="bi bi-search"></i> Buscar
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Lista de agentes -->
-<div class="row">
-    {% for agent in agents %}
-    <div class="col-lg-6 col-xl-4 mb-4">
-        <div class="card h-100 shadow-sm">
-            <div class="card-body">
-                <div class="d-flex align-items-center mb-3">
-                    <div class="flex-shrink-0">
-                        {% if agent.image_path %}
-                            <img src="{{ agent.image_path.url }}" class="rounded-circle" width="60" height="60" style="object-fit: cover;" alt="{{ agent.full_name }}">
-                        {% else %}
-                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                                <i class="bi bi-person text-white" style="font-size: 1.5rem;"></i>
-                            </div>
-                        {% endif %}
-                    </div>
-                    <div class="flex-grow-1 ms-3">
-                        <h5 class="card-title mb-1">{{ agent.full_name }}</h5>
-                        <p class="text-muted mb-1">
-                            <i class="bi bi-envelope me-1"></i>
-                            <small>{{ agent.email }}</small>
-                        </p>
-                        {% if agent.phone %}
-                        <p class="text-muted mb-0">
-                            <i class="bi bi-telephone me-1"></i>
-                            <small>{{ agent.phone }}</small>
-                        </p>
-                        {% endif %}
-                    </div>
-                    <div class="flex-shrink-0">
-                        {% if agent.is_active %}
-                            <span class="badge bg-success">Activo</span>
-                        {% else %}
-                            <span class="badge bg-secondary">Inactivo</span>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <div class="row mb-3">
-                    <div class="col-6">
-                        <div class="text-center p-2 bg-light rounded">
-                            <div class="fw-bold text-primary">{{ agent.property_set.count }}</div>
-                            <small class="text-muted">Propiedades</small>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="text-center p-2 bg-light rounded">
-                            <div class="fw-bold text-success">{{ agent.commission_rate }}%</div>
-                            <small class="text-muted">Comisión</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <small class="text-muted">
-                        <i class="bi bi-card-text me-1"></i>
-                        Matrícula: {{ agent.license_number }}
-                    </small>
-                </div>
-
-                <div class="d-flex justify-content-between align-items-center">
-                    <small class="text-muted">
-                        <i class="bi bi-calendar me-1"></i>
-                        Desde {{ agent.date_joined|date:"M Y" }}
-                    </small>
-                    <div class="btn-group">
-                        <a href="{% url 'agents:agent_detail' agent.pk %}" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-eye"></i>
-                        </a>
-                        <a href="{% url 'agents:agent_edit' agent.pk %}" class="btn btn-sm btn-outline-secondary">
-                            <i class="bi bi-pencil"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
+<div class="container-fluid mt-4">
+    <!-- Encabezado -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 text-dark mb-1">
+                <i class="bi bi-people me-2 text-primary"></i>Gestión de Agentes
+            </h1>
+            <p class="text-muted mb-0">Administre el equipo de agentes inmobiliarios</p>
         </div>
-    </div>
-    {% empty %}
-    <div class="col-12">
-        <div class="text-center py-5">
-            <i class="bi bi-people display-1 text-muted"></i>
-            <h3 class="text-muted mt-3">No se encontraron agentes</h3>
-            <p class="text-muted">No hay agentes que coincidan con los criterios de búsqueda.</p>
+        <div class="d-flex gap-2">
             <a href="{% url 'agents:agent_create' %}" class="btn btn-primary">
-                <i class="bi bi-person-plus"></i> Crear Primer Agente
+                <i class="bi bi-person-plus me-1"></i>Nuevo Agente
             </a>
+            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" 
+                    data-bs-target="#filtersCard" aria-expanded="false">
+                <i class="bi bi-funnel me-1"></i>Filtros
+            </button>
         </div>
     </div>
-    {% endfor %}
-</div>
 
-<!-- Estadísticas rápidas -->
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h6 class="mb-0">
-                    <i class="bi bi-graph-up"></i> Estadísticas Generales
-                </h6>
+    <!-- Filtros -->
+    <div class="collapse mb-4" id="filtersCard">
+        <div class="card shadow-sm border-light">
+            <div class="card-header bg-light border-bottom">
+                <h5 class="mb-0 text-dark fw-bold">
+                    <i class="bi bi-funnel me-2"></i>Filtros de Búsqueda
+                </h5>
             </div>
-            <div class="card-body">
-                <div class="row text-center">
-                    <div class="col-md-3">
-                        <div class="border-end">
-                            <h4 class="text-primary mb-1">{{ agents.count }}</h4>
-                            <small class="text-muted">Total Agentes</small>
+            <div class="card-body p-4">
+                <form method="get" id="filterForm" class="needs-validation" novalidate>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="searchQuery" class="form-label fw-semibold">
+                                <i class="bi bi-search me-1"></i>Búsqueda General
+                            </label>
+                            <input type="text" name="search" id="searchQuery" class="form-control" 
+                                   placeholder="Buscar por nombre, email o matrícula..." 
+                                   value="{{ request.GET.search|default:'' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="statusFilter" class="form-label fw-semibold">
+                                <i class="bi bi-flag me-1"></i>Estado
+                            </label>
+                            <select name="status" id="statusFilter" class="form-select">
+                                <option value="">Todos los estados</option>
+                                <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Activos</option>
+                                <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inactivos</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="sortFilter" class="form-label fw-semibold">
+                                <i class="bi bi-sort-down me-1"></i>Ordenar por
+                            </label>
+                            <select name="sort" id="sortFilter" class="form-select">
+                                <option value="name" {% if request.GET.sort == 'name' %}selected{% endif %}>Nombre</option>
+                                <option value="email" {% if request.GET.sort == 'email' %}selected{% endif %}>Email</option>
+                                <option value="properties" {% if request.GET.sort == 'properties' %}selected{% endif %}>Propiedades</option>
+                                <option value="date_joined" {% if request.GET.sort == 'date_joined' %}selected{% endif %}>Fecha de registro</option>
+                            </select>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="border-end">
-                            <h4 class="text-success mb-1">{{ active_agents_count|default:0 }}</h4>
-                            <small class="text-muted">Agentes Activos</small>
+
+                    <!-- Botones de Acción -->
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                        <div class="text-muted small">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Use los filtros para encontrar agentes específicos
+                        </div>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'agents:agent_list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Limpiar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search me-1"></i>Buscar
+                            </button>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="border-end">
-                            <h4 class="text-info mb-1">{{ total_properties|default:0 }}</h4>
-                            <small class="text-muted">Propiedades Totales</small>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de agentes -->
+    <div class="row">
+        {% for agent in agents %}
+        <div class="col-lg-6 col-xl-4 mb-4">
+            <div class="card h-100 shadow-sm border-light">
+                <div class="card-body p-4">
+                    <!-- Header del agente -->
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-shrink-0 position-relative">
+                            {% if agent.image_path %}
+                                <img src="{{ agent.image_path.url }}" class="rounded-circle border border-2 border-light shadow-sm" 
+                                     width="70" height="70" style="object-fit: cover;" alt="{{ agent.full_name }}">
+                            {% else %}
+                                <div class="bg-gradient bg-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
+                                     style="width: 70px; height: 70px;">
+                                    <span class="text-white fw-bold fs-4">
+                                        {{ agent.first_name|first }}{{ agent.last_name|first }}
+                                    </span>
+                                </div>
+                            {% endif %}
+                            <!-- Indicador de estado -->
+                            <span class="position-absolute bottom-0 end-0 p-1 
+                                {% if agent.is_active %}bg-success{% else %}bg-secondary{% endif %} 
+                                border border-2 border-white rounded-circle">
+                            </span>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h5 class="card-title mb-1 fw-bold">{{ agent.full_name }}</h5>
+                            <p class="text-muted mb-1 small">
+                                <i class="bi bi-envelope me-1"></i>{{ agent.email }}
+                            </p>
+                            {% if agent.phone %}
+                            <p class="text-muted mb-0 small">
+                                <i class="bi bi-telephone me-1"></i>{{ agent.phone }}
+                            </p>
+                            {% endif %}
+                        </div>
+                        <div class="flex-shrink-0">
+                            {% if agent.is_active %}
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                    <i class="bi bi-check-circle me-1"></i>Activo
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                                    <i class="bi bi-pause-circle me-1"></i>Inactivo
+                                </span>
+                            {% endif %}
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <h4 class="text-warning mb-1">{{ avg_commission|default:0|floatformat:1 }}%</h4>
-                        <small class="text-muted">Comisión Promedio</small>
+
+                    <!-- Estadísticas del agente -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <div class="text-center p-3 bg-primary-subtle rounded-3 border border-primary-subtle">
+                                <div class="fw-bold text-primary fs-5">{{ agent.property_set.count }}</div>
+                                <small class="text-primary fw-semibold">Propiedades</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center p-3 bg-info-subtle rounded-3 border border-info-subtle">
+                                <div class="fw-bold text-info fs-5">{{ agent.date_joined|timesince|truncatewords:1 }}</div>
+                                <small class="text-info fw-semibold">Antigüedad</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información profesional -->
+                    <div class="mb-3 p-2 bg-light rounded-2">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-award text-warning me-2"></i>
+                            <div>
+                                <small class="text-muted d-block">Matrícula Profesional</small>
+                                <span class="fw-semibold">{{ agent.license_number }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Biografía (si existe) -->
+                    {% if agent.bio %}
+                    <div class="mb-3">
+                        <p class="text-muted small mb-0" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                            {{ agent.bio }}
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Footer con acciones -->
+                    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                        <small class="text-muted">
+                            <i class="bi bi-calendar-plus me-1"></i>
+                            Desde {{ agent.date_joined|date:"M Y" }}
+                        </small>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'agents:agent_detail' agent.pk %}" 
+                               class="btn btn-sm btn-outline-primary" title="Ver detalles">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'agents:agent_edit' agent.pk %}" 
+                               class="btn btn-sm btn-outline-secondary" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <div class="mb-4">
+                    <i class="bi bi-people text-muted" style="font-size: 5rem;"></i>
+                </div>
+                <h3 class="text-muted mb-3">No se encontraron agentes</h3>
+                <p class="text-muted mb-4">No hay agentes que coincidan con los criterios de búsqueda.</p>
+                <a href="{% url 'agents:agent_create' %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-person-plus me-2"></i>Crear Primer Agente
+                </a>
+            </div>
+        </div>
+        {% endfor %}
     </div>
+
+    <!-- Estadísticas Generales -->
+    <div class="row g-3 mt-4">
+        <div class="col-md-3">
+            <div class="card border-0 bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-people fs-1 mb-2"></i>
+                    <h4 class="card-title">{{ agents.count }}</h4>
+                    <p class="card-text mb-0">Total Agentes</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-person-check fs-1 mb-2"></i>
+                    <h4 class="card-title">{{ active_agents_count|default:0 }}</h4>
+                    <p class="card-text mb-0">Agentes Activos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-house fs-1 mb-2"></i>
+                    <h4 class="card-title">{{ total_properties|default:0 }}</h4>
+                    <p class="card-text mb-0">Propiedades Totales</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-plus fs-1 mb-2"></i>
+                    <h4 class="card-title">{{ agents.count }}</h4>
+                    <p class="card-text mb-0">Este Mes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Paginación -->
+    {% if is_paginated %}
+    <nav aria-label="Paginación de agentes" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1">
+                        <i class="bi bi-chevron-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+            {% endif %}
+            
+            {% for num in page_obj.paginator.page_range %}
+                {% if num == page_obj.number %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.paginator.num_pages }}">
+                        <i class="bi bi-chevron-double-right"></i>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
 </div>
 
-<!-- Paginación -->
-{% if is_paginated %}
-<nav aria-label="Paginación de agentes" class="mt-4">
-    <ul class="pagination justify-content-center">
-        {% if page_obj.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?page=1">Primera</a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
-            </li>
-        {% endif %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Filtros en tiempo real
+    const filterForm = document.getElementById('filterForm');
+    const searchInput = document.getElementById('searchQuery');
+    const statusSelect = document.getElementById('statusFilter');
+    const sortSelect = document.getElementById('sortFilter');
+    
+    // Auto-submit en cambios de select
+    [statusSelect, sortSelect].forEach(select => {
+        if (select) {
+            select.addEventListener('change', function() {
+                filterForm.submit();
+            });
+        }
+    });
+    
+    // Búsqueda con delay
+    let searchTimeout;
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                if (this.value.length >= 3 || this.value.length === 0) {
+                    filterForm.submit();
+                }
+            }, 500);
+        });
+    }
+    
+    // Función para mostrar toast de éxito
+    function showSuccessToast(message) {
+        let toastContainer = document.querySelector('.toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            document.body.appendChild(toastContainer);
+        }
         
-        <li class="page-item active">
-            <span class="page-link">
-                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
-            </span>
-        </li>
+        const toastHtml = `
+            <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    <strong class="me-auto">Éxito</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            </div>
+        `;
         
-        {% if page_obj.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Última</a>
-            </li>
-        {% endif %}
-    </ul>
-</nav>
-{% endif %}
+        toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+        const toast = new bootstrap.Toast(toastContainer.lastElementChild);
+        toast.show();
+        
+        toastContainer.lastElementChild.addEventListener('hidden.bs.toast', function() {
+            this.remove();
+        });
+    }
+    
+    // Animaciones suaves para las tarjetas
+    const agentCards = document.querySelectorAll('.card');
+    agentCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+            this.style.transition = 'transform 0.2s ease';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+});
+</script>
+
 {% endblock %}

@@ -1,926 +1,777 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
-{% block title %}
-    {% if object %}
-        Editar: {{ object.title|truncatechars:30 }} - {{ block.super }}
-    {% else %}
-        Nueva Propiedad - {{ block.super }}
-    {% endif %}
-{% endblock %}
-
-{% block page_title_content %}
-    <div class="d-flex justify-content-between align-items-center flex-wrap">
-        <div>
-            <h1 class="h2 mb-0">
-                {% if object %}
-                    <i class="bi bi-pencil-square me-2"></i>Editar Propiedad
-                {% else %}
-                    <i class="bi bi-plus-circle-dotted me-2"></i>Nueva Propiedad
-                {% endif %}
-            </h1>
-            {% if object %}
-            <p class="text-muted mb-0 small">Modificando: {{ object.title }}</p>
-            {% endif %}
-        </div>
-        <a href="{% if object %}{% url 'properties:property_detail' object.pk %}{% else %}{% url 'properties:property_list' %}{% endif %}" class="btn btn-outline-secondary btn-sm mt-2 mt-md-0">
-            <i class="bi bi-arrow-left-circle-fill me-1"></i> 
-            {% if object %}Volver a Detalles{% else %}Cancelar y Volver a Lista{% endif %}
-        </a>
-    </div>
+{% block page_title %}
+    {% if form.instance.pk %}Editar Propiedad #{{ form.instance.pk }}{% else %}Nueva Propiedad{% endif %}
 {% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-10">
-        <div class="card shadow-sm">
-            <div class="card-body p-lg-4">
-                <form method="post" enctype="multipart/form-data" id="propertyForm">
-                    {% csrf_token %}
-                    
-                    {% if form.non_field_errors %}
-                        <div class="alert alert-danger">
-                            {% for error in form.non_field_errors %}
-                                <p class="mb-0">{{ error }}</p>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                    {% if image_formset.non_form_errors %}
-                        <div class="alert alert-danger">
-                             {% for error in image_formset.non_form_errors %}
-                                <p class="mb-0">{{ error }}</p>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            <!-- Encabezado -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 text-dark mb-1">
+                        {% if form.instance.pk %}
+                            <i class="bi bi-pencil-square me-2 text-primary"></i>Editar Propiedad
+                        {% else %}
+                            <i class="bi bi-house-add me-2 text-primary"></i>Nueva Propiedad
+                        {% endif %}
+                    </h1>
+                    <p class="text-muted mb-0">
+                        {% if form.instance.pk %}
+                            Actualice la información de la propiedad #{{ form.instance.pk }}
+                        {% else %}
+                            Complete la información de la nueva propiedad inmobiliaria
+                        {% endif %}
+                    </p>
+                </div>
+                <a href="{% if form.instance.pk %}{% url 'properties:property_detail' form.instance.pk %}{% else %}{% url 'properties:property_list' %}{% endif %}" 
+                   class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>
+                    {% if form.instance.pk %}Cancelar Cambios{% else %}Volver al listado{% endif %}
+                </a>
+            </div>
 
-
-                    <!-- Acordeón para las secciones del formulario -->
-                    <div class="accordion" id="propertyFormAccordion">
+            <div class="card shadow-sm border-light">
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data" novalidate id="propertyForm">
+                        {% csrf_token %}
                         
-                        <!-- Sección: Información Básica -->
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="headingBasicInfo">
-                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBasicInfo" aria-expanded="true" aria-controls="collapseBasicInfo">
-                                    <i class="bi bi-info-circle-fill me-2"></i>Información Básica
-                                </button>
-                            </h2>
-                            <div id="collapseBasicInfo" class="accordion-collapse collapse show" aria-labelledby="headingBasicInfo" data-bs-parent="#propertyFormAccordion">
-                                <div class="accordion-body">
-                                    <div class="row g-3">
-                                        <div class="col-md-8">
-                                            {{ form.title|as_crispy_field }}
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label for="{{ form.property_type.id_for_label }}" class="form-label">
-                                                {{ form.property_type.label }}
-                                            </label>
-                                            <div class="input-group">
-                                                {{ form.property_type }}
-                                                <button type="button" class="btn btn-outline-success" id="add-property-type-btn" data-bs-toggle="modal" data-bs-target="#propertyTypeModal" title="Crear Nuevo Tipo">
-                                                    <i class="bi bi-plus-lg"></i>
-                                                </button>
-                                            </div>
-                                            {% if form.property_type.errors %}<div class="invalid-feedback d-block">{{ form.property_type.errors|first }}</div>{% endif %}
-                                            <div class="form-text">{{ form.property_type.help_text|default:"Selecciona o crea un nuevo tipo." }}</div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            {{ form.description|as_crispy_field }}
-                                        </div>
-                                        <div class="col-md-6">
-                                             <label for="{{ form.property_status.id_for_label }}" class="form-label">
-                                                {{ form.property_status.label }}
-                                            </label>
-                                            <div class="input-group">
-                                                {{ form.property_status }}
-                                                <button type="button" class="btn btn-outline-success" id="add-property-status-btn" data-bs-toggle="modal" data-bs-target="#propertyStatusModal" title="Crear Nuevo Estado">
-                                                    <i class="bi bi-plus-lg"></i>
-                                                </button>
-                                            </div>
-                                            {% if form.property_status.errors %}<div class="invalid-feedback d-block">{{ form.property_status.errors|first }}</div>{% endif %}
-                                            <div class="form-text">{{ form.property_status.help_text|default:"Selecciona o crea un nuevo estado." }}</div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            {{ form.agent|as_crispy_field }}
-                                            {% if user.is_staff or user.is_superuser and not object %}
-                                            <div class="alert alert-info p-2 small mt-1">
-                                                <i class="bi bi-info-circle me-1"></i>
-                                                Por defecto se te asigna como agente. Puedes cambiarlo.
-                                            </div>
-                                            {% endif %}
-                                        </div>
-                                        <div class="col-md-12">
-                                            <!-- Owner field with autocomplete -->
-                                            <label for="id_owner_select2" class="form-label">{{ form.owner.label }}</label>
-                                            <select id="id_owner_select2" name="owner_text_select2" class="form-control owner-autocomplete"
-                                                    data-autocomplete-url="{% url 'properties:autocomplete_owners' %}">
-                                                {% if form.instance.owner %}
-                                                <option value="{{ form.instance.owner.pk }}" selected>{{ form.instance.owner }}</option>
-                                                {% endif %}
-                                            </select>
-                                            <input type="hidden" name="{{ form.owner.name }}" id="{{ form.owner.id_for_label }}" value="{{ form.instance.owner.pk|default:'' }}">
-                                            {% if form.owner.errors %}<div class="invalid-feedback d-block">{{ form.owner.errors|first }}</div>{% endif %}
-                                            <div class="form-text">{{ form.owner.help_text|default:"Comienza a escribir para buscar un dueño." }}</div>
-                                        </div>
+                        {% if form.errors %}
+                            <div class="alert alert-danger border-danger">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
+                                    <strong>Errores en el formulario:</strong>
+                                </div>
+                                <ul class="mb-0">
+                                    {% for field, errors in form.errors.items %}
+                                        {% for error in errors %}
+                                            <li>{{ field }}: {{ error }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+
+                        <!-- Información Básica -->
+                        <div class="row mb-5">
+                            <div class="col-12">
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="bg-primary rounded-circle p-2 me-3">
+                                        <i class="bi bi-info-circle text-white"></i>
                                     </div>
+                                    <div>
+                                        <h4 class="text-primary mb-1 fw-bold">Información Básica</h4>
+                                        <p class="text-muted small mb-0">Datos principales de la propiedad</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-8 mb-3">
+                                <label for="{{ form.title.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-house text-primary me-1"></i>{{ form.title.label }}
+                                </label>
+                                {{ form.title }}
+                                {% if form.title.errors %}
+                                    <div class="text-danger small mt-1">{{ form.title.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.property_type.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-house-door text-success me-1"></i>{{ form.property_type.label }}
+                                </label>
+                                {{ form.property_type }}
+                                {% if form.property_type.errors %}
+                                    <div class="text-danger small mt-1">{{ form.property_type.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-12 mb-3">
+                                <label for="{{ form.description.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-card-text text-info me-1"></i>{{ form.description.label }}
+                                </label>
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                    <div class="text-danger small mt-1">{{ form.description.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Describa las características principales de la propiedad
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.property_status.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-flag text-warning me-1"></i>{{ form.property_status.label }}
+                                </label>
+                                {{ form.property_status }}
+                                {% if form.property_status.errors %}
+                                    <div class="text-danger small mt-1">{{ form.property_status.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.agent.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-person-badge text-info me-1"></i>{{ form.agent.label }}
+                                </label>
+                                {{ form.agent }}
+                                {% if form.agent.errors %}
+                                    <div class="text-danger small mt-1">{{ form.agent.errors }}</div>
+                                {% endif %}
+                                {% if not form.instance.pk %}
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Por defecto eres tú como agente, pero puedes cambiarlo si es necesario.
+                                </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.owner.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-person text-secondary me-1"></i>{{ form.owner.label }}
+                                </label>
+                                {{ form.owner }}
+                                {% if form.owner.errors %}
+                                    <div class="text-danger small mt-1">{{ form.owner.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Propietario de la propiedad (opcional)
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.listing_type.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-tags text-warning me-1"></i>{{ form.listing_type.label }}
+                                </label>
+                                {{ form.listing_type }}
+                                {% if form.listing_type.errors %}
+                                    <div class="text-danger small mt-1">{{ form.listing_type.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Tipo de comercialización de la propiedad
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Sección: Ubicación -->
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="headingLocation">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLocation" aria-expanded="false" aria-controls="collapseLocation">
-                                    <i class="bi bi-geo-alt-fill me-2"></i>Ubicación
-                                </button>
-                            </h2>
-                            <div id="collapseLocation" class="accordion-collapse collapse" aria-labelledby="headingLocation" data-bs-parent="#propertyFormAccordion">
-                                <div class="accordion-body">
-                                    <div class="row g-3">
-                                        <div class="col-md-9">{{ form.street|as_crispy_field }}</div>
-                                        <div class="col-md-3">{{ form.number|as_crispy_field }}</div>
-                                        <div class="col-md-6">{{ form.neighborhood|as_crispy_field }}</div>
-                                        
-                                        <!-- Country field with autocomplete -->
-                                        <div class="col-md-6">
-                                            <label for="id_country_select2" class="form-label">{{ form.country.label }}</label>
-                                            <select id="id_country_select2" name="country_text_select2" class="form-control country-autocomplete"
-                                                    data-autocomplete-url="{% url 'properties:autocomplete_countries' %}">
-                                                {% if form.instance.country %}
-                                                <option value="{{ form.instance.country.pk }}" selected>{{ form.instance.country.name }}</option>
-                                                {% endif %}
-                                            </select>
-                                            <input type="hidden" name="{{ form.country.name }}" id="{{ form.country.id_for_label }}" value="{{ form.instance.country.pk|default:'' }}">
-                                            {% if form.country.errors %}<div class="invalid-feedback d-block">{{ form.country.errors|first }}</div>{% endif %}
-                                        </div>
-
-                                        <!-- Province field with autocomplete -->
-                                        <div class="col-md-6">
-                                            <label for="id_province_select2" class="form-label">{{ form.province.label }}</label>
-                                            <select id="id_province_select2" name="province_text_select2" class="form-control province-autocomplete"
-                                                    data-autocomplete-url="{% url 'properties:autocomplete_provinces' %}"
-                                                    disabled>
-                                                {% if form.instance.province %}
-                                                <option value="{{ form.instance.province.pk }}" selected>{{ form.instance.province.name }}</option>
-                                                {% endif %}
-                                            </select>
-                                            <input type="hidden" name="{{ form.province.name }}" id="{{ form.province.id_for_label }}" value="{{ form.instance.province.pk|default:'' }}">
-                                            {% if form.province.errors %}<div class="invalid-feedback d-block">{{ form.province.errors|first }}</div>{% endif %}
-                                            <div class="form-text">Selecciona un país primero.</div>
-                                        </div>
-                                        
-                                        <!-- Locality field with autocomplete -->
-                                        <div class="col-md-6">
-                                            <label for="id_locality_select2" class="form-label">{{ form.locality.label }}</label>
-                                            <select id="id_locality_select2" name="locality_text_select2" class="form-control locality-autocomplete"
-                                                    data-autocomplete-url="{% url 'properties:autocomplete_localities' %}"
-                                                    disabled>
-                                                {% if form.instance.locality %}
-                                                <option value="{{ form.instance.locality.pk }}" selected>{{ form.instance.locality.name }}</option>
-                                                {% endif %}
-                                            </select>
-                                            <input type="hidden" name="{{ form.locality.name }}" id="{{ form.locality.id_for_label }}" value="{{ form.instance.locality.pk|default:'' }}">
-                                            {% if form.locality.errors %}<div class="invalid-feedback d-block">{{ form.locality.errors|first }}</div>{% endif %}
-                                            <div class="form-text">Selecciona una provincia primero.</div>
-                                        </div>
+                        <!-- Ubicación -->
+                        <div class="row mb-5">
+                            <div class="col-12">
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="bg-success rounded-circle p-2 me-3">
+                                        <i class="bi bi-geo-alt text-white"></i>
                                     </div>
+                                    <div>
+                                        <h4 class="text-success mb-1 fw-bold">Ubicación</h4>
+                                        <p class="text-muted small mb-0">Dirección y localización de la propiedad</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.street.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-signpost text-success me-1"></i>{{ form.street.label }}
+                                </label>
+                                {{ form.street }}
+                                {% if form.street.errors %}
+                                    <div class="text-danger small mt-1">{{ form.street.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <label for="{{ form.number.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-hash text-success me-1"></i>{{ form.number.label }}
+                                </label>
+                                {{ form.number }}
+                                {% if form.number.errors %}
+                                    <div class="text-danger small mt-1">{{ form.number.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <label for="{{ form.neighborhood.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-map text-info me-1"></i>{{ form.neighborhood.label }}
+                                </label>
+                                {{ form.neighborhood }}
+                                {% if form.neighborhood.errors %}
+                                    <div class="text-danger small mt-1">{{ form.neighborhood.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.country.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-globe text-primary me-1"></i>{{ form.country.label }}
+                                </label>
+                                {{ form.country }}
+                                {% if form.country.errors %}
+                                    <div class="text-danger small mt-1">{{ form.country.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.province.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-map text-warning me-1"></i>{{ form.province.label }}
+                                </label>
+                                {{ form.province }}
+                                {% if form.province.errors %}
+                                    <div class="text-danger small mt-1">{{ form.province.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.locality.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-geo-alt text-info me-1"></i>{{ form.locality.label }}
+                                </label>
+                                {{ form.locality }}
+                                {% if form.locality.errors %}
+                                    <div class="text-danger small mt-1">{{ form.locality.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Características Físicas -->
+                        <div class="row mb-5">
+                            <div class="col-12">
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="bg-warning rounded-circle p-2 me-3">
+                                        <i class="bi bi-rulers text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-warning mb-1 fw-bold">Características Físicas</h4>
+                                        <p class="text-muted small mb-0">Detalles técnicos y dimensiones</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.total_surface.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-rulers text-warning me-1"></i>{{ form.total_surface.label }}
+                                </label>
+                                <div class="input-group">
+                                    {{ form.total_surface }}
+                                    <span class="input-group-text">m²</span>
+                                </div>
+                                {% if form.total_surface.errors %}
+                                    <div class="text-danger small mt-1">{{ form.total_surface.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.covered_surface.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-rulers text-secondary me-1"></i>{{ form.covered_surface.label }}
+                                </label>
+                                <div class="input-group">
+                                    {{ form.covered_surface }}
+                                    <span class="input-group-text">m²</span>
+                                </div>
+                                {% if form.covered_surface.errors %}
+                                    <div class="text-danger small mt-1">{{ form.covered_surface.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.year_built.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-calendar text-secondary me-1"></i>{{ form.year_built.label }}
+                                </label>
+                                {{ form.year_built }}
+                                {% if form.year_built.errors %}
+                                    <div class="text-danger small mt-1">{{ form.year_built.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <label for="{{ form.bedrooms.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-door-closed text-primary me-1"></i>{{ form.bedrooms.label }}
+                                </label>
+                                {{ form.bedrooms }}
+                                {% if form.bedrooms.errors %}
+                                    <div class="text-danger small mt-1">{{ form.bedrooms.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <label for="{{ form.bathrooms.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-droplet text-info me-1"></i>{{ form.bathrooms.label }}
+                                </label>
+                                {{ form.bathrooms }}
+                                {% if form.bathrooms.errors %}
+                                    <div class="text-danger small mt-1">{{ form.bathrooms.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <div class="form-check form-switch mt-4 pt-2">
+                                    {{ form.garage }}
+                                    <label class="form-check-label fw-semibold" for="{{ form.garage.id_for_label }}">
+                                        <i class="bi bi-car-front text-success me-1"></i>{{ form.garage.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <div class="form-check form-switch mt-4 pt-2">
+                                    {{ form.furnished }}
+                                    <label class="form-check-label fw-semibold" for="{{ form.furnished.id_for_label }}">
+                                        <i class="bi bi-house-check text-info me-1"></i>{{ form.furnished.label }}
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.orientation.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-compass text-secondary me-1"></i>{{ form.orientation.label }}
+                                </label>
+                                {{ form.orientation }}
+                                {% if form.orientation.errors %}
+                                    <div class="text-danger small mt-1">{{ form.orientation.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.floors.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-building text-warning me-1"></i>{{ form.floors.label }}
+                                </label>
+                                {{ form.floors }}
+                                {% if form.floors.errors %}
+                                    <div class="text-danger small mt-1">{{ form.floors.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Información Financiera -->
+                        <div class="row mb-5">
+                            <div class="col-12">
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="bg-info rounded-circle p-2 me-3">
+                                        <i class="bi bi-currency-dollar text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-info mb-1 fw-bold">Información Financiera</h4>
+                                        <p class="text-muted small mb-0">Precios y costos asociados</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.sale_price.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-tag text-success me-1"></i>{{ form.sale_price.label }}
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    {{ form.sale_price }}
+                                </div>
+                                {% if form.sale_price.errors %}
+                                    <div class="text-danger small mt-1">{{ form.sale_price.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Precio de venta de la propiedad (opcional)
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.rental_price.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-calendar-month text-info me-1"></i>{{ form.rental_price.label }}
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    {{ form.rental_price }}
+                                    <span class="input-group-text">/mes</span>
+                                </div>
+                                {% if form.rental_price.errors %}
+                                    <div class="text-danger small mt-1">{{ form.rental_price.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Precio de alquiler mensual (opcional)
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.expenses.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-receipt text-warning me-1"></i>{{ form.expenses.label }}
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    {{ form.expenses }}
+                                    <span class="input-group-text">/mes</span>
+                                </div>
+                                {% if form.expenses.errors %}
+                                    <div class="text-danger small mt-1">{{ form.expenses.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Gastos comunes o expensas mensuales (opcional)
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Sección: Detalles de la Propiedad -->
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="headingDetails">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetails" aria-expanded="false" aria-controls="collapseDetails">
-                                    <i class="bi bi-rulers me-2"></i>Detalles de la Propiedad
-                                </button>
-                            </h2>
-                            <div id="collapseDetails" class="accordion-collapse collapse" aria-labelledby="headingDetails" data-bs-parent="#propertyFormAccordion">
-                                <div class="accordion-body">
-                                    <div class="row g-3">
-                                        <div class="col-md-6">{{ form.total_surface|as_crispy_field }}</div>
-                                        <div class="col-md-6">{{ form.covered_surface|as_crispy_field }}</div>
-                                        <div class="col-md-3">{{ form.bedrooms|as_crispy_field }}</div>
-                                        <div class="col-md-3">{{ form.bathrooms|as_crispy_field }}</div>
-                                        <div class="col-md-3">{{ form.year_built|as_crispy_field }}</div>
-                                        <div class="col-md-3">{{ form.floors|as_crispy_field }}</div>
-                                        <div class="col-md-6">{{ form.orientation|as_crispy_field }}</div>
-                                        <div class="col-md-3 d-flex align-items-center pt-3">{{ form.garage|as_crispy_field }}</div>
-                                        <div class="col-md-3 d-flex align-items-center pt-3">{{ form.furnished|as_crispy_field }}</div>
+                        <!-- Características y Etiquetas -->
+                        <div class="row mb-5">
+                            <div class="col-12">
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="bg-success rounded-circle p-2 me-3">
+                                        <i class="bi bi-tags text-white"></i>
                                     </div>
+                                    <div>
+                                        <h4 class="text-success mb-1 fw-bold">Características y Etiquetas</h4>
+                                        <p class="text-muted small mb-0">Comodidades y etiquetas especiales</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">
+                                    <i class="bi bi-star text-warning me-1"></i>{{ form.features.label }}
+                                </label>
+                                <div class="border rounded p-3 bg-light" style="max-height: 200px; overflow-y: auto;">
+                                    {{ form.features }}
+                                </div>
+                                {% if form.features.errors %}
+                                    <div class="text-danger small mt-1">{{ form.features.errors }}</div>
+                                {% endif %}
+                                <div class="mt-2">
+                                    <label for="{{ form.new_features.id_for_label }}" class="form-label fw-semibold small">
+                                        Agregar nuevas características
+                                    </label>
+                                    {{ form.new_features }}
+                                    {% if form.new_features.errors %}
+                                        <div class="text-danger small mt-1">{{ form.new_features.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">
+                                    <i class="bi bi-tag text-info me-1"></i>{{ form.tags.label }}
+                                </label>
+                                <div class="border rounded p-3 bg-light" style="max-height: 200px; overflow-y: auto;">
+                                    {{ form.tags }}
+                                </div>
+                                {% if form.tags.errors %}
+                                    <div class="text-danger small mt-1">{{ form.tags.errors }}</div>
+                                {% endif %}
+                                <div class="mt-2">
+                                    <label for="{{ form.new_tags.id_for_label }}" class="form-label fw-semibold small">
+                                        Agregar nuevas etiquetas
+                                    </label>
+                                    {{ form.new_tags }}
+                                    {% if form.new_tags.errors %}
+                                        <div class="text-danger small mt-1">{{ form.new_tags.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-12">
+                                <div class="alert alert-info border-info">
+                                    <i class="bi bi-lightbulb me-2"></i>
+                                    <strong>Consejo:</strong> Seleccione características y etiquetas existentes o escriba nuevas (separadas por coma) para crearlas automáticamente.
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Sección: Información Financiera -->
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="headingFinancial">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFinancial" aria-expanded="false" aria-controls="collapseFinancial">
-                                    <i class="bi bi-currency-dollar me-2"></i>Información Financiera
-                                </button>
-                            </h2>
-                            <div id="collapseFinancial" class="accordion-collapse collapse" aria-labelledby="headingFinancial" data-bs-parent="#propertyFormAccordion">
-                                <div class="accordion-body">
-                                    <div class="row g-3">
-                                        <div class="col-md-12 mb-3">
-                                            {{ form.listing_type|as_crispy_field }}
-                                        </div>
-                                        <div class="col-md-4" id="sale_price_container">{{ form.sale_price|as_crispy_field }}</div>
-                                        <div class="col-md-4" id="rental_price_container">{{ form.rental_price|as_crispy_field }}</div>
-                                        <div class="col-md-4">{{ form.expenses|as_crispy_field }}</div>
+                        <!-- Imágenes -->
+                        {% if image_formset %}
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="bg-secondary rounded-circle p-2 me-3">
+                                        <i class="bi bi-images text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-secondary mb-1 fw-bold">Imágenes</h4>
+                                        <p class="text-muted small mb-0">Galería de fotos de la propiedad</p>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- Sección: Características y Etiquetas -->
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="headingFeaturesTags">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFeaturesTags" aria-expanded="false" aria-controls="collapseFeaturesTags">
-                                   <i class="bi bi-tags-fill me-2"></i>Comodidades y Etiquetas
-                                </button>
-                            </h2>
-                            <div id="collapseFeaturesTags" class="accordion-collapse collapse" aria-labelledby="headingFeaturesTags" data-bs-parent="#propertyFormAccordion">
-                                <div class="accordion-body">
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <label class="form-label"><i class="bi bi-star-fill me-1 text-warning"></i> {{ form.features.label }}</label>
-                                            <div class="features-container border rounded p-3 bg-light" style="max-height: 200px; overflow-y: auto;">
-                                                {{ form.features }}
-                                            </div>
-                                            {% if form.features.errors %}<div class="invalid-feedback d-block">{{ form.features.errors|first }}</div>{% endif %}
+                            
+                            <div class="col-12">
+                                <div class="alert alert-info border-info">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    Puede agregar múltiples imágenes. La primera imagen será la imagen principal.
+                                </div>
+                                
+                                {{ image_formset.management_form }}
+                                
+                                <div id="image-forms-container">
+                                    {% for image_form in image_formset %}
+                                    <div class="image-form-container card mb-3 border-light">
+                                        <div class="card-body p-3">
+                                            {% if image_form.instance.pk %}{{ image_form.DELETE }}{{ image_form.id }}{% endif %}
                                             
-                                            <div class="mt-3">
-                                                {{ form.new_features|as_crispy_field }}
-                                                <div id="new-features-preview" class="mt-1"></div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label"><i class="bi bi-tag-fill me-1 text-info"></i> {{ form.tags.label }}</label>
-                                            <div class="tags-container border rounded p-3 bg-light" style="max-height: 200px; overflow-y: auto;">
-                                                {{ form.tags }}
-                                            </div>
-                                            {% if form.tags.errors %}<div class="invalid-feedback d-block">{{ form.tags.errors|first }}</div>{% endif %}
-                                            
-                                            <div class="mt-3">
-                                                {{ form.new_tags|as_crispy_field }}
-                                                <div id="new-tags-preview" class="mt-1"></div>
-                                            </div>
-                                        </div>
-                                        <div class="col-12">
-                                            <div class="alert alert-secondary p-2 small mt-2">
-                                                <i class="bi bi-lightbulb-fill me-1"></i>
-                                                <strong>Consejo:</strong> 
-                                                Selecciona comodidades y etiquetas existentes o escribe nuevas (separadas por coma) para crearlas y asignarlas.
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Sección: Imágenes -->
-                        <div class="accordion-item">
-                            <h2 class="accordion-header" id="headingImages">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseImages" aria-expanded="false" aria-controls="collapseImages">
-                                    <i class="bi bi-images me-2"></i>Imágenes de la Propiedad
-                                </button>
-                            </h2>
-                            <div id="collapseImages" class="accordion-collapse collapse" aria-labelledby="headingImages" data-bs-parent="#propertyFormAccordion">
-                                <div class="accordion-body">
-                                    <div class="alert alert-secondary p-2 small">
-                                        <i class="bi bi-info-circle me-1"></i>
-                                        Puedes agregar hasta {{ image_formset.max_num }} imágenes. La imagen marcada como "Portada" se usará en listados.
-                                    </div>
-                                    
-                                    {{ image_formset.management_form }}
-                                    
-                                    <div id="image-forms-container" class="mb-3">
-                                        {% for image_form in image_formset %}
-                                        <div class="image-form-container card mb-3 shadow-sm">
-                                            <div class="card-body p-3">
-                                                {% if image_form.non_field_errors %}
-                                                    <div class="alert alert-danger p-1 small">
-                                                        {% for error in image_form.non_field_errors %}{{ error }}{% endfor %}
+                                            <div class="row g-3 align-items-start">
+                                                <div class="col-md-3">
+                                                    <div class="image-preview-container">
+                                                        {% if image_form.instance.image %}
+                                                            <img src="{{ image_form.instance.image.url }}" class="img-fluid rounded" alt="Vista previa" style="max-height: 150px; width: 100%; object-fit: cover;">
+                                                        {% else %}
+                                                            <div class="bg-light d-flex align-items-center justify-content-center rounded" style="height: 150px;">
+                                                                <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
+                                                            </div>
+                                                        {% endif %}
                                                     </div>
-                                                {% endif %}
-                                                {% if image_form.instance.pk %}{{ image_form.DELETE }}{{ image_form.id }}{% endif %}
-                                                
-                                                <div class="row g-3 align-items-start">
-                                                    <div class="col-md-3">
-                                                        <div class="image-preview-container mb-2 mb-md-0">
-                                                            {% if image_form.instance.image %}
-                                                                <img src="{{ image_form.instance.image.url }}" class="img-fluid rounded property-image-preview" alt="Vista previa">
-                                                            {% else %}
-                                                                <div class="image-preview-placeholder bg-light d-flex align-items-center justify-content-center rounded">
-                                                                    <i class="bi bi-image text-muted" style="font-size: 2.5rem;"></i>
-                                                                </div>
-                                                            {% endif %}
-                                                        </div>
+                                                </div>
+                                                <div class="col-md-9">
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-semibold">
+                                                            <i class="bi bi-image me-1"></i>Imagen
+                                                        </label>
+                                                        {{ image_form.image }}
                                                     </div>
-                                                    <div class="col-md-9">
-                                                        <div class="mb-2">{{ image_form.image|as_crispy_field }}</div>
-                                                        <div class="mb-2">{{ image_form.description|as_crispy_field }}</div>
-                                                        <div class="d-flex justify-content-between align-items-center">
-                                                            {{ image_form.is_cover|as_crispy_field }}
-                                                            {% if image_form.instance.pk %}
-                                                                <button type="button" class="btn btn-outline-warning btn-sm mark-for-deletion">
-                                                                    <i class="bi bi-trash-fill me-1"></i> Marcar para Eliminar
-                                                                </button>
-                                                            {% else %}
-                                                                <button type="button" class="btn btn-outline-danger btn-sm remove-image-form">
-                                                                    <i class="bi bi-x-circle-fill me-1"></i> Quitar
-                                                                </button>
-                                                            {% endif %}
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-semibold">
+                                                            <i class="bi bi-card-text me-1"></i>Descripción
+                                                        </label>
+                                                        {{ image_form.description }}
+                                                    </div>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div class="form-check">
+                                                            {{ image_form.is_cover }}
+                                                            <label class="form-check-label" for="{{ image_form.is_cover.id_for_label }}">
+                                                                Imagen principal
+                                                            </label>
                                                         </div>
+                                                        {% if image_form.instance.pk %}
+                                                            <button type="button" class="btn btn-outline-danger btn-sm mark-for-deletion">
+                                                                <i class="bi bi-trash me-1"></i>Eliminar
+                                                            </button>
+                                                        {% else %}
+                                                            <button type="button" class="btn btn-outline-secondary btn-sm remove-image-form">
+                                                                <i class="bi bi-x me-1"></i>Quitar
+                                                            </button>
+                                                        {% endif %}
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        {% endfor %}
                                     </div>
-                                    
-                                    <button type="button" id="add-image-form" class="btn btn-success">
-                                        <i class="bi bi-plus-circle-fill me-1"></i> Agregar Otra Imagen
-                                    </button>
+                                    {% endfor %}
                                 </div>
+                                
+                                <button type="button" id="add-image-form" class="btn btn-outline-primary">
+                                    <i class="bi bi-plus-circle me-1"></i>Agregar Imagen
+                                </button>
                             </div>
                         </div>
-                    </div> <!-- Fin Acordeón -->
-
-                    <!-- Botones de Acción -->
-                    <div class="mt-4 pt-3 border-top">
-                        <div class="d-flex justify-content-end gap-2">
-                            <a href="{% if object %}{% url 'properties:property_detail' object.pk %}{% else %}{% url 'properties:property_list' %}{% endif %}" class="btn btn-secondary">
-                                <i class="bi bi-x-lg me-1"></i> Cancelar
+                        {% endif %}
+                        
+                        <hr class="my-4">
+                        
+                        <div class="d-flex justify-content-end">
+                            <a href="{% if form.instance.pk %}{% url 'properties:property_detail' form.instance.pk %}{% else %}{% url 'properties:property_list' %}{% endif %}" class="btn btn-outline-secondary me-2">
+                                <i class="bi bi-x-circle me-1"></i> Cancelar
                             </a>
-                            <button type="submit" class="btn btn-primary px-4">
-                                <i class="bi bi-check-lg me-1"></i> 
-                                {% if object %}Actualizar{% else %}Crear{% endif %} Propiedad
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle-fill me-1"></i> Guardar Propiedad
                             </button>
                         </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Plantilla para nuevos formularios de imagen (oculta) -->
-<div id="empty-form" style="display: none;">
-    <div class="image-form-container card mb-3 shadow-sm">
-        <div class="card-body p-3">
-            <div class="row g-3 align-items-start">
-                <div class="col-md-3">
-                    <div class="image-preview-container mb-2 mb-md-0">
-                        <div class="image-preview-placeholder bg-light d-flex align-items-center justify-content-center rounded">
-                            <i class="bi bi-image text-muted" style="font-size: 2.5rem;"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-9">
-                    <div class="mb-2">{{ image_formset.empty_form.image|as_crispy_field }}</div>
-                    <div class="mb-2">{{ image_formset.empty_form.description|as_crispy_field }}</div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        {{ image_formset.empty_form.is_cover|as_crispy_field }}
-                        <button type="button" class="btn btn-outline-danger btn-sm remove-image-form">
-                            <i class="bi bi-x-circle-fill me-1"></i> Quitar
-                        </button>
-                    </div>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<!-- Modal para crear Property Type -->
-<div class="modal fade" id="propertyTypeModal" tabindex="-1" aria-labelledby="propertyTypeModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="propertyTypeModalLabel">
-                    <i class="bi bi-house-add-fill me-2"></i>Crear Nuevo Tipo de Propiedad
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="propertyTypeFormModal">
-                    <div class="mb-3">
-                        <label for="propertyTypeNameModal" class="form-label">Nombre *</label>
-                        <input type="text" class="form-control" id="propertyTypeNameModal" placeholder="Ej: Casa, Departamento" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="propertyTypeDescriptionModal" class="form-label">Descripción</label>
-                        <textarea class="form-control" id="propertyTypeDescriptionModal" rows="2" placeholder="Opcional"></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-success" id="savePropertyType">
-                    <i class="bi bi-check-circle-fill me-1"></i> Crear Tipo
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal para crear Property Status -->
-<div class="modal fade" id="propertyStatusModal" tabindex="-1" aria-labelledby="propertyStatusModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="propertyStatusModalLabel">
-                    <i class="bi bi-flag-fill me-2"></i>Crear Nuevo Estado de Propiedad
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="propertyStatusFormModal">
-                    <div class="mb-3">
-                        <label for="propertyStatusNameModal" class="form-label">Nombre *</label>
-                        <input type="text" class="form-control" id="propertyStatusNameModal" placeholder="Ej: Disponible, Vendida" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="propertyStatusDescriptionModal" class="form-label">Descripción</label>
-                        <textarea class="form-control" id="propertyStatusDescriptionModal" rows="2" placeholder="Opcional"></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-success" id="savePropertyStatus">
-                    <i class="bi bi-check-circle-fill me-1"></i> Crear Estado
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Toast Container -->
-<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1056"></div>
-
-<!-- Incluir Select2 CSS -->
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar tooltips de Bootstrap (si se usan en el form)
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-    })
+    const propertyForm = document.getElementById('propertyForm');
+    const salePriceInput = document.getElementById('id_sale_price');
+    const rentalPriceInput = document.getElementById('id_rental_price');
+    const listingTypeSelect = document.getElementById('id_listing_type');
 
-    // Lógica del Formset de Imágenes
-    const addButton = document.getElementById('add-image-form');
-    const emptyFormTemplate = document.getElementById('empty-form').innerHTML;
-    const formsContainer = document.getElementById('image-forms-container');
-    const totalFormsInput = document.querySelector('#id_images-TOTAL_FORMS');
-    const maxForms = parseInt(document.querySelector('#id_images-MAX_NUM_FORMS').value, 10);
-    let formNum = parseInt(totalFormsInput.value, 10);
-
-    function updateAddButtonState() {
-        if (formNum >= maxForms) {
-            addButton.style.display = 'none';
-        } else {
-            addButton.style.display = 'inline-block';
-        }
-    }
-    updateAddButtonState();
-
-    addButton.addEventListener('click', function(e) {
-        e.preventDefault();
-        if (formNum >= maxForms) {
-            showToast(`Máximo ${maxForms} imágenes permitidas.`, 'warning');
-            return;
-        }
+    // Función para mostrar/ocultar campos de precio según el tipo de listado
+    function togglePriceFields() {
+        const listingType = listingTypeSelect ? listingTypeSelect.value : '';
+        const salePriceContainer = salePriceInput ? salePriceInput.closest('.col-md-6') : null;
+        const rentalPriceContainer = rentalPriceInput ? rentalPriceInput.closest('.col-md-6') : null;
         
-        const newFormHtml = emptyFormTemplate.replace(/__prefix__/g, formNum);
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = newFormHtml;
-        const newFormElement = tempDiv.firstElementChild;
-        
-        formsContainer.appendChild(newFormElement);
-        initCrispyField(newFormElement.querySelector('input[type="file"]')); // Re-init crispy for file input
-        initCrispyField(newFormElement.querySelector('textarea')); // Re-init crispy for description
-        initCrispyField(newFormElement.querySelector('input[type="checkbox"]')); // Re-init crispy for is_cover
-
-        formNum++;
-        totalFormsInput.value = formNum;
-        addFormEvents(newFormElement);
-        updateAddButtonState();
-    });
-    
-    function addFormEvents(formElement) {
-        const imageInput = formElement.querySelector('input[type="file"]');
-        const previewContainer = formElement.querySelector('.image-preview-placeholder, .property-image-preview');
-        
-        if (imageInput) {
-            imageInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file && previewContainer) {
-                    const reader = new FileReader();
-                    reader.onload = function(event) {
-                        if (previewContainer.tagName === 'IMG') {
-                            previewContainer.src = event.target.result;
-                        } else { // Es el div placeholder
-                            previewContainer.innerHTML = `<img src="${event.target.result}" class="img-fluid rounded property-image-preview" alt="Vista previa">`;
-                            previewContainer.classList.remove('d-flex', 'align-items-center', 'justify-content-center');
-                        }
-                    };
-                    reader.readAsDataURL(file);
-                } else if (previewContainer) {
-                     if (previewContainer.tagName === 'IMG') previewContainer.src = ""; // Clear if it was an img
-                     else { // Reset placeholder
-                        previewContainer.innerHTML = '<i class="bi bi-image text-muted" style="font-size: 2.5rem;"></i>';
-                        if(!previewContainer.classList.contains('d-flex')) {
-                           previewContainer.classList.add('d-flex', 'align-items-center', 'justify-content-center');
-                        }
-                     }
-                }
-            });
-        }
-        
-        const removeButton = formElement.querySelector('.remove-image-form');
-        if (removeButton) {
-            removeButton.addEventListener('click', function(e) {
-                e.preventDefault();
-                formElement.remove();
-                formNum--; // Decrement before updating totalFormsInput
-                totalFormsInput.value = formNum; // This should be the new count of VISIBLE forms
-                // Re-index forms if needed, though Django handles non-sequential prefixes if they are unique.
-                // For simplicity, we are not re-indexing here. Django's formset should handle it.
-                updateAddButtonState();
-            });
-        }
-        
-        const markDeleteButton = formElement.querySelector('.mark-for-deletion');
-        if (markDeleteButton) {
-            markDeleteButton.addEventListener('click', function(e) {
-                e.preventDefault();
-                const deleteInput = formElement.querySelector('input[name$="-DELETE"]');
-                if (deleteInput) {
-                    deleteInput.checked = !deleteInput.checked;
-                    formElement.classList.toggle('opacity-50', deleteInput.checked);
-                    markDeleteButton.innerHTML = deleteInput.checked ? 
-                        '<i class="bi bi-arrow-counterclockwise me-1"></i> Deshacer Eliminación' : 
-                        '<i class="bi bi-trash-fill me-1"></i> Marcar para Eliminar';
-                    markDeleteButton.classList.toggle('btn-warning', deleteInput.checked);
-                    markDeleteButton.classList.toggle('btn-outline-danger', !deleteInput.checked);
-                     markDeleteButton.classList.toggle('btn-outline-warning', deleteInput.checked); // Ensure correct class swap
-                    markDeleteButton.classList.remove(deleteInput.checked ? 'btn-outline-danger' : 'btn-warning');
-                }
-            });
-             // Initialize button state based on current DELETE checkbox
-            const deleteInput = formElement.querySelector('input[name$="-DELETE"]');
-            if (deleteInput && deleteInput.checked) {
-                formElement.classList.add('opacity-50');
-                markDeleteButton.innerHTML = '<i class="bi bi-arrow-counterclockwise me-1"></i> Deshacer Eliminación';
-                markDeleteButton.classList.add('btn-warning');
-                markDeleteButton.classList.remove('btn-outline-danger');
-            } else if (deleteInput) {
-                 markDeleteButton.classList.add('btn-outline-danger');
-                 markDeleteButton.classList.remove('btn-warning');
-            }
-        }
-    }
-    
-    document.querySelectorAll('#image-forms-container .image-form-container').forEach(form => {
-        addFormEvents(form);
-    });
-    
-    document.addEventListener('change', function(e) {
-        if (e.target.matches('input[name*="-is_cover"][type="checkbox"]')) {
-            if (e.target.checked) {
-                document.querySelectorAll('input[name*="-is_cover"][type="checkbox"]').forEach(checkbox => {
-                    if (checkbox !== e.target) {
-                        checkbox.checked = false;
-                    }
-                });
-            }
-        }
-    });
-    
-    // Submit validation for at least one image (optional)
-    // document.getElementById('propertyForm').addEventListener('submit', function(e) {
-    //     // ... (previous image validation logic can be adapted here if needed)
-    // });
-    
-    // Gestión de Features y Tags (Vista previa)
-    setupTaggingInput('id_new_features', 'new-features-preview', 'bg-info');
-    setupTaggingInput('id_new_tags', 'new-tags-preview', null, ['#007bff', '#28a745', '#dc3545', '#ffc107', '#6f42c1']);
-
-    function setupTaggingInput(inputId, previewId, badgeClass, colors) {
-        const inputElement = document.getElementById(inputId);
-        const previewElement = document.getElementById(previewId);
-        if (!inputElement || !previewElement) return;
-
-        inputElement.addEventListener('input', function() {
-            const text = this.value.trim();
-            previewElement.innerHTML = ''; // Clear previous
-            if (text) {
-                const items = text.split(',').map(item => item.trim()).filter(item => item);
-                items.forEach((item, index) => {
-                    const badge = document.createElement('span');
-                    badge.className = `badge me-1 mb-1 ${badgeClass || ''}`;
-                    if (colors && colors.length > 0) {
-                        badge.style.backgroundColor = colors[index % colors.length];
-                        if (!badgeClass) badge.classList.add('text-white'); // Add text-white if no specific class like bg-info
-                    } else if (!badgeClass) {
-                         badge.classList.add('bg-secondary'); // Default if no class and no colors
-                    }
-                    badge.textContent = item;
-                    previewElement.appendChild(badge);
-                });
-            }
-        });
-    }
-    
-    // Modales para PropertyType y PropertyStatus
-    setupModalForm('savePropertyType', '{% url "properties:create_property_type_ajax" %}', 
-                   'propertyTypeNameModal', 'propertyTypeDescriptionModal', 'id_property_type', 
-                   'Tipo de propiedad', document.getElementById('propertyTypeModal'));
-    setupModalForm('savePropertyStatus', '{% url "properties:create_property_status_ajax" %}', 
-                   'propertyStatusNameModal', 'propertyStatusDescriptionModal', 'id_property_status', 
-                   'Estado de propiedad', document.getElementById('propertyStatusModal'));
-
-    async function setupModalForm(buttonId, url, nameFieldId, descFieldId, selectId, entityName, modalElement) {
-        const saveBtn = document.getElementById(buttonId);
-        if (!saveBtn) return;
-
-        saveBtn.addEventListener('click', async function() {
-            const name = document.getElementById(nameFieldId).value.trim();
-            const description = document.getElementById(descFieldId).value.trim();
-            
-            if (!name) {
-                showToast(`Por favor, ingresa un nombre para el ${entityName.toLowerCase()}.`, 'warning');
-                document.getElementById(nameFieldId).focus();
-                return;
-            }
-            
-            saveBtn.disabled = true;
-            saveBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Creando...`;
-
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-                    },
-                    body: JSON.stringify({ name, description })
-                });
-                const data = await response.json();
-                
-                if (data.success) {
-                    const selectElement = document.getElementById(selectId);
-                    const newOption = new Option(data[entityName.replace(" ", "_").toLowerCase()].name, data[entityName.replace(" ", "_").toLowerCase()].id, true, true);
-                    selectElement.add(newOption);
-                    selectElement.dispatchEvent(new Event('change')); // Trigger change for any listeners
-                    
-                    const modalInstance = bootstrap.Modal.getInstance(modalElement);
-                    if (modalInstance) modalInstance.hide();
-                    
-                    document.getElementById(nameFieldId).form.reset();
-                    showToast(`${entityName} '${data[entityName.replace(" ", "_").toLowerCase()].name}' ${data.created ? 'creado y seleccionado' : 'seleccionado'}.`, data.created ? 'success' : 'info');
-                } else {
-                    showToast(`Error: ${data.error || `No se pudo crear el ${entityName.toLowerCase()}`}`, 'danger');
-                }
-            } catch (error) {
-                console.error('Error en AJAX:', error);
-                showToast(`Error de conexión al crear ${entityName.toLowerCase()}. Intenta de nuevo.`, 'danger');
-            } finally {
-                saveBtn.disabled = false;
-                saveBtn.innerHTML = `<i class="bi bi-check-circle-fill me-1"></i> Crear ${entityName.split(" ")[0]}`;
-            }
-        });
-    }
-    
-    // Toast function
-    function showToast(message, type = 'info') {
-        const toastContainer = document.querySelector('.toast-container');
-        if (!toastContainer) return;
-
-        const toastId = 'toast-' + Date.now();
-        let iconClass = 'bi-info-circle-fill text-info';
-        if (type === 'success') iconClass = 'bi-check-circle-fill text-success';
-        if (type === 'warning') iconClass = 'bi-exclamation-triangle-fill text-warning';
-        if (type === 'danger') iconClass = 'bi-x-octagon-fill text-danger';
-
-        const toastHTML = `
-            <div class="toast align-items-center" id="${toastId}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
-                <div class="d-flex">
-                    <div class="toast-body">
-                        <i class="bi ${iconClass} me-2"></i>${message}
-                    </div>
-                    <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-            </div>
-        `;
-        toastContainer.insertAdjacentHTML('beforeend', toastHTML);
-        const toastElement = document.getElementById(toastId);
-        const toast = new bootstrap.Toast(toastElement);
-        toast.show();
-        toastElement.addEventListener('hidden.bs.toast', () => toastElement.remove());
-    }
-
-    // Helper to re-apply/initialize crispy forms styling if needed for dynamic fields
-    // This is a placeholder. Actual re-initialization depends on how crispy-forms JS works, if any.
-    // For simple Bootstrap classes, this might not be needed if classes are on the widget itself.
-    function initCrispyField(fieldElement) {
-        // Example: if crispy forms adds specific classes or needs JS re-init.
-        // This is highly dependent on the crispy forms template pack being used.
-        // For now, we assume Bootstrap classes are handled by Django rendering.
-        // If Select2 or other JS widgets were used by crispy, they'd be re-initialized here.
-    }
-
-    // Autocomplete con Select2
-    function initializeAutocomplete(selectElementId, hiddenInputId, url, placeholder, parentDropdown, extraParamsCallback) {
-        const selectElement = $(`#${selectElementId}`);
-        const hiddenInput = $(`#${hiddenInputId}`);
-
-        selectElement.select2({
-            theme: 'bootstrap-5',
-            placeholder: placeholder,
-            allowClear: true,
-            ajax: {
-                url: url,
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                    let query = {
-                        term: params.term, // search term
-                        page: params.page || 1
-                    };
-                    if (extraParamsCallback) {
-                        Object.assign(query, extraParamsCallback());
-                    }
-                    return query;
-                },
-                processResults: function (data, params) {
-                    params.page = params.page || 1;
-                    return {
-                        results: data.results,
-                        pagination: {
-                            more: (params.page * 10) < (data.count_filtered || data.results.length) // Adjust if backend sends total count
-                        }
-                    };
-                },
-                cache: true
-            },
-            minimumInputLength: 1,
-            templateResult: function(data) { return data.text; }, // data.text already formatted in view
-            templateResult: function(data) { return data.text; },
-            templateSelection: function(data) { return data.text; },
-            dropdownParent: parentDropdown
-        });
-
-        selectElement.on('select2:select', function (e) {
-            var data = e.params.data;
-            hiddenInput.val(data.id);
-            
-            if (selectElementId === 'id_country_select2') {
-                $('#id_province_select2').prop('disabled', false).val(null).trigger('change');
-                $('#id_province_select2').parent().find('.form-text').text('Ahora puedes seleccionar una provincia.');
-                $('#id_locality_select2').prop('disabled', true).val(null).trigger('change');
-                 $('#id_locality_select2').parent().find('.form-text').text('Selecciona una provincia primero.');
-                 hiddenInput.val(data.id); // Update hidden field
-                 $('#id_province, #id_locality').val(''); // Clear dependent hidden fields
-            } else if (selectElementId === 'id_province_select2') {
-                $('#id_locality_select2').prop('disabled', false).val(null).trigger('change');
-                $('#id_locality_select2').parent().find('.form-text').text('Ahora puedes seleccionar una localidad.');
-                hiddenInput.val(data.id); // Update hidden field
-                $('#id_locality').val(''); // Clear dependent hidden field
-            }
-        });
-
-        selectElement.on('select2:clear', function (e) {
-            hiddenInput.val('');
-            if (selectElementId === 'id_country_select2') {
-                $('#id_province_select2').prop('disabled', true).val(null).trigger('change');
-                $('#id_province_select2').parent().find('.form-text').text('Selecciona un país primero.');
-                $('#id_locality_select2').prop('disabled', true).val(null).trigger('change');
-                $('#id_locality_select2').parent().find('.form-text').text('Selecciona una provincia primero.');
-                $('#id_province, #id_locality').val(''); // Clear dependent hidden fields
-            } else if (selectElementId === 'id_province_select2') {
-                $('#id_locality_select2').prop('disabled', true).val(null).trigger('change');
-                $('#id_locality_select2').parent().find('.form-text').text('Selecciona una provincia primero.');
-                $('#id_locality').val(''); // Clear dependent hidden field
-            }
-        });
-    }
-
-    initializeAutocomplete('id_owner_select2', 'id_owner', '{% url "properties:autocomplete_owners" %}', 'Buscar y seleccionar dueño...');
-    
-    initializeAutocomplete('id_country_select2', 'id_country', '{% url "properties:autocomplete_countries" %}', 'Buscar y seleccionar país...');
-    
-    initializeAutocomplete('id_province_select2', 'id_province', '{% url "properties:autocomplete_provinces" %}', 'Buscar y seleccionar provincia...', null, function() {
-        return { country_id: $('#id_country').val() };
-    });
-    
-    initializeAutocomplete('id_locality_select2', 'id_locality', '{% url "properties:autocomplete_localities" %}', 'Buscar y seleccionar localidad...', null, function() {
-        return { province_id: $('#id_province').val() };
-    });
-
-    // Enable/disable province/locality based on initial values (edit mode)
-    if ($('#id_country').val()) {
-        $('#id_province_select2').prop('disabled', false);
-        $('#id_province_select2').parent().find('.form-text').text('Ahora puedes seleccionar una provincia.');
-    }
-    if ($('#id_province').val()) {
-        $('#id_locality_select2').prop('disabled', false);
-        $('#id_locality_select2').parent().find('.form-text').text('Ahora puedes seleccionar una localidad.');
-    }
-
-});
-</script>
-
-<style>
-/* Ensure Select2 dropdowns appear above other elements, especially modals */
-.select2-container--open {
-    z-index: 10050 !important; /* Higher than Bootstrap modal z-index (1050) */
-}
-.accordion-button:not(.collapsed) {
-    color: var(--bs-primary);
-    background-color: var(--bs-primary-bg-subtle);
-}
-.accordion-button:focus {
-    box-shadow: none;
-}
-.features-container .form-check,
-.tags-container .form-check {
-    display: inline-block; /* Makes them flow better */
-    margin-right: 0.5rem;
-    margin-bottom: 0.5rem;
-    padding: 0.3rem 0.6rem;
-    border: 1px solid #eee;
-    border-radius: 0.25rem;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-.features-container .form-check:hover,
-.tags-container .form-check:hover {
-    background-color: #f8f9fa;
-    border-color: #ddd;
-}
-.features-container .form-check-input { margin-right: 0.3em; }
-
-.image-preview-placeholder {
-    height: 150px; /* Default height */
-    border: 2px dashed #ccc;
-}
-.property-image-preview {
-    max-height: 150px;
-    width: 100%;
-    object-fit: cover;
-}
-.image-form-container .form-check-input[type="checkbox"] { /* for is_cover */
-    margin-top: 0.5em; /* Align better with label */
-}
-/* Style for crispy forms fields if needed */
-.form-control, .form-select, .form-check-input {
-    /* Standardize appearance slightly if crispy isn't fully styling */
-}
-.is-invalid { /* Ensure Django's errors are visible with crispy */
-    border-color: var(--bs-danger);
-}
-.invalid-feedback {
-    display: block; /* Django default might be none */
-}
-</style>
-
-<!-- Script para controlar la visibilidad de los campos de precio según el tipo de listado -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Función para mostrar/ocultar campos de precio según el tipo de listado
-        function togglePriceFields() {
-            const listingType = document.getElementById('id_listing_type').value;
-            const salePriceContainer = document.getElementById('sale_price_container');
-            const rentalPriceContainer = document.getElementById('rental_price_container');
-            
+        if (salePriceContainer && rentalPriceContainer) {
             if (listingType === 'sale') {
                 salePriceContainer.style.display = 'block';
                 rentalPriceContainer.style.display = 'none';
-                document.getElementById('id_rental_price').value = '';
+                rentalPriceInput.value = '';
             } else if (listingType === 'rent') {
                 salePriceContainer.style.display = 'none';
                 rentalPriceContainer.style.display = 'block';
-                document.getElementById('id_sale_price').value = '';
-            } else { // both
+                salePriceInput.value = '';
+            } else { // both or default
                 salePriceContainer.style.display = 'block';
                 rentalPriceContainer.style.display = 'block';
             }
         }
+    }
+
+    // Aplicar toggle inicial y agregar listener
+    if (listingTypeSelect) {
+        togglePriceFields();
+        listingTypeSelect.addEventListener('change', togglePriceFields);
+    }
+
+    // Validación del formulario
+    if (propertyForm) {
+        propertyForm.addEventListener('submit', function(e) {
+            let isValid = true;
+            
+            // Limpiar errores previos
+            document.querySelectorAll('.is-invalid').forEach(field => {
+                field.classList.remove('is-invalid');
+            });
+
+            // Validar campos requeridos
+            const requiredFields = ['title', 'property_type', 'property_status', 'agent', 'street', 'total_surface'];
+            requiredFields.forEach(fieldName => {
+                const field = document.getElementById(`id_${fieldName}`);
+                if (field && !field.value.trim()) {
+                    isValid = false;
+                    field.classList.add('is-invalid');
+                }
+            });
+
+            // Validar que al menos un precio esté definido
+            if (salePriceInput && rentalPriceInput) {
+                const salePrice = parseFloat(salePriceInput.value) || 0;
+                const rentalPrice = parseFloat(rentalPriceInput.value) || 0;
+                const listingType = listingTypeSelect ? listingTypeSelect.value : '';
+                
+                if (listingType === 'sale' && salePrice <= 0) {
+                    isValid = false;
+                    salePriceInput.classList.add('is-invalid');
+                    showErrorToast('Debe definir un precio de venta para propiedades en venta');
+                } else if (listingType === 'rent' && rentalPrice <= 0) {
+                    isValid = false;
+                    rentalPriceInput.classList.add('is-invalid');
+                    showErrorToast('Debe definir un precio de alquiler para propiedades en alquiler');
+                } else if (listingType === 'both' && salePrice <= 0 && rentalPrice <= 0) {
+                    isValid = false;
+                    salePriceInput.classList.add('is-invalid');
+                    rentalPriceInput.classList.add('is-invalid');
+                    showErrorToast('Debe definir al menos un precio (venta o alquiler)');
+                }
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+                showErrorToast('Por favor, corrija los errores en el formulario antes de continuar');
+            }
+        });
+    }
+
+    // Manejo de imágenes
+    let formCount = parseInt(document.querySelector('#id_images-TOTAL_FORMS')?.value || 0);
+    
+    document.getElementById('add-image-form')?.addEventListener('click', function() {
+        const container = document.getElementById('image-forms-container');
+        const emptyForm = document.getElementById('empty-form')?.innerHTML || '';
         
-        // Asignar el evento change al campo listing_type
-        const listingTypeSelect = document.getElementById('id_listing_type');
-        if (listingTypeSelect) {
-            listingTypeSelect.addEventListener('change', togglePriceFields);
-            // Ejecutar al cargar la página para establecer el estado inicial
-            togglePriceFields();
+        if (emptyForm && formCount < 10) { // Máximo 10 imágenes
+            const newForm = emptyForm.replace(/__prefix__/g, formCount);
+            container.insertAdjacentHTML('beforeend', newForm);
+            formCount++;
+            const totalFormsInput = document.querySelector('#id_images-TOTAL_FORMS');
+            if (totalFormsInput) {
+                totalFormsInput.value = formCount;
+            }
+        } else if (formCount >= 10) {
+            showErrorToast('Máximo 10 imágenes permitidas por propiedad');
         }
     });
+
+    // Remover formularios de imagen
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-image-form') || e.target.closest('.remove-image-form')) {
+            e.preventDefault();
+            const formContainer = e.target.closest('.image-form-container');
+            if (formContainer) {
+                formContainer.remove();
+                formCount--;
+                const totalFormsInput = document.querySelector('#id_images-TOTAL_FORMS');
+                if (totalFormsInput) {
+                    totalFormsInput.value = formCount;
+                }
+            }
+        }
+        
+        if (e.target.classList.contains('mark-for-deletion') || e.target.closest('.mark-for-deletion')) {
+            e.preventDefault();
+            const formContainer = e.target.closest('.image-form-container');
+            const deleteCheckbox = formContainer.querySelector('input[name$="-DELETE"]');
+            if (deleteCheckbox) {
+                deleteCheckbox.checked = true;
+                formContainer.style.opacity = '0.5';
+                const button = e.target.closest('.mark-for-deletion');
+                button.innerHTML = '<i class="bi bi-check me-1"></i>Marcado para eliminar';
+                button.disabled = true;
+                button.classList.remove('btn-outline-danger');
+                button.classList.add('btn-success');
+            }
+        }
+    });
+
+    // Preview de imágenes
+    document.addEventListener('change', function(e) {
+        if (e.target.type === 'file' && e.target.accept && e.target.accept.includes('image')) {
+            const file = e.target.files[0];
+            const previewContainer = e.target.closest('.image-form-container').querySelector('.image-preview-container');
+            
+            if (file && previewContainer) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewContainer.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded" alt="Vista previa" style="max-height: 150px; width: 100%; object-fit: cover;">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    });
+
+    // Función para mostrar toast de error
+    function showErrorToast(message) {
+        showToast(message, 'error');
+    }
+
+    // Función genérica para mostrar toasts
+    function showToast(message, type = 'info') {
+        let toastContainer = document.querySelector('.toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            document.body.appendChild(toastContainer);
+        }
+        
+        const iconClass = type === 'error' ? 'bi-exclamation-triangle-fill text-danger' : 'bi-info-circle-fill text-info';
+        const headerText = type === 'error' ? 'Error' : 'Información';
+        
+        const toastHtml = `
+            <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <i class="${iconClass} me-2"></i>
+                    <strong class="me-auto">${headerText}</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            </div>
+        `;
+        
+        toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+        const toast = new bootstrap.Toast(toastContainer.lastElementChild);
+        toast.show();
+        
+        toastContainer.lastElementChild.addEventListener('hidden.bs.toast', function() {
+            this.remove();
+        });
+    }
+
+    // Limpiar clases de error al escribir
+    document.querySelectorAll('.form-control').forEach(input => {
+        input.addEventListener('input', function() {
+            this.classList.remove('is-invalid');
+        });
+    });
+});
 </script>
 {% endblock %}

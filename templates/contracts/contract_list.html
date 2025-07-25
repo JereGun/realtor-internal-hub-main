@@ -5,102 +5,286 @@
 {% block page_title %}Contratos{% endblock %}
 
 {% block content %}
-<div class="container-fluid px-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2 mb-0">Listado de Contratos</h1>
-                <a href="{% url 'contracts:contract_create' %}" class="btn btn-primary">
-                    <i class="bi bi-plus-circle me-1"></i> Nuevo Contrato
-                </a>
-            </div>
+<div class="container-fluid mt-4">
+    <!-- Encabezado -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 text-dark mb-1">
+                <i class="bi bi-file-earmark-text me-2 text-primary"></i>Gestión de Contratos
+            </h1>
+            <p class="text-muted mb-0">Administre todos los contratos inmobiliarios</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'contracts:contract_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-1"></i>Nuevo Contrato
+            </a>
+            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" 
+                    data-bs-target="#filtersCard" aria-expanded="false">
+                <i class="bi bi-funnel me-1"></i>Filtros
+            </button>
+        </div>
+    </div>
 
-            <div class="card shadow-sm mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="bi bi-search me-2"></i>Filtrar Contratos</h5>
-                </div>
-                <div class="card-body">
-                    <form method="get" class="row g-3 align-items-center">
-                        <div class="col-md-4">
-                            {{ search_form.search|as_crispy_field }}
+    <!-- Filtros -->
+    <div class="collapse mb-4" id="filtersCard">
+        <div class="card shadow-sm border-light">
+            <div class="card-header bg-light border-bottom">
+                <h5 class="mb-0 text-dark fw-bold">
+                    <i class="bi bi-funnel me-2"></i>Filtros de Búsqueda
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="get" id="filterForm" class="needs-validation" novalidate>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="searchQuery" class="form-label fw-semibold">
+                                <i class="bi bi-search me-1"></i>Búsqueda General
+                            </label>
+                            <input type="text" name="search" id="searchQuery" class="form-control" 
+                                   placeholder="Buscar por propiedad, cliente o agente..." 
+                                   value="{{ search_form.search.value|default:'' }}">
                         </div>
                         <div class="col-md-3">
-                            {{ search_form.status|as_crispy_field }}
+                            <label for="statusFilter" class="form-label fw-semibold">
+                                <i class="bi bi-flag me-1"></i>Estado
+                            </label>
+                            <select name="status" id="statusFilter" class="form-select">
+                                {% for value, label in search_form.status.field.choices %}
+                                    <option value="{{ value }}" {% if search_form.status.value == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
                         </div>
-                        <div class="col-md-2 d-flex align-items-end">
-                            <button type="submit" class="btn btn-info w-100 me-2">
-                                <i class="bi bi-funnel-fill me-1"></i> Filtrar
-                            </button>
-                            <a href="{% url 'contracts:contract_list' %}" class="btn btn-outline-secondary w-100" title="Limpiar filtros">
-                                <i class="bi bi-eraser-fill"></i>
+                        <div class="col-md-3">
+                            <label for="sortFilter" class="form-label fw-semibold">
+                                <i class="bi bi-sort-down me-1"></i>Ordenar por
+                            </label>
+                            <select name="sort" id="sortFilter" class="form-select">
+                                <option value="-created_at" {% if request.GET.sort == '-created_at' %}selected{% endif %}>Más recientes</option>
+                                <option value="created_at" {% if request.GET.sort == 'created_at' %}selected{% endif %}>Más antiguos</option>
+                                <option value="start_date" {% if request.GET.sort == 'start_date' %}selected{% endif %}>Fecha de inicio</option>
+                                <option value="amount" {% if request.GET.sort == 'amount' %}selected{% endif %}>Monto (menor a mayor)</option>
+                                <option value="-amount" {% if request.GET.sort == '-amount' %}selected{% endif %}>Monto (mayor a menor)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Botones de Acción -->
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                        <div class="text-muted small">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Use los filtros para encontrar contratos específicos
+                        </div>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'contracts:contract_list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Limpiar
                             </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search me-1"></i>Buscar
+                            </button>
                         </div>
-                    </form>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas Rápidas -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-file-earmark-text fs-1 mb-2"></i>
+                    <h4 class="card-title">{{ contracts.count|default:0 }}</h4>
+                    <p class="card-text mb-0">Total Contratos</p>
                 </div>
             </div>
-
-            {% if contracts %}
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th scope="col">ID</th>
-                                    <th scope="col">Propiedad</th>
-                                    <th scope="col">Cliente</th>
-                                    <th scope="col" class="text-end">Monto ({{ contracts.0.currency }})</th>
-                                    <th scope="col" class="text-center">Estado</th>
-                                    <th scope="col">Inicio</th>
-                                    <th scope="col">Fin</th>
-                                    <th scope="col" class="text-center">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for contract in contracts %}
-                                <tr>
-                                    <td>#{{ contract.id }}</td>
-                                    <td>
-                                        <a href="{% url 'properties:property_detail' contract.property.pk %}" class="text-decoration-none">
-                                            {{ contract.property.title|truncatechars:30 }}
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <a href="{% url 'customers:customer_detail' contract.customer.pk %}" class="text-decoration-none">
-                                            {{ contract.customer.full_name|truncatechars:25 }}
-                                        </a>
-                                    </td>
-                                    <td class="text-end">${{ contract.amount|intcomma }}</td>
-                                    <td class="text-center">
-                                        <span class="badge 
-                                            {% if contract.status == contract.STATUS_ACTIVE %} bg-success
-                                            {% elif contract.status == contract.STATUS_EXPIRING_SOON %} bg-warning text-dark
-                                            {% elif contract.status == contract.STATUS_DRAFT %} bg-secondary
-                                            {% elif contract.status == contract.STATUS_FINISHED %} bg-info text-dark
-                                            {% elif contract.status == contract.STATUS_CANCELLED %} bg-danger
-                                            {% else %} bg-light text-dark {% endif %}">
-                                            {{ contract.get_status_display }}
-                                        </span>
-                                    </td>
-                                    <td>{{ contract.start_date|date:"d/m/Y" }}</td>
-                                    <td>{{ contract.end_date|date:"d/m/Y"|default:"-" }}</td>
-                                    <td class="text-center">
-                                        <a href="{% url 'contracts:contract_detail' contract.pk %}" class="btn btn-sm btn-outline-primary" title="Ver Detalles">
-                                            <i class="bi bi-eye-fill"></i>
-                                        </a>
-                                        <a href="{% url 'contracts:contract_edit' contract.pk %}" class="btn btn-sm btn-outline-secondary" title="Editar">
-                                            <i class="bi bi-pencil-fill"></i>
-                                        </a>
-                                        <a href="{% url 'contracts:contract_delete' contract.pk %}" class="btn btn-sm btn-outline-danger" title="Eliminar">
-                                            <i class="bi bi-trash-fill"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-check-circle fs-1 mb-2"></i>
+                    <h4 class="card-title">{{ active_contracts_count|default:0 }}</h4>
+                    <p class="card-text mb-0">Contratos Activos</p>
                 </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-clock fs-1 mb-2"></i>
+                    <h4 class="card-title">{{ expiring_contracts_count|default:0 }}</h4>
+                    <p class="card-text mb-0">Por Vencer</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-graph-up-arrow fs-1 mb-2"></i>
+                    <h4 class="card-title">{{ increase_due_contracts_count|default:0 }}</h4>
+                    <p class="card-text mb-0">Aumentos Próximos</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de contratos -->
+    {% if contracts %}
+    <div class="card shadow-sm border-light">
+        <div class="card-header bg-light border-bottom py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-dark fw-bold">
+                    <i class="bi bi-table me-2"></i>Lista de Contratos
+                </h5>
+                <div class="d-flex align-items-center gap-3">
+                    <small class="text-muted">
+                        Mostrando {{ contracts|length }} contratos
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col" class="border-0 ps-4">
+                                <i class="bi bi-hash text-muted me-1"></i>ID
+                            </th>
+                            <th scope="col" class="border-0">
+                                <i class="bi bi-house text-muted me-1"></i>Propiedad
+                            </th>
+                            <th scope="col" class="border-0">
+                                <i class="bi bi-person text-muted me-1"></i>Cliente
+                            </th>
+                            <th scope="col" class="border-0 text-end">
+                                <i class="bi bi-currency-dollar text-muted me-1"></i>Monto
+                            </th>
+                            <th scope="col" class="border-0 text-center">
+                                <i class="bi bi-flag text-muted me-1"></i>Estado
+                            </th>
+                            <th scope="col" class="border-0">
+                                <i class="bi bi-calendar-event text-muted me-1"></i>Inicio
+                            </th>
+                            <th scope="col" class="border-0">
+                                <i class="bi bi-calendar-x text-muted me-1"></i>Fin
+                            </th>
+                            <th scope="col" class="border-0 text-center pe-4">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for contract in contracts %}
+                        <tr class="{% if contract.is_expiring_soon %}table-warning{% endif %}">
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-file-earmark-text text-primary me-2"></i>
+                                    <span class="fw-semibold">#{{ contract.id }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="me-2">
+                                        <div class="bg-primary-subtle rounded-2 d-flex align-items-center justify-content-center" 
+                                             style="width: 32px; height: 32px;">
+                                            <i class="bi bi-house text-primary"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">
+                                            <a href="{% url 'properties:property_detail' contract.property.pk %}" 
+                                               class="text-decoration-none">
+                                                {{ contract.property.title|truncatechars:25 }}
+                                            </a>
+                                        </div>
+                                        <small class="text-muted">{{ contract.property.address|truncatechars:30 }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="me-2">
+                                        <div class="bg-success-subtle rounded-circle d-flex align-items-center justify-content-center" 
+                                             style="width: 32px; height: 32px;">
+                                            <span class="text-success fw-bold small">
+                                                {{ contract.customer.first_name|first }}{{ contract.customer.last_name|first }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">
+                                            <a href="{% url 'customers:customer_detail' contract.customer.pk %}" 
+                                               class="text-decoration-none">
+                                                {{ contract.customer.get_full_name|truncatechars:20 }}
+                                            </a>
+                                        </div>
+                                        {% if contract.customer.email %}
+                                            <small class="text-muted">{{ contract.customer.email|truncatechars:25 }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-end">
+                                <span class="fw-bold text-success fs-6">${{ contract.amount|intcomma }}</span>
+                                <small class="text-muted d-block">{{ contract.currency }}</small>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge 
+                                    {% if contract.status == 'active' %}bg-success
+                                    {% elif contract.status == 'draft' %}bg-secondary
+                                    {% elif contract.status == 'finished' %}bg-info
+                                    {% elif contract.status == 'cancelled' %}bg-danger
+                                    {% else %}bg-light text-dark
+                                    {% endif %}">
+                                    {{ contract.get_status_display }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-calendar-check text-success me-2"></i>
+                                    <span>{{ contract.start_date|date:"d/m/Y" }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if contract.end_date %}
+                                        {% if contract.is_expiring_soon %}
+                                            <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                                        {% else %}
+                                            <i class="bi bi-calendar-event text-muted me-2"></i>
+                                        {% endif %}
+                                        <span class="{% if contract.is_expiring_soon %}text-warning fw-semibold{% endif %}">
+                                            {{ contract.end_date|date:"d/m/Y" }}
+                                        </span>
+                                    {% else %}
+                                        <i class="bi bi-infinity text-muted me-2"></i>
+                                        <span class="text-muted">Indefinido</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="text-center pe-4">
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'contracts:contract_detail' contract.pk %}" 
+                                       class="btn btn-sm btn-outline-primary" title="Ver detalles">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{% url 'contracts:contract_edit' contract.pk %}" 
+                                       class="btn btn-sm btn-outline-secondary" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a href="{% url 'contracts:contract_delete' contract.pk %}" 
+                                       class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
                 {% if is_paginated %}
                 <div class="card-footer bg-light">
                     <nav aria-label="Paginación de contratos">
@@ -157,12 +341,94 @@
                 </div>
                 {% endif %}
             </div>
-            {% else %}
-            <div class="alert alert-info mt-4" role="alert">
-                <i class="bi bi-info-circle-fill me-2"></i> No se encontraron contratos que coincidan con los filtros aplicados o no hay contratos registrados.
-            </div>
-            {% endif %}
+    {% else %}
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="bi bi-file-earmark-text text-muted" style="font-size: 5rem;"></i>
         </div>
+        <h3 class="text-muted mb-3">No se encontraron contratos</h3>
+        <p class="text-muted mb-4">No hay contratos que coincidan con los filtros aplicados o no hay contratos registrados.</p>
+        <a href="{% url 'contracts:contract_create' %}" class="btn btn-primary btn-lg">
+            <i class="bi bi-plus-circle me-2"></i>Crear Primer Contrato
+        </a>
     </div>
+    {% endif %}
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Filtros en tiempo real
+    const filterForm = document.getElementById('filterForm');
+    const searchInput = document.getElementById('searchQuery');
+    const statusSelect = document.getElementById('statusFilter');
+    const sortSelect = document.getElementById('sortFilter');
+    
+    // Auto-submit en cambios de select
+    [statusSelect, sortSelect].forEach(select => {
+        if (select) {
+            select.addEventListener('change', function() {
+                filterForm.submit();
+            });
+        }
+    });
+    
+    // Búsqueda con delay
+    let searchTimeout;
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                if (this.value.length >= 3 || this.value.length === 0) {
+                    filterForm.submit();
+                }
+            }, 500);
+        });
+    }
+    
+    // Función para mostrar toast de éxito
+    function showSuccessToast(message) {
+        let toastContainer = document.querySelector('.toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            document.body.appendChild(toastContainer);
+        }
+        
+        const toastHtml = `
+            <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    <strong class="me-auto">Éxito</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            </div>
+        `;
+        
+        toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+        const toast = new bootstrap.Toast(toastContainer.lastElementChild);
+        toast.show();
+        
+        toastContainer.lastElementChild.addEventListener('hidden.bs.toast', function() {
+            this.remove();
+        });
+    }
+    
+    // Animaciones suaves para las filas de la tabla
+    const contractRows = document.querySelectorAll('tbody tr');
+    contractRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.01)';
+            this.style.transition = 'transform 0.2s ease';
+        });
+        
+        row.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+});
+</script>
+
 {% endblock %}

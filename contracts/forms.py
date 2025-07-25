@@ -21,8 +21,7 @@ class ContractForm(forms.ModelForm):
         model = Contract
         fields = [
             'property', 'customer', 'agent', 'start_date', 'end_date', 'amount', 
-            'currency', 'frequency', 'increase_percentage', 'next_increase_date', 
-            'terms', 'notes', 'status'
+            'currency', 'frequency', 'next_increase_date', 'terms', 'notes', 'status'
         ]
         widgets = {
             'property': forms.Select(attrs={'class': 'form-control', 'id': 'id_property'}),
@@ -33,7 +32,6 @@ class ContractForm(forms.ModelForm):
             'amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'id': 'id_amount'}),
             'currency': forms.TextInput(attrs={'class': 'form-control'}),
             'frequency': forms.Select(attrs={'class': 'form-control'}),
-            'increase_percentage': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'next_increase_date': DateInput(attrs={'class': 'form-control', 'type': 'date'}, format='%Y-%m-%d'),
             'terms': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
             'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),

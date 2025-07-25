@@ -19,7 +19,7 @@
                     </a>
                 </div>
                 <div class="card-body p-4">
-                    <form method="post" id="invoiceForm" action="{% url 'accounting:invoice_update' invoice.pk %}">
+                    <form method="post" id="invoiceForm" action="{% if invoice %}{% url 'accounting:invoice_update' invoice.pk %}{% else %}{% url 'accounting:invoice_create' %}{% endif %}">
                         {% csrf_token %}
                         
                         <fieldset class="mb-4">
@@ -202,18 +202,20 @@ document.addEventListener('DOMContentLoaded', function () {
         previewCustomer.textContent = customerSelect?.selectedOptions[0]?.text || 'Nombre del Cliente';
         // previewCustomerDetails.textContent = ''; // Add logic if you have more customer details
 
-        const stateSelect = document.getElementById('id_state');
-        if (stateSelect && stateSelect.selectedOptions.length > 0) {
-            previewStatusBadge.textContent = stateSelect.selectedOptions[0].text;
+        const statusSelect = document.getElementById('id_status');
+        if (statusSelect && statusSelect.selectedOptions.length > 0) {
+            previewStatusBadge.textContent = statusSelect.selectedOptions[0].text;
             previewStatusBadge.className = 'badge'; // Reset classes
-            switch (stateSelect.value.toLowerCase()) {
+            switch (statusSelect.value.toLowerCase()) {
                 case 'paid': previewStatusBadge.classList.add('bg-success'); break;
-                case 'pending': previewStatusBadge.classList.add('bg-warning', 'text-dark'); break;
+                case 'sent': previewStatusBadge.classList.add('bg-info'); break;
+                case 'validated': previewStatusBadge.classList.add('bg-warning', 'text-dark'); break;
                 case 'cancelled': previewStatusBadge.classList.add('bg-danger'); break;
+                case 'draft': previewStatusBadge.classList.add('bg-secondary'); break;
                 default: previewStatusBadge.classList.add('bg-secondary');
             }
         } else {
-            previewStatusBadge.textContent = 'Pendiente';
+            previewStatusBadge.textContent = 'Borrador';
             previewStatusBadge.className = 'badge bg-secondary';
         }
 

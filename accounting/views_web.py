@@ -59,6 +59,7 @@ def accounting_dashboard(request):
 @login_required
 def invoice_list(request):
     invoice_list = Invoice.objects.select_related("customer").order_by("-date")
+    today = timezone.now().date()
 
     # Búsqueda
     query = request.GET.get("q")
@@ -161,6 +162,7 @@ def invoice_list(request):
         "accounting/invoice_list.html",
         {
             "invoices": invoices,
+            "today": today,
             "query": query,
             "status": status,
             "customer_id": customer_id,
@@ -432,9 +434,37 @@ def quick_payment_create(request, invoice_pk):
             payment.date = timezone.now().date()  # Fecha actual
             payment.save()
             invoice.update_status()
+            
+            # Si es una petición AJAX, devolver JSON
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                # Recalcular totales
+                total_paid = invoice.payments.aggregate(total=Sum("amount"))["total"] or 0
+                balance = invoice.total_amount - total_paid
+                
+                return JsonResponse({
+                    "success": True,
+                    "message": "Pago rápido registrado correctamente.",
+                    "payment": {
+                        "id": payment.pk,
+                        "amount": float(payment.amount),
+                        "method": payment.method,
+                        "date": payment.date.strftime('%d/%m/%Y')
+                    },
+                    "total_paid": float(total_paid),
+                    "balance": float(balance),
+                    "invoice_status": invoice.get_status_display()
+                })
+            
             messages.success(request, "Pago rápido registrado correctamente.")
             return redirect("accounting:invoice_detail", pk=invoice.pk)
         else:
+            # Si es una petición AJAX, devolver errores en JSON
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return JsonResponse({
+                    "success": False,
+                    "errors": form.errors
+                }, status=400)
+            
             messages.error(
                 request, "Error al registrar el pago rápido. Revise los datos."
             )
@@ -644,6 +674,7 @@ def payment_delete(request, pk):
 def invoiceline_create(request, invoice_pk):
     invoice = get_object_or_404(Invoice, pk=invoice_pk)
     InvoiceLineForm = modelform_factory(InvoiceLine, fields=("concept", "amount"))
+    
     if request.method == "POST":
         form = InvoiceLineForm(request.POST)
         if form.is_valid():
@@ -651,14 +682,36 @@ def invoiceline_create(request, invoice_pk):
             invoiceline.invoice = invoice
             invoiceline.save()
             invoice.compute_total()  # Recalcular el total después de agregar una línea
+            
+            # Si es una petición AJAX, devolver JSON
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return JsonResponse({
+                    "success": True,
+                    "message": "Línea de factura agregada correctamente.",
+                    "item": {
+                        "id": invoiceline.pk,
+                        "concept": invoiceline.concept,
+                        "amount": float(invoiceline.amount)
+                    },
+                    "new_total": float(invoice.total_amount)
+                })
+            
             messages.success(request, "Línea de factura agregada correctamente.")
             return redirect("accounting:invoice_detail", pk=invoice.pk)
         else:
+            # Si es una petición AJAX, devolver errores en JSON
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return JsonResponse({
+                    "success": False,
+                    "errors": form.errors
+                }, status=400)
+            
             messages.error(
                 request, "Error al agregar la línea de factura. Revise los datos."
             )
     else:
         form = InvoiceLineForm()
+    
     return render(
         request, "accounting/invoiceline_form.html", {"form": form, "invoice": invoice}
     )

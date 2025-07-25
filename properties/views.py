@@ -10,6 +10,7 @@ from django.http import JsonResponse
 from .models import Property, PropertyImage, Feature, Tag, PropertyType, PropertyStatus
 from locations.models import Country, State, City # Added for autocompletion
 from customers.models import Customer # Added for owner autocompletion
+from agents.models import Agent # Added for agent reference
 from .forms import PropertyForm, PropertyImageForm, PropertySearchForm, PropertyImageFormSet
 import json
 
@@ -58,37 +59,120 @@ class PropertyListView(LoginRequiredMixin, ListView):
     paginate_by = 12
     
     def get_queryset(self):
-        queryset = Property.objects.all().select_related('property_type', 'property_status', 'agent')
+        queryset = Property.objects.select_related('property_type', 'property_status', 'agent').prefetch_related('images')
         
-        form = PropertySearchForm(self.request.GET)
-        if form.is_valid():
-            search = form.cleaned_data.get('search')
-            property_type = form.cleaned_data.get('property_type')
-            property_status = form.cleaned_data.get('property_status')
-            locality = form.cleaned_data.get('locality')
-            
-            if search:
-                queryset = queryset.filter(
-                    Q(title__icontains=search) |
-                    Q(description__icontains=search) |
-                    Q(street__icontains=search) |
-                    Q(neighborhood__icontains=search)
-                )
-            
-            if property_type:
-                queryset = queryset.filter(property_type=property_type)
-            
-            if property_status:
-                queryset = queryset.filter(property_status=property_status)
-            
-            if locality:
-                queryset = queryset.filter(locality__icontains=locality)
+        # Filtros de búsqueda
+        search = self.request.GET.get('search')
+        if search:
+            queryset = queryset.filter(
+                Q(title__icontains=search) | 
+                Q(description__icontains=search) |
+                Q(street__icontains=search) |
+                Q(neighborhood__icontains=search)
+            )
         
-        return queryset.order_by('-created_at')
+        property_type = self.request.GET.get('property_type')
+        if property_type:
+            queryset = queryset.filter(property_type_id=property_type)
+        
+        property_status = self.request.GET.get('property_status')
+        if property_status:
+            queryset = queryset.filter(property_status_id=property_status)
+        
+        agent = self.request.GET.get('agent')
+        if agent:
+            queryset = queryset.filter(agent_id=agent)
+        
+        # Filtros de precio
+        min_sale_price = self.request.GET.get('min_sale_price')
+        if min_sale_price:
+            queryset = queryset.filter(sale_price__gte=min_sale_price)
+        
+        max_sale_price = self.request.GET.get('max_sale_price')
+        if max_sale_price:
+            queryset = queryset.filter(sale_price__lte=max_sale_price)
+        
+        min_rental_price = self.request.GET.get('min_rental_price')
+        if min_rental_price:
+            queryset = queryset.filter(rental_price__gte=min_rental_price)
+        
+        max_rental_price = self.request.GET.get('max_rental_price')
+        if max_rental_price:
+            queryset = queryset.filter(rental_price__lte=max_rental_price)
+        
+        # Filtros de características
+        bedrooms = self.request.GET.get('bedrooms')
+        if bedrooms:
+            if bedrooms == '4':
+                queryset = queryset.filter(bedrooms__gte=4)
+            else:
+                queryset = queryset.filter(bedrooms=bedrooms)
+        
+        bathrooms = self.request.GET.get('bathrooms')
+        if bathrooms:
+            if bathrooms == '3':
+                queryset = queryset.filter(bathrooms__gte=3)
+            else:
+                queryset = queryset.filter(bathrooms=bathrooms)
+        
+        # Filtros adicionales
+        garage = self.request.GET.get('garage')
+        if garage:
+            if garage == 'true':
+                queryset = queryset.filter(garage=True)
+            elif garage == 'false':
+                queryset = queryset.filter(garage=False)
+        
+        furnished = self.request.GET.get('furnished')
+        if furnished:
+            if furnished == 'true':
+                queryset = queryset.filter(furnished=True)
+            elif furnished == 'false':
+                queryset = queryset.filter(furnished=False)
+        
+        year_built = self.request.GET.get('year_built')
+        if year_built:
+            if year_built == '2020-':
+                queryset = queryset.filter(year_built__gte=2020)
+            elif year_built == '2010-2019':
+                queryset = queryset.filter(year_built__gte=2010, year_built__lte=2019)
+            elif year_built == '2000-2009':
+                queryset = queryset.filter(year_built__gte=2000, year_built__lte=2009)
+            elif year_built == '-1999':
+                queryset = queryset.filter(year_built__lt=2000)
+        
+        # Ordenamiento
+        sort = self.request.GET.get('sort', '-created_at')
+        queryset = queryset.order_by(sort)
+        
+        return queryset
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['search_form'] = PropertySearchForm(self.request.GET)
+        context['property_types'] = PropertyType.objects.all()
+        context['property_statuses'] = PropertyStatus.objects.all()
+        context['agents'] = Agent.objects.filter(is_active=True)
+        
+        # Calcular estadísticas para las tarjetas
+        all_properties = Property.objects.all()
+        context['total_properties_count'] = all_properties.count()
+        
+        # Buscar estados específicos por nombre (ajustar según los nombres reales en tu BD)
+        try:
+            available_status = PropertyStatus.objects.get(name__icontains='disponible')
+            context['available_properties_count'] = all_properties.filter(property_status=available_status).count()
+        except PropertyStatus.DoesNotExist:
+            context['available_properties_count'] = 0
+        
+        try:
+            rented_status = PropertyStatus.objects.get(name__icontains='alquilada')
+            context['rented_properties_count'] = all_properties.filter(property_status=rented_status).count()
+        except PropertyStatus.DoesNotExist:
+            context['rented_properties_count'] = 0
+        
+        # Propiedades con etiquetas (como alternativa a "destacadas")
+        context['featured_properties_count'] = all_properties.filter(tags__isnull=False).distinct().count()
+        
         return context
 
 
@@ -100,6 +184,9 @@ class PropertyDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['images'] = self.object.images.all()
+        # Agregar contratos relacionados con esta propiedad
+        from contracts.models import Contract
+        context['contracts'] = Contract.objects.filter(property=self.object).select_related('customer', 'agent')[:5]
         return context
 
 

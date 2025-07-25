@@ -1,182 +1,615 @@
 {% extends 'base.html' %}
 {% load humanize %}
 
-{% block title %}Propiedades - {{ block.super }}{% endblock %}
 {% block page_title %}Propiedades{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
-    <h2 class="mb-2 mb-md-0">Lista de Propiedades</h2>
-    <a href="{% url 'properties:property_create' %}" class="btn btn-primary">
-        <i class="bi bi-plus-circle me-1"></i> Nueva Propiedad
-    </a>
-</div>
-
-<!-- Search Form -->
-<div class="card shadow-sm mb-4">
-    <div class="card-header bg-light">
-        <h5 class="mb-0"><i class="bi bi-funnel me-2"></i>Filtros de Búsqueda</h5>
-    </div>
-    <div class="card-body">
-        <form method="get" class="row g-3 align-items-center">
-            <div class="col-xl-3 col-lg-4 col-md-6">
-                <label for="{{ search_form.search.id_for_label }}" class="form-label visually-hidden">Buscar</label>
-                {{ search_form.search }}
-            </div>
-            <div class="col-xl-2 col-lg-4 col-md-6">
-                <label for="{{ search_form.property_type.id_for_label }}" class="form-label visually-hidden">Tipo</label>
-                {{ search_form.property_type }}
-            </div>
-            <div class="col-xl-2 col-lg-4 col-md-6">
-                <label for="{{ search_form.property_status.id_for_label }}" class="form-label visually-hidden">Estado</label>
-                {{ search_form.property_status }}
-            </div>
-            <div class="col-xl-2 col-lg-4 col-md-6">
-                <label for="{{ search_form.locality.id_for_label }}" class="form-label visually-hidden">Localidad</label>
-                {{ search_form.locality }}
-            </div>
-            <div class="col-xl-3 col-lg-8 col-md-12 d-flex justify-content-start justify-content-xl-end mt-3 mt-xl-0">
-                <button type="submit" class="btn btn-info text-white me-2">
-                    <i class="bi bi-search me-1"></i> Buscar
-                </button>
-                <a href="{% url 'properties:property_list' %}" class="btn btn-outline-secondary">
-                    <i class="bi bi-eraser me-1"></i> Limpiar
-                </a>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Properties Grid -->
-<div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
-    {% for property_item in properties %} {# Renamed property to property_item to avoid conflict with context variable in include if any #}
-        {% include "properties/_property_card.html" with property=property_item %}
-    {% empty %}
-    <div class="col-12">
-        <div class="text-center py-5 my-5 bg-light rounded shadow-sm">
-            <i class="bi bi-building-slash display-1 text-muted"></i>
-            <h3 class="text-muted mt-3">No se encontraron propiedades</h3>
-            <p class="text-muted">Intenta ajustar los filtros de búsqueda o <a href="{% url 'properties:property_create' %}" class="text-primary">agrega una nueva propiedad</a>.</p>
+<div class="container-fluid mt-4">
+    <!-- Encabezado -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 text-dark mb-1">
+                <i class="bi bi-house-door me-2 text-primary"></i>Gestión de Propiedades
+            </h1>
+            <p class="text-muted mb-0">Administre todas las propiedades inmobiliarias</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'properties:property_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-1"></i>Nueva Propiedad
+            </a>
+            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" 
+                    data-bs-target="#filtersCard" aria-expanded="false">
+                <i class="bi bi-funnel me-1"></i>Filtros
+            </button>
         </div>
     </div>
-    {% endfor %}
+
+    <!-- Filtros -->
+    <div class="collapse mb-4" id="filtersCard">
+        <div class="card shadow-sm border-light">
+            <div class="card-header bg-light border-bottom">
+                <h5 class="mb-0 text-dark fw-bold">
+                    <i class="bi bi-funnel me-2"></i>Filtros de Búsqueda
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="get" id="filterForm" class="needs-validation" novalidate>
+                    <!-- Filtros Básicos -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label for="searchQuery" class="form-label fw-semibold">
+                                <i class="bi bi-search me-1"></i>Búsqueda General
+                            </label>
+                            <input type="text" name="search" id="searchQuery" class="form-control" 
+                                   placeholder="Buscar por título, dirección o descripción..." 
+                                   value="{{ request.GET.search|default:'' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="typeFilter" class="form-label fw-semibold">
+                                <i class="bi bi-house-door me-1"></i>Tipo de Propiedad
+                            </label>
+                            <select name="property_type" id="typeFilter" class="form-select">
+                                <option value="">Todos los tipos</option>
+                                {% for type in property_types %}
+                                    <option value="{{ type.id }}" {% if request.GET.property_type == type.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ type.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="statusFilter" class="form-label fw-semibold">
+                                <i class="bi bi-flag me-1"></i>Estado
+                            </label>
+                            <select name="property_status" id="statusFilter" class="form-select">
+                                <option value="">Todos los estados</option>
+                                {% for status in property_statuses %}
+                                    <option value="{{ status.id }}" {% if request.GET.property_status == status.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ status.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="sortFilter" class="form-label fw-semibold">
+                                <i class="bi bi-sort-down me-1"></i>Ordenar por
+                            </label>
+                            <select name="sort" id="sortFilter" class="form-select">
+                                <option value="-created_at" {% if request.GET.sort == '-created_at' or not request.GET.sort %}selected{% endif %}>Más recientes</option>
+                                <option value="created_at" {% if request.GET.sort == 'created_at' %}selected{% endif %}>Más antiguos</option>
+                                <option value="title" {% if request.GET.sort == 'title' %}selected{% endif %}>Título (A-Z)</option>
+                                <option value="-title" {% if request.GET.sort == '-title' %}selected{% endif %}>Título (Z-A)</option>
+                                <option value="sale_price" {% if request.GET.sort == 'sale_price' %}selected{% endif %}>Precio venta (menor)</option>
+                                <option value="-sale_price" {% if request.GET.sort == '-sale_price' %}selected{% endif %}>Precio venta (mayor)</option>
+                                <option value="rental_price" {% if request.GET.sort == 'rental_price' %}selected{% endif %}>Precio alquiler (menor)</option>
+                                <option value="-rental_price" {% if request.GET.sort == '-rental_price' %}selected{% endif %}>Precio alquiler (mayor)</option>
+                                <option value="-total_surface" {% if request.GET.sort == '-total_surface' %}selected{% endif %}>Superficie (mayor)</option>
+                                <option value="total_surface" {% if request.GET.sort == 'total_surface' %}selected{% endif %}>Superficie (menor)</option>
+                                <option value="-bedrooms" {% if request.GET.sort == '-bedrooms' %}selected{% endif %}>Más dormitorios</option>
+                                <option value="bedrooms" {% if request.GET.sort == 'bedrooms' %}selected{% endif %}>Menos dormitorios</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Filtros Avanzados -->
+                    <div class="border-top pt-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="text-muted mb-0">Filtros Avanzados</h6>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" 
+                                    data-bs-toggle="collapse" data-bs-target="#advancedFilters">
+                                <i class="bi bi-chevron-down me-1"></i>Mostrar más opciones
+                            </button>
+                        </div>
+                        
+                        <div class="collapse" id="advancedFilters">
+                            <div class="row g-3">
+                                <!-- Rango de precios -->
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        <i class="bi bi-currency-dollar me-1"></i>Rango de Precio de Venta
+                                    </label>
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <div class="input-group">
+                                                <span class="input-group-text">$</span>
+                                                <input type="number" name="min_sale_price" class="form-control" 
+                                                       placeholder="Mínimo" value="{{ request.GET.min_sale_price|default:'' }}">
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="input-group">
+                                                <span class="input-group-text">$</span>
+                                                <input type="number" name="max_sale_price" class="form-control" 
+                                                       placeholder="Máximo" value="{{ request.GET.max_sale_price|default:'' }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        <i class="bi bi-calendar-month me-1"></i>Rango de Precio de Alquiler
+                                    </label>
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <div class="input-group">
+                                                <span class="input-group-text">$</span>
+                                                <input type="number" name="min_rental_price" class="form-control" 
+                                                       placeholder="Mínimo" value="{{ request.GET.min_rental_price|default:'' }}">
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="input-group">
+                                                <span class="input-group-text">$</span>
+                                                <input type="number" name="max_rental_price" class="form-control" 
+                                                       placeholder="Máximo" value="{{ request.GET.max_rental_price|default:'' }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Características -->
+                                <div class="col-md-4">
+                                    <label for="bedroomsFilter" class="form-label fw-semibold">
+                                        <i class="bi bi-door-closed me-1"></i>Dormitorios
+                                    </label>
+                                    <select name="bedrooms" id="bedroomsFilter" class="form-select">
+                                        <option value="">Cualquier cantidad</option>
+                                        <option value="1" {% if request.GET.bedrooms == '1' %}selected{% endif %}>1</option>
+                                        <option value="2" {% if request.GET.bedrooms == '2' %}selected{% endif %}>2</option>
+                                        <option value="3" {% if request.GET.bedrooms == '3' %}selected{% endif %}>3</option>
+                                        <option value="4" {% if request.GET.bedrooms == '4' %}selected{% endif %}>4+</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <label for="bathroomsFilter" class="form-label fw-semibold">
+                                        <i class="bi bi-droplet me-1"></i>Baños
+                                    </label>
+                                    <select name="bathrooms" id="bathroomsFilter" class="form-select">
+                                        <option value="">Cualquier cantidad</option>
+                                        <option value="1" {% if request.GET.bathrooms == '1' %}selected{% endif %}>1</option>
+                                        <option value="2" {% if request.GET.bathrooms == '2' %}selected{% endif %}>2</option>
+                                        <option value="3" {% if request.GET.bathrooms == '3' %}selected{% endif %}>3+</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <label for="agentFilter" class="form-label fw-semibold">
+                                        <i class="bi bi-person-badge me-1"></i>Agente
+                                    </label>
+                                    <select name="agent" id="agentFilter" class="form-select">
+                                        <option value="">Todos los agentes</option>
+                                        {% for agent in agents %}
+                                            <option value="{{ agent.id }}" {% if request.GET.agent == agent.id|stringformat:"s" %}selected{% endif %}>
+                                                {{ agent.get_full_name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <!-- Filtros adicionales -->
+                                <div class="col-md-4">
+                                    <label for="garageFilter" class="form-label fw-semibold">
+                                        <i class="bi bi-car-front me-1"></i>Garage
+                                    </label>
+                                    <select name="garage" id="garageFilter" class="form-select">
+                                        <option value="">Cualquiera</option>
+                                        <option value="true" {% if request.GET.garage == 'true' %}selected{% endif %}>Con garage</option>
+                                        <option value="false" {% if request.GET.garage == 'false' %}selected{% endif %}>Sin garage</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <label for="furnishedFilter" class="form-label fw-semibold">
+                                        <i class="bi bi-house-check me-1"></i>Amueblado
+                                    </label>
+                                    <select name="furnished" id="furnishedFilter" class="form-select">
+                                        <option value="">Cualquiera</option>
+                                        <option value="true" {% if request.GET.furnished == 'true' %}selected{% endif %}>Amueblado</option>
+                                        <option value="false" {% if request.GET.furnished == 'false' %}selected{% endif %}>Sin amueblar</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <label for="yearBuiltFilter" class="form-label fw-semibold">
+                                        <i class="bi bi-calendar me-1"></i>Año de construcción
+                                    </label>
+                                    <select name="year_built" id="yearBuiltFilter" class="form-select">
+                                        <option value="">Cualquier año</option>
+                                        <option value="2020-" {% if request.GET.year_built == '2020-' %}selected{% endif %}>Desde 2020</option>
+                                        <option value="2010-2019" {% if request.GET.year_built == '2010-2019' %}selected{% endif %}>2010-2019</option>
+                                        <option value="2000-2009" {% if request.GET.year_built == '2000-2009' %}selected{% endif %}>2000-2009</option>
+                                        <option value="-1999" {% if request.GET.year_built == '-1999' %}selected{% endif %}>Antes de 2000</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de Acción -->
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                        <div class="text-muted small">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Use los filtros para encontrar propiedades específicas
+                        </div>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'properties:property_list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Limpiar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search me-1"></i>Buscar
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas Rápidas -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-house fs-1 mb-2"></i>
+                    <h4 class="card-title">{{ total_properties_count|default:0 }}</h4>
+                    <p class="card-text mb-0">Total Propiedades</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-check-circle fs-1 mb-2"></i>
+                    <h4 class="card-title">{{ available_properties_count|default:0 }}</h4>
+                    <p class="card-text mb-0">Disponibles</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-eye fs-1 mb-2"></i>
+                    <h4 class="card-title">{{ featured_properties_count|default:0 }}</h4>
+                    <p class="card-text mb-0">Destacadas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-house-heart fs-1 mb-2"></i>
+                    <h4 class="card-title">{{ rented_properties_count|default:0 }}</h4>
+                    <p class="card-text mb-0">Alquiladas</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de propiedades -->
+    {% if properties %}
+    <div class="card shadow-sm border-light">
+        <div class="card-header bg-light border-bottom py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-dark fw-bold">
+                    <i class="bi bi-table me-2"></i>Lista de Propiedades
+                </h5>
+                <div class="d-flex align-items-center gap-3">
+                    <small class="text-muted">
+                        Mostrando {{ properties|length }} propiedades
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col" class="border-0 ps-4">
+                                <i class="bi bi-hash text-muted me-1"></i>ID
+                            </th>
+                            <th scope="col" class="border-0">
+                                <i class="bi bi-house text-muted me-1"></i>Propiedad
+                            </th>
+                            <th scope="col" class="border-0">
+                                <i class="bi bi-geo-alt text-muted me-1"></i>Ubicación
+                            </th>
+                            <th scope="col" class="border-0 text-center">
+                                <i class="bi bi-rulers text-muted me-1"></i>Características
+                            </th>
+                            <th scope="col" class="border-0 text-end">
+                                <i class="bi bi-currency-dollar text-muted me-1"></i>Precios
+                            </th>
+                            <th scope="col" class="border-0 text-center">
+                                <i class="bi bi-flag text-muted me-1"></i>Estado
+                            </th>
+                            <th scope="col" class="border-0">
+                                <i class="bi bi-person-badge text-muted me-1"></i>Agente
+                            </th>
+                            <th scope="col" class="border-0 text-center pe-4">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for property in properties %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-house text-primary me-2"></i>
+                                    <span class="fw-semibold">#{{ property.id }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="me-2">
+                                        {% if property.images.first %}
+                                            <img src="{{ property.images.first.image.url }}" 
+                                                 class="rounded-2" style="width: 40px; height: 40px; object-fit: cover;" 
+                                                 alt="{{ property.title }}">
+                                        {% else %}
+                                            <div class="bg-primary-subtle rounded-2 d-flex align-items-center justify-content-center" 
+                                                 style="width: 40px; height: 40px;">
+                                                <i class="bi bi-house text-primary"></i>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">
+                                            <a href="{% url 'properties:property_detail' property.pk %}" 
+                                               class="text-decoration-none">
+                                                {{ property.title|truncatechars:25 }}
+                                            </a>
+                                        </div>
+                                        <small class="text-muted">{{ property.property_type.name }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-geo-alt text-danger me-2"></i>
+                                    <div>
+                                        <div class="fw-semibold">{{ property.street }} {{ property.number|truncatechars:30 }}</div>
+                                        {% if property.locality %}
+                                            <small class="text-muted">{{ property.locality.name }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center gap-2">
+                                    {% if property.bedrooms %}
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                                            <i class="bi bi-door-closed me-1"></i>{{ property.bedrooms }}
+                                        </span>
+                                    {% endif %}
+                                    {% if property.bathrooms %}
+                                        <span class="badge bg-info-subtle text-info border border-info-subtle">
+                                            <i class="bi bi-droplet me-1"></i>{{ property.bathrooms }}
+                                        </span>
+                                    {% endif %}
+                                    {% if property.total_surface %}
+                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle">
+                                            {{ property.total_surface }}m²
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="text-end">
+                                <div>
+                                    {% if property.sale_price %}
+                                        <div class="fw-bold text-success">${{ property.sale_price|intcomma }}</div>
+                                        <small class="text-muted">Venta</small>
+                                    {% endif %}
+                                    {% if property.rental_price %}
+                                        <div class="fw-bold text-info">${{ property.rental_price|intcomma }}</div>
+                                        <small class="text-muted">Alquiler</small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge 
+                                    {% if property.property_status.name == 'Disponible' %}bg-success
+                                    {% elif property.property_status.name == 'Vendida' %}bg-danger
+                                    {% elif property.property_status.name == 'Alquilada' %}bg-info
+                                    {% elif property.property_status.name == 'En Proceso' %}bg-warning text-dark
+                                    {% else %}bg-secondary
+                                    {% endif %}">
+                                    {{ property.property_status.name }}
+                                </span>
+
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="me-2">
+                                        <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center" 
+                                             style="width: 32px; height: 32px;">
+                                            <span class="text-white fw-bold small">
+                                                {{ property.agent.first_name|first }}{{ property.agent.last_name|first }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">{{ property.agent.get_full_name|truncatechars:15 }}</div>
+                                        {% if property.agent.email %}
+                                            <small class="text-muted">{{ property.agent.email|truncatechars:20 }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="text-center pe-4">
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'properties:property_detail' property.pk %}" 
+                                       class="btn btn-sm btn-outline-primary" title="Ver detalles">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{% url 'properties:property_edit' property.pk %}" 
+                                       class="btn btn-sm btn-outline-secondary" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a href="{% url 'properties:property_delete' property.pk %}" 
+                                       class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% if is_paginated %}
+        <div class="card-footer bg-light">
+            <nav aria-label="Paginación de propiedades">
+                <ul class="pagination justify-content-center mb-0">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1" aria-label="Primera">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}" aria-label="Anterior">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link" aria-hidden="true">&laquo;&laquo;</span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link" aria-hidden="true">&laquo;</span>
+                        </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span></li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item"><a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}" aria-label="Siguiente">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.paginator.num_pages }}" aria-label="Última">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link" aria-hidden="true">&raquo;</span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link" aria-hidden="true">&raquo;&raquo;</span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="bi bi-house text-muted" style="font-size: 5rem;"></i>
+        </div>
+        <h3 class="text-muted mb-3">No se encontraron propiedades</h3>
+        <p class="text-muted mb-4">No hay propiedades que coincidan con los filtros aplicados o no hay propiedades registradas.</p>
+        <a href="{% url 'properties:property_create' %}" class="btn btn-primary btn-lg">
+            <i class="bi bi-plus-circle me-2"></i>Crear Primera Propiedad
+        </a>
+    </div>
+    {% endif %}
 </div>
 
-<!-- Pagination -->
-{% if is_paginated %}
-<nav aria-label="Paginación de propiedades" class="mt-5">
-    <ul class="pagination justify-content-center flex-wrap">
-        {% if page_obj.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?{{ request.GET.urlencode }}&page=1" aria-label="Primera">
-                    <i class="bi bi-chevron-double-left"></i>
-                </a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?{{ request.GET.urlencode }}&page={{ page_obj.previous_page_number }}" aria-label="Anterior">
-                    <i class="bi bi-chevron-left"></i>
-                </a>
-            </li>
-        {% else %}
-            <li class="page-item disabled">
-                <span class="page-link"><i class="bi bi-chevron-double-left"></i></span>
-            </li>
-            <li class="page-item disabled">
-                <span class="page-link"><i class="bi bi-chevron-left"></i></span>
-            </li>
-        {% endif %}
-        
-        {% for num in page_obj.paginator.page_range %}
-            {% if page_obj.number == num %}
-                <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span></li>
-            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                <li class="page-item"><a class="page-link" href="?{{ request.GET.urlencode }}&page={{ num }}">{{ num }}</a></li>
-            {% elif num == page_obj.number|add:'-3' or num == page_obj.number|add:'3' %}
-                <li class="page-item disabled"><span class="page-link">...</span></li>
-            {% endif %}
-        {% endfor %}
-        
-        {% if page_obj.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?{{ request.GET.urlencode }}&page={{ page_obj.next_page_number }}" aria-label="Siguiente">
-                    <i class="bi bi-chevron-right"></i>
-                </a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="?{{ request.GET.urlencode }}&page={{ page_obj.paginator.num_pages }}" aria-label="Última">
-                    <i class="bi bi-chevron-double-right"></i>
-                </a>
-            </li>
-        {% else %}
-             <li class="page-item disabled">
-                <span class="page-link"><i class="bi bi-chevron-right"></i></span>
-            </li>
-            <li class="page-item disabled">
-                <span class="page-link"><i class="bi bi-chevron-double-right"></i></span>
-            </li>
-        {% endif %}
-    </ul>
-</nav>
-{% endif %}
-
-<style>
-.property-card {
-    transition: transform .2s ease-out, box-shadow .2s ease-out;
-}
-.property-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
-}
-.property-card-img {
-    height: 220px;
-    object-fit: cover;
-}
-.property-card-img-placeholder {
-    height: 220px;
-}
-.property-card-status-type {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 1;
-}
-.property-card-tags {
-    position: absolute;
-    bottom: 10px; /* Ajustado para que no se solape con la imagen si es muy corta */
-    left: 10px;
-    z-index: 1;
-}
-.property-card .card-title {
-    font-size: 1.1rem;
-    color: #333;
-}
-.property-card .card-text small {
-    font-size: 0.85rem;
-}
-.property-card .btn-primary {
-    background-color: #007bff; /* Ajusta tu color primario */
-    border-color: #007bff;
-}
-.property-card .btn-primary:hover {
-    background-color: #0056b3;
-    border-color: #0056b3;
-}
-.card-footer {
-    background-color: #f8f9fa;
-}
-
-/* Mejoras en el formulario de búsqueda */
-.card-header h5 {
-    font-weight: 500;
-}
-</style>
-
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
+document.addEventListener('DOMContentLoaded', function() {
+    // Filtros en tiempo real
+    const filterForm = document.getElementById('filterForm');
+    const searchInput = document.getElementById('searchQuery');
+    const typeSelect = document.getElementById('typeFilter');
+    const statusSelect = document.getElementById('statusFilter');
+    const agentSelect = document.getElementById('agentFilter');
+    const sortSelect = document.getElementById('sortFilter');
+    const bedroomsSelect = document.getElementById('bedroomsFilter');
+    const bathroomsSelect = document.getElementById('bathroomsFilter');
+    const garageSelect = document.getElementById('garageFilter');
+    const furnishedSelect = document.getElementById('furnishedFilter');
+    const yearBuiltSelect = document.getElementById('yearBuiltFilter');
+    
+    // Auto-submit en cambios de select
+    [typeSelect, statusSelect, agentSelect, sortSelect, bedroomsSelect, bathroomsSelect, garageSelect, furnishedSelect, yearBuiltSelect].forEach(select => {
+        if (select) {
+            select.addEventListener('change', function() {
+                filterForm.submit();
+            });
+        }
+    });
+    
+    // Búsqueda con delay
+    let searchTimeout;
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                if (this.value.length >= 3 || this.value.length === 0) {
+                    filterForm.submit();
+                }
+            }, 500);
+        });
+    }
+    
+    // Función para mostrar toast de éxito
+    function showSuccessToast(message) {
+        let toastContainer = document.querySelector('.toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            document.body.appendChild(toastContainer);
+        }
+        
+        const toastHtml = `
+            <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    <strong class="me-auto">Éxito</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            </div>
+        `;
+        
+        toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+        const toast = new bootstrap.Toast(toastContainer.lastElementChild);
+        toast.show();
+        
+        toastContainer.lastElementChild.addEventListener('hidden.bs.toast', function() {
+            this.remove();
+        });
+    }
+    
+    // Animaciones suaves para las filas de la tabla
+    const propertyRows = document.querySelectorAll('tbody tr');
+    propertyRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.01)';
+            this.style.transition = 'transform 0.2s ease';
+        });
+        
+        row.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
     });
 });
 </script>
+
 {% endblock %}

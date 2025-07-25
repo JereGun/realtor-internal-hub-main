@@ -4,110 +4,154 @@
 {% block page_title %}Detalle del Agente{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>
-        <i class="bi bi-person"></i> {{ agent.full_name }}
-    </h2>
-    <div>
-        <a href="{% url 'agents:agent_edit' agent.pk %}" class="btn btn-primary">
-            <i class="bi bi-pencil"></i> Editar Agente
-        </a>
-        <a href="{% url 'agents:agent_list' %}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Volver
-        </a>
+<div class="container-fluid mt-4">
+    <!-- Encabezado -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 text-dark mb-1">
+                <i class="bi bi-person-badge me-2 text-primary"></i>{{ agent.full_name }}
+            </h1>
+            <p class="text-muted mb-0">Perfil completo del agente inmobiliario</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'agents:agent_edit' agent.pk %}" class="btn btn-primary">
+                <i class="bi bi-pencil me-1"></i>Editar Agente
+            </a>
+            <a href="{% url 'agents:agent_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Volver
+            </a>
+        </div>
     </div>
-</div>
 
 <div class="row">
     <!-- Información del Agente -->
     <div class="col-lg-4 mb-4">
-        <div class="card">
-            <div class="card-body text-center">
-                <div class="mb-3">
+        <div class="card shadow-sm border-light">
+            <div class="card-body text-center p-4">
+                <div class="mb-4 position-relative">
                     {% if agent.image_path %}
-                        <img src="{{ agent.image_path.url }}" class="rounded-circle" width="150" height="150" style="object-fit: cover;" alt="{{ agent.full_name }}">
+                        <img src="{{ agent.image_path.url }}" class="rounded-circle border border-3 border-light shadow" 
+                             width="160" height="160" style="object-fit: cover;" alt="{{ agent.full_name }}">
                     {% else %}
-                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 150px; height: 150px;">
-                            <i class="bi bi-person text-white" style="font-size: 4rem;"></i>
+                        <div class="bg-gradient bg-primary rounded-circle d-flex align-items-center justify-content-center mx-auto shadow" 
+                             style="width: 160px; height: 160px;">
+                            <span class="text-white fw-bold" style="font-size: 3rem;">
+                                {{ agent.first_name|first }}{{ agent.last_name|first }}
+                            </span>
                         </div>
                     {% endif %}
+                    <!-- Indicador de estado -->
+                    <span class="position-absolute bottom-0 end-50 translate-middle-x p-2 
+                        {% if agent.is_active %}bg-success{% else %}bg-secondary{% endif %} 
+                        border border-3 border-white rounded-circle">
+                    </span>
                 </div>
                 
-                <h4 class="mb-1">{{ agent.full_name }}</h4>
-                <p class="text-muted mb-3">{{ agent.email }}</p>
+                <h4 class="mb-2 fw-bold">{{ agent.full_name }}</h4>
+                <p class="text-muted mb-3">
+                    <i class="bi bi-envelope me-1"></i>{{ agent.email }}
+                </p>
                 
-                <div class="mb-3">
+                <div class="mb-4">
                     {% if agent.is_active %}
-                        <span class="badge bg-success fs-6">
-                            <i class="bi bi-check-circle me-1"></i>Activo
+                        <span class="badge bg-success-subtle text-success border border-success-subtle fs-6 px-3 py-2">
+                            <i class="bi bi-check-circle me-1"></i>Agente Activo
                         </span>
                     {% else %}
-                        <span class="badge bg-secondary fs-6">
-                            <i class="bi bi-x-circle me-1"></i>Inactivo
+                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle fs-6 px-3 py-2">
+                            <i class="bi bi-pause-circle me-1"></i>Agente Inactivo
                         </span>
                     {% endif %}
                 </div>
 
-                <div class="row text-center mb-3">
-                    <div class="col-4">
-                        <div class="border-end">
-                            <h5 class="text-primary mb-0">{{ agent.property_set.count }}</h5>
-                            <small class="text-muted">Propiedades</small>
+                <!-- Biografía si existe -->
+                {% if agent.bio %}
+                <div class="mb-4 p-3 bg-light rounded-3">
+                    <h6 class="text-primary mb-2">
+                        <i class="bi bi-person-lines-fill me-1"></i>Acerca de mí
+                    </h6>
+                    <p class="text-muted small mb-0">{{ agent.bio }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Estadísticas rápidas -->
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <div class="text-center p-3 bg-primary-subtle rounded-3 border border-primary-subtle">
+                            <h5 class="text-primary mb-1 fw-bold">{{ agent.property_set.count }}</h5>
+                            <small class="text-primary fw-semibold">Propiedades</small>
                         </div>
                     </div>
-                    <div class="col-4">
-                        <div class="border-end">
-                            <h5 class="text-success mb-0">{{ active_contracts }}</h5>
-                            <small class="text-muted">Contratos</small>
+                    <div class="col-6">
+                        <div class="text-center p-3 bg-success-subtle rounded-3 border border-success-subtle">
+                            <h5 class="text-success mb-1 fw-bold">{{ active_contracts|default:0 }}</h5>
+                            <small class="text-success fw-semibold">Contratos</small>
                         </div>
-                    </div>
-                    <div class="col-4">
-                        <h5 class="text-warning mb-0">{{ agent.commission_rate }}%</h5>
-                        <small class="text-muted">Comisión</small>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Información de contacto -->
-        <div class="card mt-4">
-            <div class="card-header">
-                <h6 class="mb-0">
-                    <i class="bi bi-person-vcard"></i> Información de Contacto
+        <div class="card shadow-sm border-light mt-4">
+            <div class="card-header bg-light border-bottom">
+                <h6 class="mb-0 text-dark fw-bold">
+                    <i class="bi bi-person-vcard me-2"></i>Información de Contacto
                 </h6>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
                 <div class="mb-3">
-                    <label class="fw-bold text-muted">Email:</label>
-                    <div>
-                        <a href="mailto:{{ agent.email }}" class="text-decoration-none">
-                            <i class="bi bi-envelope me-2"></i>{{ agent.email }}
-                        </a>
+                    <div class="d-flex align-items-center p-2 bg-light rounded-2">
+                        <div class="bg-primary rounded-circle p-2 me-3">
+                            <i class="bi bi-envelope text-white"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Email</small>
+                            <a href="mailto:{{ agent.email }}" class="text-decoration-none fw-semibold">
+                                {{ agent.email }}
+                            </a>
+                        </div>
                     </div>
                 </div>
                 
                 {% if agent.phone %}
                 <div class="mb-3">
-                    <label class="fw-bold text-muted">Teléfono:</label>
-                    <div>
-                        <a href="tel:{{ agent.phone }}" class="text-decoration-none">
-                            <i class="bi bi-telephone me-2"></i>{{ agent.phone }}
-                        </a>
+                    <div class="d-flex align-items-center p-2 bg-light rounded-2">
+                        <div class="bg-success rounded-circle p-2 me-3">
+                            <i class="bi bi-telephone text-white"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Teléfono</small>
+                            <a href="tel:{{ agent.phone }}" class="text-decoration-none fw-semibold">
+                                {{ agent.phone }}
+                            </a>
+                        </div>
                     </div>
                 </div>
                 {% endif %}
 
                 <div class="mb-3">
-                    <label class="fw-bold text-muted">Matrícula:</label>
-                    <div>
-                        <i class="bi bi-card-text me-2"></i>{{ agent.license_number }}
+                    <div class="d-flex align-items-center p-2 bg-light rounded-2">
+                        <div class="bg-warning rounded-circle p-2 me-3">
+                            <i class="bi bi-award text-white"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Matrícula Profesional</small>
+                            <span class="fw-semibold">{{ agent.license_number }}</span>
+                        </div>
                     </div>
                 </div>
 
                 <div class="mb-0">
-                    <label class="fw-bold text-muted">Miembro desde:</label>
-                    <div>
-                        <i class="bi bi-calendar me-2"></i>{{ agent.date_joined|date:"d/m/Y" }}
+                    <div class="d-flex align-items-center p-2 bg-light rounded-2">
+                        <div class="bg-info rounded-circle p-2 me-3">
+                            <i class="bi bi-calendar-plus text-white"></i>
+                        </div>
+                        <div>
+                            <small class="text-muted d-block">Miembro desde</small>
+                            <span class="fw-semibold">{{ agent.date_joined|date:"d/m/Y" }}</span>
+                            <small class="text-muted d-block">{{ agent.date_joined|timesince }} de experiencia</small>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -116,13 +160,13 @@
 
     <!-- Propiedades del Agente -->
     <div class="col-lg-8 mb-4">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h6 class="mb-0">
-                    <i class="bi bi-house"></i> Propiedades ({{ agent.property_set.count }})
+        <div class="card shadow-sm border-light">
+            <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center py-3">
+                <h6 class="mb-0 text-dark fw-bold">
+                    <i class="bi bi-house me-2"></i>Propiedades Asignadas ({{ agent.property_set.count }})
                 </h6>
-                <a href="{% url 'properties:property_create' %}" class="btn btn-sm btn-outline-primary">
-                    <i class="bi bi-plus"></i> Nueva Propiedad
+                <a href="{% url 'properties:property_create' %}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-plus me-1"></i>Nueva Propiedad
                 </a>
             </div>
             <div class="card-body">
@@ -184,77 +228,101 @@
         </div>
 
         <!-- Estadísticas Detalladas -->
-        <div class="card mt-4">
-            <div class="card-header">
-                <h6 class="mb-0">
-                    <i class="bi bi-graph-up"></i> Estadísticas Detalladas
+        <div class="card shadow-sm border-light mt-4">
+            <div class="card-header bg-light border-bottom">
+                <h6 class="mb-0 text-dark fw-bold">
+                    <i class="bi bi-graph-up me-2"></i>Estadísticas Detalladas
                 </h6>
             </div>
-            <div class="card-body">
-                <div class="row">
+            <div class="card-body p-4">
+                <div class="row g-4">
                     <div class="col-md-6">
-                        <h6 class="text-primary">Propiedades por Estado</h6>
-                        <div class="mb-3">
-                            {% for status_stat in property_stats_by_status %}
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>{{ status_stat.property_status__name }}</span>
-                                <span class="badge bg-primary">{{ status_stat.count }}</span>
+                        <div class="bg-primary-subtle rounded-3 p-3 border border-primary-subtle">
+                            <h6 class="text-primary mb-3 fw-bold">
+                                <i class="bi bi-flag me-1"></i>Propiedades por Estado
+                            </h6>
+                            <div class="mb-3">
+                                {% for status_stat in property_stats_by_status %}
+                                <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-white rounded-2">
+                                    <span class="fw-semibold">{{ status_stat.property_status__name }}</span>
+                                    <span class="badge bg-primary">{{ status_stat.count }}</span>
+                                </div>
+                                {% empty %}
+                                <div class="text-center py-3">
+                                    <i class="bi bi-info-circle text-muted"></i>
+                                    <p class="text-muted mb-0 mt-2">Sin datos disponibles</p>
+                                </div>
+                                {% endfor %}
                             </div>
-                            {% empty %}
-                            <p class="text-muted">Sin datos</p>
-                            {% endfor %}
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <h6 class="text-success">Propiedades por Tipo</h6>
-                        <div class="mb-3">
-                            {% for type_stat in property_stats_by_type %}
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>{{ type_stat.property_type__name }}</span>
-                                <span class="badge bg-success">{{ type_stat.count }}</span>
+                        <div class="bg-success-subtle rounded-3 p-3 border border-success-subtle">
+                            <h6 class="text-success mb-3 fw-bold">
+                                <i class="bi bi-house me-1"></i>Propiedades por Tipo
+                            </h6>
+                            <div class="mb-3">
+                                {% for type_stat in property_stats_by_type %}
+                                <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-white rounded-2">
+                                    <span class="fw-semibold">{{ type_stat.property_type__name }}</span>
+                                    <span class="badge bg-success">{{ type_stat.count }}</span>
+                                </div>
+                                {% empty %}
+                                <div class="text-center py-3">
+                                    <i class="bi bi-info-circle text-muted"></i>
+                                    <p class="text-muted mb-0 mt-2">Sin datos disponibles</p>
+                                </div>
+                                {% endfor %}
                             </div>
-                            {% empty %}
-                            <p class="text-muted">Sin datos</p>
-                            {% endfor %}
                         </div>
                     </div>
                 </div>
 
-                <div class="row">
+                <!-- Métricas de rendimiento -->
+                <div class="row g-3 mt-3">
                     <div class="col-md-4">
-                        <div class="text-center p-3 bg-light rounded">
-                            <h5 class="text-info mb-1">
+                        <div class="text-center p-4 bg-info-subtle rounded-3 border border-info-subtle">
+                            <div class="bg-info rounded-circle p-2 d-inline-flex mb-2">
+                                <i class="bi bi-currency-dollar text-white"></i>
+                            </div>
+                            <h5 class="text-info mb-1 fw-bold">
                                 {% if avg_sale_price %}
                                     ${{ avg_sale_price|floatformat:0 }}
                                 {% else %}
                                     -
                                 {% endif %}
                             </h5>
-                            <small class="text-muted">Precio Promedio Venta</small>
+                            <small class="text-info fw-semibold">Precio Promedio Venta</small>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="text-center p-3 bg-light rounded">
-                            <h5 class="text-warning mb-1">
+                        <div class="text-center p-4 bg-warning-subtle rounded-3 border border-warning-subtle">
+                            <div class="bg-warning rounded-circle p-2 d-inline-flex mb-2">
+                                <i class="bi bi-calendar-month text-white"></i>
+                            </div>
+                            <h5 class="text-warning mb-1 fw-bold">
                                 {% if avg_rental_price %}
                                     ${{ avg_rental_price|floatformat:0 }}
                                 {% else %}
                                     -
                                 {% endif %}
                             </h5>
-                            <small class="text-muted">Precio Promedio Alquiler</small>
+                            <small class="text-warning fw-semibold">Precio Promedio Alquiler</small>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="text-center p-3 bg-light rounded">
-                            <h5 class="text-secondary mb-1">
+                        <div class="text-center p-4 bg-secondary-subtle rounded-3 border border-secondary-subtle">
+                            <div class="bg-secondary rounded-circle p-2 d-inline-flex mb-2">
+                                <i class="bi bi-rulers text-white"></i>
+                            </div>
+                            <h5 class="text-secondary mb-1 fw-bold">
                                 {% if total_surface %}
                                     {{ total_surface|floatformat:0 }} m²
                                 {% else %}
                                     -
                                 {% endif %}
                             </h5>
-                            <small class="text-muted">Superficie Total</small>
+                            <small class="text-secondary fw-semibold">Superficie Total</small>
                         </div>
                     </div>
                 </div>
@@ -262,31 +330,37 @@
         </div>
 
         <!-- Actividad Reciente -->
-        <div class="card mt-4">
-            <div class="card-header">
-                <h6 class="mb-0">
-                    <i class="bi bi-clock-history"></i> Actividad Reciente
+        <div class="card shadow-sm border-light mt-4">
+            <div class="card-header bg-light border-bottom">
+                <h6 class="mb-0 text-dark fw-bold">
+                    <i class="bi bi-clock-history me-2"></i>Actividad Reciente
                 </h6>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
                 <div class="timeline">
                     {% for activity in recent_activities|slice:":5" %}
-                    <div class="d-flex mb-3">
+                    <div class="d-flex mb-3 p-3 bg-light rounded-3">
                         <div class="flex-shrink-0">
-                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
+                                 style="width: 45px; height: 45px;">
                                 <i class="bi bi-house text-white"></i>
                             </div>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <h6 class="mb-1">{{ activity.title }}</h6>
-                            <p class="text-muted mb-1">{{ activity.description }}</p>
-                            <small class="text-muted">{{ activity.created_at|timesince }} atrás</small>
+                            <h6 class="mb-1 fw-bold">{{ activity.title }}</h6>
+                            <p class="text-muted mb-2 small">{{ activity.description }}</p>
+                            <small class="text-primary fw-semibold">
+                                <i class="bi bi-clock me-1"></i>{{ activity.created_at|timesince }} atrás
+                            </small>
                         </div>
                     </div>
                     {% empty %}
-                    <div class="text-center py-3">
-                        <i class="bi bi-clock text-muted" style="font-size: 2rem;"></i>
-                        <p class="text-muted mt-2">Sin actividad reciente</p>
+                    <div class="text-center py-5">
+                        <div class="mb-3">
+                            <i class="bi bi-clock text-muted" style="font-size: 3rem;"></i>
+                        </div>
+                        <h6 class="text-muted mb-2">Sin actividad reciente</h6>
+                        <p class="text-muted small mb-0">Las actividades del agente aparecerán aquí</p>
                     </div>
                     {% endfor %}
                 </div>

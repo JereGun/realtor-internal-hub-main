@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.db.models import Q
+from django.utils import timezone
 from .models import Contract, ContractIncrease
 from .forms import ContractForm, ContractIncreaseForm, ContractSearchForm
 from accounting.models_invoice import Invoice, InvoiceLine
@@ -40,6 +41,25 @@ class ContractListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['search_form'] = ContractSearchForm(self.request.GET)
+        
+        # Calcular estadísticas para las tarjetas
+        all_contracts = Contract.objects.all()
+        today = timezone.now().date()
+        next_month = today + timezone.timedelta(days=30)
+        
+        context['active_contracts_count'] = all_contracts.filter(status='active').count()
+        context['expiring_contracts_count'] = all_contracts.filter(
+            status='active',
+            end_date__isnull=False,
+            end_date__lte=next_month
+        ).count()
+        context['increase_due_contracts_count'] = all_contracts.filter(
+            status='active',
+            next_increase_date__isnull=False,
+            next_increase_date__lte=next_month,
+            next_increase_date__gte=today
+        ).count()
+        
         return context
 
 

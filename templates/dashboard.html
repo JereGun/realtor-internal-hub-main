@@ -1,79 +1,677 @@
 {% extends 'base.html' %}
+{% load humanize %}
+{% load static %}
 
-{% block page_title %}Dashboard{% endblock %}
+{% block title %}Dashboard - Sistema de Gestión Inmobiliaria{% endblock %}
 
-{% block content %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
+<style>
+  :root {
+    --primary-color: #2563eb;
+    --success-color: #059669;
+    --warning-color: #d97706;
+    --danger-color: #dc2626;
+    --info-color: #0891b2;
+    --dark-color: #1f2937;
+    --light-color: #f8fafc;
+    --border-color: #e5e7eb;
+  }
+
+  .dashboard-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #1d4ed8 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dashboard-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    transform: translate(50%, -50%);
+  }
+
+  .dashboard-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  .dashboard-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    position: relative;
+    z-index: 2;
+  }
+
+  .metric-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .metric-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+  }
+
+  .metric-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--card-color, var(--primary-color));
+  }
+
+  .metric-card.success::before {
+    background: var(--success-color);
+  }
+  .metric-card.warning::before {
+    background: var(--warning-color);
+  }
+  .metric-card.danger::before {
+    background: var(--danger-color);
+  }
+  .metric-card.info::before {
+    background: var(--info-color);
+  }
+
+  .metric-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    margin-bottom: 1rem;
+  }
+
+  .metric-icon.success {
+    background: var(--success-color);
+  }
+  .metric-icon.warning {
+    background: var(--warning-color);
+  }
+  .metric-icon.danger {
+    background: var(--danger-color);
+  }
+  .metric-icon.info {
+    background: var(--info-color);
+  }
+  .metric-icon.primary {
+    background: var(--primary-color);
+  }
+
+  .metric-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+    line-height: 1;
+  }
+
+  .metric-label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 0.25rem;
+  }
+
+  .metric-subtitle {
+    font-size: 0.875rem;
+    color: #9ca3af;
+  }
+
+  .chart-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
+    height: 100%;
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .chart-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--dark-color);
+    margin: 0;
+  }
+
+  .recent-activity {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-color);
+  }
+
+  .activity-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  .activity-item:last-child {
+    border-bottom: none;
+  }
+
+  .activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 1rem;
+    color: white;
+  }
+
+  .activity-content {
+    flex: 1;
+  }
+
+  .activity-title {
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.25rem;
+  }
+
+  .activity-subtitle {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  .activity-amount {
+    font-weight: 600;
+    color: var(--success-color);
+  }
+
+  .quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .quick-action {
+    background: white;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-decoration: none;
+    color: var(--dark-color);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .quick-action:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px -8px rgba(37, 99, 235, 0.3);
+  }
+
+  .quick-action-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    background: var(--light-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    color: var(--primary-color);
+  }
+
+  .quick-action-content h6 {
+    margin: 0 0 0.25rem 0;
+    font-weight: 600;
+  }
+
+  .quick-action-content small {
+    color: #6b7280;
+  }
+
+  .status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .status-badge.success {
+    background: rgba(5, 150, 105, 0.1);
+    color: var(--success-color);
+  }
+
+  .status-badge.warning {
+    background: rgba(217, 119, 6, 0.1);
+    color: var(--warning-color);
+  }
+
+  .status-badge.danger {
+    background: rgba(220, 38, 38, 0.1);
+    color: var(--danger-color);
+  }
+
+  .table-modern {
+    border: none;
+  }
+
+  .table-modern thead th {
+    border: none;
+    background: var(--light-color);
+    color: var(--dark-color);
+    font-weight: 600;
+    padding: 1rem;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .table-modern tbody td {
+    border: none;
+    padding: 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  .table-modern tbody tr:hover {
+    background: rgba(37, 99, 235, 0.02);
+  }
+
+  @media (max-width: 768px) {
+    .dashboard-header h1 {
+      font-size: 2rem;
+    }
+
+    .metric-value {
+      font-size: 2rem;
+    }
+
+    .quick-actions {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %} {% block content %}
 <div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col-12">
-            <h1 class="h3">Dashboard</h1>
+  <!-- Dashboard Header -->
+  <div class="dashboard-header">
+    <h1><i class="bi bi-speedometer2 me-3"></i>Dashboard</h1>
+    <p class="dashboard-subtitle mb-0">
+      Resumen general de tu negocio inmobiliario
+    </p>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions">
+    <a href="{% url 'properties:property_create' %}" class="quick-action">
+      <div class="quick-action-icon">
+        <i class="bi bi-plus-circle"></i>
+      </div>
+      <div class="quick-action-content">
+        <h6>Nueva Propiedad</h6>
+        <small>Agregar propiedad al catálogo</small>
+      </div>
+    </a>
+    <a href="{% url 'contracts:contract_create' %}" class="quick-action">
+      <div class="quick-action-icon">
+        <i class="bi bi-file-earmark-plus"></i>
+      </div>
+      <div class="quick-action-content">
+        <h6>Nuevo Contrato</h6>
+        <small>Crear contrato de venta/alquiler</small>
+      </div>
+    </a>
+    <a href="{% url 'customers:customer_create' %}" class="quick-action">
+      <div class="quick-action-icon">
+        <i class="bi bi-person-plus"></i>
+      </div>
+      <div class="quick-action-content">
+        <h6>Nuevo Cliente</h6>
+        <small>Registrar nuevo cliente</small>
+      </div>
+    </a>
+    <a href="{% url 'accounting:invoice_create' %}" class="quick-action">
+      <div class="quick-action-icon">
+        <i class="bi bi-receipt"></i>
+      </div>
+      <div class="quick-action-content">
+        <h6>Nueva Factura</h6>
+        <small>Generar factura</small>
+      </div>
+    </a>
+  </div>
+
+  <!-- Metrics Cards -->
+  <div class="row mb-4">
+    <div class="col-xl-3 col-lg-6 col-md-6 mb-4">
+      <div class="metric-card success">
+        <div class="metric-icon success">
+          <i class="bi bi-currency-dollar"></i>
         </div>
+        <div class="metric-value">
+          ${{ sales_total|floatformat:0|intcomma }}
+        </div>
+        <div class="metric-label">Ventas Totales</div>
+        <div class="metric-subtitle">
+          {{ sales_count }} propiedades vendidas
+        </div>
+      </div>
     </div>
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card text-bg-success mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Ventas de Propiedades</h5>
-                    <p class="card-text display-6">${{ sales_total|floatformat:2 }}</p>
-                    <small>{{ sales_count }} ventas</small>
-                </div>
-            </div>
+    <div class="col-xl-3 col-lg-6 col-md-6 mb-4">
+      <div class="metric-card info">
+        <div class="metric-icon info">
+          <i class="bi bi-house-check"></i>
         </div>
-        <div class="col-md-4">
-            <div class="card text-bg-info mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Ingresos por Alquileres</h5>
-                    <p class="card-text display-6">${{ rent_income|floatformat:2 }}</p>
-                    <small>{{ rent_count }} alquileres</small>
-                </div>
-            </div>
+        <div class="metric-value">
+          ${{ rent_income|floatformat:0|intcomma }}
         </div>
-        <div class="col-md-4">
-            <div class="card text-bg-warning mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Pagos Pendientes</h5>
-                    <p class="card-text display-6">${{ pending_payments|floatformat:2 }}</p>
-                    <small>{{ pending_count }} pagos</small>
-                </div>
-            </div>
-        </div>
+        <div class="metric-label">Ingresos por Alquileres</div>
+        <div class="metric-subtitle">{{ rent_count }} pagos recibidos</div>
+      </div>
     </div>
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">Resumen de Últimas Ventas y Alquileres</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Tipo</th>
-                                    <th>Propiedad</th>
-                                    <th>Cliente</th>
-                                    <th>Monto</th>
-                                    <th>Fecha</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for op in last_operations %}
-                                <tr>
-                                    <td>{{ op.type }}</td>
-                                    <td>{{ op.property }}</td>
-                                    <td>{{ op.customer }}</td>
-                                    <td>${{ op.amount|floatformat:2 }}</td>
-                                    <td>{{ op.date|date:'d/m/Y' }}</td>
-                                </tr>
-                                {% empty %}
-                                <tr><td colspan="5">No hay operaciones recientes.</td></tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+    <div class="col-xl-3 col-lg-6 col-md-6 mb-4">
+      <div class="metric-card warning">
+        <div class="metric-icon warning">
+          <i class="bi bi-clock-history"></i>
         </div>
+        <div class="metric-value">
+          ${{ pending_payments|floatformat:0|intcomma }}
+        </div>
+        <div class="metric-label">Pagos Pendientes</div>
+        <div class="metric-subtitle">{{ pending_count }} pagos por cobrar</div>
+      </div>
     </div>
+    <div class="col-xl-3 col-lg-6 col-md-6 mb-4">
+      <div class="metric-card primary">
+        <div class="metric-icon primary">
+          <i class="bi bi-building"></i>
+        </div>
+        <div class="metric-value">{{ total_properties }}</div>
+        <div class="metric-label">Propiedades Activas</div>
+        <div class="metric-subtitle">
+          {{ available_properties }} disponibles
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts and Recent Activity -->
+  <div class="row mb-4">
+    <div class="col-lg-8 mb-4">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h5 class="chart-title">Actividad Reciente</h5>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-modern">
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Propiedad</th>
+                <th>Cliente</th>
+                <th>Monto</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for op in last_operations %}
+              <tr>
+                <td>
+                  {% if op.type == 'Venta' %}
+                  <span class="status-badge success">{{ op.type }}</span>
+                  {% else %}
+                  <span class="status-badge info">{{ op.type }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="fw-semibold">
+                    {{ op.property|truncatechars:30 }}
+                  </div>
+                </td>
+                <td>{{ op.customer }}</td>
+                <td class="fw-bold text-success">
+                  ${{ op.amount|floatformat:0|intcomma }}
+                </td>
+                <td>{{ op.date|date:'d/m/Y' }}</td>
+                <td>
+                  <span class="status-badge success">Completado</span>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="6" class="text-center py-4">
+                  <div class="text-muted">
+                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                    No hay operaciones recientes
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+      <div class="recent-activity">
+        <div class="chart-header">
+          <h5 class="chart-title">Resumen del Mes</h5>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-icon" style="background: var(--success-color)">
+            <i class="bi bi-graph-up"></i>
+          </div>
+          <div class="activity-content">
+            <div class="activity-title">Contratos Activos</div>
+            <div class="activity-subtitle">
+              {{ active_contracts }} contratos en curso
+            </div>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-icon" style="background: var(--info-color)">
+            <i class="bi bi-people"></i>
+          </div>
+          <div class="activity-content">
+            <div class="activity-title">Nuevos Clientes</div>
+            <div class="activity-subtitle">
+              {{ new_customers }} clientes este mes
+            </div>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-icon" style="background: var(--warning-color)">
+            <i class="bi bi-exclamation-triangle"></i>
+          </div>
+          <div class="activity-content">
+            <div class="activity-title">Contratos por Vencer</div>
+            <div class="activity-subtitle">
+              {{ expiring_contracts }} próximos a vencer
+            </div>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-icon" style="background: var(--primary-color)">
+            <i class="bi bi-calendar-check"></i>
+          </div>
+          <div class="activity-content">
+            <div class="activity-title">Pagos del Mes</div>
+            <div class="activity-subtitle activity-amount">
+              ${{ monthly_payments|floatformat:0|intcomma }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Additional Stats -->
+  <div class="row">
+    <div class="col-lg-6 mb-4">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h5 class="chart-title">Propiedades por Tipo</h5>
+        </div>
+        <div class="row">
+          {% for type_stat in property_types_stats %}
+          <div class="col-6 mb-3">
+            <div class="d-flex align-items-center">
+              <div class="me-3">
+                <div
+                  class="metric-icon primary"
+                  style="width: 40px; height: 40px; font-size: 1rem"
+                >
+                  <i class="bi bi-house-door"></i>
+                </div>
+              </div>
+              <div>
+                <div class="fw-bold">{{ type_stat.count }}</div>
+                <div class="text-muted small">{{ type_stat.name }}</div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6 mb-4">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h5 class="chart-title">Estados de Propiedades</h5>
+        </div>
+        <div class="row">
+          {% for status_stat in property_status_stats %}
+          <div class="col-6 mb-3">
+            <div class="d-flex align-items-center">
+              <div class="me-3">
+                <div
+                  class="metric-icon info"
+                  style="width: 40px; height: 40px; font-size: 1rem"
+                >
+                  <i class="bi bi-flag"></i>
+                </div>
+              </div>
+              <div>
+                <div class="fw-bold">{{ status_stat.count }}</div>
+                <div class="text-muted small">{{ status_stat.name }}</div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/dashboard.js' %}"></script>
+<script>
+  // Additional dashboard-specific functionality
+  document.addEventListener("DOMContentLoaded", function () {
+    // Add refresh button to dashboard header
+    const dashboardHeader = document.querySelector(".dashboard-header");
+    if (dashboardHeader) {
+      const refreshBtn = document.createElement("button");
+      refreshBtn.id = "refreshDashboard";
+      refreshBtn.className = "btn btn-light btn-sm position-absolute";
+      refreshBtn.style.cssText = "top: 1rem; right: 1rem; z-index: 3;";
+      refreshBtn.innerHTML =
+        '<i class="bi bi-arrow-clockwise me-1"></i>Actualizar';
+      refreshBtn.title = "Actualizar datos del dashboard";
+      dashboardHeader.appendChild(refreshBtn);
+    }
+
+    // Add tooltips to metric cards
+    const metricCards = document.querySelectorAll(".metric-card");
+    metricCards.forEach((card) => {
+      const cardType = card.classList.contains("success")
+        ? "ventas"
+        : card.classList.contains("info")
+        ? "alquileres"
+        : card.classList.contains("warning")
+        ? "pagos pendientes"
+        : "propiedades";
+      card.setAttribute("data-bs-toggle", "tooltip");
+      card.setAttribute("data-bs-placement", "top");
+      card.setAttribute("title", `Haz clic para ver detalles de ${cardType}`);
+    });
+
+    // Initialize tooltips
+    if (typeof bootstrap !== "undefined") {
+      const tooltipTriggerList = [].slice.call(
+        document.querySelectorAll('[data-bs-toggle="tooltip"]')
+      );
+      tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
+    }
+
+    // Add keyboard shortcuts info
+    const shortcutsInfo = document.createElement("div");
+    shortcutsInfo.className = "position-fixed bottom-0 end-0 p-3";
+    shortcutsInfo.style.cssText =
+      "z-index: 1000; font-size: 0.8rem; color: #6b7280;";
+    shortcutsInfo.innerHTML = `
+        <div class="bg-white rounded shadow-sm p-2 border">
+            <small>
+                <strong>Atajos:</strong> Ctrl+R (Actualizar) | Ctrl+N (Nueva Propiedad)
+            </small>
+        </div>
+    `;
+    document.body.appendChild(shortcutsInfo);
+
+    // Hide shortcuts info after 5 seconds
+    setTimeout(() => {
+      shortcutsInfo.style.opacity = "0";
+      shortcutsInfo.style.transition = "opacity 0.5s ease";
+      setTimeout(() => shortcutsInfo.remove(), 500);
+    }, 5000);
+  });
+</script>
 {% endblock %}

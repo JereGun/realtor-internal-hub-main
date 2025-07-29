@@ -1,245 +1,362 @@
 {% extends 'base.html' %}
+{% load humanize %}
 
-{% block page_title %}{{ customer.get_full_name }} - Detalles del Cliente{% endblock %}
+{% block title %}{{ customer.get_full_name }} - Detalles del Cliente{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="{% url 'customers:customer_list' %}">Clientes</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">{{ customer.get_full_name }}</li>
-                        </ol>
-                    </nav>
-                    <h1 class="h3 mb-0">{{ customer.get_full_name }}</h1>
+<div class="container-fluid mt-4">
+    <!-- Header con breadcrumb -->
+    <div class="d-flex justify-content-between align-items-start mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'customers:customer_list' %}" class="text-decoration-none">
+                            <i class="bi bi-people me-1"></i>Clientes
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ customer.get_full_name }}</li>
+                </ol>
+            </nav>
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" 
+                         style="width: 60px; height: 60px;">
+                        <span class="text-white fw-bold fs-4">
+                            {{ customer.first_name|first }}{{ customer.last_name|first }}
+                        </span>
+                    </div>
                 </div>
-                <div class="btn-group" role="group">
-                    <a href="{% url 'customers:customer_edit' customer.pk %}" class="btn btn-warning">
-                        <i class="fas fa-edit"></i> Editar
-                    </a>
-                    <a href="{% url 'customers:customer_delete' customer.pk %}" class="btn btn-danger">
-                        <i class="fas fa-trash"></i> Eliminar
-                    </a>
+                <div>
+                    <h1 class="h3 text-dark mb-1">{{ customer.get_full_name }}</h1>
+                    <p class="text-muted mb-0">
+                        <i class="bi bi-person-badge me-1"></i>Cliente #{{ customer.id }}
+                        {% if customer.document %}
+                            • {{ customer.document }}
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="btn-group" role="group">
+            <a href="{% url 'customers:customer_edit' customer.pk %}" class="btn btn-warning">
+                <i class="bi bi-pencil me-1"></i>Editar
+            </a>
+            <a href="{% url 'customers:customer_delete' customer.pk %}" class="btn btn-danger"
+               onclick="return confirm('¿Está seguro de eliminar este cliente?')">
+                <i class="bi bi-trash me-1"></i>Eliminar
+            </a>
+        </div>
+    </div>
+
+    <!-- Estadísticas rápidas -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-file-earmark-text fs-1 mb-2"></i>
+                    <h4 class="card-title">{{ customer.contract_set.count|default:0 }}</h4>
+                    <p class="card-text mb-0">Contratos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-check-circle fs-1 mb-2"></i>
+                    <h4 class="card-title">{{ active_contracts_count|default:0 }}</h4>
+                    <p class="card-text mb-0">Activos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-house fs-1 mb-2"></i>
+                    <h4 class="card-title">{{ properties_count|default:0 }}</h4>
+                    <p class="card-text mb-0">Propiedades</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-calendar-event fs-1 mb-2"></i>
+                    <h4 class="card-title">{{ customer.created_at|timesince }}</h4>
+                    <p class="card-text mb-0">Cliente desde</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Información principal -->
+        <div class="col-lg-8">
+            <!-- Información Personal -->
+            <div class="card shadow-sm border-light mb-4">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="bi bi-person me-2"></i>Información Personal
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted fw-semibold">Nombre Completo</label>
+                                <div class="fw-bold">{{ customer.get_full_name }}</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted fw-semibold">Documento</label>
+                                <div class="fw-bold">{{ customer.document|default:"No especificado" }}</div>
+                            </div>
+                            {% if customer.birth_date %}
+                            <div class="mb-3">
+                                <label class="form-label text-muted fw-semibold">Fecha de Nacimiento</label>
+                                <div class="fw-bold">{{ customer.birth_date|date:"d/m/Y" }}</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted fw-semibold">Email</label>
+                                <div class="fw-bold">
+                                    {% if customer.email %}
+                                        <a href="mailto:{{ customer.email }}" class="text-decoration-none">
+                                            <i class="bi bi-envelope me-1"></i>{{ customer.email }}
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">No especificado</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted fw-semibold">Teléfono</label>
+                                <div class="fw-bold">
+                                    {% if customer.phone %}
+                                        <a href="tel:{{ customer.phone }}" class="text-decoration-none">
+                                            <i class="bi bi-telephone me-1"></i>{{ customer.phone }}
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">No especificado</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% if customer.profession %}
+                            <div class="mb-3">
+                                <label class="form-label text-muted fw-semibold">Profesión</label>
+                                <div class="fw-bold">{{ customer.profession }}</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if customer.notes %}
+                    <div class="mt-4 pt-3 border-top">
+                        <label class="form-label text-muted fw-semibold">Notas</label>
+                        <div class="bg-light p-3 rounded">
+                            {{ customer.notes|linebreaksbr }}
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 
-            <div class="row">
-                <!-- Customer Information -->
-                <div class="col-lg-8">
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0">
-                                <i class="fas fa-user"></i> Información Personal
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <h6 class="text-muted">Nombre</h6>
-                                    <p class="mb-3">{{ customer.first_name }}</p>
-
-                                    <h6 class="text-muted">Apellido</h6>
-                                    <p class="mb-3">{{ customer.last_name }}</p>
-
-                                    <h6 class="text-muted">Documento</h6>
-                                    <p class="mb-3">{{ customer.document }}</p>
-
-                                </div>
-                                <div class="col-md-6">
-                                    <h6 class="text-muted">Email</h6>
-                                    <p class="mb-3">
-                                        {% if customer.email %}
-                                            <a href="mailto:{{ customer.email }}">{{ customer.email }}</a>
-                                        {% else %}
-                                            <span class="text-muted">No especificado</span>
-                                        {% endif %}
-                                    </p>
-
-                                    <h6 class="text-muted">Teléfono</h6>
-                                    <p class="mb-3">
-                                        {% if customer.phone %}
-                                            <a href="tel:{{ customer.phone }}">{{ customer.phone }}</a>
-                                        {% else %}
-                                            <span class="text-muted">No especificado</span>
-                                        {% endif %}
-                                    </p>
+            <!-- Información de Dirección -->
+            <div class="card shadow-sm border-light mb-4">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="bi bi-geo-alt me-2"></i>Información de Dirección
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted fw-semibold">Dirección</label>
+                                <div class="fw-bold">
+                                    {% if customer.street and customer.number %}
+                                        {{ customer.street }} {{ customer.number }}
+                                    {% else %}
+                                        <span class="text-muted">No especificada</span>
+                                    {% endif %}
                                 </div>
                             </div>
-
-                            {% if customer.notes %}
-                            <div class="mt-4">
-                                <h6 class="text-muted">Notas</h6>
-                                <div class="bg-light p-3 rounded">
-                                    {{ customer.notes|linebreaksbr }}
-                                </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted fw-semibold">Barrio</label>
+                                <div class="fw-bold">{{ customer.neighborhood|default:"No especificado" }}</div>
                             </div>
-                            {% endif %}
                         </div>
-                    </div>
-
-                    <!-- Address Information -->
-                    {% if customer.address or customer.city or customer.state or customer.zip_code or customer.country %}
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0">
-                                <i class="fas fa-map-marker-alt"></i> Dirección
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <h6 class="text-muted">Dirección</h6>
-                                    <p class="mb-3">{{ customer.full_address|default:"No especificada" }}</p>
-
-                                    <h6 class="text-muted">Ciudad</h6>
-                                    <p class="mb-3">{{ customer.locality.name|default:"No especificada" }}</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <h6 class="text-muted">Estado/Provincia</h6>
-                                    <p class="mb-3">{{ customer.province.name|default:"No especificado" }}</p>
-
-                                    <h6 class="text-muted">País</h6>
-                                    <p class="mb-3">{{ customer.country|default:"No especificado" }}</p>
-                                </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label text-muted fw-semibold">Localidad</label>
+                                <div class="fw-bold">{{ customer.locality.name|default:"No especificada" }}</div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted fw-semibold">Provincia</label>
+                                <div class="fw-bold">{{ customer.province.name|default:"No especificada" }}</div>
                             </div>
                         </div>
                     </div>
-                    {% endif %}
-
-                    <!-- Customer Activity/Properties -->
-                    {% if customer.properties.exists %}
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0">
-                                <i class="fas fa-file-contract"></i> Contratos Activos
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th>Propiedad</th>
-                                            <th>Estado</th>
-                                            <th>Fecha de Inicio</th>
-                                            <th>Fecha de Fin</th>
-                                            <th>Monto</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for contract in active_contracts %}
-                                        <tr>
-                                            <td>
-                                                <a href="{% url 'properties:property_detail' contract.property.pk %}" class="text-decoration-none">
-                                                    {{ contract.property.title }}
-                                                </a>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-{{ contract.get_status_display|lower }}">{{ contract.get_status_display }}</span>
-                                            </td>
-                                            <td>{{ contract.start_date|date:"d/m/Y" }}</td>
-                                            <td>
-                                                {% if contract.end_date %}
-                                                    {{ contract.end_date|date:"d/m/Y" }}
-                                                {% else %}
-                                                    <span class="text-muted">Indefinido</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>${{ contract.amount|floatformat:2 }}</td>
-                                        </tr>
-                                        {% empty %}
-                                        <tr>
-                                            <td colspan="5" class="text-center text-muted">No hay contratos activos</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                    {% if customer.country %}
+                    <div class="mt-3 pt-3 border-top">
+                        <label class="form-label text-muted fw-semibold">País</label>
+                        <div class="fw-bold">{{ customer.country.name }}</div>
                     </div>
                     {% endif %}
                 </div>
+            </div>
 
-                <!-- Sidebar -->
-                <div class="col-lg-4">
-                    <!-- Quick Stats -->
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0">
-                                <i class="fas fa-chart-bar"></i> Estadísticas
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row text-center">
-                                <div class="col-6">
-                                    <div class="border-end">
-                                        <h4 class="text-primary">{{ customer.properties.count }}</h4>
-                                        <small class="text-muted">Propiedades</small>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <h4 class="text-success">{{ customer.transactions.count }}</h4>
-                                    <small class="text-muted">Transacciones</small>
-                                </div>
-                            </div>
-                        </div>
+            <!-- Contratos -->
+            <div class="card shadow-sm border-light">
+                <div class="card-header bg-light border-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 text-dark fw-bold">
+                            <i class="bi bi-file-earmark-text me-2"></i>Contratos
+                        </h5>
+                        <a href="{% url 'contracts:contract_create' %}?customer={{ customer.pk }}" class="btn btn-sm btn-primary">
+                            <i class="bi bi-plus-circle me-1"></i>Nuevo Contrato
+                        </a>
                     </div>
-
-                    <!-- Registration Info -->
-                    <div class="card mb-4">
-                        <div class="card-header">
-                            <h5 class="mb-0">
-                                <i class="fas fa-info-circle"></i> Información del Sistema
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <h6 class="text-muted">Fecha de Registro</h6>
-                            <p class="mb-3">{{ customer.created_at|date:"d/m/Y H:i" }}</p>
-
-                            <h6 class="text-muted">Última Actualización</h6>
-                            <p class="mb-3">{{ customer.updated_at|date:"d/m/Y H:i" }}</p>
-
-                            {% if customer.source %}
-                            <h6 class="text-muted">Fuente de Contacto</h6>
-                            <p class="mb-3">{{ customer.get_source_display }}</p>
-                            {% endif %}
-                        </div>
+                </div>
+                <div class="card-body p-0">
+                    {% if customer.contract_set.exists %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="border-0 ps-4">Propiedad</th>
+                                    <th class="border-0">Estado</th>
+                                    <th class="border-0">Fecha Inicio</th>
+                                    <th class="border-0">Fecha Fin</th>
+                                    <th class="border-0 text-end">Monto</th>
+                                    <th class="border-0 text-center pe-4">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for contract in customer.contract_set.all %}
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-house text-primary me-2"></i>
+                                            <div>
+                                                <div class="fw-semibold">
+                                                    <a href="{% url 'properties:property_detail' contract.property.pk %}" 
+                                                       class="text-decoration-none">
+                                                        {{ contract.property.title|truncatechars:30 }}
+                                                    </a>
+                                                </div>
+                                                <small class="text-muted">{{ contract.property.property_type.name }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if contract.status == 'active' %}bg-success
+                                            {% elif contract.status == 'finished' %}bg-primary
+                                            {% elif contract.status == 'cancelled' %}bg-danger
+                                            {% else %}bg-warning text-dark
+                                            {% endif %}">
+                                            {{ contract.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold">{{ contract.start_date|date:"d/m/Y" }}</div>
+                                    </td>
+                                    <td>
+                                        {% if contract.end_date %}
+                                            <div class="fw-semibold">{{ contract.end_date|date:"d/m/Y" }}</div>
+                                        {% else %}
+                                            <span class="text-muted">Indefinido</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="fw-bold text-success">${{ contract.amount|intcomma }}</div>
+                                    </td>
+                                    <td class="text-center pe-4">
+                                        <a href="{% url 'contracts:contract_detail' contract.pk %}" 
+                                           class="btn btn-sm btn-outline-primary" title="Ver contrato">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-file-earmark display-1 text-muted"></i>
+                        <h6 class="text-muted mt-3">No hay contratos registrados</h6>
+                        <p class="text-muted">Este cliente aún no tiene contratos asociados.</p>
+                        <a href="{% url 'contracts:contract_create' %}?customer={{ customer.pk }}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-1"></i>Crear Primer Contrato
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
 
-                    <!-- Quick Actions -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h5 class="mb-0">
-                                <i class="fas fa-bolt"></i> Acciones Rápidas
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-grid gap-2">
-                                {% if customer.email %}
-                                <a href="mailto:{{ customer.email }}" class="btn btn-outline-primary btn-sm">
-                                    <i class="fas fa-envelope"></i> Enviar Email
-                                </a>
-                                {% endif %}
-                                
-                                {% if customer.phone %}
-                                <a href="tel:{{ customer.phone }}" class="btn btn-outline-success btn-sm">
-                                    <i class="fas fa-phone"></i> Llamar
-                                </a>
-                                {% endif %}
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Información del Sistema -->
+            <div class="card shadow-sm border-light mb-4">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="bi bi-info-circle me-2"></i>Información del Sistema
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label text-muted fw-semibold">Fecha de Registro</label>
+                        <div class="fw-bold">{{ customer.created_at|date:"d/m/Y H:i" }}</div>
+                        <small class="text-muted">{{ customer.created_at|timesince }} atrás</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted fw-semibold">Última Actualización</label>
+                        <div class="fw-bold">{{ customer.updated_at|date:"d/m/Y H:i" }}</div>
+                        <small class="text-muted">{{ customer.updated_at|timesince }} atrás</small>
+                    </div>
+                </div>
+            </div>
 
-                                <a href="{% url 'properties:property_create' %}?customer={{ customer.pk }}" class="btn btn-outline-info btn-sm">
-                                    <i class="fas fa-home"></i> Agregar Propiedad
-                                </a>
+            <!-- Acciones Rápidas -->
+            <div class="card shadow-sm border-light">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="bi bi-lightning me-2"></i>Acciones Rápidas
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-grid gap-2">
+                        {% if customer.email %}
+                        <a href="mailto:{{ customer.email }}" class="btn btn-outline-primary">
+                            <i class="bi bi-envelope me-2"></i>Enviar Email
+                        </a>
+                        {% endif %}
+                        
+                        {% if customer.phone %}
+                        <a href="tel:{{ customer.phone }}" class="btn btn-outline-success">
+                            <i class="bi bi-telephone me-2"></i>Llamar
+                        </a>
+                        {% endif %}
 
-                                <a href="{% url 'customers:customer_edit' customer.pk %}" class="btn btn-outline-warning btn-sm">
-                                    <i class="fas fa-edit"></i> Editar Cliente
-                                </a>
-                            </div>
-                        </div>
+                        <a href="{% url 'contracts:contract_create' %}?customer={{ customer.pk }}" class="btn btn-outline-info">
+                            <i class="bi bi-file-earmark-plus me-2"></i>Nuevo Contrato
+                        </a>
+
+                        <a href="{% url 'customers:customer_edit' customer.pk %}" class="btn btn-outline-warning">
+                            <i class="bi bi-pencil me-2"></i>Editar Cliente
+                        </a>
+
+                        <hr class="my-3">
+
+                        <a href="{% url 'customers:customer_delete' customer.pk %}" 
+                           class="btn btn-outline-danger"
+                           onclick="return confirm('¿Está seguro de eliminar este cliente? Esta acción no se puede deshacer.')">
+                            <i class="bi bi-trash me-2"></i>Eliminar Cliente
+                        </a>
                     </div>
                 </div>
             </div>

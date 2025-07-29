@@ -8,6 +8,7 @@
 {% block meta_keywords %}inmobiliaria, propiedades, casas en venta, departamentos en alquiler, bienes raíces, agentes inmobiliarios, hogar ideal, venta de propiedades, alquiler de propiedades, inmobiliaria premium{% endblock %}
 
 {% block og_title %}Inmobiliaria Premium - Tu Hogar Ideal Te Espera{% endblock %}
+
 {% block og_description %}Descubre más de {{ total_properties }} propiedades disponibles. 15+ años de experiencia, 500+ familias felices. Encuentra tu hogar perfecto con nosotros.{% endblock %}
 
 {% block structured_data %}
@@ -66,7 +67,7 @@
 {% block extra_css %}
 <style>
     .hero-section {
-        background: linear-gradient(135deg, rgba(37, 99, 235, 0.9), rgba(59, 130, 246, 0.8)), 
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.9), rgba(59, 130, 246, 0.8)),
                     url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>');
         min-height: 100vh;
         display: flex;
@@ -74,12 +75,12 @@
         position: relative;
         overflow: hidden;
     }
-    
+
     .hero-content {
         position: relative;
         z-index: 2;
     }
-    
+
     .hero-title {
         font-size: 3.5rem;
         font-weight: 700;
@@ -87,14 +88,14 @@
         margin-bottom: 1.5rem;
         line-height: 1.2;
     }
-    
+
     .hero-subtitle {
         font-size: 1.25rem;
         color: rgba(255, 255, 255, 0.9);
         margin-bottom: 2rem;
         font-weight: 400;
     }
-    
+
     .search-box {
         background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(10px);
@@ -102,7 +103,7 @@
         padding: 2rem;
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
     }
-    
+
     .stats-card {
         background: rgba(255, 255, 255, 0.1);
         backdrop-filter: blur(10px);
@@ -111,14 +112,20 @@
         padding: 2rem;
         text-align: center;
         color: white;
+        transition: all 0.3s ease;
     }
-    
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.15);
+    }
+
     .stats-number {
         font-size: 2.5rem;
         font-weight: 700;
         color: var(--accent-color);
     }
-    
+
     .feature-icon {
         width: 80px;
         height: 80px;
@@ -130,8 +137,13 @@
         margin: 0 auto 1.5rem;
         font-size: 2rem;
         color: white;
+        transition: all 0.3s ease;
     }
-    
+
+    .feature-icon:hover {
+        transform: scale(1.1);
+    }
+
     .property-card-home {
         border-radius: 20px;
         overflow: hidden;
@@ -139,18 +151,23 @@
         border: none;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     }
-    
+
     .property-card-home:hover {
         transform: translateY(-10px);
         box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
     }
-    
+
     .property-image {
         height: 250px;
         object-fit: cover;
         width: 100%;
+        transition: transform 0.3s ease;
     }
-    
+
+    .property-card-home:hover .property-image {
+        transform: scale(1.05);
+    }
+
     .price-badge {
         position: absolute;
         top: 1rem;
@@ -160,16 +177,17 @@
         border-radius: 25px;
         font-weight: 600;
         font-size: 0.9rem;
+        backdrop-filter: blur(10px);
     }
-    
+
     .sale-badge {
-        background-color: #28a745;
+        background-color: rgba(40, 167, 69, 0.9);
     }
-    
+
     .rent-badge {
-        background-color: #007bff;
+        background-color: rgba(0, 123, 255, 0.9);
     }
-    
+
     .dual-badge {
         background: none;
         padding: 0;
@@ -177,21 +195,112 @@
         flex-direction: column;
         gap: 5px;
     }
-    
+
     .dual-badge .sale-badge,
     .dual-badge .rent-badge {
         padding: 0.5rem 1rem;
         border-radius: 25px;
         text-align: center;
     }
-    
+
+    .cta-section {
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cta-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+        opacity: 0.5;
+    }
+
+    .cta-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Property Grid Improvements */
+    .feature-item {
+        padding: 0.5rem;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+
+    .feature-item:hover {
+        background-color: rgba(var(--bs-primary-rgb), 0.1);
+    }
+
+    .feature-item i {
+        font-size: 1.2rem;
+    }
+
+    /* Responsive Grid Adjustments */
+    @media (max-width: 1400px) {
+        .property-card-home .card-title {
+            font-size: 1.1rem;
+        }
+    }
+
+    @media (max-width: 992px) {
+        .property-image {
+            height: 220px;
+        }
+    }
+
     @media (max-width: 768px) {
         .hero-title {
             font-size: 2.5rem;
         }
-        
+
         .search-box {
             padding: 1.5rem;
+        }
+
+        .stats-card {
+            margin-bottom: 1rem;
+        }
+
+        .property-image {
+            height: 200px;
+        }
+
+        .property-card-home .card-body {
+            padding: 1.5rem;
+        }
+
+        .dual-badge {
+            flex-direction: row;
+            gap: 3px;
+        }
+
+        .dual-badge .sale-badge,
+        .dual-badge .rent-badge {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.75rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .property-image {
+            height: 180px;
+        }
+
+        .feature-item i {
+            font-size: 1rem;
+        }
+
+        .feature-item small {
+            font-size: 0.7rem;
+        }
+
+        .feature-item strong {
+            font-size: 0.8rem;
         }
     }
 </style>
@@ -205,8 +314,10 @@
             <div class="col-lg-6">
                 <div class="hero-content fade-in-up">
                     <h1 class="hero-title">Encuentra tu hogar perfecto</h1>
-                    <p class="hero-subtitle">Descubre propiedades excepcionales en las mejores ubicaciones. Tu nuevo hogar te está esperando.</p>
-                    
+                    <p class="hero-subtitle">
+                        Descubre propiedades excepcionales en las mejores ubicaciones. Tu nuevo hogar te está esperando.
+                    </p>
+
                     <div class="d-flex gap-3 mb-4">
                         <a href="{% url 'public:properties' %}" class="btn btn-primary btn-lg">
                             <i class="bi bi-search me-2"></i>Explorar Propiedades
@@ -215,7 +326,7 @@
                             <i class="bi bi-info-circle me-2"></i>Conocer Más
                         </a>
                     </div>
-                    
+
                     <div class="d-flex gap-3 mb-4">
                         <a href="{% url 'public:properties' %}?listing_type=sale" class="btn btn-success btn-lg">
                             <i class="bi bi-house-door me-2"></i>Propiedades en Venta
@@ -226,7 +337,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="col-lg-6">
                 <div class="search-box fade-in-up">
                     <h4 class="mb-4 text-center">Búsqueda Rápida</h4>
@@ -253,15 +364,15 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Precio Máximo</label>
-                                <input type="number" name="max_price" class="form-control" placeholder="Precio máximo">
+                                <input type="number" name="max_price" class="form-control" placeholder="Precio máximo" />
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Ubicación</label>
-                                <input type="text" name="location_search" class="form-control" placeholder="Ciudad, barrio...">
+                                <input type="text" name="location_search" class="form-control" placeholder="Ciudad, barrio..." />
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Buscar por palabra clave</label>
-                                <input type="text" name="search" class="form-control" placeholder="Ej: departamento, centro, garage...">
+                                <input type="text" name="search" class="form-control" placeholder="Ej: departamento, centro, garage..." />
                             </div>
                             <div class="col-12">
                                 <button type="submit" class="btn btn-primary w-100">
@@ -273,12 +384,12 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Stats -->
         <div class="row mt-5">
             <div class="col-md-3 mb-4">
                 <div class="stats-card">
-                    <div class="stats-number">{{ total_properties }}+</div>
+                    <div class="stats-number">{{ total_properties|default:"500" }}+</div>
                     <div>Propiedades Disponibles</div>
                 </div>
             </div>
@@ -309,96 +420,149 @@
     <div class="container">
         <div class="text-center mb-5">
             <h2 class="display-5 fw-bold mb-3">Propiedades Destacadas</h2>
-            <p class="lead text-muted">Descubre nuestras propiedades más exclusivas y populares</p>
+            <p class="lead text-muted">
+                Descubre nuestras propiedades más exclusivas y populares
+            </p>
         </div>
-        
-        <div class="row">
+
+        <div class="row g-4 justify-content-center">
             {% for property in featured_properties %}
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card property-card-home">
+            <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12">
+                <div class="card property-card-home h-100">
                     <div class="position-relative">
                         {% if property.cover_image %}
-                        <img src="{{ property.cover_image.image.url }}" class="property-image" alt="{{ property.title }}">
+                        <img src="{{ property.cover_image.image.url }}" class="property-image" alt="{{ property.title }}" loading="lazy" />
                         {% else %}
                         <div class="property-image bg-light d-flex align-items-center justify-content-center">
-                            <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                            <i class="bi bi-image text-muted" style="font-size: 3rem"></i>
                         </div>
                         {% endif %}
                         
+                        <!-- Status Badge -->
+                        {% if property.status %}
+                        <div class="position-absolute top-0 start-0 m-3">
+                            <span class="badge bg-success">{{ property.get_status_display }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Price Badge -->
                         {% if property.listing_type == 'both' %}
-                            <div class="price-badge dual-badge">
-                                <div class="sale-badge">
-                                    {% if property.sale_price %}
-                                        ${{ property.sale_price|floatformat:0|intcomma }}
-                                    {% else %}
-                                        Consultar
-                                    {% endif %}
-                                </div>
-                                <div class="rent-badge">
-                                    {% if property.rental_price %}
-                                        ${{ property.rental_price|floatformat:0|intcomma }}/mes
-                                    {% else %}
-                                        Consultar
-                                    {% endif %}
-                                </div>
-                            </div>
-                        {% else %}
-                            <div class="price-badge {% if property.listing_type == 'sale' %}sale-badge{% else %}rent-badge{% endif %}">
-                                {% if property.listing_type == 'sale' %}
-                                    {% if property.sale_price %}
-                                        ${{ property.sale_price|floatformat:0|intcomma }}
-                                    {% else %}
-                                        Consultar precio
-                                    {% endif %}
+                        <div class="price-badge dual-badge">
+                            <div class="sale-badge">
+                                {% if property.sale_price %}
+                                    ${{ property.sale_price|floatformat:0|intcomma }}
                                 {% else %}
-                                    {% if property.rental_price %}
-                                        ${{ property.rental_price|floatformat:0|intcomma }}/mes
-                                    {% else %}
-                                        Consultar precio
-                                    {% endif %}
+                                    Consultar
                                 {% endif %}
                             </div>
+                            <div class="rent-badge">
+                                {% if property.rental_price %}
+                                    ${{ property.rental_price|floatformat:0|intcomma }}/mes
+                                {% else %}
+                                    Consultar
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="price-badge {% if property.listing_type == 'sale' %}sale-badge{% else %}rent-badge{% endif %}">
+                            {% if property.listing_type == 'sale' %}
+                                {% if property.sale_price %}
+                                    ${{ property.sale_price|floatformat:0|intcomma }}
+                                {% else %}
+                                    Consultar precio
+                                {% endif %}
+                            {% else %}
+                                {% if property.rental_price %}
+                                    ${{ property.rental_price|floatformat:0|intcomma }}/mes
+                                {% else %}
+                                    Consultar precio
+                                {% endif %}
+                            {% endif %}
+                        </div>
                         {% endif %}
                     </div>
-                    
-                    <div class="card-body p-4">
+
+                    <div class="card-body p-4 d-flex flex-column">
                         <div class="d-flex justify-content-between align-items-start mb-3">
-                            <h5 class="card-title mb-0">{{ property.title }}</h5>
-                            <span class="badge bg-primary">{{ property.property_type.name }}</span>
+                            <h5 class="card-title mb-0 flex-grow-1 me-2">{{ property.title|truncatechars:35 }}</h5>
+                            <span class="badge bg-primary flex-shrink-0">{{ property.property_type.name }}</span>
                         </div>
-                        
-                        <p class="text-muted mb-3">
-                            <i class="bi bi-geo-alt me-1"></i>{{ property.full_address|truncatechars:40 }}
+
+                        <p class="text-muted mb-3 small">
+                            <i class="bi bi-geo-alt me-1"></i>{{ property.full_address|truncatechars:45 }}
                         </p>
-                        
-                        <div class="row text-center mb-3">
+
+                        <!-- Property Features Grid -->
+                        <div class="row text-center mb-3 g-2">
                             <div class="col-4">
-                                <small class="text-muted d-block">Dormitorios</small>
-                                <strong>{{ property.bedrooms }}</strong>
+                                <div class="feature-item">
+                                    <i class="bi bi-door-closed text-primary d-block mb-1"></i>
+                                    <small class="text-muted d-block">Dormitorios</small>
+                                    <strong class="small">{{ property.bedrooms|default:"N/A" }}</strong>
+                                </div>
                             </div>
                             <div class="col-4">
-                                <small class="text-muted d-block">Baños</small>
-                                <strong>{{ property.bathrooms }}</strong>
+                                <div class="feature-item">
+                                    <i class="bi bi-droplet text-primary d-block mb-1"></i>
+                                    <small class="text-muted d-block">Baños</small>
+                                    <strong class="small">{{ property.bathrooms|default:"N/A" }}</strong>
+                                </div>
                             </div>
                             <div class="col-4">
-                                <small class="text-muted d-block">m²</small>
-                                <strong>{{ property.total_surface|floatformat:0 }}</strong>
+                                <div class="feature-item">
+                                    <i class="bi bi-arrows-fullscreen text-primary d-block mb-1"></i>
+                                    <small class="text-muted d-block">m²</small>
+                                    <strong class="small">{{ property.total_surface|floatformat:0|default:"N/A" }}</strong>
+                                </div>
                             </div>
                         </div>
-                        
-                        <a href="{% url 'public:property_detail' property.id %}" class="btn btn-outline-primary w-100">
-                            <i class="bi bi-eye me-2"></i>Ver Detalles
-                        </a>
+
+                        <!-- Additional Features -->
+                        {% if property.garage or property.pool or property.garden %}
+                        <div class="d-flex justify-content-center gap-2 mb-3">
+                            {% if property.garage %}
+                            <span class="badge bg-light text-dark">
+                                <i class="bi bi-car-front me-1"></i>Garage
+                            </span>
+                            {% endif %}
+                            {% if property.pool %}
+                            <span class="badge bg-light text-dark">
+                                <i class="bi bi-water me-1"></i>Piscina
+                            </span>
+                            {% endif %}
+                            {% if property.garden %}
+                            <span class="badge bg-light text-dark">
+                                <i class="bi bi-tree me-1"></i>Jardín
+                            </span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Action Button -->
+                        <div class="mt-auto">
+                            <a href="{% url 'public:property_detail' property.id %}" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-eye me-2"></i>Ver Detalles
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
             {% empty %}
-            <div class="col-12 text-center">
-                <p class="text-muted">No hay propiedades destacadas disponibles en este momento.</p>
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="bi bi-house text-muted" style="font-size: 4rem;"></i>
+                    <h4 class="text-muted mt-3">No hay propiedades destacadas</h4>
+                    <p class="text-muted">
+                        No hay propiedades destacadas disponibles en este momento.
+                    </p>
+                    <a href="{% url 'public:properties' %}" class="btn btn-primary">
+                        <i class="bi bi-search me-2"></i>Ver Todas las Propiedades
+                    </a>
+                </div>
             </div>
             {% endfor %}
         </div>
-        
+
         <div class="text-center mt-5">
             <a href="{% url 'public:properties' %}" class="btn btn-primary btn-lg">
                 <i class="bi bi-buildings me-2"></i>Ver Todas las Propiedades
@@ -412,9 +576,11 @@
     <div class="container">
         <div class="text-center mb-5">
             <h2 class="display-5 fw-bold mb-3">¿Por qué elegirnos?</h2>
-            <p class="lead text-muted">Ofrecemos el mejor servicio inmobiliario con años de experiencia</p>
+            <p class="lead text-muted">
+                Ofrecemos el mejor servicio inmobiliario con años de experiencia
+            </p>
         </div>
-        
+
         <div class="row">
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="text-center">
@@ -422,37 +588,45 @@
                         <i class="bi bi-shield-check"></i>
                     </div>
                     <h5 class="fw-bold mb-3">Confianza y Seguridad</h5>
-                    <p class="text-muted">Transacciones 100% seguras con asesoramiento legal completo.</p>
+                    <p class="text-muted">
+                        Transacciones 100% seguras con asesoramiento legal completo.
+                    </p>
                 </div>
             </div>
-            
+
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="text-center">
                     <div class="feature-icon">
                         <i class="bi bi-people"></i>
                     </div>
                     <h5 class="fw-bold mb-3">Equipo Experto</h5>
-                    <p class="text-muted">Agentes profesionales con amplia experiencia en el mercado.</p>
+                    <p class="text-muted">
+                        Agentes profesionales con amplia experiencia en el mercado.
+                    </p>
                 </div>
             </div>
-            
+
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="text-center">
                     <div class="feature-icon">
                         <i class="bi bi-clock"></i>
                     </div>
                     <h5 class="fw-bold mb-3">Atención 24/7</h5>
-                    <p class="text-muted">Estamos disponibles cuando nos necesites, todos los días del año.</p>
+                    <p class="text-muted">
+                        Estamos disponibles cuando nos necesites, todos los días del año.
+                    </p>
                 </div>
             </div>
-            
+
             <div class="col-lg-3 col-md-6 mb-4">
                 <div class="text-center">
                     <div class="feature-icon">
                         <i class="bi bi-graph-up"></i>
                     </div>
                     <h5 class="fw-bold mb-3">Mejor Precio</h5>
-                    <p class="text-muted">Garantizamos los mejores precios del mercado y tasaciones precisas.</p>
+                    <p class="text-muted">
+                        Garantizamos los mejores precios del mercado y tasaciones precisas.
+                    </p>
                 </div>
             </div>
         </div>
@@ -460,20 +634,26 @@
 </section>
 
 <!-- CTA Section -->
-<section class="section-padding" style="background: linear-gradient(135deg, var(--primary-color), var(--accent-color));">
+<section class="section-padding cta-section">
     <div class="container text-center text-white">
         <div class="row justify-content-center">
             <div class="col-lg-8">
-                <h2 class="display-5 fw-bold mb-4">¿Listo para encontrar tu hogar ideal?</h2>
-                <p class="lead mb-4">Nuestro equipo de expertos está aquí para ayudarte en cada paso del camino. Desde la búsqueda hasta la firma del contrato.</p>
-                
-                <div class="d-flex flex-column flex-md-row gap-3 justify-content-center">
-                    <a href="{% url 'public:properties' %}" class="btn btn-light btn-lg">
-                        <i class="bi bi-search me-2"></i>Buscar Propiedades
-                    </a>
-                    <a href="{% url 'public:agents' %}" class="btn btn-outline-light btn-lg">
-                        <i class="bi bi-telephone me-2"></i>Contactar Agente
-                    </a>
+                <div class="cta-content">
+                    <h2 class="display-5 fw-bold mb-4">
+                        ¿Listo para encontrar tu hogar ideal?
+                    </h2>
+                    <p class="lead mb-4">
+                        Nuestro equipo de expertos está aquí para ayudarte en cada paso del camino. Desde la búsqueda hasta la firma del contrato.
+                    </p>
+
+                    <div class="d-flex flex-column flex-md-row gap-3 justify-content-center">
+                        <a href="{% url 'public:properties' %}" class="btn btn-light btn-lg">
+                            <i class="bi bi-search me-2"></i>Buscar Propiedades
+                        </a>
+                        <a href="{% url 'public:agents' %}" class="btn btn-outline-light btn-lg">
+                            <i class="bi bi-telephone me-2"></i>Contactar Agente
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

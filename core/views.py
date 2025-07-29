@@ -1,26 +1,46 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum, Q, Count
+from django.utils import timezone
+from datetime import datetime, timedelta
 from .models import Company
 from .forms import CompanyForm
 from contracts.models import Contract
 from payments.models import ContractPayment
-from django.db.models import Sum, Q
-from datetime import datetime
+from properties.models import Property, PropertyType, PropertyStatus
+from customers.models import Customer
 
+@login_required
 def dashboard(request):
-    # Necesitamos determinar qué contratos son de venta y cuáles de alquiler
-    # Como no existe el campo contract_type, podemos usar otro criterio
-    # Por ejemplo, podemos asumir que los contratos con status='finished' son ventas
-    # y los contratos con status='active' son alquileres (esto es solo un ejemplo)
+    """
+    Vista principal del dashboard con métricas y estadísticas del negocio inmobiliario.
+    """
+    # Obtener fecha actual y rangos de tiempo
+    today = timezone.now().date()
+    current_month_start = today.replace(day=1)
+    last_month = current_month_start - timedelta(days=1)
+    last_month_start = last_month.replace(day=1)
     
-    # Ventas de propiedades (asumiendo que son contratos finalizados)
-    sales = Contract.objects.filter(status='finished')
-    sales_total = sales.aggregate(total=Sum('amount'))['total'] or 0
-    sales_count = sales.count()
+    # === MÉTRICAS PRINCIPALES ===
+    
+    # Ventas de propiedades (contratos finalizados con propiedades de venta)
+    sales_contracts = Contract.objects.filter(
+        status='finished',
+        property__listing_type__in=['sale', 'both']
+    )
+    sales_total = sales_contracts.aggregate(total=Sum('amount'))['total'] or 0
+    sales_count = sales_contracts.count()
 
-    # Ingresos por alquileres (asumiendo que son contratos activos)
-    rent_contracts = Contract.objects.filter(status='active')
-    rent_payments = ContractPayment.objects.filter(contract__in=rent_contracts, status='paid')
+    # Ingresos por alquileres (pagos de contratos activos de alquiler)
+    rent_contracts = Contract.objects.filter(
+        status='active',
+        property__listing_type__in=['rent', 'both']
+    )
+    rent_payments = ContractPayment.objects.filter(
+        contract__in=rent_contracts, 
+        status='paid'
+    )
     rent_income = rent_payments.aggregate(total=Sum('amount'))['total'] or 0
     rent_count = rent_payments.count()
 
@@ -29,38 +49,106 @@ def dashboard(request):
     pending_payments = pending_payments_qs.aggregate(total=Sum('amount'))['total'] or 0
     pending_count = pending_payments_qs.count()
 
-    # Últimas operaciones (ventas y alquileres)
-    last_sales = sales.order_by('-created_at')[:5]
-    last_rents = rent_payments.order_by('-due_date')[:5]
+    # Propiedades totales y disponibles
+    total_properties = Property.objects.count()
+    available_properties = Property.objects.filter(
+        property_status__name__icontains='disponible'
+    ).count()
+
+    # === ESTADÍSTICAS ADICIONALES ===
+    
+    # Contratos activos
+    active_contracts = Contract.objects.filter(status='active').count()
+    
+    # Nuevos clientes este mes
+    new_customers = Customer.objects.filter(
+        created_at__gte=current_month_start
+    ).count()
+    
+    # Contratos próximos a vencer (próximos 30 días)
+    expiring_date = today + timedelta(days=30)
+    expiring_contracts = Contract.objects.filter(
+        status='active',
+        end_date__lte=expiring_date,
+        end_date__gte=today
+    ).count()
+    
+    # Pagos del mes actual
+    monthly_payments = ContractPayment.objects.filter(
+        payment_date__gte=current_month_start,
+        status='paid'
+    ).aggregate(total=Sum('amount'))['total'] or 0
+
+    # === ÚLTIMAS OPERACIONES ===
+    
+    # Últimas ventas
+    last_sales = sales_contracts.order_by('-created_at')[:5]
+    # Últimos pagos de alquiler
+    last_rents = rent_payments.order_by('-payment_date')[:5]
+    
     last_operations = []
-    for s in last_sales:
+    
+    # Agregar ventas
+    for sale in last_sales:
         last_operations.append({
             'type': 'Venta',
-            'property': str(s.property),
-            'customer': str(s.customer),
-            'amount': s.amount,
-            'date': s.created_at
+            'property': str(sale.property),
+            'customer': str(sale.customer),
+            'amount': sale.amount,
+            'date': sale.created_at
         })
-    for r in last_rents:
+    
+    # Agregar alquileres
+    for rent in last_rents:
         last_operations.append({
             'type': 'Alquiler',
-            'property': str(r.contract.property),
-            'customer': str(r.contract.customer),
-            'amount': r.amount,
-            'date': r.due_date
+            'property': str(rent.contract.property),
+            'customer': str(rent.contract.customer),
+            'amount': rent.amount,
+            'date': rent.payment_date or rent.due_date
         })
+    
     # Ordenar por fecha descendente
     last_operations = sorted(last_operations, key=lambda x: x['date'], reverse=True)[:10]
 
+    # === ESTADÍSTICAS POR TIPO Y ESTADO ===
+    
+    # Propiedades por tipo
+    property_types_stats = PropertyType.objects.annotate(
+        count=Count('property')
+    ).filter(count__gt=0).order_by('-count')[:6]
+    
+    # Propiedades por estado
+    property_status_stats = PropertyStatus.objects.annotate(
+        count=Count('property')
+    ).filter(count__gt=0).order_by('-count')[:6]
+
+    # === CONTEXTO PARA EL TEMPLATE ===
     context = {
+        # Métricas principales
         'sales_total': sales_total,
         'sales_count': sales_count,
         'rent_income': rent_income,
         'rent_count': rent_count,
         'pending_payments': pending_payments,
         'pending_count': pending_count,
+        'total_properties': total_properties,
+        'available_properties': available_properties,
+        
+        # Estadísticas adicionales
+        'active_contracts': active_contracts,
+        'new_customers': new_customers,
+        'expiring_contracts': expiring_contracts,
+        'monthly_payments': monthly_payments,
+        
+        # Actividad reciente
         'last_operations': last_operations,
+        
+        # Estadísticas por categorías
+        'property_types_stats': property_types_stats,
+        'property_status_stats': property_status_stats,
     }
+    
     return render(request, 'dashboard.html', context)
 
 

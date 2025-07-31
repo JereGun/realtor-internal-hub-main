@@ -1,0 +1,72 @@
+{% extends 'errors/generic_error.html' %}
+
+{% block title %}Página no encontrada - Sistema de Gestión Inmobiliaria{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-6">
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-5 text-center">
+                    <!-- 404 Specific Icon -->
+                    <div class="mb-4">
+                        <i class="bi bi-house-x text-primary" style="font-size: 4rem;"></i>
+                    </div>
+
+                    <!-- 404 Title -->
+                    <h1 class="display-4 fw-bold mb-3 text-primary">
+                        Propiedad no encontrada
+                    </h1>
+
+                    <!-- 404 Message -->
+                    <p class="lead text-muted mb-4">
+                        La propiedad, cliente o recurso que buscas no existe o ha sido movido.
+                    </p>
+
+                    <!-- Search Suggestion -->
+                    <div class="mb-4">
+                        <p class="text-muted">¿Quizás estabas buscando alguna de estas opciones?</p>
+                        <div class="d-flex justify-content-center gap-2 flex-wrap">
+                            <a href="{% url 'properties:property_list' %}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-building me-1"></i>Propiedades
+                            </a>
+                            <a href="{% url 'customers:customer_list' %}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-people me-1"></i>Clientes
+                            </a>
+                            <a href="{% url 'contracts:contract_list' %}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-file-text me-1"></i>Contratos
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Volver
+                        </a>
+                        <a href="{% url 'agents:dashboard' %}" class="btn btn-primary">
+                            <i class="bi bi-house me-2"></i>Ir al Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        min-height: 100vh;
+    }
+    
+    .card {
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.95);
+    }
+    
+    .main-content {
+        margin-left: 0 !important;
+    }
+</style>
+{% endblock %}

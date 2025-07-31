@@ -1,0 +1,1 @@
+# Core logging module for the real estate management system

@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Error {{ status_code }} - Sistema de Gestión Inmobiliaria{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-6">
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-5 text-center">
+                    <!-- Error Icon -->
+                    <div class="mb-4">
+                        {% if status_code == 404 %}
+                            <i class="bi bi-search text-warning" style="font-size: 4rem;"></i>
+                        {% elif status_code == 403 %}
+                            <i class="bi bi-shield-exclamation text-danger" style="font-size: 4rem;"></i>
+                        {% elif status_code == 500 %}
+                            <i class="bi bi-exclamation-triangle text-danger" style="font-size: 4rem;"></i>
+                        {% else %}
+                            <i class="bi bi-exclamation-circle text-warning" style="font-size: 4rem;"></i>
+                        {% endif %}
+                    </div>
+
+                    <!-- Error Title -->
+                    <h1 class="display-4 fw-bold mb-3">
+                        {% if status_code == 404 %}
+                            Página no encontrada
+                        {% elif status_code == 403 %}
+                            Acceso denegado
+                        {% elif status_code == 500 %}
+                            Error del servidor
+                        {% else %}
+                            Error {{ status_code }}
+                        {% endif %}
+                    </h1>
+
+                    <!-- Error Message -->
+                    <p class="lead text-muted mb-4">
+                        {{ error_data.message|default:"Ha ocurrido un error inesperado." }}
+                    </p>
+
+                    <!-- Error Details (only in debug mode) -->
+                    {% if error_data.details and debug %}
+                        <div class="alert alert-info text-start mb-4">
+                            <h6 class="alert-heading">Detalles del error:</h6>
+                            {% if error_data.details.exception_type %}
+                                <p><strong>Tipo:</strong> {{ error_data.details.exception_type }}</p>
+                            {% endif %}
+                            {% if error_data.details.traceback %}
+                                <pre class="small">{{ error_data.details.traceback }}</pre>
+                            {% else %}
+                                <p>{{ error_data.details }}</p>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Volver
+                        </a>
+                        <a href="{% url 'agents:dashboard' %}" class="btn btn-primary">
+                            <i class="bi bi-house me-2"></i>Ir al Dashboard
+                        </a>
+                    </div>
+
+                    <!-- Help Text -->
+                    <div class="mt-4 pt-4 border-top">
+                        <p class="text-muted small mb-0">
+                            Si el problema persiste, contacta al administrador del sistema.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+    }
+    
+    .card {
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.95);
+    }
+    
+    .main-content {
+        margin-left: 0 !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-refresh for server errors after 30 seconds
+    {% if status_code == 500 %}
+        setTimeout(function() {
+            if (confirm('¿Deseas intentar recargar la página?')) {
+                window.location.reload();
+            }
+        }, 30000);
+    {% endif %}
+</script>
+{% endblock %}

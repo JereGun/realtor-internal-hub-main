@@ -12,3 +12,8 @@ sqlparse==0.5.3
 tzdata==2025.2
 celery==5.3.6
 redis==5.0.1
+
+# Logging and Error Handling
+structlog==23.2.0
+sentry-sdk[django]==1.40.6
+python-json-logger==2.0.7

@@ -1,0 +1,129 @@
+{% extends 'errors/generic_error.html' %}
+
+{% block title %}Error del servidor - Sistema de Gestión Inmobiliaria{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-6">
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-5 text-center">
+                    <!-- 500 Specific Icon -->
+                    <div class="mb-4">
+                        <i class="bi bi-tools text-danger" style="font-size: 4rem;"></i>
+                    </div>
+
+                    <!-- 500 Title -->
+                    <h1 class="display-4 fw-bold mb-3 text-danger">
+                        Error del servidor
+                    </h1>
+
+                    <!-- 500 Message -->
+                    <p class="lead text-muted mb-4">
+                        Estamos experimentando problemas técnicos temporales. 
+                        Nuestro equipo ha sido notificado automáticamente.
+                    </p>
+
+                    <!-- Status Information -->
+                    <div class="alert alert-info mb-4">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <div class="text-start">
+                                <strong>¿Qué está pasando?</strong><br>
+                                <small>El servidor está procesando tu solicitud pero encontró un problema inesperado.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- What to do -->
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-3">¿Qué puedes hacer?</h6>
+                        <div class="row text-start">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-start mb-2">
+                                    <i class="bi bi-1-circle text-primary me-2 mt-1"></i>
+                                    <small>Espera unos minutos e intenta nuevamente</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-start mb-2">
+                                    <i class="bi bi-2-circle text-primary me-2 mt-1"></i>
+                                    <small>Verifica tu conexión a internet</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-start mb-2">
+                                    <i class="bi bi-3-circle text-primary me-2 mt-1"></i>
+                                    <small>Contacta al administrador si persiste</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-start mb-2">
+                                    <i class="bi bi-4-circle text-primary me-2 mt-1"></i>
+                                    <small>Intenta acceder desde otra página</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-center gap-3 mb-3">
+                        <button onclick="window.location.reload()" class="btn btn-outline-primary">
+                            <i class="bi bi-arrow-clockwise me-2"></i>Reintentar
+                        </button>
+                        <a href="{% url 'agents:dashboard' %}" class="btn btn-primary">
+                            <i class="bi bi-house me-2"></i>Ir al Dashboard
+                        </a>
+                    </div>
+
+                    <!-- Auto-refresh countdown -->
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="bi bi-clock me-1"></i>
+                            Reintento automático en <span id="countdown">30</span> segundos
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        min-height: 100vh;
+    }
+    
+    .card {
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.95);
+    }
+    
+    .main-content {
+        margin-left: 0 !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Countdown timer for auto-refresh
+    let countdown = 30;
+    const countdownElement = document.getElementById('countdown');
+    
+    const timer = setInterval(function() {
+        countdown--;
+        if (countdownElement) {
+            countdownElement.textContent = countdown;
+        }
+        
+        if (countdown <= 0) {
+            clearInterval(timer);
+            if (confirm('¿Deseas recargar la página automáticamente?')) {
+                window.location.reload();
+            }
+        }
+    }, 1000);
+</script>
+{% endblock %}

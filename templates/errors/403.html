@@ -1,0 +1,114 @@
+{% extends 'errors/generic_error.html' %}
+
+{% block title %}Acceso denegado - Sistema de Gestión Inmobiliaria{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-6">
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-5 text-center">
+                    <!-- 403 Specific Icon -->
+                    <div class="mb-4">
+                        <i class="bi bi-shield-exclamation text-warning" style="font-size: 4rem;"></i>
+                    </div>
+
+                    <!-- 403 Title -->
+                    <h1 class="display-4 fw-bold mb-3 text-warning">
+                        Acceso denegado
+                    </h1>
+
+                    <!-- 403 Message -->
+                    <p class="lead text-muted mb-4">
+                        No tienes permisos suficientes para acceder a este recurso o realizar esta acción.
+                    </p>
+
+                    <!-- Permission Information -->
+                    <div class="alert alert-warning mb-4">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            <div class="text-start">
+                                <strong>Permisos insuficientes</strong><br>
+                                <small>Tu cuenta no tiene los permisos necesarios para esta operación.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- What to do -->
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-3">¿Qué puedes hacer?</h6>
+                        <div class="row text-start">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-start mb-2">
+                                    <i class="bi bi-1-circle text-warning me-2 mt-1"></i>
+                                    <small>Verifica que hayas iniciado sesión</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-start mb-2">
+                                    <i class="bi bi-2-circle text-warning me-2 mt-1"></i>
+                                    <small>Contacta al administrador</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-start mb-2">
+                                    <i class="bi bi-3-circle text-warning me-2 mt-1"></i>
+                                    <small>Solicita permisos adicionales</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-start mb-2">
+                                    <i class="bi bi-4-circle text-warning me-2 mt-1"></i>
+                                    <small>Intenta con otra cuenta</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User Info -->
+                    {% if user.is_authenticated %}
+                        <div class="alert alert-info mb-4">
+                            <small>
+                                <strong>Usuario actual:</strong> {{ user.get_full_name|default:user.username }}<br>
+                                <strong>Email:</strong> {{ user.email }}
+                            </small>
+                        </div>
+                    {% endif %}
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left me-2"></i>Volver
+                        </a>
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'agents:dashboard' %}" class="btn btn-warning">
+                                <i class="bi bi-house me-2"></i>Ir al Dashboard
+                            </a>
+                        {% else %}
+                            <a href="{% url 'agents:login' %}" class="btn btn-warning">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Iniciar Sesión
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+        min-height: 100vh;
+    }
+    
+    .card {
+        backdrop-filter: blur(10px);
+        background: rgba(255, 255, 255, 0.95);
+    }
+    
+    .main-content {
+        margin-left: 0 !important;
+    }
+</style>
+{% endblock %}

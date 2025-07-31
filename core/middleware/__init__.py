@@ -1,0 +1,1 @@
+# Core middleware module for the real estate management system

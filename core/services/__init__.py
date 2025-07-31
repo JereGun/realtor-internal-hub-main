@@ -1,0 +1,1 @@
+# Core services module for the real estate management system

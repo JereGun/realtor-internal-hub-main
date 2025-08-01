@@ -78,6 +78,70 @@
                 {% endif %}
             </a>
         </li>
+
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle {% if 'configuracion' in request.path or request.resolver_match.url_name == 'company_settings' %}active{% endif %}" href="#" id="configDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-gear me-2"></i> Configuración
+                {% comment %}Indicador visual para cambios pendientes{% endcomment %}
+                {% if has_pending_config_changes %}
+                    <span class="badge bg-warning rounded-pill ms-1">!</span>
+                {% endif %}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-light" aria-labelledby="configDropdown">
+                <li>
+                    <a class="dropdown-item {% if request.resolver_match.url_name == 'company_configuration' %}active{% endif %}" href="{% url 'core:company_configuration' %}">
+                        <i class="bi bi-building me-2"></i>
+                        Panel de Configuración
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <a class="dropdown-item {% if request.resolver_match.url_name == 'company_basic_info' %}active{% endif %}" href="{% url 'core:company_basic_info' %}">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Datos Básicos
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item {% if request.resolver_match.url_name == 'contact_info' %}active{% endif %}" href="{% url 'core:contact_info' %}">
+                        <i class="bi bi-telephone me-2"></i>
+                        Información de Contacto
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item {% if request.resolver_match.url_name == 'system_configuration' %}active{% endif %}" href="{% url 'core:system_configuration' %}">
+                        <i class="bi bi-sliders me-2"></i>
+                        Configuración del Sistema
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <a class="dropdown-item {% if request.resolver_match.url_name == 'document_templates' %}active{% endif %}" href="{% url 'core:document_templates' %}">
+                        <i class="bi bi-file-earmark-text me-2"></i>
+                        Plantillas de Documentos
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item {% if request.resolver_match.url_name == 'notification_settings' %}active{% endif %}" href="{% url 'core:notification_settings' %}">
+                        <i class="bi bi-bell-fill me-2"></i>
+                        Configuración de Notificaciones
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <a class="dropdown-item {% if request.resolver_match.url_name == 'backup_restore' %}active{% endif %}" href="{% url 'core:backup_restore' %}">
+                        <i class="bi bi-download me-2"></i>
+                        Respaldo y Restauración
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <a class="dropdown-item {% if request.resolver_match.url_name == 'company_settings' %}active{% endif %}" href="{% url 'core:company_settings' %}">
+                        <i class="bi bi-gear-wide me-2"></i>
+                        Configuración Básica (Legacy)
+                    </a>
+                </li>
+            </ul>
+        </li>
     </ul>
 
     <div class="mt-auto pt-3 border-top">

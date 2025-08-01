@@ -1,1 +1,1 @@
-# Tests for core app
+# Tests package for core app

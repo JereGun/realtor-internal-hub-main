@@ -1,0 +1,525 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Configuración de Empresa{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/configuration.css' %}" rel="stylesheet">
+<style>
+    .nav-tabs .nav-link {
+        color: #495057;
+        border: 1px solid transparent;
+        border-top-left-radius: 0.375rem;
+        border-top-right-radius: 0.375rem;
+    }
+    
+    .nav-tabs .nav-link:hover {
+        border-color: #e9ecef #e9ecef #dee2e6;
+        isolation: isolate;
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: #495057;
+        background-color: #fff;
+        border-color: #dee2e6 #dee2e6 #fff;
+    }
+    
+    .tab-content {
+        border: 1px solid #dee2e6;
+        border-top: none;
+        padding: 2rem;
+        background-color: #fff;
+        border-radius: 0 0 0.375rem 0.375rem;
+    }
+    
+    .configuration-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .configuration-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    
+    .section-card {
+        border: none;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        transition: all 0.15s ease-in-out;
+    }
+    
+    .section-card:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+    }
+    
+    .section-icon {
+        font-size: 2rem;
+        color: #667eea;
+        margin-bottom: 1rem;
+    }
+    
+    .quick-stats {
+        background: #f8f9fa;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="configuration-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-cogs configuration-icon me-3"></i>
+                    <div>
+                        <h1 class="mb-2">Configuración de Empresa</h1>
+                        <p class="mb-0 opacity-75">Gestiona todos los aspectos de la configuración de tu empresa desde un solo lugar</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="quick-stats bg-white bg-opacity-10 rounded p-3">
+                    <div class="row">
+                        <div class="col-6 stat-item">
+                            <div class="stat-number text-white">{{ company.document_templates.count }}</div>
+                            <div class="stat-label text-white-50">Plantillas</div>
+                        </div>
+                        <div class="col-6 stat-item">
+                            <div class="stat-number text-white">{{ company.notification_settings.count }}</div>
+                            <div class="stat-label text-white-50">Notificaciones</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Navegación por pestañas -->
+    <ul class="nav nav-tabs" id="configurationTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {% if active_tab == 'basic' %}active{% endif %}" 
+                    id="basic-tab" 
+                    data-bs-toggle="tab" 
+                    data-bs-target="#basic" 
+                    type="button" 
+                    role="tab" 
+                    aria-controls="basic" 
+                    aria-selected="{% if active_tab == 'basic' %}true{% else %}false{% endif %}">
+                <i class="fas fa-building me-2"></i>
+                Datos Básicos
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {% if active_tab == 'contact' %}active{% endif %}" 
+                    id="contact-tab" 
+                    data-bs-toggle="tab" 
+                    data-bs-target="#contact" 
+                    type="button" 
+                    role="tab" 
+                    aria-controls="contact" 
+                    aria-selected="{% if active_tab == 'contact' %}true{% else %}false{% endif %}">
+                <i class="fas fa-address-book me-2"></i>
+                Contacto
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {% if active_tab == 'system' %}active{% endif %}" 
+                    id="system-tab" 
+                    data-bs-toggle="tab" 
+                    data-bs-target="#system" 
+                    type="button" 
+                    role="tab" 
+                    aria-controls="system" 
+                    aria-selected="{% if active_tab == 'system' %}true{% else %}false{% endif %}">
+                <i class="fas fa-cog me-2"></i>
+                Sistema
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {% if active_tab == 'templates' %}active{% endif %}" 
+                    id="templates-tab" 
+                    data-bs-toggle="tab" 
+                    data-bs-target="#templates" 
+                    type="button" 
+                    role="tab" 
+                    aria-controls="templates" 
+                    aria-selected="{% if active_tab == 'templates' %}true{% else %}false{% endif %}">
+                <i class="fas fa-file-alt me-2"></i>
+                Plantillas
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {% if active_tab == 'notifications' %}active{% endif %}" 
+                    id="notifications-tab" 
+                    data-bs-toggle="tab" 
+                    data-bs-target="#notifications" 
+                    type="button" 
+                    role="tab" 
+                    aria-controls="notifications" 
+                    aria-selected="{% if active_tab == 'notifications' %}true{% else %}false{% endif %}">
+                <i class="fas fa-bell me-2"></i>
+                Notificaciones
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {% if active_tab == 'backup' %}active{% endif %}" 
+                    id="backup-tab" 
+                    data-bs-toggle="tab" 
+                    data-bs-target="#backup" 
+                    type="button" 
+                    role="tab" 
+                    aria-controls="backup" 
+                    aria-selected="{% if active_tab == 'backup' %}true{% else %}false{% endif %}">
+                <i class="fas fa-download me-2"></i>
+                Respaldo
+            </button>
+        </li>
+    </ul>
+
+    <!-- Contenido de las pestañas -->
+    <div class="tab-content" id="configurationTabContent">
+        <!-- Pestaña Datos Básicos -->
+        <div class="tab-pane fade {% if active_tab == 'basic' %}show active{% endif %}" 
+             id="basic" 
+             role="tabpanel" 
+             aria-labelledby="basic-tab">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="card section-card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-building section-icon me-2"></i>
+                                Información Básica de la Empresa
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted mb-4">
+                                Configura los datos fundamentales de tu empresa que aparecerán en documentos y comunicaciones.
+                            </p>
+                            <a href="{% url 'core:company_basic_info' %}" class="btn btn-primary">
+                                <i class="fas fa-edit me-2"></i>
+                                Editar Datos Básicos
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card section-card">
+                        <div class="card-body text-center">
+                            {% if company.logo %}
+                                <img src="{{ company.logo.url }}" alt="Logo" class="img-fluid mb-3" style="max-height: 100px;">
+                            {% else %}
+                                <i class="fas fa-image section-icon"></i>
+                            {% endif %}
+                            <h6>{{ company.name|default:"Sin nombre" }}</h6>
+                            <p class="text-muted small">{{ company.address|default:"Sin dirección" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pestaña Contacto -->
+        <div class="tab-pane fade {% if active_tab == 'contact' %}show active{% endif %}" 
+             id="contact" 
+             role="tabpanel" 
+             aria-labelledby="contact-tab">
+            <div class="card section-card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-address-book section-icon me-2"></i>
+                        Información de Contacto
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Gestiona toda la información de contacto de tu empresa, incluyendo múltiples números de teléfono y direcciones.
+                    </p>
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-envelope me-2"></i>Email Principal</h6>
+                            <p class="text-muted">{{ company.email|default:"No configurado" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-phone me-2"></i>Teléfono Principal</h6>
+                            <p class="text-muted">{{ company.phone|default:"No configurado" }}</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'core:contact_info' %}" class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i>
+                        Editar Información de Contacto
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pestaña Sistema -->
+        <div class="tab-pane fade {% if active_tab == 'system' %}show active{% endif %}" 
+             id="system" 
+             role="tabpanel" 
+             aria-labelledby="system-tab">
+            <div class="card section-card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-cog section-icon me-2"></i>
+                        Configuraciones del Sistema
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Configura parámetros operacionales como moneda, zona horaria, formatos de fecha y prefijos de documentos.
+                    </p>
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <h6><i class="fas fa-coins me-2"></i>Moneda</h6>
+                            <p class="text-muted">
+                                {% if company.system_configuration %}
+                                    {{ company.system_configuration.currency }}
+                                {% else %}
+                                    EUR (por defecto)
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-3">
+                            <h6><i class="fas fa-clock me-2"></i>Zona Horaria</h6>
+                            <p class="text-muted">
+                                {% if company.system_configuration %}
+                                    {{ company.system_configuration.timezone }}
+                                {% else %}
+                                    Europe/Madrid
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-3">
+                            <h6><i class="fas fa-calendar me-2"></i>Formato Fecha</h6>
+                            <p class="text-muted">
+                                {% if company.system_configuration %}
+                                    {{ company.system_configuration.date_format }}
+                                {% else %}
+                                    DD/MM/YYYY
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-3">
+                            <h6><i class="fas fa-language me-2"></i>Idioma</h6>
+                            <p class="text-muted">
+                                {% if company.system_configuration %}
+                                    {{ company.system_configuration.get_language_display }}
+                                {% else %}
+                                    Español
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    <a href="{% url 'core:system_configuration' %}" class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i>
+                        Editar Configuraciones del Sistema
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pestaña Plantillas -->
+        <div class="tab-pane fade {% if active_tab == 'templates' %}show active{% endif %}" 
+             id="templates" 
+             role="tabpanel" 
+             aria-labelledby="templates-tab">
+            <div class="card section-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-file-alt section-icon me-2"></i>
+                        Plantillas de Documentos
+                    </h5>
+                    <a href="{% url 'core:document_template_create' %}" class="btn btn-success btn-sm">
+                        <i class="fas fa-plus me-2"></i>
+                        Nueva Plantilla
+                    </a>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Gestiona las plantillas para facturas, contratos, recibos y otros documentos de tu empresa.
+                    </p>
+                    <a href="{% url 'core:document_templates' %}" class="btn btn-primary">
+                        <i class="fas fa-list me-2"></i>
+                        Ver Todas las Plantillas
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pestaña Notificaciones -->
+        <div class="tab-pane fade {% if active_tab == 'notifications' %}show active{% endif %}" 
+             id="notifications" 
+             role="tabpanel" 
+             aria-labelledby="notifications-tab">
+            <div class="card section-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-bell section-icon me-2"></i>
+                        Configuración de Notificaciones
+                    </h5>
+                    <a href="{% url 'core:notification_create' %}" class="btn btn-success btn-sm">
+                        <i class="fas fa-plus me-2"></i>
+                        Nueva Notificación
+                    </a>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Configura recordatorios automáticos, alertas y notificaciones por email y SMS.
+                    </p>
+                    <a href="{% url 'core:notification_settings' %}" class="btn btn-primary">
+                        <i class="fas fa-list me-2"></i>
+                        Ver Todas las Notificaciones
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pestaña Respaldo -->
+        <div class="tab-pane fade {% if active_tab == 'backup' %}show active{% endif %}" 
+             id="backup" 
+             role="tabpanel" 
+             aria-labelledby="backup-tab">
+            <div class="card section-card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-download section-icon me-2"></i>
+                        Respaldo y Restauración
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Crea respaldos de todas tus configuraciones y restaura desde archivos de respaldo anteriores.
+                    </p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="d-grid">
+                                <button type="button" class="btn btn-outline-primary" onclick="createBackup()">
+                                    <i class="fas fa-download me-2"></i>
+                                    Crear Respaldo
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-grid">
+                                <a href="{% url 'core:backup_restore' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-upload me-2"></i>
+                                    Restaurar Respaldo
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Función para crear respaldo
+function createBackup() {
+    if (confirm('¿Desea crear un respaldo de todas las configuraciones?')) {
+        fetch('{% url "core:create_backup_api" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.blob();
+            }
+            throw new Error('Error al crear el respaldo');
+        })
+        .then(blob => {
+            // Crear enlace de descarga
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `backup_configuracion_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            // Mostrar mensaje de éxito
+            showAlert('Respaldo creado y descargado correctamente', 'success');
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('Error al crear el respaldo: ' + error.message, 'danger');
+        });
+    }
+}
+
+// Función para mostrar alertas
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const container = document.querySelector('.container');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    // Auto-dismiss después de 5 segundos
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+// Mantener la pestaña activa después de recargar
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const activeTab = urlParams.get('tab');
+    
+    if (activeTab) {
+        const tabButton = document.getElementById(activeTab + '-tab');
+        if (tabButton) {
+            const tab = new bootstrap.Tab(tabButton);
+            tab.show();
+        }
+    }
+    
+    // Actualizar URL cuando se cambia de pestaña
+    document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function(e) {
+            const tabId = e.target.getAttribute('data-bs-target').substring(1);
+            const url = new URL(window.location);
+            url.searchParams.set('tab', tabId);
+            window.history.replaceState({}, '', url);
+        });
+    });
+});
+</script>
+{% endblock %}

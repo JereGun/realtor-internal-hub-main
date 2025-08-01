@@ -1,0 +1,526 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Información de Contacto - Configuración{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-section {
+        background: #fff;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        margin-bottom: 2rem;
+    }
+    
+    .form-section-header {
+        background: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        border-radius: 0.5rem 0.5rem 0 0;
+        padding: 1.5rem;
+    }
+    
+    .form-section-body {
+        padding: 2rem;
+    }
+    
+    .contact-type-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        margin-left: 0.5rem;
+    }
+    
+    .field-help {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+    
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-color: #ced4da;
+    }
+    
+    .contact-preview {
+        background: #f8f9fa;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .contact-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+    
+    .contact-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .contact-icon {
+        width: 20px;
+        text-align: center;
+        margin-right: 0.75rem;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'core:company_configuration' %}">Configuración</a></li>
+            <li class="breadcrumb-item active">Información de Contacto</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-2">
+                <i class="fas fa-address-book text-primary me-2"></i>
+                Información de Contacto
+            </h1>
+            <p class="text-muted mb-0">Gestiona toda la información de contacto de tu empresa</p>
+        </div>
+        <a href="{% url 'core:company_configuration' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>
+            Volver
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Formulario -->
+            <form method="post" id="contactInfoForm">
+                {% csrf_token %}
+                
+                <!-- Dirección -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-map-marker-alt me-2"></i>
+                            Dirección
+                        </h5>
+                    </div>
+                    <div class="form-section-body">
+                        <div class="mb-3">
+                            <label for="{{ form.street_address.id_for_label }}" class="form-label">
+                                {{ form.street_address.label }}
+                            </label>
+                            {{ form.street_address }}
+                            {% if form.street_address.help_text %}
+                                <div class="field-help">{{ form.street_address.help_text }}</div>
+                            {% endif %}
+                            {% if form.street_address.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.street_address.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.city.id_for_label }}" class="form-label">
+                                        {{ form.city.label }}
+                                    </label>
+                                    {{ form.city }}
+                                    {% if form.city.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.city.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.state_province.id_for_label }}" class="form-label">
+                                        {{ form.state_province.label }}
+                                    </label>
+                                    {{ form.state_province }}
+                                    {% if form.state_province.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.state_province.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.postal_code.id_for_label }}" class="form-label">
+                                        {{ form.postal_code.label }}
+                                    </label>
+                                    {{ form.postal_code }}
+                                    {% if form.postal_code.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.postal_code.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.country.id_for_label }}" class="form-label">
+                                        {{ form.country.label }}
+                                    </label>
+                                    {{ form.country }}
+                                    {% if form.country.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.country.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contacto Principal -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-star me-2"></i>
+                            Contacto Principal
+                            <span class="contact-type-badge bg-primary text-white">Principal</span>
+                        </h5>
+                    </div>
+                    <div class="form-section-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.primary_email.id_for_label }}" class="form-label">
+                                        {{ form.primary_email.label }}
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-envelope"></i>
+                                        </span>
+                                        {{ form.primary_email }}
+                                    </div>
+                                    {% if form.primary_email.help_text %}
+                                        <div class="field-help">{{ form.primary_email.help_text }}</div>
+                                    {% endif %}
+                                    {% if form.primary_email.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.primary_email.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.primary_phone.id_for_label }}" class="form-label">
+                                        {{ form.primary_phone.label }}
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-phone"></i>
+                                        </span>
+                                        {{ form.primary_phone }}
+                                    </div>
+                                    {% if form.primary_phone.help_text %}
+                                        <div class="field-help">{{ form.primary_phone.help_text }}</div>
+                                    {% endif %}
+                                    {% if form.primary_phone.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.primary_phone.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contacto Adicional -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-plus-circle me-2"></i>
+                            Contacto Adicional
+                            <span class="contact-type-badge bg-secondary text-white">Opcional</span>
+                        </h5>
+                    </div>
+                    <div class="form-section-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.secondary_email.id_for_label }}" class="form-label">
+                                        {{ form.secondary_email.label }}
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-envelope"></i>
+                                        </span>
+                                        {{ form.secondary_email }}
+                                    </div>
+                                    {% if form.secondary_email.help_text %}
+                                        <div class="field-help">{{ form.secondary_email.help_text }}</div>
+                                    {% endif %}
+                                    {% if form.secondary_email.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.secondary_email.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.secondary_phone.id_for_label }}" class="form-label">
+                                        {{ form.secondary_phone.label }}
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-phone"></i>
+                                        </span>
+                                        {{ form.secondary_phone }}
+                                    </div>
+                                    {% if form.secondary_phone.help_text %}
+                                        <div class="field-help">{{ form.secondary_phone.help_text }}</div>
+                                    {% endif %}
+                                    {% if form.secondary_phone.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.secondary_phone.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.mobile_phone.id_for_label }}" class="form-label">
+                                        {{ form.mobile_phone.label }}
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-mobile-alt"></i>
+                                        </span>
+                                        {{ form.mobile_phone }}
+                                    </div>
+                                    {% if form.mobile_phone.help_text %}
+                                        <div class="field-help">{{ form.mobile_phone.help_text }}</div>
+                                    {% endif %}
+                                    {% if form.mobile_phone.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.mobile_phone.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.fax_number.id_for_label }}" class="form-label">
+                                        {{ form.fax_number.label }}
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-fax"></i>
+                                        </span>
+                                        {{ form.fax_number }}
+                                    </div>
+                                    {% if form.fax_number.help_text %}
+                                        <div class="field-help">{{ form.fax_number.help_text }}</div>
+                                    {% endif %}
+                                    {% if form.fax_number.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.fax_number.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'core:company_configuration' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>
+                        Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>
+                        Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Preview de contacto -->
+            <div class="contact-preview">
+                <h6 class="mb-3">
+                    <i class="fas fa-eye me-2"></i>
+                    Vista Previa
+                </h6>
+                <div id="contactPreview">
+                    <div class="contact-item">
+                        <i class="fas fa-building contact-icon"></i>
+                        <span id="previewName">{{ company.name|default:"Nombre de la empresa" }}</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt contact-icon"></i>
+                        <span id="previewAddress">{{ company.address|default:"Dirección no configurada" }}</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope contact-icon"></i>
+                        <span id="previewEmail">{{ company.email|default:"Email no configurado" }}</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-phone contact-icon"></i>
+                        <span id="previewPhone">{{ company.phone|default:"Teléfono no configurado" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ayuda -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Información
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="card-text small text-muted">
+                        La información de contacto se utilizará en:
+                    </p>
+                    <ul class="small text-muted">
+                        <li>Documentos generados (facturas, contratos)</li>
+                        <li>Comunicaciones automáticas</li>
+                        <li>Firma de emails</li>
+                        <li>Información pública de la empresa</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Formateo automático de teléfonos
+    const phoneInputs = document.querySelectorAll('input[type="text"][id*="phone"]');
+    phoneInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            let value = this.value.replace(/\D/g, '');
+            if (value.length === 9 && !value.startsWith('34')) {
+                this.value = '+34 ' + value.substring(0, 3) + ' ' + value.substring(3, 6) + ' ' + value.substring(6);
+            }
+        });
+    });
+
+    // Validación de código postal
+    const postalCodeInput = document.getElementById('{{ form.postal_code.id_for_label }}');
+    if (postalCodeInput) {
+        postalCodeInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').substring(0, 5);
+        });
+    }
+
+    // Preview en tiempo real
+    function updatePreview() {
+        const streetAddress = document.getElementById('{{ form.street_address.id_for_label }}').value;
+        const city = document.getElementById('{{ form.city.id_for_label }}').value;
+        const postalCode = document.getElementById('{{ form.postal_code.id_for_label }}').value;
+        const primaryEmail = document.getElementById('{{ form.primary_email.id_for_label }}').value;
+        const primaryPhone = document.getElementById('{{ form.primary_phone.id_for_label }}').value;
+
+        // Actualizar dirección
+        let fullAddress = '';
+        if (streetAddress) fullAddress += streetAddress;
+        if (city) fullAddress += (fullAddress ? ', ' : '') + city;
+        if (postalCode) fullAddress += (fullAddress ? ', ' : '') + postalCode;
+        
+        document.getElementById('previewAddress').textContent = fullAddress || 'Dirección no configurada';
+        document.getElementById('previewEmail').textContent = primaryEmail || 'Email no configurado';
+        document.getElementById('previewPhone').textContent = primaryPhone || 'Teléfono no configurado';
+    }
+
+    // Escuchar cambios en los campos
+    const previewFields = [
+        '{{ form.street_address.id_for_label }}',
+        '{{ form.city.id_for_label }}',
+        '{{ form.postal_code.id_for_label }}',
+        '{{ form.primary_email.id_for_label }}',
+        '{{ form.primary_phone.id_for_label }}'
+    ];
+
+    previewFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.addEventListener('input', updatePreview);
+        }
+    });
+
+    // Validación de email en tiempo real
+    const emailInputs = document.querySelectorAll('input[type="email"]');
+    emailInputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.value && !this.value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+                if (this.value) this.classList.add('is-valid');
+            }
+        });
+    });
+
+    // Confirmación antes de salir si hay cambios
+    let formChanged = false;
+    const form = document.getElementById('contactInfoForm');
+    const formInputs = form.querySelectorAll('input, textarea, select');
+    
+    formInputs.forEach(input => {
+        input.addEventListener('change', () => {
+            formChanged = true;
+        });
+    });
+
+    window.addEventListener('beforeunload', function(e) {
+        if (formChanged) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+
+    form.addEventListener('submit', function() {
+        formChanged = false;
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} - Sistema Inmobiliario{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header">
+                <h1 class="page-title">{{ title }}</h1>
+                <div class="page-subtitle">Información completa de tu perfil</div>
+            </div>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                Error cargando el perfil. Por favor, intente nuevamente.
+            </div>
+        </div>
+    </div>
+    {% else %}
+    
+    <!-- Profile Completion Warning -->
+    {% if show_completion_warning %}
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="alert alert-warning">
+                <i class="fas fa-info-circle"></i>
+                Tu perfil está {{ profile_completion }}% completo. 
+                <a href="{% url 'agents:profile_edit' %}" class="alert-link">Completar perfil</a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <!-- Profile Information -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if profile.avatar %}
+                        <img src="{{ profile.avatar.url }}" alt="Avatar" class="rounded-circle mb-3" width="120" height="120">
+                    {% else %}
+                        <div class="avatar-placeholder mb-3">
+                            <i class="fas fa-user fa-4x text-muted"></i>
+                        </div>
+                    {% endif %}
+                    
+                    <h4 class="card-title">{{ agent.get_full_name }}</h4>
+                    <p class="text-muted">{{ agent.email }}</p>
+                    
+                    {% if agent.license_number %}
+                    <p class="text-muted">
+                        <i class="fas fa-id-card"></i> {{ agent.license_number }}
+                    </p>
+                    {% endif %}
+                    
+                    <div class="mt-3">
+                        <a href="{% url 'agents:profile_edit' %}" class="btn btn-primary">
+                            <i class="fas fa-edit"></i> Editar Perfil
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Completion -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title">Completitud del Perfil</h5>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-2">
+                        <div class="progress-bar" role="progressbar" 
+                             style="width: {{ profile_completion }}%" 
+                             aria-valuenow="{{ profile_completion }}" 
+                             aria-valuemin="0" aria-valuemax="100">
+                            {{ profile_completion }}%
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        Un perfil completo mejora tu visibilidad y credibilidad
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Details -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Información Personal</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Nombre:</strong>
+                            <p>{{ agent.first_name }} {{ agent.last_name }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Email:</strong>
+                            <p>
+                                {{ agent.email }}
+                                {% if profile.email_verified %}
+                                    <i class="fas fa-check-circle text-success" title="Verificado"></i>
+                                {% else %}
+                                    <i class="fas fa-exclamation-circle text-warning" title="No verificado"></i>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Teléfono:</strong>
+                            <p>
+                                {{ agent.phone|default:"No especificado" }}
+                                {% if agent.phone and profile.phone_verified %}
+                                    <i class="fas fa-check-circle text-success" title="Verificado"></i>
+                                {% elif agent.phone %}
+                                    <i class="fas fa-exclamation-circle text-warning" title="No verificado"></i>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Zona Horaria:</strong>
+                            <p>{{ profile.timezone }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Idioma:</strong>
+                            <p>{{ profile.get_language_display }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Tema:</strong>
+                            <p>{{ profile.get_theme_display }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if agent.bio %}
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <strong>Biografía:</strong>
+                            <p>{{ agent.bio }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Security Settings -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title">Configuraciones de Seguridad</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Autenticación 2FA:</strong>
+                            <p>
+                                {% if has_2fa %}
+                                    <span class="badge badge-success">Habilitado</span>
+                                {% else %}
+                                    <span class="badge badge-warning">Deshabilitado</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Sesiones Activas:</strong>
+                            <p>{{ session_count }} sesión{{ session_count|pluralize:"es" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Timeout de Sesión:</strong>
+                            <p>{{ security_settings.session_timeout_minutes }} minutos</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Alertas de Seguridad:</strong>
+                            <p>
+                                {% if security_settings.suspicious_activity_alerts %}
+                                    <span class="badge badge-success">Habilitadas</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">Deshabilitadas</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <a href="{% url 'agents:security_settings' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-shield-alt"></i> Configurar Seguridad
+                        </a>
+                        <a href="{% url 'agents:session_management' %}" class="btn btn-outline-info">
+                            <i class="fas fa-desktop"></i> Gestionar Sesiones
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Statistics -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title">Estadísticas de la Cuenta</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h4 class="text-primary">{{ profile_stats.total_logins }}</h4>
+                                <small class="text-muted">Total Logins</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h4 class="text-info">{{ profile_stats.profile_updates }}</h4>
+                                <small class="text-muted">Actualizaciones</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h4 class="text-success">{{ profile_stats.security_events }}</h4>
+                                <small class="text-muted">Eventos de Seguridad</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h4 class="text-warning">{{ profile_stats.account_created|timesince }}</h4>
+                                <small class="text-muted">Miembro desde</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            {% if recent_activity %}
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title">Actividad Reciente</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        {% for activity in recent_activity %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ activity.get_action_display }}</strong>
+                                <br>
+                                <small class="text-muted">{{ activity.created_at|timesince }} ago</small>
+                            </div>
+                            <div>
+                                {% if activity.success %}
+                                    <i class="fas fa-check-circle text-success"></i>
+                                {% else %}
+                                    <i class="fas fa-times-circle text-danger"></i>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.avatar-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.progress {
+    height: 20px;
+}
+
+.badge {
+    font-size: 0.8em;
+}
+</style>
+{% endblock %}

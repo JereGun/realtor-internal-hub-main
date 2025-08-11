@@ -367,6 +367,163 @@ class UserManagementService:
         except Agent.DoesNotExist:
             return None
     
+    def get_profile_completion_details(self, agent: Agent) -> Dict[str, Any]:
+        """
+        Obtiene detalles específicos sobre la completitud del perfil.
+        
+        Args:
+            agent: Usuario para analizar completitud
+            
+        Returns:
+            dict: Detalles de completitud con recomendaciones
+        """
+        try:
+            completed_fields = []
+            missing_fields = []
+            recommendations = []
+            
+            # Analizar campos básicos del agente
+            basic_fields = {
+                'first_name': {'value': agent.first_name, 'name': 'Nombre', 'priority': 'high'},
+                'last_name': {'value': agent.last_name, 'name': 'Apellido', 'priority': 'high'},
+                'email': {'value': agent.email, 'name': 'Email', 'priority': 'high'},
+                'phone': {'value': agent.phone, 'name': 'Teléfono', 'priority': 'medium'},
+                'license_number': {'value': agent.license_number, 'name': 'Número de Licencia', 'priority': 'high'},
+                'bio': {'value': agent.bio, 'name': 'Biografía', 'priority': 'low'},
+                'image_path': {'value': agent.image_path, 'name': 'Foto de Perfil', 'priority': 'medium'}
+            }
+            
+            for field_key, field_info in basic_fields.items():
+                if field_info['value']:
+                    completed_fields.append({
+                        'field': field_key,
+                        'name': field_info['name'],
+                        'priority': field_info['priority']
+                    })
+                else:
+                    missing_fields.append({
+                        'field': field_key,
+                        'name': field_info['name'],
+                        'priority': field_info['priority']
+                    })
+            
+            # Analizar campos del perfil
+            try:
+                profile = agent.profile
+                profile_fields = {
+                    'avatar': {'value': profile.avatar, 'name': 'Avatar', 'priority': 'medium'},
+                    'timezone': {'value': profile.timezone, 'name': 'Zona Horaria', 'priority': 'low'},
+                    'language': {'value': profile.language, 'name': 'Idioma', 'priority': 'low'},
+                    'theme': {'value': profile.theme, 'name': 'Tema', 'priority': 'low'}
+                }
+                
+                for field_key, field_info in profile_fields.items():
+                    if field_info['value']:
+                        completed_fields.append({
+                            'field': field_key,
+                            'name': field_info['name'],
+                            'priority': field_info['priority']
+                        })
+                    else:
+                        missing_fields.append({
+                            'field': field_key,
+                            'name': field_info['name'],
+                            'priority': field_info['priority']
+                        })
+                
+                # Verificaciones adicionales
+                if profile.email_verified:
+                    completed_fields.append({
+                        'field': 'email_verified',
+                        'name': 'Email Verificado',
+                        'priority': 'high'
+                    })
+                else:
+                    missing_fields.append({
+                        'field': 'email_verified',
+                        'name': 'Email Verificado',
+                        'priority': 'high'
+                    })
+                    recommendations.append({
+                        'type': 'verification',
+                        'message': 'Verifica tu email para mejorar la seguridad de tu cuenta',
+                        'action': 'verify_email',
+                        'priority': 'high'
+                    })
+                
+                if profile.phone_verified:
+                    completed_fields.append({
+                        'field': 'phone_verified',
+                        'name': 'Teléfono Verificado',
+                        'priority': 'medium'
+                    })
+                else:
+                    missing_fields.append({
+                        'field': 'phone_verified',
+                        'name': 'Teléfono Verificado',
+                        'priority': 'medium'
+                    })
+                    if agent.phone:
+                        recommendations.append({
+                            'type': 'verification',
+                            'message': 'Verifica tu teléfono para recibir alertas de seguridad',
+                            'action': 'verify_phone',
+                            'priority': 'medium'
+                        })
+                
+                # Recomendaciones de seguridad
+                if not profile.two_factor_enabled:
+                    recommendations.append({
+                        'type': 'security',
+                        'message': 'Habilita la autenticación de dos factores para mayor seguridad',
+                        'action': 'enable_2fa',
+                        'priority': 'high'
+                    })
+                
+            except UserProfile.DoesNotExist:
+                # Si no hay perfil, todos los campos del perfil están faltando
+                profile_fields = ['avatar', 'timezone', 'language', 'theme']
+                for field in profile_fields:
+                    missing_fields.append({
+                        'field': field,
+                        'name': field.title(),
+                        'priority': 'low'
+                    })
+            
+            # Generar recomendaciones basadas en campos faltantes
+            high_priority_missing = [f for f in missing_fields if f['priority'] == 'high']
+            if high_priority_missing:
+                recommendations.append({
+                    'type': 'profile',
+                    'message': f'Completa los campos importantes: {", ".join([f["name"] for f in high_priority_missing])}',
+                    'action': 'complete_profile',
+                    'priority': 'high'
+                })
+            
+            # Calcular porcentaje
+            total_fields = len(completed_fields) + len(missing_fields)
+            percentage = int((len(completed_fields) / total_fields) * 100) if total_fields > 0 else 0
+            
+            return {
+                'percentage': percentage,
+                'completed_fields': completed_fields,
+                'missing_fields': missing_fields,
+                'recommendations': recommendations,
+                'total_fields': total_fields,
+                'completed_count': len(completed_fields)
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error obteniendo detalles de completitud para {agent.email}: {str(e)}")
+            return {
+                'percentage': 0,
+                'completed_fields': [],
+                'missing_fields': [],
+                'recommendations': [],
+                'total_fields': 0,
+                'completed_count': 0
+            }
+    
     def get_user_statistics(self, agent: Agent) -> Dict[str, Any]:
         """
         Obtiene estadísticas del usuario.

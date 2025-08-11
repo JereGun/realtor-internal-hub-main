@@ -9,8 +9,8 @@ from django.db.models import Count, Sum, Avg, F, ExpressionWrapper, DecimalField
 from django.http import JsonResponse
 from django.utils import timezone
 from datetime import timedelta, datetime
-from .models import Agent
-from .forms import AgentLoginForm, AgentForm
+from ..models import Agent
+from ..forms import AgentLoginForm, AgentForm
 from properties.models import Property
 from contracts.models import Contract
 from customers.models import Customer
@@ -205,7 +205,7 @@ def dashboard(request):
             year=month_start.year if month_start.month < 12 else month_start.year + 1,
         ) - timedelta(days=1)
 
-        month_payments = Payment.objects.filter(
+        month_payments = ContractPayment.objects.filter(
             contract__agent=request.user, payment_date__range=[month_start, month_end]
         ).aggregate(total=Sum("amount"))
 
@@ -319,7 +319,8 @@ class AgentUpdateView(LoginRequiredMixin, UpdateView):
 
 @login_required
 def profile_view(request):
-    return render(request, "agents/profile.html", {"agent": request.user})
+    """Vista de perfil legacy - redirige a la nueva vista de perfil."""
+    return redirect('agents:profile_view')
 
 
 @login_required
@@ -351,7 +352,7 @@ def dashboard_data(request):
             year=month_start.year if month_start.month < 12 else month_start.year + 1,
         ) - timedelta(days=1)
 
-        month_payments = Payment.objects.filter(
+        month_payments = ContractPayment.objects.filter(
             contract__agent=request.user, payment_date__range=[month_start, month_end]
         ).aggregate(total=Sum("amount"))
 

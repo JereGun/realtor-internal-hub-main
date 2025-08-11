@@ -1,0 +1,379 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} - Sistema Inmobiliario{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header">
+                <h1 class="page-title">{{ title }}</h1>
+                <div class="page-subtitle">Controla y gestiona tus sesiones activas</div>
+            </div>
+        </div>
+    </div>
+
+    {% if error %}
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i>
+                Error cargando las sesiones. Por favor, intente nuevamente.
+            </div>
+        </div>
+    </div>
+    {% else %}
+
+    <!-- Session Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-primary">{{ session_stats.total_active }}</h3>
+                    <p class="card-text">Sesiones Activas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-info">{{ session_stats.unique_ips }}</h3>
+                    <p class="card-text">IPs Únicas</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-success">{{ session_stats.unique_devices }}</h3>
+                    <p class="card-text">Dispositivos</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="btn-group-vertical w-100">
+                        <button class="btn btn-outline-danger btn-sm" onclick="terminateAllSessions()">
+                            <i class="fas fa-sign-out-alt"></i> Cerrar Todas
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Sessions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Sesiones Activas</h5>
+                </div>
+                <div class="card-body">
+                    {% if sessions_data %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Dispositivo</th>
+                                    <th>Ubicación</th>
+                                    <th>IP</th>
+                                    <th>Última Actividad</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for session in sessions_data %}
+                                <tr class="{% if session.is_current %}table-success{% endif %}">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="device-icon me-2">
+                                                {% if session.device_info.device_type == 'mobile' %}
+                                                    <i class="fas fa-mobile-alt text-primary"></i>
+                                                {% elif session.device_info.device_type == 'tablet' %}
+                                                    <i class="fas fa-tablet-alt text-info"></i>
+                                                {% else %}
+                                                    <i class="fas fa-desktop text-secondary"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <strong>{{ session.device_name }}</strong><br>
+                                                <small class="text-muted">{{ session.browser_name }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span>{{ session.location_display }}</span>
+                                        {% if session.location.is_local %}
+                                            <br><small class="text-muted">Red Local</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <code>{{ session.ip_address }}</code>
+                                    </td>
+                                    <td>
+                                        <span title="{{ session.last_activity }}">
+                                            {{ session.last_activity|timesince }} ago
+                                        </span>
+                                        {% if session.is_current %}
+                                            <br><small class="text-success">Sesión actual</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if session.is_expired %}
+                                            <span class="badge badge-danger">Expirada</span>
+                                        {% elif session.is_current %}
+                                            <span class="badge badge-success">Actual</span>
+                                        {% else %}
+                                            <span class="badge badge-primary">Activa</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if not session.is_current and not session.is_expired %}
+                                            <button class="btn btn-outline-danger btn-sm" 
+                                                    onclick="terminateSession('{{ session.session_key }}')"
+                                                    title="Cerrar esta sesión">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        {% elif session.is_current %}
+                                            <span class="text-muted">
+                                                <i class="fas fa-check-circle"></i> Actual
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">
+                                                <i class="fas fa-clock"></i> Expirada
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-desktop fa-3x text-muted mb-3"></i>
+                        <h5>No hay sesiones activas</h5>
+                        <p class="text-muted">No se encontraron sesiones activas en tu cuenta.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Session Information -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Información de Seguridad</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Sesión Actual:</strong> {{ current_session_key|truncatechars:20 }}
+                    </div>
+                    
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-shield-alt text-success"></i>
+                            Las sesiones se cierran automáticamente por inactividad
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-eye text-info"></i>
+                            Puedes monitorear todas tus sesiones activas
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-times-circle text-warning"></i>
+                            Cierra sesiones sospechosas inmediatamente
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-mobile-alt text-primary"></i>
+                            Cada dispositivo mantiene su propia sesión
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Acciones de Seguridad</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-danger" onclick="terminateAllSessions()">
+                            <i class="fas fa-sign-out-alt"></i> Cerrar Todas las Sesiones
+                        </button>
+                        <a href="{% url 'agents:security_settings' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-cog"></i> Configuraciones de Seguridad
+                        </a>
+                        <a href="{% url 'agents:change_password' %}" class="btn btn-outline-warning">
+                            <i class="fas fa-key"></i> Cambiar Contraseña
+                        </a>
+                        <a href="{% url 'agents:profile_view' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-user"></i> Volver al Perfil
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.device-icon {
+    width: 30px;
+    text-align: center;
+}
+
+.table-success {
+    background-color: rgba(40, 167, 69, 0.1);
+}
+
+.badge {
+    font-size: 0.75em;
+}
+
+code {
+    font-size: 0.85em;
+    color: #e83e8c;
+    background-color: #f8f9fa;
+    padding: 0.2em 0.4em;
+    border-radius: 0.25rem;
+}
+
+.btn-group-vertical .btn {
+    margin-bottom: 0.25rem;
+}
+
+.btn-group-vertical .btn:last-child {
+    margin-bottom: 0;
+}
+
+.d-grid {
+    display: grid;
+}
+
+.gap-2 {
+    gap: 0.5rem;
+}
+
+.me-2 {
+    margin-right: 0.5rem;
+}
+</style>
+
+<script>
+// CSRF token for AJAX requests
+const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+function terminateSession(sessionKey) {
+    if (!confirm('¿Estás seguro de que quieres cerrar esta sesión?')) {
+        return;
+    }
+    
+    fetch(`{% url 'agents:terminate_specific_session' session_key='PLACEHOLDER' %}`.replace('PLACEHOLDER', sessionKey), {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            showAlert('success', data.message);
+            // Reload page to update session list
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            showAlert('danger', data.error || 'Error cerrando la sesión');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('danger', 'Error de conexión');
+    });
+}
+
+function terminateAllSessions() {
+    if (!confirm('¿Estás seguro de que quieres cerrar todas las demás sesiones? Esta acción no se puede deshacer.')) {
+        return;
+    }
+    
+    fetch('{% url "agents:terminate_other_sessions" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', `${data.terminated_count} sesiones cerradas correctamente`);
+            // Reload page to update session list
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            showAlert('danger', data.error || 'Error cerrando las sesiones');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('danger', 'Error de conexión');
+    });
+}
+
+function showAlert(type, message) {
+    // Create alert element
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type} alert-dismissible fade show`;
+    alert.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    // Insert at top of container
+    const container = document.querySelector('.container-fluid');
+    container.insertBefore(alert, container.firstChild);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        if (alert.parentNode) {
+            alert.remove();
+        }
+    }, 5000);
+}
+
+// Auto-refresh session data every 30 seconds
+setInterval(() => {
+    // Only refresh if no modals are open
+    if (!document.querySelector('.modal.show')) {
+        window.location.reload();
+    }
+}, 30000);
+
+// Add CSRF token to page for AJAX requests
+document.addEventListener('DOMContentLoaded', function() {
+    if (!document.querySelector('[name=csrfmiddlewaretoken]')) {
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = '{{ csrf_token }}';
+        document.body.appendChild(csrfInput);
+    }
+});
+</script>
+{% endblock %}

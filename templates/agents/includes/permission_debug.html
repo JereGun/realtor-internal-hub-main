@@ -1,0 +1,63 @@
+{% comment %}
+Template de debug para mostrar información de permisos del usuario.
+Solo se muestra en modo DEBUG.
+{% endcomment %}
+
+{% if debug and debug_info %}
+<div class="permission-debug" style="background: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; margin: 10px 0; border-radius: 5px; font-family: monospace; font-size: 12px;">
+    <h5 style="margin: 0 0 10px 0; color: #495057;">🔐 Debug de Permisos</h5>
+    
+    <div style="margin-bottom: 10px;">
+        <strong>Usuario:</strong> {{ debug_info.user.get_full_name }} ({{ debug_info.user.email }})
+    </div>
+    
+    <div style="margin-bottom: 10px;">
+        <strong>Estado:</strong>
+        {% if debug_info.is_superuser %}
+            <span style="color: #dc3545;">Superusuario</span>
+        {% elif debug_info.is_staff %}
+            <span style="color: #fd7e14;">Staff</span>
+        {% else %}
+            <span style="color: #28a745;">Usuario Regular</span>
+        {% endif %}
+    </div>
+    
+    {% if debug_info.roles %}
+    <div style="margin-bottom: 10px;">
+        <strong>Roles ({{ debug_info.total_roles }}):</strong>
+        <ul style="margin: 5px 0; padding-left: 20px;">
+            {% for role in debug_info.roles %}
+            <li>
+                <strong>{{ role.name }}</strong>
+                {% if role.description %}
+                    - {{ role.description }}
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    
+    {% if debug_info.permissions %}
+    <div style="margin-bottom: 10px;">
+        <strong>Permisos ({{ debug_info.total_permissions }}):</strong>
+        <details style="margin: 5px 0;">
+            <summary style="cursor: pointer; color: #007bff;">Ver permisos</summary>
+            <ul style="margin: 5px 0; padding-left: 20px; max-height: 200px; overflow-y: auto;">
+                {% for permission in debug_info.permissions %}
+                <li>
+                    <code>{{ permission.codename }}</code> - {{ permission.name }}
+                </li>
+                {% endfor %}
+            </ul>
+        </details>
+    </div>
+    {% endif %}
+    
+    {% if not debug_info.roles and not debug_info.permissions %}
+    <div style="color: #6c757d; font-style: italic;">
+        Sin roles o permisos asignados
+    </div>
+    {% endif %}
+</div>
+{% endif %}

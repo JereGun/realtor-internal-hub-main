@@ -1,0 +1,406 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/admin.css' %}" rel="stylesheet">
+<style>
+.log-item {
+    border-left: 3px solid #e3e6f0;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 0 0.25rem 0.25rem 0;
+}
+
+.log-item.success {
+    border-left-color: #1cc88a;
+    background-color: #f8fff9;
+}
+
+.log-item.error {
+    border-left-color: #e74a3b;
+    background-color: #fff5f5;
+}
+
+.log-details {
+    background-color: #f8f9fc;
+    border: 1px solid #e3e6f0;
+    border-radius: 0.25rem;
+    padding: 0.75rem;
+    margin-top: 0.5rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+}
+
+.filter-card {
+    background: #f8f9fc;
+    border: 1px solid #e3e6f0;
+    border-radius: 0.35rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.stats-row {
+    background: linear-gradient(45deg, #4e73df, #224abe);
+    color: white;
+    border-radius: 0.35rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    text-align: center;
+    padding: 1rem;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+.action-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+}
+
+.ip-badge {
+    background-color: #6c757d;
+    color: white;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-family: 'Courier New', monospace;
+}
+
+.export-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    border-radius: 50px;
+    padding: 15px 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">{{ title }}</h1>
+        <div>
+            <a href="{% url 'agents:admin_dashboard' %}" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Volver al Panel
+            </a>
+            <a href="{% url 'agents:admin_export_audit_logs' %}?{% for key, value in request.GET.items %}{{ key }}={{ value }}&{% endfor %}" 
+               class="btn btn-success btn-sm">
+                <i class="fas fa-download"></i> Exportar CSV
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="stats-row">
+        <div class="row">
+            <div class="col-md-3 stat-card">
+                <div class="stat-number">{{ total_logs|floatformat:0 }}</div>
+                <div class="stat-label">Total Logs</div>
+            </div>
+            <div class="col-md-3 stat-card">
+                <div class="stat-number">{{ successful_logs|floatformat:0 }}</div>
+                <div class="stat-label">Exitosos</div>
+            </div>
+            <div class="col-md-3 stat-card">
+                <div class="stat-number">{{ failed_logs|floatformat:0 }}</div>
+                <div class="stat-label">Fallidos</div>
+            </div>
+            <div class="col-md-3 stat-card">
+                <div class="stat-number">{{ success_rate|floatformat:1 }}%</div>
+                <div class="stat-label">Tasa de Éxito</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Filtros de Búsqueda</h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row">
+                <div class="col-md-2 mb-3">
+                    <label for="user" class="form-label">Usuario</label>
+                    <select class="form-control" id="user" name="user">
+                        <option value="">Todos los usuarios</option>
+                        {% for user in users_for_filter %}
+                        <option value="{{ user.id }}" {% if current_filters.user == user.id|stringformat:"s" %}selected{% endif %}>
+                            {{ user.get_full_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label for="action" class="form-label">Acción</label>
+                    <select class="form-control" id="action" name="action">
+                        <option value="">Todas las acciones</option>
+                        {% for action in actions_for_filter %}
+                        <option value="{{ action }}" {% if current_filters.action == action %}selected{% endif %}>
+                            {{ action|title }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label for="success" class="form-label">Estado</label>
+                    <select class="form-control" id="success" name="success">
+                        <option value="">Todos</option>
+                        <option value="true" {% if current_filters.success == 'true' %}selected{% endif %}>Exitosos</option>
+                        <option value="false" {% if current_filters.success == 'false' %}selected{% endif %}>Fallidos</option>
+                    </select>
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label for="date_from" class="form-label">Desde</label>
+                    <input type="date" class="form-control" id="date_from" name="date_from" 
+                           value="{{ current_filters.date_from }}">
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label for="date_to" class="form-label">Hasta</label>
+                    <input type="date" class="form-control" id="date_to" name="date_to" 
+                           value="{{ current_filters.date_to }}">
+                </div>
+                <div class="col-md-2 mb-3 d-flex align-items-end">
+                    <div class="btn-group w-100">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Buscar
+                        </button>
+                        <a href="{% url 'agents:admin_audit_logs' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+            </form>
+            
+            <!-- Additional IP Filter -->
+            <div class="row mt-3">
+                <div class="col-md-3">
+                    <label for="ip_address" class="form-label">Dirección IP</label>
+                    <input type="text" class="form-control" id="ip_address" name="ip_address" 
+                           value="{{ current_filters.ip_address }}" placeholder="192.168.1.1">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Acciones Más Frecuentes</h6>
+                </div>
+                <div class="card-body">
+                    {% for action in top_actions %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="action-badge bg-info text-white">{{ action.action|title }}</span>
+                        <span class="font-weight-bold">{{ action.count }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Usuarios Más Activos</h6>
+                </div>
+                <div class="card-body">
+                    {% for user in top_users %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span>{{ user.agent__first_name }} {{ user.agent__last_name }}</span>
+                        <span class="font-weight-bold">{{ user.count }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audit Logs -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                Logs de Auditoría ({{ page_obj.paginator.count }} resultados)
+            </h6>
+        </div>
+        <div class="card-body">
+            {% if audit_logs %}
+                {% for log in audit_logs %}
+                <div class="log-item {% if log.success %}success{% else %}error{% endif %}">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="action-badge {% if log.success %}bg-success{% else %}bg-danger{% endif %} text-white me-2">
+                                    {{ log.get_action_display }}
+                                </span>
+                                <span class="ip-badge me-2">{{ log.ip_address }}</span>
+                                {% if log.success %}
+                                    <i class="fas fa-check-circle text-success"></i>
+                                {% else %}
+                                    <i class="fas fa-times-circle text-danger"></i>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-1">
+                                <strong>Usuario:</strong> 
+                                {% if log.agent %}
+                                    <a href="{% url 'agents:admin_user_detail' log.agent.pk %}">
+                                        {{ log.agent.get_full_name }}
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">Sistema</span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-1">
+                                <strong>Recurso:</strong> {{ log.resource_type|title }}
+                                {% if log.resource_id %}
+                                    (ID: {{ log.resource_id }})
+                                {% endif %}
+                            </div>
+                            
+                            {% if log.details %}
+                            <div class="mt-2">
+                                <button class="btn btn-sm btn-outline-secondary toggle-details" 
+                                        data-target="#details-{{ log.id }}">
+                                    <i class="fas fa-eye"></i> Ver Detalles
+                                </button>
+                                <div id="details-{{ log.id }}" class="log-details" style="display: none;">
+                                    <pre>{{ log.details|pprint }}</pre>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4 text-right">
+                            <div class="text-muted small">
+                                {{ log.created_at|date:"d/m/Y H:i:s" }}
+                            </div>
+                            {% if log.session_key %}
+                            <div class="text-muted small">
+                                Sesión: {{ log.session_key|truncatechars:12 }}
+                            </div>
+                            {% endif %}
+                            <div class="text-muted small">
+                                {{ log.user_agent|truncatechars:40 }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Pagination -->
+                {% if is_paginated %}
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-clipboard-list fa-3x text-gray-300 mb-3"></i>
+                    <h5 class="text-gray-600">No se encontraron logs</h5>
+                    <p class="text-muted">Intenta ajustar los filtros de búsqueda.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Floating Export Button -->
+<a href="{% url 'agents:admin_export_audit_logs' %}?{% for key, value in request.GET.items %}{{ key }}={{ value }}&{% endfor %}" 
+   class="btn btn-success export-btn" title="Exportar logs filtrados">
+    <i class="fas fa-download"></i> Exportar
+</a>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Toggle log details
+    $('.toggle-details').click(function() {
+        const target = $(this).data('target');
+        const details = $(target);
+        const icon = $(this).find('i');
+        
+        if (details.is(':visible')) {
+            details.slideUp();
+            icon.removeClass('fa-eye-slash').addClass('fa-eye');
+            $(this).html('<i class="fas fa-eye"></i> Ver Detalles');
+        } else {
+            details.slideDown();
+            icon.removeClass('fa-eye').addClass('fa-eye-slash');
+            $(this).html('<i class="fas fa-eye-slash"></i> Ocultar Detalles');
+        }
+    });
+    
+    // Auto-submit form when IP address changes
+    $('#ip_address').on('input', function() {
+        const form = $(this).closest('form');
+        clearTimeout(this.searchTimeout);
+        this.searchTimeout = setTimeout(function() {
+            form.submit();
+        }, 1000);
+    });
+    
+    // Set today as default end date if not set
+    if (!$('#date_to').val()) {
+        const today = new Date().toISOString().split('T')[0];
+        $('#date_to').val(today);
+    }
+    
+    // Set 7 days ago as default start date if not set
+    if (!$('#date_from').val()) {
+        const weekAgo = new Date();
+        weekAgo.setDate(weekAgo.getDate() - 7);
+        $('#date_from').val(weekAgo.toISOString().split('T')[0]);
+    }
+});
+</script>
+{% endblock %}

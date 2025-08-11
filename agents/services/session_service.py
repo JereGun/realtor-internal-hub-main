@@ -322,6 +322,7 @@ class SessionService:
             
             return {
                 'session_key': session.session_key,
+                'agent_id': session.agent.id,
                 'agent': {
                     'id': session.agent.id,
                     'email': session.agent.email,

@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} - Sistema Inmobiliario{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header">
+                <h1 class="page-title">{{ title }}</h1>
+                <div class="page-subtitle">Actualiza tu información personal y preferencias</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Información del Perfil</h5>
+                    <div class="card-subtitle">
+                        Completitud actual: <strong>{{ current_completion }}%</strong>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Avatar Section -->
+                        <div class="row mb-4">
+                            <div class="col-md-3 text-center">
+                                <div class="avatar-preview mb-3">
+                                    {% if avatar_url %}
+                                        <img id="avatar-preview" src="{{ avatar_url }}" alt="Avatar actual" class="rounded-circle" width="120" height="120">
+                                    {% else %}
+                                        <div id="avatar-preview" class="avatar-placeholder">
+                                            <i class="fas fa-user fa-4x text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="form-group">
+                                    {{ form.avatar.label_tag }}
+                                    {{ form.avatar }}
+                                    {% if form.avatar.help_text %}
+                                        <small class="form-text text-muted">{{ form.avatar.help_text }}</small>
+                                    {% endif %}
+                                    {% if form.avatar.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.avatar.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-9">
+                                <!-- Basic Information -->
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            {{ form.first_name.label_tag }}
+                                            {{ form.first_name }}
+                                            {% if form.first_name.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.first_name.errors.0 }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            {{ form.last_name.label_tag }}
+                                            {{ form.last_name }}
+                                            {% if form.last_name.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {{ form.last_name.errors.0 }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    {{ form.phone.label_tag }}
+                                    {{ form.phone }}
+                                    {% if form.phone.help_text %}
+                                        <small class="form-text text-muted">{{ form.phone.help_text }}</small>
+                                    {% endif %}
+                                    {% if form.phone.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.phone.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Biography -->
+                        <div class="form-group">
+                            {{ form.bio.label_tag }}
+                            {{ form.bio }}
+                            {% if form.bio.help_text %}
+                                <small class="form-text text-muted">{{ form.bio.help_text }}</small>
+                            {% endif %}
+                            {% if form.bio.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.bio.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Preferences -->
+                        <h6 class="mt-4 mb-3">Preferencias</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {{ form.timezone.label_tag }}
+                                    {{ form.timezone }}
+                                    {% if form.timezone.help_text %}
+                                        <small class="form-text text-muted">{{ form.timezone.help_text }}</small>
+                                    {% endif %}
+                                    {% if form.timezone.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.timezone.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {{ form.language.label_tag }}
+                                    {{ form.language }}
+                                    {% if form.language.help_text %}
+                                        <small class="form-text text-muted">{{ form.language.help_text }}</small>
+                                    {% endif %}
+                                    {% if form.language.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.language.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    {{ form.theme.label_tag }}
+                                    {{ form.theme }}
+                                    {% if form.theme.help_text %}
+                                        <small class="form-text text-muted">{{ form.theme.help_text }}</small>
+                                    {% endif %}
+                                    {% if form.theme.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.theme.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Guardar Cambios
+                            </button>
+                            <a href="{% url 'agents:profile_view' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-placeholder {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    border: 2px dashed #dee2e6;
+}
+
+.avatar-preview img {
+    object-fit: cover;
+    border: 2px solid #dee2e6;
+}
+
+.form-control, .form-select {
+    border-radius: 0.375rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.card-subtitle {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Preview avatar when file is selected
+    const avatarInput = document.getElementById('id_avatar');
+    const avatarPreview = document.getElementById('avatar-preview');
+    
+    if (avatarInput && avatarPreview) {
+        avatarInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (avatarPreview.tagName === 'IMG') {
+                        avatarPreview.src = e.target.result;
+                    } else {
+                        // Replace placeholder with image
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.alt = 'Vista previa del avatar';
+                        img.className = 'rounded-circle';
+                        img.width = 120;
+                        img.height = 120;
+                        img.style.objectFit = 'cover';
+                        img.style.border = '2px solid #dee2e6';
+                        avatarPreview.parentNode.replaceChild(img, avatarPreview);
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    
+    // Character counter for bio
+    const bioTextarea = document.getElementById('id_bio');
+    if (bioTextarea) {
+        const maxLength = bioTextarea.getAttribute('maxlength');
+        if (maxLength) {
+            const counter = document.createElement('small');
+            counter.className = 'form-text text-muted';
+            counter.id = 'bio-counter';
+            bioTextarea.parentNode.appendChild(counter);
+            
+            function updateCounter() {
+                const remaining = maxLength - bioTextarea.value.length;
+                counter.textContent = `${remaining} caracteres restantes`;
+                if (remaining < 50) {
+                    counter.className = 'form-text text-warning';
+                } else {
+                    counter.className = 'form-text text-muted';
+                }
+            }
+            
+            bioTextarea.addEventListener('input', updateCounter);
+            updateCounter(); // Initial count
+        }
+    }
+});
+</script>
+{% endblock %}

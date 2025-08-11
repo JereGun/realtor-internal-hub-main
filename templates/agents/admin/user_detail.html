@@ -1,0 +1,487 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/admin.css' %}" rel="stylesheet">
+<style>
+.user-avatar-large {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.info-card {
+    border: 1px solid #e3e6f0;
+    border-radius: 0.35rem;
+    margin-bottom: 1.5rem;
+}
+
+.info-card .card-header {
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+    font-weight: 600;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 1rem;
+    border-right: 1px solid #e3e6f0;
+}
+
+.stat-item:last-child {
+    border-right: none;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #5a5c69;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #858796;
+    text-transform: uppercase;
+}
+
+.activity-item {
+    border-left: 3px solid #e3e6f0;
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+}
+
+.activity-item.success {
+    border-left-color: #1cc88a;
+}
+
+.activity-item.error {
+    border-left-color: #e74a3b;
+}
+
+.session-item {
+    border: 1px solid #e3e6f0;
+    border-radius: 0.25rem;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.session-item.active {
+    border-color: #1cc88a;
+    background-color: #f8fff9;
+}
+
+.progress-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content-center;
+    font-weight: bold;
+    color: white;
+}
+
+.role-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    margin: 0.25rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.suspicious-alert {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 0.25rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">{{ title }}</h1>
+        <div>
+            <a href="{% url 'agents:admin_user_list' %}" class="btn btn-secondary btn-sm">
+                <i class="fas fa-arrow-left"></i> Volver a Lista
+            </a>
+            <a href="{% url 'agents:admin_dashboard' %}" class="btn btn-secondary btn-sm">
+                <i class="fas fa-tachometer-alt"></i> Panel Admin
+            </a>
+        </div>
+    </div>
+
+    <!-- User Profile Header -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 text-center">
+                    {% if user_detail.image_path %}
+                        <img src="{{ user_detail.image_path.url }}" alt="{{ user_detail.get_full_name }}" class="user-avatar-large mb-3">
+                    {% else %}
+                        <div class="user-avatar-large bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="font-size: 3rem;">
+                            {{ user_detail.first_name.0 }}{{ user_detail.last_name.0 }}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="progress-circle mx-auto mb-3" style="background-color: {% if profile_completion >= 80 %}#1cc88a{% elif profile_completion >= 50 %}#f6c23e{% else %}#e74a3b{% endif %};">
+                        {{ profile_completion }}%
+                    </div>
+                    <small class="text-muted">Completitud del Perfil</small>
+                </div>
+                
+                <div class="col-md-9">
+                    <h2 class="mb-1">{{ user_detail.get_full_name }}</h2>
+                    <p class="text-muted mb-3">{{ user_detail.email }}</p>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Licencia:</strong> {{ user_detail.license_number }}</p>
+                            <p><strong>Teléfono:</strong> {{ user_detail.phone|default:"No especificado" }}</p>
+                            <p><strong>Estado:</strong> 
+                                {% if user_detail.is_active %}
+                                    <span class="badge badge-success">Activo</span>
+                                {% else %}
+                                    <span class="badge badge-danger">Inactivo</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Registro:</strong> {{ user_detail.date_joined|date:"d/m/Y H:i" }}</p>
+                            <p><strong>Último Login:</strong> 
+                                {% if user_detail.last_login %}
+                                    {{ user_detail.last_login|date:"d/m/Y H:i" }}
+                                {% else %}
+                                    <span class="text-muted">Nunca</span>
+                                {% endif %}
+                            </p>
+                            <p><strong>Sesiones Activas:</strong> {{ active_sessions.count }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if user_detail.bio %}
+                    <div class="mt-3">
+                        <strong>Biografía:</strong>
+                        <p class="text-muted">{{ user_detail.bio }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="card shadow mb-4">
+        <div class="card-header">
+            <h6 class="m-0 font-weight-bold text-primary">Estadísticas del Usuario</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 stat-item">
+                    <div class="stat-number">{{ user_stats.days_since_registration|default:0 }}</div>
+                    <div class="stat-label">Días Registrado</div>
+                </div>
+                <div class="col-md-3 stat-item">
+                    <div class="stat-number">{{ user_stats.total_sessions|default:0 }}</div>
+                    <div class="stat-label">Sesiones Totales</div>
+                </div>
+                <div class="col-md-3 stat-item">
+                    <div class="stat-number">{{ user_stats.total_actions|default:0 }}</div>
+                    <div class="stat-label">Acciones Realizadas</div>
+                </div>
+                <div class="col-md-3 stat-item">
+                    <div class="stat-number">{{ user_stats.success_rate|floatformat:1|default:0 }}%</div>
+                    <div class="stat-label">Tasa de Éxito</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Roles and Permissions -->
+        <div class="col-md-6">
+            <div class="card shadow mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Roles y Permisos</h6>
+                    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#assignRoleModal">
+                        <i class="fas fa-plus"></i> Asignar Rol
+                    </button>
+                </div>
+                <div class="card-body">
+                    {% if user_roles %}
+                        {% for user_role in user_roles %}
+                        <div class="role-badge bg-info text-white d-flex justify-content-between align-items-center">
+                            <span>{{ user_role.role.name }}</span>
+                            <button class="btn btn-sm btn-outline-light btn-remove-role" 
+                                    data-role-id="{{ user_role.role.id }}"
+                                    data-role-name="{{ user_role.role.name }}">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <small class="text-muted">
+                            Asignado por {{ user_role.assigned_by.get_full_name|default:"Sistema" }} 
+                            el {{ user_role.assigned_at|date:"d/m/Y" }}
+                        </small>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">Este usuario no tiene roles asignados.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Settings -->
+        <div class="col-md-6">
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Configuración de Seguridad</h6>
+                </div>
+                <div class="card-body">
+                    {% if security_settings %}
+                        <div class="row">
+                            <div class="col-6">
+                                <p><strong>Intentos de Login:</strong> {{ security_settings.login_attempts }}</p>
+                                <p><strong>Cuenta Bloqueada:</strong> 
+                                    {% if security_settings.is_locked %}
+                                        <span class="badge badge-danger">Sí</span>
+                                    {% else %}
+                                        <span class="badge badge-success">No</span>
+                                    {% endif %}
+                                </p>
+                                <p><strong>2FA Habilitado:</strong> 
+                                    {% if user_detail.profile.two_factor_enabled %}
+                                        <span class="badge badge-success">Sí</span>
+                                    {% else %}
+                                        <span class="badge badge-warning">No</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="col-6">
+                                <p><strong>Timeout Sesión:</strong> {{ security_settings.session_timeout_minutes }} min</p>
+                                <p><strong>Alertas Actividad:</strong> 
+                                    {% if security_settings.suspicious_activity_alerts %}
+                                        <span class="badge badge-success">Sí</span>
+                                    {% else %}
+                                        <span class="badge badge-warning">No</span>
+                                    {% endif %}
+                                </p>
+                                <p><strong>Último Cambio Contraseña:</strong> {{ security_settings.password_changed_at|date:"d/m/Y" }}</p>
+                            </div>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No hay configuraciones de seguridad disponibles.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Suspicious Activity Alert -->
+    {% if suspicious_activity %}
+    <div class="card shadow mb-4">
+        <div class="card-header bg-warning">
+            <h6 class="m-0 font-weight-bold text-dark">
+                <i class="fas fa-exclamation-triangle"></i> Actividad Sospechosa Detectada
+            </h6>
+        </div>
+        <div class="card-body">
+            {% for activity in suspicious_activity %}
+            <div class="suspicious-alert">
+                <strong>{{ activity.type|title }}:</strong> {{ activity.description }}
+                <small class="text-muted d-block">Severidad: {{ activity.severity|title }}</small>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <!-- Active Sessions -->
+        <div class="col-md-6">
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Sesiones Activas</h6>
+                </div>
+                <div class="card-body">
+                    {% if active_sessions %}
+                        {% for session in active_sessions %}
+                        <div class="session-item active">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong>{{ session.ip_address }}</strong>
+                                    <p class="mb-1 text-muted small">{{ session.user_agent|truncatechars:50 }}</p>
+                                    <small class="text-muted">
+                                        Última actividad: {{ session.last_activity|date:"d/m/Y H:i" }}
+                                    </small>
+                                </div>
+                                <button class="btn btn-danger btn-sm btn-terminate-session" 
+                                        data-session-key="{{ session.session_key }}">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">No hay sesiones activas.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="col-md-6">
+            <div class="card shadow mb-4">
+                <div class="card-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Actividad Reciente</h6>
+                </div>
+                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    {% if recent_activity %}
+                        {% for activity in recent_activity %}
+                        <div class="activity-item {% if activity.success %}success{% else %}error{% endif %}">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <strong>{{ activity.get_action_display }}</strong>
+                                    <p class="mb-1 text-muted small">{{ activity.resource_type|title }}</p>
+                                    <small class="text-muted">{{ activity.created_at|date:"d/m/Y H:i" }}</small>
+                                </div>
+                                <div>
+                                    {% if activity.success %}
+                                        <i class="fas fa-check-circle text-success"></i>
+                                    {% else %}
+                                        <i class="fas fa-times-circle text-danger"></i>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">No hay actividad reciente.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Assign Role Modal -->
+<div class="modal fade" id="assignRoleModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Asignar Rol</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="assignRoleForm">
+                    <div class="form-group">
+                        <label for="roleSelect">Seleccionar Rol:</label>
+                        <select class="form-control" id="roleSelect" name="role_id" required>
+                            <option value="">-- Seleccionar Rol --</option>
+                            {% for role in available_roles %}
+                            <option value="{{ role.id }}">{{ role.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="confirmAssignRole">Asignar Rol</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Assign role
+    $('#confirmAssignRole').click(function() {
+        const roleId = $('#roleSelect').val();
+        if (!roleId) {
+            alert('Por favor selecciona un rol');
+            return;
+        }
+        
+        $.ajax({
+            url: `/agents/admin/users/{{ user_detail.pk }}/assign-role/`,
+            type: 'POST',
+            data: {
+                'role_id': roleId,
+                'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert(response.error || 'Error asignando rol');
+                }
+            },
+            error: function() {
+                alert('Error de conexión al servidor');
+            }
+        });
+    });
+    
+    // Remove role
+    $('.btn-remove-role').click(function() {
+        const roleId = $(this).data('role-id');
+        const roleName = $(this).data('role-name');
+        
+        if (confirm(`¿Estás seguro de que quieres remover el rol "${roleName}"?`)) {
+            $.ajax({
+                url: `/agents/admin/users/{{ user_detail.pk }}/remove-role/${roleId}/`,
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        alert(response.error || 'Error removiendo rol');
+                    }
+                },
+                error: function() {
+                    alert('Error de conexión al servidor');
+                }
+            });
+        }
+    });
+    
+    // Terminate session
+    $('.btn-terminate-session').click(function() {
+        const sessionKey = $(this).data('session-key');
+        
+        if (confirm('¿Estás seguro de que quieres terminar esta sesión?')) {
+            $.ajax({
+                url: `/agents/admin/sessions/${sessionKey}/terminate/`,
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        alert(response.error || 'Error terminando sesión');
+                    }
+                },
+                error: function() {
+                    alert('Error de conexión al servidor');
+                }
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} - Sistema Inmobiliario{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header">
+                <h1 class="page-title">{{ title }}</h1>
+                <div class="page-subtitle">Configura la seguridad de tu cuenta</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Security Settings Form -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Configuraciones de Seguridad</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Two-Factor Authentication -->
+                        <div class="form-group">
+                            <div class="form-check">
+                                {{ form.enable_2fa }}
+                                {{ form.enable_2fa.label_tag }}
+                            </div>
+                            {% if form.enable_2fa.help_text %}
+                                <small class="form-text text-muted">{{ form.enable_2fa.help_text }}</small>
+                            {% endif %}
+                            {% if form.enable_2fa.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.enable_2fa.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Session Timeout -->
+                        <div class="form-group">
+                            {{ form.session_timeout_minutes.label_tag }}
+                            <div class="input-group">
+                                {{ form.session_timeout_minutes }}
+                                <div class="input-group-append">
+                                    <span class="input-group-text">minutos</span>
+                                </div>
+                            </div>
+                            {% if form.session_timeout_minutes.help_text %}
+                                <small class="form-text text-muted">{{ form.session_timeout_minutes.help_text }}</small>
+                            {% endif %}
+                            {% if form.session_timeout_minutes.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.session_timeout_minutes.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Suspicious Activity Alerts -->
+                        <div class="form-group">
+                            <div class="form-check">
+                                {{ form.suspicious_activity_alerts }}
+                                {{ form.suspicious_activity_alerts.label_tag }}
+                            </div>
+                            {% if form.suspicious_activity_alerts.help_text %}
+                                <small class="form-text text-muted">{{ form.suspicious_activity_alerts.help_text }}</small>
+                            {% endif %}
+                            {% if form.suspicious_activity_alerts.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.suspicious_activity_alerts.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Allowed IP Addresses -->
+                        <div class="form-group">
+                            {{ form.allowed_ip_addresses.label_tag }}
+                            {{ form.allowed_ip_addresses }}
+                            {% if form.allowed_ip_addresses.help_text %}
+                                <small class="form-text text-muted">{{ form.allowed_ip_addresses.help_text }}</small>
+                            {% endif %}
+                            {% if form.allowed_ip_addresses.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.allowed_ip_addresses.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Guardar Configuraciones
+                            </button>
+                            <a href="{% url 'agents:profile_view' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Volver al Perfil
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Status -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Estado de Seguridad</h5>
+                </div>
+                <div class="card-body">
+                    <!-- 2FA Status -->
+                    <div class="security-item mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>Autenticación 2FA</span>
+                            {% if security_stats.has_2fa %}
+                                <span class="badge badge-success">Habilitado</span>
+                            {% else %}
+                                <span class="badge badge-warning">Deshabilitado</span>
+                            {% endif %}
+                        </div>
+                        {% if security_stats.has_2fa and security_stats.backup_codes_count %}
+                            <small class="text-muted">{{ security_stats.backup_codes_count }} códigos de respaldo</small>
+                        {% endif %}
+                    </div>
+
+                    <!-- Password Status -->
+                    <div class="security-item mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>Última Cambio de Contraseña</span>
+                            <small class="text-muted">{{ security_stats.last_password_change|timesince }} ago</small>
+                        </div>
+                    </div>
+
+                    <!-- Account Lock Status -->
+                    <div class="security-item mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>Estado de la Cuenta</span>
+                            {% if security_stats.is_account_locked %}
+                                <span class="badge badge-danger">Bloqueada</span>
+                            {% else %}
+                                <span class="badge badge-success">Activa</span>
+                            {% endif %}
+                        </div>
+                        {% if security_stats.failed_login_attempts > 0 %}
+                            <small class="text-warning">{{ security_stats.failed_login_attempts }} intentos fallidos</small>
+                        {% endif %}
+                    </div>
+
+                    <!-- Allowed IPs -->
+                    <div class="security-item mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span>IPs Permitidas</span>
+                            <span class="badge badge-info">{{ security_stats.allowed_ips_count }}</span>
+                        </div>
+                        {% if security_stats.allowed_ips_count == 0 %}
+                            <small class="text-muted">Todas las IPs permitidas</small>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Recommendations -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title">Recomendaciones</h5>
+                </div>
+                <div class="card-body">
+                    {% if not security_stats.has_2fa %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-shield-alt"></i>
+                        <strong>Habilita 2FA</strong><br>
+                        Añade una capa extra de seguridad a tu cuenta.
+                    </div>
+                    {% endif %}
+
+                    {% if security_stats.allowed_ips_count == 0 %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-network-wired"></i>
+                        <strong>Restringe IPs</strong><br>
+                        Considera limitar el acceso a IPs específicas.
+                    </div>
+                    {% endif %}
+
+                    <div class="alert alert-success">
+                        <i class="fas fa-key"></i>
+                        <strong>Cambia tu contraseña regularmente</strong><br>
+                        Se recomienda cambiarla cada 90 días.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title">Acciones Rápidas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'agents:change_password' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-key"></i> Cambiar Contraseña
+                        </a>
+                        <a href="{% url 'agents:session_management' %}" class="btn btn-outline-info">
+                            <i class="fas fa-desktop"></i> Gestionar Sesiones
+                        </a>
+                        {% if show_2fa_setup %}
+                        <button class="btn btn-outline-warning" onclick="alert('Función de configuración 2FA próximamente')">
+                            <i class="fas fa-mobile-alt"></i> Configurar 2FA
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.security-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.security-item:last-child {
+    border-bottom: none;
+}
+
+.badge {
+    font-size: 0.75em;
+}
+
+.input-group-text {
+    background-color: #f8f9fa;
+    border-color: #ced4da;
+}
+
+.alert {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.alert:last-child {
+    margin-bottom: 0;
+}
+
+.d-grid {
+    display: grid;
+}
+
+.gap-2 {
+    gap: 0.5rem;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Session timeout slider/input interaction
+    const sessionTimeoutInput = document.getElementById('id_session_timeout_minutes');
+    if (sessionTimeoutInput) {
+        sessionTimeoutInput.addEventListener('change', function() {
+            const value = parseInt(this.value);
+            const hours = Math.floor(value / 60);
+            const minutes = value % 60;
+            
+            let timeText = '';
+            if (hours > 0) {
+                timeText += hours + ' hora' + (hours > 1 ? 's' : '');
+                if (minutes > 0) {
+                    timeText += ' y ' + minutes + ' minuto' + (minutes > 1 ? 's' : '');
+                }
+            } else {
+                timeText = minutes + ' minuto' + (minutes > 1 ? 's' : '');
+            }
+            
+            // Update help text if exists
+            const helpText = this.parentNode.parentNode.querySelector('.form-text');
+            if (helpText) {
+                helpText.innerHTML = `Tiempo antes de cerrar sesión automáticamente (${timeText})`;
+            }
+        });
+        
+        // Trigger initial update
+        sessionTimeoutInput.dispatchEvent(new Event('change'));
+    }
+    
+    // 2FA toggle warning
+    const enable2faCheckbox = document.getElementById('id_enable_2fa');
+    if (enable2faCheckbox) {
+        enable2faCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                if (!confirm('¿Estás seguro de que quieres habilitar la autenticación de dos factores? Serás redirigido a la configuración.')) {
+                    this.checked = false;
+                }
+            } else {
+                if (!confirm('¿Estás seguro de que quieres deshabilitar la autenticación de dos factores? Esto reducirá la seguridad de tu cuenta.')) {
+                    this.checked = true;
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

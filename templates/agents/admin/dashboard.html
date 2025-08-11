@@ -1,0 +1,418 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/admin.css' %}" rel="stylesheet">
+<style>
+.admin-card {
+    border: none;
+    border-radius: 0.35rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    margin-bottom: 1.5rem;
+    transition: all 0.3s;
+}
+
+.admin-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.25rem 2rem 0 rgba(58, 59, 69, 0.2);
+}
+
+.stat-card {
+    background: linear-gradient(45deg, #4e73df, #224abe);
+    color: white;
+    border-radius: 0.35rem;
+    padding: 1.5rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    opacity: 0.9;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.quick-action-card {
+    background: #f8f9fc;
+    border: 2px dashed #e3e6f0;
+    border-radius: 0.35rem;
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.quick-action-card:hover {
+    border-color: #4e73df;
+    background: #f0f3ff;
+}
+
+.activity-item {
+    border-left: 3px solid #e3e6f0;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 0 0.25rem 0.25rem 0;
+}
+
+.activity-item.success {
+    border-left-color: #1cc88a;
+    background-color: #f8fff9;
+}
+
+.activity-item.error {
+    border-left-color: #e74a3b;
+    background-color: #fff5f5;
+}
+
+.activity-item.warning {
+    border-left-color: #f6c23e;
+    background-color: #fffbf0;
+}
+
+.alert-card {
+    background: linear-gradient(45deg, #e74a3b, #c0392b);
+    color: white;
+    border-radius: 0.35rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.welcome-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 0.35rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.metric-icon {
+    font-size: 3rem;
+    opacity: 0.3;
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.position-relative {
+    position: relative;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Welcome Header -->
+    <div class="welcome-header">
+        <h1 class="h2 mb-2">Panel de Administración</h1>
+        <p class="mb-0">Gestiona usuarios, monitorea actividad y mantén la seguridad del sistema</p>
+    </div>
+
+    <!-- Main Statistics -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card position-relative">
+                <div class="stat-number">{{ total_users }}</div>
+                <div class="stat-label">Total Usuarios</div>
+                <i class="fas fa-users metric-icon"></i>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card position-relative" style="background: linear-gradient(45deg, #1cc88a, #17a673);">
+                <div class="stat-number">{{ active_users }}</div>
+                <div class="stat-label">Usuarios Activos</div>
+                <i class="fas fa-user-check metric-icon"></i>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card position-relative" style="background: linear-gradient(45deg, #f6c23e, #e0a800);">
+                <div class="stat-number">{{ active_sessions }}</div>
+                <div class="stat-label">Sesiones Activas</div>
+                <i class="fas fa-desktop metric-icon"></i>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="stat-card position-relative" style="background: linear-gradient(45deg, #e74a3b, #c0392b);">
+                <div class="stat-number">{{ recent_users }}</div>
+                <div class="stat-label">Nuevos (7 días)</div>
+                <i class="fas fa-user-plus metric-icon"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security Alerts -->
+    {% if suspicious_activity %}
+    <div class="alert-card">
+        <div class="d-flex align-items-center mb-3">
+            <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+            <div>
+                <h5 class="mb-1">Alertas de Seguridad</h5>
+                <p class="mb-0">Se han detectado {{ suspicious_activity|length }} actividades sospechosas</p>
+            </div>
+        </div>
+        <a href="{% url 'agents:admin_audit_logs' %}?action=suspicious_activity" class="btn btn-light btn-sm">
+            <i class="fas fa-eye"></i> Ver Detalles
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h4 class="mb-3">Acciones Rápidas</h4>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="quick-action-card" onclick="location.href='{% url 'agents:admin_user_list' %}'">
+                <i class="fas fa-users fa-3x text-primary mb-3"></i>
+                <h5>Gestionar Usuarios</h5>
+                <p class="text-muted">Ver, editar y administrar usuarios del sistema</p>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="quick-action-card" onclick="location.href='{% url 'agents:admin_audit_logs' %}'">
+                <i class="fas fa-clipboard-list fa-3x text-success mb-3"></i>
+                <h5>Logs de Auditoría</h5>
+                <p class="text-muted">Revisar actividad y eventos del sistema</p>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="quick-action-card" onclick="location.href='{% url 'agents:admin_audit_logs' %}?success=false'">
+                <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                <h5>Eventos Fallidos</h5>
+                <p class="text-muted">Investigar acciones que no se completaron</p>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="quick-action-card" onclick="exportAuditLogs()">
+                <i class="fas fa-download fa-3x text-info mb-3"></i>
+                <h5>Exportar Datos</h5>
+                <p class="text-muted">Descargar reportes y logs del sistema</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Activity -->
+        <div class="col-md-8">
+            <div class="admin-card">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Actividad Reciente</h6>
+                </div>
+                <div class="card-body" style="max-height: 500px; overflow-y: auto;">
+                    {% if recent_activity %}
+                        {% for activity in recent_activity %}
+                        <div class="activity-item {% if activity.success %}success{% else %}error{% endif %}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="d-flex align-items-center mb-1">
+                                        <strong class="me-2">{{ activity.get_action_display }}</strong>
+                                        {% if activity.success %}
+                                            <i class="fas fa-check-circle text-success"></i>
+                                        {% else %}
+                                            <i class="fas fa-times-circle text-danger"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="text-muted small">
+                                        {% if activity.agent %}
+                                            <strong>Usuario:</strong> {{ activity.agent.get_full_name }} |
+                                        {% endif %}
+                                        <strong>IP:</strong> {{ activity.ip_address }} |
+                                        <strong>Recurso:</strong> {{ activity.resource_type|title }}
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <small class="text-muted">{{ activity.created_at|date:"d/m H:i" }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-history fa-3x text-gray-300 mb-3"></i>
+                            <h5 class="text-gray-600">No hay actividad reciente</h5>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'agents:admin_audit_logs' %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-eye"></i> Ver Todos los Logs
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Statistics -->
+        <div class="col-md-4">
+            <div class="admin-card">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Estadísticas del Sistema</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <div class="border-right">
+                                <div class="h4 font-weight-bold text-primary">{{ total_logs }}</div>
+                                <div class="small text-muted">Total Logs</div>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="h4 font-weight-bold text-danger">{{ failed_actions }}</div>
+                            <div class="small text-muted">Acciones Fallidas</div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="border-right">
+                                <div class="h4 font-weight-bold text-success">{{ active_users }}</div>
+                                <div class="small text-muted">Usuarios Activos</div>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="h4 font-weight-bold text-warning">{{ inactive_users }}</div>
+                            <div class="small text-muted">Usuarios Inactivos</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="admin-card">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Estado del Sistema</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="small">Usuarios Activos</span>
+                            <span class="small font-weight-bold">{{ active_users }}/{{ total_users }}</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" style="width: {% widthratio active_users total_users 100 %}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="small">Sesiones Activas</span>
+                            <span class="small font-weight-bold">{{ active_sessions }}</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-info" style="width: {% if active_sessions > 0 %}75{% else %}0{% endif %}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="small">Actividad Sospechosa</span>
+                            <span class="small font-weight-bold">{{ suspicious_activity|length }}</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-{% if suspicious_activity %}danger{% else %}success{% endif %}" 
+                                 style="width: {% if suspicious_activity %}100{% else %}10{% endif %}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Information -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="admin-card">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Información del Sistema</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6 class="text-primary">Usuarios</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success"></i> {{ active_users }} usuarios activos</li>
+                                <li><i class="fas fa-times text-danger"></i> {{ inactive_users }} usuarios inactivos</li>
+                                <li><i class="fas fa-plus text-info"></i> {{ recent_users }} nuevos esta semana</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-primary">Seguridad</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-shield-alt text-success"></i> Sistema de auditoría activo</li>
+                                <li><i class="fas fa-lock text-info"></i> Autenticación 2FA disponible</li>
+                                <li><i class="fas fa-eye text-warning"></i> Monitoreo de actividad sospechosa</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-primary">Acciones Disponibles</h6>
+                            <ul class="list-unstyled">
+                                <li><a href="{% url 'agents:admin_user_list' %}"><i class="fas fa-users"></i> Gestionar usuarios</a></li>
+                                <li><a href="{% url 'agents:admin_audit_logs' %}"><i class="fas fa-clipboard-list"></i> Ver logs de auditoría</a></li>
+                                <li><a href="{% url 'agents:admin_export_audit_logs' %}"><i class="fas fa-download"></i> Exportar reportes</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function exportAuditLogs() {
+    // Show export options modal or redirect to export
+    if (confirm('¿Deseas exportar los logs de auditoría de los últimos 30 días?')) {
+        const endDate = new Date().toISOString().split('T')[0];
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 30);
+        const startDateStr = startDate.toISOString().split('T')[0];
+        
+        window.location.href = `{% url 'agents:admin_export_audit_logs' %}?date_from=${startDateStr}&date_to=${endDate}`;
+    }
+}
+
+$(document).ready(function() {
+    // Auto-refresh statistics every 5 minutes
+    setInterval(function() {
+        location.reload();
+    }, 300000); // 5 minutes
+    
+    // Add tooltips to statistics
+    $('[data-toggle="tooltip"]').tooltip();
+    
+    // Animate numbers on page load
+    $('.stat-number').each(function() {
+        const $this = $(this);
+        const countTo = parseInt($this.text());
+        
+        $({ countNum: 0 }).animate({
+            countNum: countTo
+        }, {
+            duration: 2000,
+            easing: 'swing',
+            step: function() {
+                $this.text(Math.floor(this.countNum));
+            },
+            complete: function() {
+                $this.text(countTo);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

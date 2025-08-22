@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ notification.title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #6f42c1;
+            color: white;
+            padding: 15px;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #777;
+            text-align: center;
+        }
+        .button {
+            display: inline-block;
+            background-color: #6f42c1;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .notification-type {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background-color: #6f42c1;
+            color: white;
+        }
+        .contract-details {
+            background-color: #fff;
+            padding: 15px;
+            border-left: 4px solid #6f42c1;
+            margin: 15px 0;
+        }
+        .amount {
+            font-size: 18px;
+            font-weight: bold;
+            color: #6f42c1;
+        }
+        .date-highlight {
+            font-weight: bold;
+            color: #fd7e14;
+        }
+        .frequency-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            background-color: #e9ecef;
+            border-radius: 3px;
+            font-size: 11px;
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>{{ notification.title }}</h2>
+    </div>
+    <div class="content">
+        <div class="notification-type">Aumento de Alquiler Próximo</div>
+        
+        <p>Hola {{ agent.first_name }},</p>
+        
+        <p>{{ notification.message }}</p>
+        
+        {% if notification.related_object %}
+        <div class="contract-details">
+            <h4>Detalles del Contrato:</h4>
+            <p><strong>Propiedad:</strong> {{ notification.related_object.property.title }}</p>
+            <p><strong>Cliente:</strong> {{ notification.related_object.customer.full_name }}</p>
+            <p><strong>Monto actual:</strong> <span class="amount">${{ notification.related_object.amount|floatformat:2 }}</span></p>
+            <p><strong>Fecha de aumento:</strong> <span class="date-highlight">{{ notification.related_object.next_increase_date|date:"d/m/Y" }}</span></p>
+            <p><strong>Frecuencia:</strong> <span class="frequency-badge">{{ notification.related_object.get_frequency_display|default:"Sin frecuencia definida" }}</span></p>
+            {% with days_until=notification.related_object.days_until_rent_increase %}
+                {% if days_until is not None %}
+                    <p><strong>Días restantes:</strong> {{ days_until }} día{{ days_until|pluralize }}</p>
+                {% endif %}
+            {% endwith %}
+        </div>
+        
+        <p><strong>Acciones recomendadas:</strong></p>
+        <ul>
+            <li>Calcular el nuevo monto del alquiler</li>
+            <li>Notificar al cliente sobre el aumento próximo</li>
+            <li>Preparar la documentación necesaria</li>
+            <li>Actualizar el monto del contrato en el sistema</li>
+            <li>Programar la fecha del próximo aumento</li>
+        </ul>
+        
+        <p>
+            <a href="{{ site_url }}{% url 'contracts:contract_detail' notification.related_object.id %}" class="button">
+                Ver detalles del contrato
+            </a>
+        </p>
+        {% endif %}
+        
+        <p>Fecha de notificación: {{ notification.created_at|date:"d/m/Y H:i" }}</p>
+    </div>
+    <div class="footer">
+        <p>Este es un mensaje automático, por favor no responda a este correo.</p>
+        <p>Para configurar sus preferencias de notificaciones, <a href="{{ site_url }}{% url 'user_notifications:notification_preferences' %}">haga clic aquí</a>.</p>
+    </div>
+</body>
+</html>

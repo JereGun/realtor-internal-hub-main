@@ -209,11 +209,8 @@ class PropertyCreateView(LoginRequiredMixin, CreateView):
         return context
     
     def form_valid(self, form):
-        # Crear el formset directamente en lugar de usar get_context_data()
-        if self.request.POST:
-            image_formset = PropertyImageFormSet(self.request.POST, self.request.FILES)
-        else:
-            image_formset = PropertyImageFormSet()
+        # Crear el formset directamente para validación
+        image_formset = PropertyImageFormSet(self.request.POST, self.request.FILES)
         
         if form.is_valid() and image_formset.is_valid():
             # El método save del formulario está sobreescrito para manejar
@@ -228,12 +225,19 @@ class PropertyCreateView(LoginRequiredMixin, CreateView):
             
             return redirect(self.get_success_url())
         else:
-            # Crear el contexto manualmente para evitar problemas con get_context_data
-            context = {
-                'form': form,
-                'image_formset': image_formset,
-            }
-            return self.render_to_response(context)
+            # Si hay errores, renderizar con el contexto adecuado
+            return self.form_invalid(form)
+    
+    def form_invalid(self, form):
+        """Handle invalid form submission"""
+        # Crear el formset con los datos POST para mostrar errores
+        image_formset = PropertyImageFormSet(self.request.POST, self.request.FILES)
+        
+        # Crear contexto mínimo necesario
+        context = self.get_context_data(form=form)
+        context['image_formset'] = image_formset
+        
+        return self.render_to_response(context)
     
     def get_success_url(self):
         return reverse_lazy('properties:property_detail', kwargs={'pk': self.object.pk})

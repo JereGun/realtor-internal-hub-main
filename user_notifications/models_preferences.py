@@ -24,6 +24,10 @@ class NotificationPreference(BaseModel):
     receive_invoice_payment = models.BooleanField(default=True, verbose_name="Recibir notificaciones de pagos de facturas")
     receive_invoice_status_change = models.BooleanField(default=True, verbose_name="Recibir notificaciones de cambios de estado de facturas")
     
+    # Preferencias para contratos
+    receive_contract_expiration = models.BooleanField(default=True, verbose_name="Recibir notificaciones de vencimiento de contratos")
+    receive_rent_increase = models.BooleanField(default=True, verbose_name="Recibir notificaciones de aumentos de alquiler")
+    
     # Configuración de frecuencia
     notification_frequency = models.CharField(
         max_length=20, 

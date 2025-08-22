@@ -179,7 +179,13 @@ def add_contract_increase(request, pk):
             
             # Update contract amount
             contract.amount = increase.new_amount
-            contract.save() # Saves the new amount
+
+            # Update next_increase_date using RentIncreaseChecker logic
+            from user_notifications.checkers import RentIncreaseChecker
+            checker = RentIncreaseChecker()
+            next_date = checker.calculate_next_increase_date(contract, from_date=increase.effective_date)
+            contract.next_increase_date = next_date
+            contract.save() # Saves the new amount and next increase date
 
 
             messages.success(request, 'Aumento agregado correctamente.')

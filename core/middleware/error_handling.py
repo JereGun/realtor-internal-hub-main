@@ -266,26 +266,37 @@ class ErrorHandlingMiddleware(MiddlewareMixin):
         fallback_template = 'errors/generic_error.html'
         
         try:
-            return TemplateResponse(
-                request,
-                template_name,
-                context={
-                    'error_data': error_data,
-                    'status_code': status_code
-                },
-                status=status_code
+            from django.template import loader
+            from django.http import HttpResponse as DjangoHttpResponse
+            
+            # Use render_to_string to avoid TemplateResponse rendering issues
+            template = loader.get_template(template_name)
+            html_content = template.render({
+                'error_data': error_data,
+                'status_code': status_code
+            }, request)
+            
+            return DjangoHttpResponse(
+                html_content,
+                status=status_code,
+                content_type='text/html'
             )
         except:
             # Fallback to generic error template
             try:
-                return TemplateResponse(
-                    request,
-                    fallback_template,
-                    context={
-                        'error_data': error_data,
-                        'status_code': status_code
-                    },
-                    status=status_code
+                from django.template import loader
+                from django.http import HttpResponse as DjangoHttpResponse
+                
+                template = loader.get_template(fallback_template)
+                html_content = template.render({
+                    'error_data': error_data,
+                    'status_code': status_code
+                }, request)
+                
+                return DjangoHttpResponse(
+                    html_content,
+                    status=status_code,
+                    content_type='text/html'
                 )
             except:
                 # Ultimate fallback to simple HTTP response

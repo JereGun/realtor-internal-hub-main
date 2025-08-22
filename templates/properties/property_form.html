@@ -1,6 +1,11 @@
-{% extends 'base.html' %} {% load crispy_forms_tags %} {% block page_title %} {%
-if form.instance.pk %}Editar Propiedad #{{ form.instance.pk }}{% else %}Nueva
-Propiedad{% endif %} {% endblock %} {% block content %}
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block page_title %}
+{% if form.instance.pk %}Editar Propiedad #{{ form.instance.pk }}{% else %}Nueva Propiedad{% endif %}
+{% endblock %}
+
+{% block content %}
 <div class="container-fluid mt-4">
   <div class="row justify-content-center">
     <div class="col-lg-10 col-xl-8">
@@ -9,10 +14,10 @@ Propiedad{% endif %} {% endblock %} {% block content %}
         <div>
           <h1 class="h3 text-dark mb-1">
             {% if form.instance.pk %}
-            <i class="bi bi-pencil-square me-2 text-primary"></i>Editar
-            Propiedad {% else %}
-            <i class="bi bi-house-add me-2 text-primary"></i>Nueva Propiedad {%
-            endif %}
+            <i class="bi bi-pencil-square me-2 text-primary"></i>Editar Propiedad
+            {% else %}
+            <i class="bi bi-house-add me-2 text-primary"></i>Nueva Propiedad
+            {% endif %}
           </h1>
           <p class="text-muted mb-0">
             {% if form.instance.pk %} Actualice la información de la propiedad
@@ -25,8 +30,7 @@ Propiedad{% endif %} {% endblock %} {% block content %}
           class="btn btn-outline-secondary"
         >
           <i class="bi bi-arrow-left me-1"></i>
-          {% if form.instance.pk %}Cancelar Cambios{% else %}Volver al listado{%
-          endif %}
+          {% if form.instance.pk %}Cancelar Cambios{% else %}Volver al listado{% endif %}
         </a>
       </div>
 
@@ -45,10 +49,11 @@ Propiedad{% endif %} {% endblock %} {% block content %}
                 <strong>Errores en el formulario:</strong>
               </div>
               <ul class="mb-0">
-                {% for field, errors in form.errors.items %} {% for error in
-                errors %}
-                <li>{{ field }}: {{ error }}</li>
-                {% endfor %} {% endfor %}
+                {% for field, errors in form.errors.items %}
+                  {% for error in errors %}
+                    <li>{{ field }}: {{ error }}</li>
+                  {% endfor %}
+                {% endfor %}
               </ul>
             </div>
             {% endif %}
@@ -76,8 +81,8 @@ Propiedad{% endif %} {% endblock %} {% block content %}
                   for="{{ form.title.id_for_label }}"
                   class="form-label fw-semibold"
                 >
-                  <i class="bi bi-house text-primary me-1"></i>{{
-                  form.title.label }}
+                  <i class="bi bi-house text-primary me-1"></i>
+                  {{form.title.label }}
                 </label>
                 {{ form.title }} {% if form.title.errors %}
                 <div class="text-danger small mt-1">
@@ -91,8 +96,8 @@ Propiedad{% endif %} {% endblock %} {% block content %}
                   for="{{ form.property_type.id_for_label }}"
                   class="form-label fw-semibold"
                 >
-                  <i class="bi bi-house-door text-success me-1"></i>{{
-                  form.property_type.label }}
+                  <i class="bi bi-house-door text-success me-1"></i>
+                  {{form.property_type.label }}
                 </label>
                 {{ form.property_type }} {% if form.property_type.errors %}
                 <div class="text-danger small mt-1">
@@ -106,8 +111,8 @@ Propiedad{% endif %} {% endblock %} {% block content %}
                   for="{{ form.description.id_for_label }}"
                   class="form-label fw-semibold"
                 >
-                  <i class="bi bi-card-text text-info me-1"></i>{{
-                  form.description.label }}
+                  <i class="bi bi-card-text text-info me-1"></i>
+                  {{form.description.label }}
                 </label>
                 {{ form.description }} {% if form.description.errors %}
                 <div class="text-danger small mt-1">
@@ -125,8 +130,8 @@ Propiedad{% endif %} {% endblock %} {% block content %}
                   for="{{ form.property_status.id_for_label }}"
                   class="form-label fw-semibold"
                 >
-                  <i class="bi bi-flag text-warning me-1"></i>{{
-                  form.property_status.label }}
+                  <i class="bi bi-flag text-warning me-1"></i>
+                  {{form.property_status.label }}
                 </label>
                 {{ form.property_status }} {% if form.property_status.errors %}
                 <div class="text-danger small mt-1">
@@ -140,8 +145,8 @@ Propiedad{% endif %} {% endblock %} {% block content %}
                   for="{{ form.agent.id_for_label }}"
                   class="form-label fw-semibold"
                 >
-                  <i class="bi bi-person-badge text-info me-1"></i>{{
-                  form.agent.label }}
+                  <i class="bi bi-person-badge text-info me-1"></i>
+                  {{form.agent.label }}
                 </label>
                 {{ form.agent }} {% if form.agent.errors %}
                 <div class="text-danger small mt-1">
@@ -159,10 +164,9 @@ Propiedad{% endif %} {% endblock %} {% block content %}
               <div class="col-md-6 mb-3">
                 <label
                   for="{{ form.owner.id_for_label }}"
-                  class="form-label fw-semibold"
-                >
-                  <i class="bi bi-person text-secondary me-1"></i>{{
-                  form.owner.label }}
+                  class="form-label fw-semibold">
+                  <i class="bi bi-person text-secondary me-1"></i>
+                  {{form.owner.label }}
                 </label>
                 {{ form.owner }} {% if form.owner.errors %}
                 <div class="text-danger small mt-1">
@@ -180,8 +184,8 @@ Propiedad{% endif %} {% endblock %} {% block content %}
                   for="{{ form.listing_type.id_for_label }}"
                   class="form-label fw-semibold"
                 >
-                  <i class="bi bi-tags text-warning me-1"></i>{{
-                  form.listing_type.label }}
+                  <i class="bi bi-tags text-warning me-1"></i>
+                  {{form.listing_type.label }}
                 </label>
                 {{ form.listing_type }} {% if form.listing_type.errors %}
                 <div class="text-danger small mt-1">
@@ -216,8 +220,8 @@ Propiedad{% endif %} {% endblock %} {% block content %}
                   for="{{ form.street.id_for_label }}"
                   class="form-label fw-semibold"
                 >
-                  <i class="bi bi-signpost text-success me-1"></i>{{
-                  form.street.label }}
+                  <i class="bi bi-signpost text-success me-1"></i>
+                  {{form.street.label }}
                 </label>
                 {{ form.street }} {% if form.street.errors %}
                 <div class="text-danger small mt-1">
@@ -231,8 +235,8 @@ Propiedad{% endif %} {% endblock %} {% block content %}
                   for="{{ form.number.id_for_label }}"
                   class="form-label fw-semibold"
                 >
-                  <i class="bi bi-hash text-success me-1"></i>{{
-                  form.number.label }}
+                  <i class="bi bi-hash text-success me-1"></i>
+                  {{form.number.label }}
                 </label>
                 {{ form.number }} {% if form.number.errors %}
                 <div class="text-danger small mt-1">
@@ -246,8 +250,8 @@ Propiedad{% endif %} {% endblock %} {% block content %}
                   for="{{ form.neighborhood.id_for_label }}"
                   class="form-label fw-semibold"
                 >
-                  <i class="bi bi-map text-info me-1"></i>{{
-                  form.neighborhood.label }}
+                  <i class="bi bi-map text-info me-1"></i>
+                  {{form.neighborhood.label }}
                 </label>
                 {{ form.neighborhood }} {% if form.neighborhood.errors %}
                 <div class="text-danger small mt-1">
@@ -261,8 +265,8 @@ Propiedad{% endif %} {% endblock %} {% block content %}
                   for="{{ form.country.id_for_label }}"
                   class="form-label fw-semibold"
                 >
-                  <i class="bi bi-globe text-primary me-1"></i>{{
-                  form.country.label }}
+                  <i class="bi bi-globe text-primary me-1"></i>
+                  {{form.country.label }}
                 </label>
                 {{ form.country }} {% if form.country.errors %}
                 <div class="text-danger small mt-1">
@@ -276,8 +280,8 @@ Propiedad{% endif %} {% endblock %} {% block content %}
                   for="{{ form.province.id_for_label }}"
                   class="form-label fw-semibold"
                 >
-                  <i class="bi bi-map text-warning me-1"></i>{{
-                  form.province.label }}
+                  <i class="bi bi-map text-warning me-1"></i>
+                  {{form.province.label }}
                 </label>
                 {{ form.province }} {% if form.province.errors %}
                 <div class="text-danger small mt-1">
@@ -291,8 +295,8 @@ Propiedad{% endif %} {% endblock %} {% block content %}
                   for="{{ form.locality.id_for_label }}"
                   class="form-label fw-semibold"
                 >
-                  <i class="bi bi-geo-alt text-info me-1"></i>{{
-                  form.locality.label }}
+                  <i class="bi bi-geo-alt text-info me-1"></i>
+                  {{form.locality.label }}
                 </label>
                 {{ form.locality }} {% if form.locality.errors %}
                 <div class="text-danger small mt-1">
@@ -323,10 +327,9 @@ Propiedad{% endif %} {% endblock %} {% block content %}
               <div class="col-md-6 mb-3">
                 <label
                   for="{{ form.total_surface.id_for_label }}"
-                  class="form-label fw-semibold"
-                >
-                  <i class="bi bi-rulers text-warning me-1"></i>{{
-                  form.total_surface.label }}
+                  class="form-label fw-semibold">
+                  <i class="bi bi-rulers text-warning me-1"></i>
+                  {{form.total_surface.label }}
                 </label>
                 <div class="input-group">
                   {{ form.total_surface }}
@@ -344,8 +347,8 @@ Propiedad{% endif %} {% endblock %} {% block content %}
                   for="{{ form.covered_surface.id_for_label }}"
                   class="form-label fw-semibold"
                 >
-                  <i class="bi bi-rulers text-secondary me-1"></i>{{
-                  form.covered_surface.label }}
+                  <i class="bi bi-rulers text-secondary me-1"></i>
+                  {{ form.covered_surface.label }}
                 </label>
                 <div class="input-group">
                   {{ form.covered_surface }}
@@ -363,8 +366,8 @@ Propiedad{% endif %} {% endblock %} {% block content %}
                   for="{{ form.year_built.id_for_label }}"
                   class="form-label fw-semibold"
                 >
-                  <i class="bi bi-calendar text-secondary me-1"></i>{{
-                  form.year_built.label }}
+                  <i class="bi bi-calendar text-secondary me-1"></i>
+                  {{ form.year_built.label }}
                 </label>
                 {{ form.year_built }} {% if form.year_built.errors %}
                 <div class="text-danger small mt-1">
@@ -378,8 +381,8 @@ Propiedad{% endif %} {% endblock %} {% block content %}
                   for="{{ form.bedrooms.id_for_label }}"
                   class="form-label fw-semibold"
                 >
-                  <i class="bi bi-door-closed text-primary me-1"></i>{{
-                  form.bedrooms.label }}
+                  <i class="bi bi-door-closed text-primary me-1"></i>
+                  {{ form.bedrooms.label }}
                 </label>
                 {{ form.bedrooms }} {% if form.bedrooms.errors %}
                 <div class="text-danger small mt-1">
@@ -393,8 +396,8 @@ Propiedad{% endif %} {% endblock %} {% block content %}
                   for="{{ form.bathrooms.id_for_label }}"
                   class="form-label fw-semibold"
                 >
-                  <i class="bi bi-droplet text-info me-1"></i>{{
-                  form.bathrooms.label }}
+                  <i class="bi bi-droplet text-info me-1"></i>
+                  {{ form.bathrooms.label }}
                 </label>
                 {{ form.bathrooms }} {% if form.bathrooms.errors %}
                 <div class="text-danger small mt-1">
@@ -408,10 +411,9 @@ Propiedad{% endif %} {% endblock %} {% block content %}
                   {{ form.garage }}
                   <label
                     class="form-check-label fw-semibold"
-                    for="{{ form.garage.id_for_label }}"
-                  >
-                    <i class="bi bi-car-front text-success me-1"></i>{{
-                    form.garage.label }}
+                    for="{{ form.garage.id_for_label }}">
+                    <i class="bi bi-car-front text-success me-1"></i>
+                    {{ form.garage.label }}
                   </label>
                 </div>
               </div>
@@ -421,10 +423,9 @@ Propiedad{% endif %} {% endblock %} {% block content %}
                   {{ form.furnished }}
                   <label
                     class="form-check-label fw-semibold"
-                    for="{{ form.furnished.id_for_label }}"
-                  >
-                    <i class="bi bi-house-check text-info me-1"></i>{{
-                    form.furnished.label }}
+                    for="{{ form.furnished.id_for_label }}">
+                    <i class="bi bi-house-check text-info me-1"></i>
+                    {{ form.furnished.label }}
                   </label>
                 </div>
               </div>
@@ -434,8 +435,8 @@ Propiedad{% endif %} {% endblock %} {% block content %}
                   for="{{ form.orientation.id_for_label }}"
                   class="form-label fw-semibold"
                 >
-                  <i class="bi bi-compass text-secondary me-1"></i>{{
-                  form.orientation.label }}
+                  <i class="bi bi-compass text-secondary me-1"></i>
+                  {{ form.orientation.label }}
                 </label>
                 {{ form.orientation }} {% if form.orientation.errors %}
                 <div class="text-danger small mt-1">
@@ -449,8 +450,8 @@ Propiedad{% endif %} {% endblock %} {% block content %}
                   for="{{ form.floors.id_for_label }}"
                   class="form-label fw-semibold"
                 >
-                  <i class="bi bi-building text-warning me-1"></i>{{
-                  form.floors.label }}
+                  <i class="bi bi-building text-warning me-1"></i>
+                  {{ form.floors.label }}
                 </label>
                 {{ form.floors }} {% if form.floors.errors %}
                 <div class="text-danger small mt-1">
@@ -483,8 +484,8 @@ Propiedad{% endif %} {% endblock %} {% block content %}
                   for="{{ form.sale_price.id_for_label }}"
                   class="form-label fw-semibold"
                 >
-                  <i class="bi bi-tag text-success me-1"></i>{{
-                  form.sale_price.label }}
+                  <i class="bi bi-tag text-success me-1"></i> 
+                  {{ form.sale_price.label }}
                 </label>
                 <div class="input-group">
                   <span class="input-group-text">$</span>
@@ -506,8 +507,8 @@ Propiedad{% endif %} {% endblock %} {% block content %}
                   for="{{ form.rental_price.id_for_label }}"
                   class="form-label fw-semibold"
                 >
-                  <i class="bi bi-calendar-month text-info me-1"></i>{{
-                  form.rental_price.label }}
+                  <i class="bi bi-calendar-month text-info me-1"></i>
+                  {{ form.rental_price.label }}
                 </label>
                 <div class="input-group">
                   <span class="input-group-text">$</span>
@@ -526,12 +527,9 @@ Propiedad{% endif %} {% endblock %} {% block content %}
               </div>
 
               <div class="col-md-12 mb-3">
-                <label
-                  for="{{ form.expenses.id_for_label }}"
-                  class="form-label fw-semibold"
-                >
-                  <i class="bi bi-receipt text-warning me-1"></i>{{
-                  form.expenses.label }}
+                <label for="{{ form.expenses.id_for_label }}" class="form-label fw-semibold">
+                  <i class="bi bi-receipt text-warning me-1"></i>
+                  {{ form.expenses.label }}
                 </label>
                 <div class="input-group">
                   <span class="input-group-text">$</span>
@@ -570,8 +568,8 @@ Propiedad{% endif %} {% endblock %} {% block content %}
 
               <div class="col-md-6 mb-3">
                 <label class="form-label fw-semibold">
-                  <i class="bi bi-star text-warning me-1"></i>{{
-                  form.features.label }}
+                  <i class="bi bi-star text-warning me-1"></i>
+                  {{ form.features.label }}
                 </label>
                 <div
                   class="border rounded p-3 bg-light"
@@ -667,8 +665,7 @@ Propiedad{% endif %} {% endblock %} {% block content %}
                   {% for image_form in image_formset %}
                   <div class="image-form-container card mb-3 border-light">
                     <div class="card-body p-3">
-                      {% if image_form.instance.pk %}{{ image_form.DELETE }}{{
-                      image_form.id }}{% endif %}
+                      {% if image_form.instance.pk %}{{ image_form.DELETE }}{{ image_form.id }}{% endif %}
 
                       <div class="row g-3 align-items-start">
                         <div class="col-md-3">

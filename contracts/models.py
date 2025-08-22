@@ -264,6 +264,166 @@ class Contract(BaseModel):
         self.update_status()
         super().save(*args, **kwargs)
 
+    @classmethod
+    def get_expiring_contracts(cls, days_threshold=30):
+        """
+        Get contracts expiring within the specified threshold.
+        
+        Args:
+            days_threshold (int): Number of days to look ahead for expiring contracts
+            
+        Returns:
+            QuerySet: Active contracts expiring within the threshold
+        """
+        from django.utils import timezone
+        today = timezone.now().date()
+        threshold_date = today + timezone.timedelta(days=days_threshold)
+        
+        return cls.objects.filter(
+            status=cls.STATUS_ACTIVE,
+            end_date__isnull=False,
+            end_date__lte=threshold_date,
+            end_date__gte=today
+        ).select_related('agent', 'property', 'customer')
+
+    @classmethod
+    def get_expired_contracts(cls):
+        """
+        Get contracts that have already expired but are still marked as active.
+        
+        Returns:
+            QuerySet: Contracts that have expired
+        """
+        from django.utils import timezone
+        today = timezone.now().date()
+        
+        return cls.objects.filter(
+            status=cls.STATUS_ACTIVE,
+            end_date__isnull=False,
+            end_date__lt=today
+        ).select_related('agent', 'property', 'customer')
+
+    def needs_rent_increase_notification(self, days_threshold=7):
+        """
+        Check if this contract needs a rent increase notification.
+        
+        Args:
+            days_threshold (int): Number of days to look ahead for rent increases
+            
+        Returns:
+            bool: True if the contract has a rent increase due within the threshold
+        """
+        if not self.next_increase_date or self.status != self.STATUS_ACTIVE:
+            return False
+        
+        from django.utils import timezone
+        today = timezone.now().date()
+        threshold_date = today + timezone.timedelta(days=days_threshold)
+        
+        return self.next_increase_date <= threshold_date
+
+    @classmethod
+    def get_contracts_with_increases_due(cls, days_threshold=7):
+        """
+        Get contracts with rent increases due within the specified threshold.
+        
+        Args:
+            days_threshold (int): Number of days to look ahead for rent increases
+            
+        Returns:
+            QuerySet: Active contracts with rent increases due
+        """
+        from django.utils import timezone
+        today = timezone.now().date()
+        threshold_date = today + timezone.timedelta(days=days_threshold)
+        
+        return cls.objects.filter(
+            status=cls.STATUS_ACTIVE,
+            next_increase_date__isnull=False,
+            next_increase_date__lte=threshold_date
+        ).select_related('agent', 'property', 'customer')
+
+    @classmethod
+    def get_overdue_rent_increases(cls):
+        """
+        Get contracts with overdue rent increases.
+        
+        Returns:
+            QuerySet: Active contracts with overdue rent increases
+        """
+        from django.utils import timezone
+        today = timezone.now().date()
+        
+        return cls.objects.filter(
+            status=cls.STATUS_ACTIVE,
+            next_increase_date__isnull=False,
+            next_increase_date__lt=today
+        ).select_related('agent', 'property', 'customer')
+
+    def days_until_expiry(self):
+        """
+        Calculate the number of days until this contract expires.
+        
+        Returns:
+            int: Number of days until expiry (negative if expired, None if no end date)
+        """
+        if not self.end_date:
+            return None
+        
+        from django.utils import timezone
+        today = timezone.now().date()
+        return (self.end_date - today).days
+
+    def days_until_rent_increase(self):
+        """
+        Calculate the number of days until the next rent increase.
+        
+        Returns:
+            int: Number of days until increase (negative if overdue, None if no increase date)
+        """
+        if not self.next_increase_date:
+            return None
+        
+        from django.utils import timezone
+        today = timezone.now().date()
+        return (self.next_increase_date - today).days
+
+    def get_notification_urgency_level(self, notification_type):
+        """
+        Determine the urgency level for notifications related to this contract.
+        
+        Args:
+            notification_type (str): Type of notification ('expiration' or 'rent_increase')
+            
+        Returns:
+            str: Urgency level ('low', 'medium', 'high', 'critical')
+        """
+        if notification_type == 'expiration':
+            days = self.days_until_expiry()
+            if days is None:
+                return 'low'
+            elif days < 0:
+                return 'critical'  # Expired
+            elif days <= 7:
+                return 'high'      # Expires within a week
+            elif days <= 30:
+                return 'medium'    # Expires within a month
+            else:
+                return 'low'
+        
+        elif notification_type == 'rent_increase':
+            days = self.days_until_rent_increase()
+            if days is None:
+                return 'low'
+            elif days < 0:
+                return 'high'      # Overdue
+            elif days <= 7:
+                return 'medium'    # Due within a week
+            else:
+                return 'low'
+        
+        return 'low'
+
 
 class ContractIncrease(BaseModel):
     """

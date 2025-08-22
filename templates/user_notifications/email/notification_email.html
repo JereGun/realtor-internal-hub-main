@@ -64,6 +64,22 @@
             background-color: #17a2b8;
             color: white;
         }
+        .contract-expired {
+            background-color: #dc3545;
+            color: white;
+        }
+        .contract-expiring-urgent {
+            background-color: #fd7e14;
+            color: white;
+        }
+        .contract-expiring-soon {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .rent-increase {
+            background-color: #6f42c1;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -75,10 +91,24 @@
             <div class="notification-type due-soon">Vencimiento Próximo</div>
         {% elif notification.notification_type == 'invoice_overdue' %}
             <div class="notification-type overdue">Factura Vencida</div>
+        {% elif notification.notification_type == 'invoice_overdue_urgent' %}
+            <div class="notification-type overdue">Factura Vencida - Urgente</div>
+        {% elif notification.notification_type == 'invoice_overdue_critical' %}
+            <div class="notification-type overdue">Factura Vencida - Crítica</div>
         {% elif notification.notification_type == 'invoice_payment_received' %}
             <div class="notification-type payment">Pago Recibido</div>
         {% elif notification.notification_type == 'invoice_status_change' %}
             <div class="notification-type status-change">Cambio de Estado</div>
+        {% elif notification.notification_type == 'contract_expired' %}
+            <div class="notification-type contract-expired">Contrato Vencido</div>
+        {% elif notification.notification_type == 'contract_expiring_urgent' %}
+            <div class="notification-type contract-expiring-urgent">Contrato Vence Pronto</div>
+        {% elif notification.notification_type == 'contract_expiring_soon' %}
+            <div class="notification-type contract-expiring-soon">Contrato Próximo a Vencer</div>
+        {% elif notification.notification_type == 'rent_increase_due' %}
+            <div class="notification-type rent-increase">Aumento de Alquiler Pendiente</div>
+        {% elif notification.notification_type == 'rent_increase_overdue' %}
+            <div class="notification-type rent-increase">Aumento de Alquiler Vencido</div>
         {% endif %}
         
         <p>Hola {{ agent.first_name }},</p>
@@ -87,9 +117,19 @@
         
         {% if notification.related_object %}
             <p>
-                <a href="{{ site_url }}{% url 'accounting:invoice_detail' notification.related_object.id %}" class="button">
-                    Ver detalles de la factura
-                </a>
+                {% if notification.notification_type|slice:":8" == "contract" %}
+                    <a href="{{ site_url }}{% url 'contracts:contract_detail' notification.related_object.id %}" class="button">
+                        Ver detalles del contrato
+                    </a>
+                {% elif notification.notification_type|slice:":7" == "invoice" %}
+                    <a href="{{ site_url }}{% url 'accounting:invoice_detail' notification.related_object.id %}" class="button">
+                        Ver detalles de la factura
+                    </a>
+                {% elif notification.notification_type|slice:":4" == "rent" %}
+                    <a href="{{ site_url }}{% url 'contracts:contract_detail' notification.related_object.id %}" class="button">
+                        Ver detalles del contrato
+                    </a>
+                {% endif %}
             </p>
         {% endif %}
         

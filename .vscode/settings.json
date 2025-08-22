@@ -1,2 +1,4 @@
 {
+    "python.languageServer": "None",
+    "CodeGPT.apiKey": "LM Studio"
 }

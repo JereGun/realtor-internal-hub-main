@@ -4,3 +4,7 @@ class AccountingConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'accounting'
     verbose_name = 'Contabilidad'
+    
+    def ready(self):
+        """Register signal handlers when the app is ready."""
+        import accounting.signals

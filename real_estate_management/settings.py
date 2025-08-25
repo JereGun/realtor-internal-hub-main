@@ -30,6 +30,115 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'America/Argentina/Buenos_Aires'
 
+# Celery Beat Configuration for Notification Tasks
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    # Contract expiration notifications - daily at 8:00 AM
+    'check-contract-expirations': {
+        'task': 'user_notifications.tasks.check_contract_expirations',
+        'schedule': crontab(hour=8, minute=0),
+        'options': {
+            'expires': 3600,  # Task expires after 1 hour if not executed
+            'retry': True,
+            'retry_policy': {
+                'max_retries': 3,
+                'interval_start': 0,
+                'interval_step': 0.2,
+                'interval_max': 0.2,
+            }
+        }
+    },
+    
+    # Invoice overdue notifications - daily at 9:00 AM
+    'check-invoice-overdue': {
+        'task': 'user_notifications.tasks.check_invoice_overdue',
+        'schedule': crontab(hour=9, minute=0),
+        'options': {
+            'expires': 3600,
+            'retry': True,
+            'retry_policy': {
+                'max_retries': 3,
+                'interval_start': 0,
+                'interval_step': 0.2,
+                'interval_max': 0.2,
+            }
+        }
+    },
+    
+    # Rent increase notifications - daily at 10:00 AM
+    'check-rent-increases': {
+        'task': 'user_notifications.tasks.check_rent_increases',
+        'schedule': crontab(hour=10, minute=0),
+        'options': {
+            'expires': 3600,
+            'retry': True,
+            'retry_policy': {
+                'max_retries': 3,
+                'interval_start': 0,
+                'interval_step': 0.2,
+                'interval_max': 0.2,
+            }
+        }
+    },
+    
+    # Invoice due soon notifications - daily at 11:00 AM
+    'check-invoice-due-soon': {
+        'task': 'user_notifications.tasks.check_invoice_due_soon',
+        'schedule': crontab(hour=11, minute=0),
+        'options': {
+            'expires': 3600,
+            'retry': True,
+            'retry_policy': {
+                'max_retries': 3,
+                'interval_start': 0,
+                'interval_step': 0.2,
+                'interval_max': 0.2,
+            }
+        }
+    },
+    
+    # Process notification batches - daily at 6:00 PM
+    'process-notification-batches': {
+        'task': 'user_notifications.tasks.process_notification_batches',
+        'schedule': crontab(hour=18, minute=0),
+        'options': {
+            'expires': 3600,
+            'retry': True,
+            'retry_policy': {
+                'max_retries': 3,
+                'interval_start': 0,
+                'interval_step': 0.2,
+                'interval_max': 0.2,
+            }
+        }
+    },
+}
+
+# Additional Celery configuration for monitoring and failure handling
+CELERY_TASK_ROUTES = {
+    'user_notifications.tasks.*': {'queue': 'notifications'},
+}
+
+CELERY_TASK_ANNOTATIONS = {
+    'user_notifications.tasks.*': {
+        'rate_limit': '10/m',  # Limit notification tasks to 10 per minute
+        'time_limit': 300,     # 5 minute time limit
+        'soft_time_limit': 240, # 4 minute soft time limit
+    }
+}
+
+# Task result expiration
+CELERY_RESULT_EXPIRES = 3600  # Results expire after 1 hour
+
+# Worker configuration
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+CELERY_WORKER_MAX_TASKS_PER_CHILD = 1000
+
+# Error handling
+CELERY_TASK_REJECT_ON_WORKER_LOST = True
+CELERY_TASK_ACKS_LATE = True
+
 # Application definition
 DJANGO_APPS = [
     'django.contrib.admin',
@@ -63,6 +172,7 @@ THIRD_PARTY_APPS = [
     'crispy_bootstrap4',
     'rest_framework',  # Agregada DRF
     'celery',
+    'django_celery_beat',  # For database-backed periodic tasks
 ]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS
@@ -318,6 +428,21 @@ LOGGING = {
             'propagate': True,
         },
         'accounting': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'user_notifications': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'celery': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'celery.task': {
             'handlers': ['console', 'file'],
             'level': 'INFO',
             'propagate': True,

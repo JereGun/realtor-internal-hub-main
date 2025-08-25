@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ notification.title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #28a745;
+            color: white;
+            padding: 15px;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #777;
+            text-align: center;
+        }
+        .button {
+            display: inline-block;
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .notification-type {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background-color: #28a745;
+            color: white;
+        }
+        .payment-details {
+            background-color: #fff;
+            padding: 15px;
+            border-left: 4px solid #28a745;
+            margin: 15px 0;
+        }
+        .amount-paid {
+            font-size: 18px;
+            font-weight: bold;
+            color: #28a745;
+        }
+        .amount-remaining {
+            font-size: 16px;
+            font-weight: bold;
+            color: #6c757d;
+        }
+        .success-notice {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 15px 0;
+            color: #155724;
+        }
+        .fully-paid {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 15px 0;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>{{ notification.title }}</h2>
+    </div>
+    <div class="content">
+        <div class="notification-type">Pago Recibido</div>
+        
+        <div class="success-notice">
+            <strong>✅ ¡Excelente!</strong> Se ha registrado un nuevo pago para esta factura.
+        </div>
+        
+        <p>Hola {{ agent.first_name }},</p>
+        
+        <p>{{ notification.message }}</p>
+        
+        {% if notification.related_object %}
+        <div class="payment-details">
+            <h4>Detalles del Pago:</h4>
+            <p><strong>Factura:</strong> {{ notification.related_object.number }}</p>
+            <p><strong>Cliente:</strong> {{ notification.related_object.customer.full_name }}</p>
+            <p><strong>Monto del pago:</strong> <span class="amount-paid">${{ payment.amount|floatformat:2 }}</span></p>
+            <p><strong>Fecha del pago:</strong> {{ payment.date|date:"d/m/Y" }}</p>
+            <p><strong>Método de pago:</strong> {{ payment.method }}</p>
+            {% if payment.notes %}
+            <p><strong>Notas:</strong> {{ payment.notes }}</p>
+            {% endif %}
+            <hr>
+            <p><strong>Saldo restante:</strong> <span class="amount-remaining">${{ notification.related_object.get_balance|floatformat:2 }}</span></p>
+            
+            {% if notification.related_object.get_balance <= 0 %}
+            <div class="fully-paid">
+                <strong>🎉 ¡Factura totalmente pagada!</strong> Esta factura ha sido completamente saldada.
+            </div>
+            {% endif %}
+        </div>
+        
+        {% if notification.related_object.get_balance > 0 %}
+        <p><strong>Próximos pasos:</strong></p>
+        <ul>
+            <li>Confirmar la recepción del pago con el cliente</li>
+            <li>Actualizar registros contables si es necesario</li>
+            <li>Hacer seguimiento del saldo restante si aplica</li>
+        </ul>
+        {% else %}
+        <p><strong>Acciones completadas:</strong></p>
+        <ul>
+            <li>✅ Factura completamente pagada</li>
+            <li>✅ Confirmar con el cliente la finalización del pago</li>
+            <li>✅ Actualizar estado en el sistema</li>
+        </ul>
+        {% endif %}
+        
+        <p>
+            <a href="{{ site_url }}{% url 'accounting:invoice_detail' notification.related_object.id %}" class="button">
+                Ver detalles de la factura
+            </a>
+        </p>
+        {% endif %}
+        
+        <p>Fecha de notificación: {{ notification.created_at|date:"d/m/Y H:i" }}</p>
+    </div>
+    <div class="footer">
+        <p>Este es un mensaje automático, por favor no responda a este correo.</p>
+        <p>Para configurar sus preferencias de notificaciones, <a href="{{ site_url }}{% url 'user_notifications:notification_preferences' %}">haga clic aquí</a>.</p>
+    </div>
+</body>
+</html>

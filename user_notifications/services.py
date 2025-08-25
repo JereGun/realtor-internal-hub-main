@@ -39,7 +39,7 @@ def create_notification(agent, title, message, notification_type, related_object
             # Verificar el tipo de notificación y las preferencias específicas
             should_send_email = False
             
-            if notification_type == 'invoice_due_soon' and preferences.receive_invoice_due_soon:
+            if notification_type in ['invoice_due_soon', 'invoice_due_urgent'] and preferences.receive_invoice_due_soon:
                 should_send_email = True
             elif notification_type in ['invoice_overdue', 'invoice_overdue_urgent', 'invoice_overdue_critical'] and preferences.receive_invoice_overdue:
                 should_send_email = True
@@ -84,6 +84,16 @@ def send_notification_email(notification):
         'site_url': site_url,
     }
     
+    # Add payment information for payment received notifications
+    if notification.notification_type == 'invoice_payment_received' and notification.related_object:
+        # Get the most recent payment for this invoice
+        try:
+            latest_payment = notification.related_object.payments.order_by('-date', '-created_at').first()
+            if latest_payment:
+                context['payment'] = latest_payment
+        except Exception as e:
+            logger.warning(f"Could not retrieve payment information for notification {notification.id}: {e}")
+    
     # Seleccionar la plantilla apropiada basada en el tipo de notificación
     template_name = 'user_notifications/email/notification_email.html'  # Default template
     
@@ -93,6 +103,12 @@ def send_notification_email(notification):
         template_name = 'user_notifications/email/invoice_overdue_urgent.html'
     elif notification.notification_type == 'invoice_overdue_critical':
         template_name = 'user_notifications/email/invoice_overdue_critical.html'
+    elif notification.notification_type == 'invoice_due_soon':
+        template_name = 'user_notifications/email/invoice_due_soon.html'
+    elif notification.notification_type == 'invoice_due_urgent':
+        template_name = 'user_notifications/email/invoice_due_urgent.html'
+    elif notification.notification_type == 'invoice_payment_received':
+        template_name = 'user_notifications/email/invoice_payment_received.html'
     elif notification.notification_type == 'rent_increase_due':
         template_name = 'user_notifications/email/rent_increase_due.html'
     elif notification.notification_type == 'rent_increase_overdue':
@@ -522,6 +538,7 @@ def _get_notification_type_display_name(notification_type):
     """
     type_names = {
         'invoice_due_soon': 'Facturas por vencer',
+        'invoice_due_urgent': 'Facturas por vencer (urgente)',
         'invoice_overdue': 'Facturas vencidas',
         'invoice_overdue_urgent': 'Facturas vencidas (urgente)',
         'invoice_overdue_critical': 'Facturas vencidas (crítica)',
@@ -555,6 +572,7 @@ def should_send_notification_by_preference(agent, notification_type):
         # Map notification types to preference fields
         preference_mapping = {
             'invoice_due_soon': preferences.receive_invoice_due_soon,
+            'invoice_due_urgent': preferences.receive_invoice_due_soon,
             'invoice_overdue': preferences.receive_invoice_overdue,
             'invoice_overdue_urgent': preferences.receive_invoice_overdue,
             'invoice_overdue_critical': preferences.receive_invoice_overdue,

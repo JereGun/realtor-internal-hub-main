@@ -5,8 +5,11 @@ from django.contrib import messages
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.db.models import Q
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
 from .models import Customer
 from .forms import CustomerForm, CustomerSearchForm
+import json
 
 
 class CustomerListView(LoginRequiredMixin, ListView):
@@ -84,3 +87,55 @@ class CustomerDeleteView(LoginRequiredMixin, DeleteView):
     def delete(self, request, *args, **kwargs):
         messages.success(request, 'Cliente eliminado correctamente.')
         return super().delete(request, *args, **kwargs)
+
+
+@login_required
+def create_customer_ajax(request):
+    """Crear cliente via AJAX"""
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        first_name = data.get('first_name', '').strip()
+        last_name = data.get('last_name', '').strip()
+        email = data.get('email', '').strip()
+        phone = data.get('phone', '').strip()
+        document = data.get('document', '').strip()
+        
+        # Validaciones básicas
+        if not first_name or not last_name:
+            return JsonResponse({'success': False, 'error': 'Nombre y apellido son requeridos'})
+        
+        if not email:
+            return JsonResponse({'success': False, 'error': 'Email es requerido'})
+        
+        # Verificar si ya existe un cliente con el mismo email
+        if Customer.objects.filter(email=email).exists():
+            return JsonResponse({'success': False, 'error': 'Ya existe un cliente con este email'})
+        
+        # Verificar si ya existe un cliente con el mismo documento (si se proporcionó)
+        if document and Customer.objects.filter(document=document).exists():
+            return JsonResponse({'success': False, 'error': 'Ya existe un cliente con este documento'})
+        
+        try:
+            # Crear el cliente
+            customer = Customer.objects.create(
+                first_name=first_name.title(),
+                last_name=last_name.title(),
+                email=email.lower(),
+                phone=phone,
+                document=document
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'customer': {
+                    'id': customer.id,
+                    'full_name': customer.get_full_name(),
+                    'email': customer.email,
+                    'text': f"{customer.get_full_name()} ({customer.email})"
+                }
+            })
+        
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': f'Error al crear el cliente: {str(e)}'})
+        
+    return JsonResponse({'success': False, 'error': 'Método no permitido'})

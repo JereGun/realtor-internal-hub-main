@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block page_title %}
+    Detalle de Notificación
+{% endblock %}
+
+{% block extra_js %}
+{% load static %}
+<script src="{% static 'js/notifications.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="bi bi-bell-fill me-2"></i>Detalle de Notificación
+        </h2>
+        <div class="btn-group">
+            <a href="{% url 'user_notifications:notification_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Volver a la lista
+            </a>
+            {% if related_object_info.url %}
+                <a href="{{ related_object_info.url }}" class="btn btn-primary">
+                    <i class="bi bi-box-arrow-up-right"></i> Ver {{ related_object_info.type|title }}
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Notification Details Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Información de la Notificación</h5>
+                    <span class="badge 
+                        {% if notification.notification_type == 'invoice_due_soon' %}bg-warning text-dark
+                        {% elif notification.notification_type == 'invoice_overdue' %}bg-danger
+                        {% elif notification.notification_type == 'invoice_payment_received' %}bg-success
+                        {% elif notification.notification_type == 'contract_expiration' %}bg-warning text-dark
+                        {% elif notification.notification_type == 'contract_increase' %}bg-info
+                        {% else %}bg-secondary{% endif %}">
+                        {{ notification.get_notification_type_display }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4 class="mb-3">{{ notification.title }}</h4>
+                            <div class="mb-3">
+                                <strong>Estado:</strong>
+                                {% if notification.is_read %}
+                                    <span class="badge bg-success">Leída</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">No leída</span>
+                                {% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <strong>Fecha de creación:</strong>
+                                <span class="text-muted">{{ notification.created_at|date:"d/m/Y H:i" }}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <strong>Tipo:</strong>
+                                <span class="text-muted">{{ notification.get_notification_type_display }}</span>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Agente:</strong>
+                                <span class="text-muted">{{ notification.agent.first_name }} {{ notification.agent.last_name }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="mb-3">
+                        <strong>Mensaje:</strong>
+                        <div class="mt-2 p-3 bg-light rounded">
+                            {{ notification.message }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Related Object Card -->
+            {% if related_object_info %}
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Objeto Relacionado</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Tipo:</strong>
+                        <span class="text-muted">{{ related_object_info.type|title }}</span>
+                    </div>
+                    <div class="mb-3">
+                        <strong>ID:</strong>
+                        <span class="text-muted">#{{ related_object_info.object.pk }}</span>
+                    </div>
+                    
+                    {% if related_object_info.type == 'invoice' %}
+                        <div class="mb-3">
+                            <strong>Número de Factura:</strong>
+                            <span class="text-muted">{{ related_object_info.object.number }}</span>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Cliente:</strong>
+                            <span class="text-muted">{{ related_object_info.object.customer.first_name }} {{ related_object_info.object.customer.last_name }}</span>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Monto:</strong>
+                            <span class="text-muted">${{ related_object_info.object.total_amount|floatformat:2 }}</span>
+                        </div>
+                        {% if related_object_info.object.due_date %}
+                        <div class="mb-3">
+                            <strong>Fecha de Vencimiento:</strong>
+                            <span class="text-muted">{{ related_object_info.object.due_date|date:"d/m/Y" }}</span>
+                        </div>
+                        {% endif %}
+                    {% elif related_object_info.type == 'contract' %}
+                        <div class="mb-3">
+                            <strong>Propiedad:</strong>
+                            <span class="text-muted">{{ related_object_info.object.property.name }}</span>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Cliente:</strong>
+                            <span class="text-muted">{{ related_object_info.object.customer.first_name }} {{ related_object_info.object.customer.last_name }}</span>
+                        </div>
+                        {% if related_object_info.object.end_date %}
+                        <div class="mb-3">
+                            <strong>Fecha de Finalización:</strong>
+                            <span class="text-muted">{{ related_object_info.object.end_date|date:"d/m/Y" }}</span>
+                        </div>
+                        {% endif %}
+                    {% elif related_object_info.type == 'payment' %}
+                        <div class="mb-3">
+                            <strong>Monto:</strong>
+                            <span class="text-muted">${{ related_object_info.object.amount|floatformat:2 }}</span>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Fecha:</strong>
+                            <span class="text-muted">{{ related_object_info.object.date|date:"d/m/Y" }}</span>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Método:</strong>
+                            <span class="text-muted">{{ related_object_info.object.get_method_display }}</span>
+                        </div>
+                    {% endif %}
+                    
+                    {% if related_object_info.url %}
+                    <div class="d-grid">
+                        <a href="{{ related_object_info.url }}" class="btn btn-primary">
+                            <i class="bi bi-box-arrow-up-right"></i> Ver {{ related_object_info.type|title }}
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Actions Card -->
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Acciones</h5>
+                </div>
+                <div class="card-body">
+                    {% if not notification.is_read %}
+                    <div class="d-grid gap-2 mb-3">
+                        <button type="button" class="btn btn-success" data-notification-id="{{ notification.id }}" class="mark-read-btn">
+                            <i class="bi bi-check"></i> Marcar como leída
+                        </button>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'user_notifications:notification_list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Volver a la lista
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

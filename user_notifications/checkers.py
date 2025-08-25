@@ -903,8 +903,9 @@ class InvoiceDueSoonChecker:
             if invoice.get_balance() > 0:  # Only notify for unpaid invoices
                 if self.should_notify(invoice, 'invoice_due_urgent'):
                     days_until_due = self.calculate_days_until_due(invoice)
-                    self.create_due_soon_notification(invoice, days_until_due)
-                    results['urgent_due_soon'] += 1
+                    notification = self.create_due_soon_notification(invoice, days_until_due)
+                    if notification:  # Only count if notification was actually created (not duplicate)
+                        results['urgent_due_soon'] += 1
         
         # Check invoices due within 7 days (but not within 3 days)
         standard_invoices = self.get_due_soon_invoices(7).exclude(
@@ -914,12 +915,14 @@ class InvoiceDueSoonChecker:
             if invoice.get_balance() > 0:  # Only notify for unpaid invoices
                 if self.should_notify(invoice, 'invoice_due_soon'):
                     days_until_due = self.calculate_days_until_due(invoice)
-                    self.create_due_soon_notification(invoice, days_until_due)
-                    results['standard_due_soon'] += 1
+                    notification = self.create_due_soon_notification(invoice, days_until_due)
+                    if notification:  # Only count if notification was actually created (not duplicate)
+                        results['standard_due_soon'] += 1
         
         results['total_notifications'] = (
             results['urgent_due_soon'] + 
             results['standard_due_soon']
         )
         
+        logger.info(f"Invoice due soon check completed: {results}")
         return results

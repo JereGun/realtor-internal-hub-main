@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
+{% load static %}
 
 {% block page_title %}
 {% if form.instance.pk %}Editar Propiedad #{{ form.instance.pk }}{% else %}Nueva Propiedad{% endif %}
@@ -1027,4 +1028,7 @@
     });
   });
 </script>
+
+<script src="{% static 'js/owner-autocomplete.js' %}"></script>
+<script src="{% static 'js/location-autocomplete.js' %}"></script>
 {% endblock %}

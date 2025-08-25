@@ -55,9 +55,23 @@ class Notification(BaseModel):
     def get_related_object_url(self):
         """Get URL for the related object if applicable"""
         if self.related_object:
-            # This can be extended based on the related object type
+            # Check if the object has a get_absolute_url method
             if hasattr(self.related_object, 'get_absolute_url'):
                 return self.related_object.get_absolute_url()
+            
+            # Handle specific object types
+            model_name = self.content_type.model
+            
+            if model_name == 'invoice':
+                from django.urls import reverse
+                return reverse('accounting:invoice_detail', kwargs={'pk': self.related_object.pk})
+            elif model_name == 'contract':
+                from django.urls import reverse
+                return reverse('contracts:contract_detail', kwargs={'pk': self.related_object.pk})
+            elif model_name == 'payment':
+                from django.urls import reverse
+                return reverse('accounting:payment_detail', kwargs={'pk': self.related_object.pk})
+        
         return None
 
 

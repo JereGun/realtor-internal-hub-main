@@ -82,13 +82,16 @@ class PropertyForm(forms.ModelForm):
             }),
             'street': forms.TextInput(attrs={'class': 'form-control'}),
             'number': forms.TextInput(attrs={'class': 'form-control'}),
-            'neighborhood': forms.TextInput(attrs={'class': 'form-control'}),
+            'neighborhood': forms.TextInput(attrs={
+                'class': 'form-control neighborhood-autocomplete',
+                'placeholder': 'Escriba el nombre del barrio...'
+            }),
             'locality': forms.TextInput(attrs={ # Changed to TextInput
-                'class': 'form-control locality-autocomplete', # Added class for JS targeting
-                'placeholder': 'Buscar localidad...'
+                'class': 'form-control city-autocomplete', # Changed to city-autocomplete for consistency
+                'placeholder': 'Buscar ciudad...'
             }),
             'province': forms.TextInput(attrs={ # Changed to TextInput
-                'class': 'form-control province-autocomplete', # Added class for JS targeting
+                'class': 'form-control state-autocomplete', # Changed to state-autocomplete for consistency
                 'placeholder': 'Buscar provincia...'
             }),
             'country': forms.TextInput(attrs={ # Changed to TextInput

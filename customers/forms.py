@@ -17,18 +17,29 @@ class CustomerForm(forms.ModelForm):
             'document': forms.TextInput(attrs={'class': 'form-control'}),
             'street': forms.TextInput(attrs={'class': 'form-control'}),
             'number': forms.TextInput(attrs={'class': 'form-control'}),
-            'neighborhood': forms.TextInput(attrs={'class': 'form-control'}),
+            'neighborhood': forms.TextInput(attrs={
+                'class': 'form-control neighborhood-autocomplete',
+                'placeholder': 'Escriba el nombre del barrio...'
+            }),
             'birth_date': forms.DateInput(
                 attrs={'class': 'form-control', 'type': 'date'},
                 format='%Y-%m-%d'
             ),
             'profession': forms.TextInput(attrs={'class': 'form-control'}),
             'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-            # Los campos ForeignKey (country, province, locality) usarán los widgets por defecto (Select)
-            # o se pueden personalizar aquí si es necesario, aunque la carga dinámica se hará con JS.
-            'country': forms.Select(attrs={'class': 'form-select country-select'}), # Use Select for initial data
-            'province': forms.Select(attrs={'class': 'form-select province-select'}),
-            'locality': forms.Select(attrs={'class': 'form-select locality-select'}),
+            # Campos de ubicación con autocomplete y creación
+            'country': forms.TextInput(attrs={
+                'class': 'form-control country-autocomplete',
+                'placeholder': 'Buscar país...'
+            }),
+            'province': forms.TextInput(attrs={
+                'class': 'form-control state-autocomplete', 
+                'placeholder': 'Buscar provincia...'
+            }),
+            'locality': forms.TextInput(attrs={
+                'class': 'form-control city-autocomplete',
+                'placeholder': 'Buscar ciudad...'
+            }),
         }
 
     def __init__(self, *args, **kwargs):

@@ -6,215 +6,569 @@
 {% if form.instance.pk %}Editar Propiedad #{{ form.instance.pk }}{% else %}Nueva Propiedad{% endif %}
 {% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/property-styles.css' %}">
+<style>
+  /* Enhanced Form Styles */
+  .property-form-container {
+    background: linear-gradient(135deg, var(--property-light) 0%, #ffffff 100%);
+    min-height: 100vh;
+    padding: var(--property-spacing-lg) 0;
+  }
+  
+  .form-progress-indicator {
+    background: white;
+    border-radius: var(--property-radius-lg);
+    box-shadow: var(--property-shadow-sm);
+    padding: var(--property-spacing-md);
+    margin-bottom: var(--property-spacing-xl);
+    position: sticky;
+    top: 20px;
+    z-index: var(--property-z-sticky);
+  }
+  
+  .progress-step {
+    display: flex;
+    align-items: center;
+    padding: var(--property-spacing-sm) var(--property-spacing-md);
+    border-radius: var(--property-radius-md);
+    transition: var(--property-transition-normal);
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--property-gray-600);
+  }
+  
+  .progress-step:hover {
+    background: var(--property-light);
+    color: var(--property-primary);
+    text-decoration: none;
+  }
+  
+  .progress-step.active {
+    background: var(--property-primary-light);
+    color: var(--property-primary);
+    font-weight: var(--property-font-weight-semibold);
+  }
+  
+  .progress-step.completed {
+    color: var(--property-success);
+  }
+  
+  .progress-step-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: var(--property-spacing-sm);
+    font-size: var(--property-font-size-sm);
+    transition: var(--property-transition-normal);
+  }
+  
+  .progress-step.active .progress-step-icon {
+    background: var(--property-primary);
+    color: white;
+  }
+  
+  .progress-step.completed .progress-step-icon {
+    background: var(--property-success);
+    color: white;
+  }
+  
+  .form-section {
+    background: white;
+    border-radius: var(--property-radius-lg);
+    box-shadow: var(--property-shadow-sm);
+    margin-bottom: var(--property-spacing-xl);
+    overflow: hidden;
+    transition: var(--property-transition-normal);
+  }
+  
+  .form-section:hover {
+    box-shadow: var(--property-shadow-md);
+  }
+  
+  .section-header {
+    background: linear-gradient(135deg, var(--property-light) 0%, var(--property-gray-100) 100%);
+    padding: var(--property-spacing-lg);
+    border-bottom: 1px solid var(--property-gray-200);
+    position: relative;
+  }
+  
+  .section-header::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--property-primary);
+  }
+  
+  .section-content {
+    padding: var(--property-spacing-xl);
+  }
+  
+  .enhanced-form-control {
+    border: 2px solid var(--property-gray-200);
+    border-radius: var(--property-radius-md);
+    padding: var(--property-spacing-md);
+    transition: var(--property-transition-normal);
+    font-size: var(--property-font-size-base);
+  }
+  
+  .enhanced-form-control:focus {
+    border-color: var(--property-primary);
+    box-shadow: 0 0 0 3px var(--property-primary-light);
+    outline: none;
+  }
+  
+  .enhanced-form-control.is-invalid {
+    border-color: var(--property-danger);
+    box-shadow: 0 0 0 3px var(--property-danger-light);
+  }
+  
+  .enhanced-form-control.is-valid {
+    border-color: var(--property-success);
+    box-shadow: 0 0 0 3px var(--property-success-light);
+  }
+  
+  .form-floating-label {
+    position: relative;
+  }
+  
+  .form-floating-label .form-label {
+    position: absolute;
+    top: 50%;
+    left: var(--property-spacing-md);
+    transform: translateY(-50%);
+    background: white;
+    padding: 0 var(--property-spacing-xs);
+    color: var(--property-gray-500);
+    transition: var(--property-transition-normal);
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  .form-floating-label .enhanced-form-control:focus + .form-label,
+  .form-floating-label .enhanced-form-control:not(:placeholder-shown) + .form-label {
+    top: 0;
+    font-size: var(--property-font-size-sm);
+    color: var(--property-primary);
+    font-weight: var(--property-font-weight-medium);
+  }
+  
+  .drag-drop-zone {
+    border: 2px dashed var(--property-gray-300);
+    border-radius: var(--property-radius-lg);
+    padding: var(--property-spacing-2xl);
+    text-align: center;
+    transition: var(--property-transition-normal);
+    cursor: pointer;
+    background: var(--property-light);
+  }
+  
+  .drag-drop-zone:hover,
+  .drag-drop-zone.drag-over {
+    border-color: var(--property-primary);
+    background: var(--property-primary-light);
+    transform: translateY(-2px);
+  }
+  
+  .validation-feedback {
+    display: flex;
+    align-items: center;
+    margin-top: var(--property-spacing-xs);
+    font-size: var(--property-font-size-sm);
+    transition: var(--property-transition-normal);
+  }
+  
+  .validation-feedback.invalid-feedback {
+    color: var(--property-danger);
+  }
+  
+  .validation-feedback.valid-feedback {
+    color: var(--property-success);
+  }
+  
+  .validation-feedback i {
+    margin-right: var(--property-spacing-xs);
+  }
+  
+  .form-actions {
+    background: white;
+    border-radius: var(--property-radius-lg);
+    box-shadow: var(--property-shadow-md);
+    padding: var(--property-spacing-xl);
+    position: sticky;
+    bottom: 20px;
+    z-index: var(--property-z-sticky);
+  }
+  
+  .btn-enhanced {
+    padding: var(--property-spacing-md) var(--property-spacing-xl);
+    border-radius: var(--property-radius-md);
+    font-weight: var(--property-font-weight-semibold);
+    transition: var(--property-transition-normal);
+    border: none;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .btn-enhanced::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: var(--property-transition-normal);
+  }
+  
+  .btn-enhanced:hover::before {
+    left: 100%;
+  }
+  
+  .btn-primary-enhanced {
+    background: linear-gradient(135deg, var(--property-primary) 0%, var(--property-primary-hover) 100%);
+    color: white;
+  }
+  
+  .btn-primary-enhanced:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--property-shadow-lg);
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid mt-4">
-  <div class="row justify-content-center">
-    <div class="col-lg-10 col-xl-8">
-      <!-- Encabezado -->
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <h1 class="h3 text-dark mb-1">
-            {% if form.instance.pk %}
-            <i class="bi bi-pencil-square me-2 text-primary"></i>Editar Propiedad
-            {% else %}
-            <i class="bi bi-house-add me-2 text-primary"></i>Nueva Propiedad
-            {% endif %}
-          </h1>
-          <p class="text-muted mb-0">
-            {% if form.instance.pk %} Actualice la información de la propiedad
-            #{{ form.instance.pk }} {% else %} Complete la información de la
-            nueva propiedad inmobiliaria {% endif %}
-          </p>
+<div class="property-form-container">
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Progress Indicator Sidebar -->
+      <div class="col-lg-3 col-xl-2">
+        <div class="form-progress-indicator">
+          <h6 class="fw-bold mb-3 text-dark">
+            <i class="bi bi-list-check me-2"></i>Progreso del Formulario
+          </h6>
+          <div class="progress-steps">
+            <a href="#section-basic" class="progress-step active" data-section="basic">
+              <div class="progress-step-icon">1</div>
+              <span>Información Básica</span>
+            </a>
+            <a href="#section-location" class="progress-step" data-section="location">
+              <div class="progress-step-icon">2</div>
+              <span>Ubicación</span>
+            </a>
+            <a href="#section-physical" class="progress-step" data-section="physical">
+              <div class="progress-step-icon">3</div>
+              <span>Características</span>
+            </a>
+            <a href="#section-financial" class="progress-step" data-section="financial">
+              <div class="progress-step-icon">4</div>
+              <span>Información Financiera</span>
+            </a>
+            <a href="#section-features" class="progress-step" data-section="features">
+              <div class="progress-step-icon">5</div>
+              <span>Características</span>
+            </a>
+            <a href="#section-images" class="progress-step" data-section="images">
+              <div class="progress-step-icon">6</div>
+              <span>Imágenes</span>
+            </a>
+          </div>
+          <div class="mt-3">
+            <div class="progress" style="height: 6px;">
+              <div class="progress-bar bg-primary" role="progressbar" style="width: 16.67%" id="form-progress"></div>
+            </div>
+            <small class="text-muted mt-1 d-block">
+              <span id="progress-text">1 de 6 secciones completadas</span>
+            </small>
+          </div>
         </div>
-        <a
-          href="{% if form.instance.pk %}{% url 'properties:property_detail' form.instance.pk %}{% else %}{% url 'properties:property_list' %}{% endif %}"
-          class="btn btn-outline-secondary"
-        >
-          <i class="bi bi-arrow-left me-1"></i>
-          {% if form.instance.pk %}Cancelar Cambios{% else %}Volver al listado{% endif %}
-        </a>
       </div>
-
-      <div class="card shadow-sm border-light">
-        <div class="card-body p-4">
-          <form
-            method="post"
-            enctype="multipart/form-data"
-            novalidate
-            id="propertyForm"
+      
+      <!-- Main Form Content -->
+      <div class="col-lg-9 col-xl-10">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h1 class="h3 text-dark mb-1">
+              {% if form.instance.pk %}
+              <i class="bi bi-pencil-square me-2 text-primary"></i>Editar Propiedad
+              {% else %}
+              <i class="bi bi-house-add me-2 text-primary"></i>Nueva Propiedad
+              {% endif %}
+            </h1>
+            <p class="text-muted mb-0">
+              {% if form.instance.pk %} Actualice la información de la propiedad
+              #{{ form.instance.pk }} {% else %} Complete la información de la
+              nueva propiedad inmobiliaria {% endif %}
+            </p>
+          </div>
+          <a
+            href="{% if form.instance.pk %}{% url 'properties:property_detail' form.instance.pk %}{% else %}{% url 'properties:property_list' %}{% endif %}"
+            class="btn btn-outline-secondary"
           >
-            {% csrf_token %} {% if form.errors %}
-            <div class="alert alert-danger border-danger">
-              <div class="d-flex align-items-center mb-2">
-                <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
-                <strong>Errores en el formulario:</strong>
-              </div>
-              <ul class="mb-0">
-                {% for field, errors in form.errors.items %}
-                  {% for error in errors %}
-                    <li>{{ field }}: {{ error }}</li>
-                  {% endfor %}
+            <i class="bi bi-arrow-left me-1"></i>
+            {% if form.instance.pk %}Cancelar Cambios{% else %}Volver al listado{% endif %}
+          </a>
+        </div>
+
+        <form
+          method="post"
+          enctype="multipart/form-data"
+          novalidate
+          id="propertyForm"
+        >
+          {% csrf_token %}
+          
+          <!-- Global Form Errors -->
+          {% if form.errors %}
+          <div class="alert alert-danger border-0 shadow-sm mb-4" style="border-left: 4px solid var(--property-danger) !important;">
+            <div class="d-flex align-items-center mb-2">
+              <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
+              <strong>Errores en el formulario:</strong>
+            </div>
+            <ul class="mb-0">
+              {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                  <li>{{ field }}: {{ error }}</li>
                 {% endfor %}
-              </ul>
-            </div>
-            {% endif %}
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
 
-            <!-- Información Básica -->
-            <div class="row mb-5">
-              <div class="col-12">
-                <div class="d-flex align-items-center mb-4">
-                  <div class="bg-primary rounded-circle p-2 me-3">
-                    <i class="bi bi-info-circle text-white"></i>
-                  </div>
-                  <div>
-                    <h4 class="text-primary mb-1 fw-bold">
-                      Información Básica
-                    </h4>
-                    <p class="text-muted small mb-0">
-                      Datos principales de la propiedad
-                    </p>
-                  </div>
+          <!-- Información Básica -->
+          <div class="form-section" id="section-basic">
+            <div class="section-header">
+              <div class="d-flex align-items-center">
+                <div class="bg-primary rounded-circle p-2 me-3">
+                  <i class="bi bi-info-circle text-white"></i>
                 </div>
-              </div>
-
-              <div class="col-md-8 mb-3">
-                <label
-                  for="{{ form.title.id_for_label }}"
-                  class="form-label fw-semibold"
-                >
-                  <i class="bi bi-house text-primary me-1"></i>
-                  {{form.title.label }}
-                </label>
-                {{ form.title }} {% if form.title.errors %}
-                <div class="text-danger small mt-1">
-                  {{ form.title.errors }}
-                </div>
-                {% endif %}
-              </div>
-
-              <div class="col-md-4 mb-3">
-                <label
-                  for="{{ form.property_type.id_for_label }}"
-                  class="form-label fw-semibold"
-                >
-                  <i class="bi bi-house-door text-success me-1"></i>
-                  {{form.property_type.label }}
-                </label>
-                {{ form.property_type }} {% if form.property_type.errors %}
-                <div class="text-danger small mt-1">
-                  {{ form.property_type.errors }}
-                </div>
-                {% endif %}
-              </div>
-
-              <div class="col-12 mb-3">
-                <label
-                  for="{{ form.description.id_for_label }}"
-                  class="form-label fw-semibold"
-                >
-                  <i class="bi bi-card-text text-info me-1"></i>
-                  {{form.description.label }}
-                </label>
-                {{ form.description }} {% if form.description.errors %}
-                <div class="text-danger small mt-1">
-                  {{ form.description.errors }}
-                </div>
-                {% endif %}
-                <div class="form-text">
-                  <i class="bi bi-info-circle me-1"></i>
-                  Describa las características principales de la propiedad
-                </div>
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label
-                  for="{{ form.property_status.id_for_label }}"
-                  class="form-label fw-semibold"
-                >
-                  <i class="bi bi-flag text-warning me-1"></i>
-                  {{form.property_status.label }}
-                </label>
-                {{ form.property_status }} {% if form.property_status.errors %}
-                <div class="text-danger small mt-1">
-                  {{ form.property_status.errors }}
-                </div>
-                {% endif %}
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label
-                  for="{{ form.agent.id_for_label }}"
-                  class="form-label fw-semibold"
-                >
-                  <i class="bi bi-person-badge text-info me-1"></i>
-                  {{form.agent.label }}
-                </label>
-                {{ form.agent }} {% if form.agent.errors %}
-                <div class="text-danger small mt-1">
-                  {{ form.agent.errors }}
-                </div>
-                {% endif %} {% if not form.instance.pk %}
-                <div class="form-text">
-                  <i class="bi bi-info-circle me-1"></i>
-                  Por defecto eres tú como agente, pero puedes cambiarlo si es
-                  necesario.
-                </div>
-                {% endif %}
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label
-                  for="{{ form.owner.id_for_label }}"
-                  class="form-label fw-semibold">
-                  <i class="bi bi-person text-secondary me-1"></i>
-                  {{form.owner.label }}
-                </label>
-                {{ form.owner }} {% if form.owner.errors %}
-                <div class="text-danger small mt-1">
-                  {{ form.owner.errors }}
-                </div>
-                {% endif %}
-                <div class="form-text">
-                  <i class="bi bi-info-circle me-1"></i>
-                  Propietario de la propiedad (opcional)
-                </div>
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label
-                  for="{{ form.listing_type.id_for_label }}"
-                  class="form-label fw-semibold"
-                >
-                  <i class="bi bi-tags text-warning me-1"></i>
-                  {{form.listing_type.label }}
-                </label>
-                {{ form.listing_type }} {% if form.listing_type.errors %}
-                <div class="text-danger small mt-1">
-                  {{ form.listing_type.errors }}
-                </div>
-                {% endif %}
-                <div class="form-text">
-                  <i class="bi bi-info-circle me-1"></i>
-                  Tipo de comercialización de la propiedad
+                <div>
+                  <h4 class="text-primary mb-1 fw-bold">
+                    Información Básica
+                  </h4>
+                  <p class="text-muted small mb-0">
+                    Datos principales de la propiedad
+                  </p>
                 </div>
               </div>
             </div>
+            <div class="section-content">
+              <div class="row">
 
-            <!-- Ubicación -->
-            <div class="row mb-5">
-              <div class="col-12">
-                <div class="d-flex align-items-center mb-4">
-                  <div class="bg-success rounded-circle p-2 me-3">
-                    <i class="bi bi-geo-alt text-white"></i>
+                <div class="col-md-8 mb-4">
+                  <div class="form-floating-label">
+                    <input type="text" 
+                           class="form-control enhanced-form-control" 
+                           id="{{ form.title.id_for_label }}" 
+                           name="{{ form.title.name }}" 
+                           value="{{ form.title.value|default:'' }}"
+                           placeholder=" "
+                           required>
+                    <label for="{{ form.title.id_for_label }}" class="form-label">
+                      <i class="bi bi-house text-primary me-1"></i>
+                      {{ form.title.label }}
+                    </label>
                   </div>
-                  <div>
-                    <h4 class="text-success mb-1 fw-bold">Ubicación</h4>
-                    <p class="text-muted small mb-0">
-                      Dirección y localización de la propiedad
-                    </p>
+                  {% if form.title.errors %}
+                  <div class="validation-feedback invalid-feedback">
+                    <i class="bi bi-exclamation-circle"></i>
+                    {{ form.title.errors.0 }}
+                  </div>
+                  {% endif %}
+                  <div class="validation-feedback valid-feedback" style="display: none;">
+                    <i class="bi bi-check-circle"></i>
+                    Título válido
+                  </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                  <label for="{{ form.property_type.id_for_label }}" class="form-label fw-semibold">
+                    <i class="bi bi-house-door text-success me-1"></i>
+                    {{ form.property_type.label }}
+                  </label>
+                  <select class="form-select enhanced-form-control" 
+                          id="{{ form.property_type.id_for_label }}" 
+                          name="{{ form.property_type.name }}"
+                          required>
+                    <option value="">Seleccionar tipo...</option>
+                    {% for choice in form.property_type.field.choices %}
+                      {% if choice.0 %}
+                        <option value="{{ choice.0 }}" {% if form.property_type.value == choice.0 %}selected{% endif %}>
+                          {{ choice.1 }}
+                        </option>
+                      {% endif %}
+                    {% endfor %}
+                  </select>
+                  {% if form.property_type.errors %}
+                  <div class="validation-feedback invalid-feedback">
+                    <i class="bi bi-exclamation-circle"></i>
+                    {{ form.property_type.errors.0 }}
+                  </div>
+                  {% endif %}
+                  <div class="validation-feedback valid-feedback" style="display: none;">
+                    <i class="bi bi-check-circle"></i>
+                    Tipo seleccionado
+                  </div>
+                </div>
+
+                <div class="col-12 mb-4">
+                  <label for="{{ form.description.id_for_label }}" class="form-label fw-semibold">
+                    <i class="bi bi-card-text text-info me-1"></i>
+                    {{ form.description.label }}
+                  </label>
+                  <textarea class="form-control enhanced-form-control" 
+                            id="{{ form.description.id_for_label }}" 
+                            name="{{ form.description.name }}" 
+                            rows="4" 
+                            placeholder="Describa las características principales de la propiedad...">{{ form.description.value|default:'' }}</textarea>
+                  {% if form.description.errors %}
+                  <div class="validation-feedback invalid-feedback">
+                    <i class="bi bi-exclamation-circle"></i>
+                    {{ form.description.errors.0 }}
+                  </div>
+                  {% endif %}
+                  <div class="form-text">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Describa las características principales de la propiedad
+                  </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                  <label for="{{ form.property_status.id_for_label }}" class="form-label fw-semibold">
+                    <i class="bi bi-flag text-warning me-1"></i>
+                    {{ form.property_status.label }}
+                  </label>
+                  <select class="form-select enhanced-form-control" 
+                          id="{{ form.property_status.id_for_label }}" 
+                          name="{{ form.property_status.name }}"
+                          required>
+                    <option value="">Seleccionar estado...</option>
+                    {% for choice in form.property_status.field.choices %}
+                      {% if choice.0 %}
+                        <option value="{{ choice.0 }}" {% if form.property_status.value == choice.0 %}selected{% endif %}>
+                          {{ choice.1 }}
+                        </option>
+                      {% endif %}
+                    {% endfor %}
+                  </select>
+                  {% if form.property_status.errors %}
+                  <div class="validation-feedback invalid-feedback">
+                    <i class="bi bi-exclamation-circle"></i>
+                    {{ form.property_status.errors.0 }}
+                  </div>
+                  {% endif %}
+                </div>
+
+                <div class="col-md-6 mb-4">
+                  <label for="{{ form.agent.id_for_label }}" class="form-label fw-semibold">
+                    <i class="bi bi-person-badge text-info me-1"></i>
+                    {{ form.agent.label }}
+                  </label>
+                  <select class="form-select enhanced-form-control" 
+                          id="{{ form.agent.id_for_label }}" 
+                          name="{{ form.agent.name }}">
+                    {% for choice in form.agent.field.choices %}
+                      <option value="{{ choice.0 }}" {% if form.agent.value == choice.0 %}selected{% endif %}>
+                        {{ choice.1 }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                  {% if form.agent.errors %}
+                  <div class="validation-feedback invalid-feedback">
+                    <i class="bi bi-exclamation-circle"></i>
+                    {{ form.agent.errors.0 }}
+                  </div>
+                  {% endif %}
+                  {% if not form.instance.pk %}
+                  <div class="form-text">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Por defecto eres tú como agente, pero puedes cambiarlo si es necesario.
+                  </div>
+                  {% endif %}
+                </div>
+
+                <div class="col-md-6 mb-4">
+                  <label for="{{ form.owner.id_for_label }}" class="form-label fw-semibold">
+                    <i class="bi bi-person text-secondary me-1"></i>
+                    {{ form.owner.label }}
+                  </label>
+                  <select class="form-select enhanced-form-control" 
+                          id="{{ form.owner.id_for_label }}" 
+                          name="{{ form.owner.name }}">
+                    <option value="">Seleccionar propietario...</option>
+                    {% for choice in form.owner.field.choices %}
+                      {% if choice.0 %}
+                        <option value="{{ choice.0 }}" {% if form.owner.value == choice.0 %}selected{% endif %}>
+                          {{ choice.1 }}
+                        </option>
+                      {% endif %}
+                    {% endfor %}
+                  </select>
+                  {% if form.owner.errors %}
+                  <div class="validation-feedback invalid-feedback">
+                    <i class="bi bi-exclamation-circle"></i>
+                    {{ form.owner.errors.0 }}
+                  </div>
+                  {% endif %}
+                  <div class="form-text">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Propietario de la propiedad (opcional)
+                  </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                  <label for="{{ form.listing_type.id_for_label }}" class="form-label fw-semibold">
+                    <i class="bi bi-tags text-warning me-1"></i>
+                    {{ form.listing_type.label }}
+                  </label>
+                  <select class="form-select enhanced-form-control" 
+                          id="{{ form.listing_type.id_for_label }}" 
+                          name="{{ form.listing_type.name }}">
+                    {% for choice in form.listing_type.field.choices %}
+                      <option value="{{ choice.0 }}" {% if form.listing_type.value == choice.0 %}selected{% endif %}>
+                        {{ choice.1 }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                  {% if form.listing_type.errors %}
+                  <div class="validation-feedback invalid-feedback">
+                    <i class="bi bi-exclamation-circle"></i>
+                    {{ form.listing_type.errors.0 }}
+                  </div>
+                  {% endif %}
+                  <div class="form-text">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Tipo de comercialización de la propiedad
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <!-- Ubicación -->
+          <div class="form-section" id="section-location">
+            <div class="section-header">
+              <div class="d-flex align-items-center">
+                <div class="bg-success rounded-circle p-2 me-3">
+                  <i class="bi bi-geo-alt text-white"></i>
+                </div>
+                <div>
+                  <h4 class="text-success mb-1 fw-bold">Ubicación</h4>
+                  <p class="text-muted small mb-0">
+                    Dirección y localización de la propiedad
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="section-content">
+              <div class="row">
 
               <div class="col-md-6 mb-3">
                 <label
@@ -291,21 +645,26 @@
                 {% endif %}
               </div>
 
-              <div class="col-md-4 mb-3">
-                <label
-                  for="{{ form.locality.id_for_label }}"
-                  class="form-label fw-semibold"
-                >
-                  <i class="bi bi-geo-alt text-info me-1"></i>
-                  {{form.locality.label }}
-                </label>
-                {{ form.locality }} {% if form.locality.errors %}
-                <div class="text-danger small mt-1">
-                  {{ form.locality.errors }}
+                <div class="col-md-4 mb-4">
+                  <label for="{{ form.locality.id_for_label }}" class="form-label fw-semibold">
+                    <i class="bi bi-geo-alt text-info me-1"></i>
+                    {{ form.locality.label }}
+                  </label>
+                  <input type="text" 
+                         class="form-control enhanced-form-control" 
+                         id="{{ form.locality.id_for_label }}" 
+                         name="{{ form.locality.name }}" 
+                         value="{{ form.locality.value|default:'' }}">
+                  {% if form.locality.errors %}
+                  <div class="validation-feedback invalid-feedback">
+                    <i class="bi bi-exclamation-circle"></i>
+                    {{ form.locality.errors.0 }}
+                  </div>
+                  {% endif %}
                 </div>
-                {% endif %}
               </div>
             </div>
+          </div>
 
             <!-- Características Físicas -->
             <div class="row mb-5">
@@ -636,29 +995,50 @@
               </div>
             </div>
 
-            <!-- Imágenes -->
-            {% if image_formset %}
-            <div class="row mb-4">
-              <div class="col-12">
-                <div class="d-flex align-items-center mb-4">
-                  <div class="bg-secondary rounded-circle p-2 me-3">
-                    <i class="bi bi-images text-white"></i>
-                  </div>
-                  <div>
-                    <h4 class="text-secondary mb-1 fw-bold">Imágenes</h4>
-                    <p class="text-muted small mb-0">
-                      Galería de fotos de la propiedad
-                    </p>
+          <!-- Imágenes -->
+          {% if image_formset %}
+          <div class="form-section" id="section-images">
+            <div class="section-header">
+              <div class="d-flex align-items-center">
+                <div class="bg-secondary rounded-circle p-2 me-3">
+                  <i class="bi bi-images text-white"></i>
+                </div>
+                <div>
+                  <h4 class="text-secondary mb-1 fw-bold">Imágenes</h4>
+                  <p class="text-muted small mb-0">
+                    Galería de fotos de la propiedad
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="section-content">
+              <!-- Drag and Drop Zone -->
+              <div class="drag-drop-zone mb-4" id="dragDropZone">
+                <div class="text-center">
+                  <i class="bi bi-cloud-upload display-4 text-primary mb-3"></i>
+                  <h5 class="text-primary mb-2">Arrastra y suelta tus imágenes aquí</h5>
+                  <p class="text-muted mb-3">o haz clic para seleccionar archivos</p>
+                  <input type="file" 
+                         id="multipleImageInput" 
+                         multiple 
+                         accept="image/*" 
+                         style="display: none;">
+                  <button type="button" class="btn btn-primary btn-enhanced" onclick="document.getElementById('multipleImageInput').click()">
+                    <i class="bi bi-plus-circle me-2"></i>Seleccionar Imágenes
+                  </button>
+                  <div class="mt-2">
+                    <small class="text-muted">
+                      <i class="bi bi-info-circle me-1"></i>
+                      Formatos soportados: JPG, PNG, WebP. Máximo 10 imágenes.
+                    </small>
                   </div>
                 </div>
               </div>
 
-              <div class="col-12">
-                <div class="alert alert-info border-info">
-                  <i class="bi bi-info-circle me-2"></i>
-                  Puede agregar múltiples imágenes. La primera imagen será la
-                  imagen principal.
-                </div>
+              <div class="alert alert-info border-0 shadow-sm mb-4" style="border-left: 4px solid var(--property-info) !important;">
+                <i class="bi bi-lightbulb me-2"></i>
+                <strong>Consejo:</strong> La primera imagen será la imagen principal. Puedes reordenar las imágenes arrastrándolas.
+              </div>
 
                 {{ image_formset.management_form }}
 
@@ -754,32 +1134,296 @@
             </div>
             {% endif %}
 
-            <hr class="my-4" />
-
-            <div class="d-flex justify-content-end">
+        </form>
+        
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="form-progress-summary">
+              <small class="text-muted">
+                <i class="bi bi-info-circle me-1"></i>
+                Progreso: <span id="completion-percentage">16%</span> completado
+              </small>
+            </div>
+            <div class="action-buttons">
               <a
                 href="{% if form.instance.pk %}{% url 'properties:property_detail' form.instance.pk %}{% else %}{% url 'properties:property_list' %}{% endif %}"
-                class="btn btn-outline-secondary me-2"
+                class="btn btn-outline-secondary me-3"
               >
                 <i class="bi bi-x-circle me-1"></i> Cancelar
               </a>
-              <button type="submit" class="btn btn-primary">
-                <i class="bi bi-check-circle-fill me-1"></i> Guardar Propiedad
+              <button type="submit" form="propertyForm" class="btn btn-primary-enhanced btn-enhanced">
+                <i class="bi bi-check-circle-fill me-2"></i> 
+                {% if form.instance.pk %}Actualizar Propiedad{% else %}Guardar Propiedad{% endif %}
               </button>
             </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </div>
 
+{% block extra_js %}
+<script src="{% static 'js/property-form-enhanced.js' %}"></script>
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     const propertyForm = document.getElementById("propertyForm");
     const salePriceInput = document.getElementById("id_sale_price");
     const rentalPriceInput = document.getElementById("id_rental_price");
     const listingTypeSelect = document.getElementById("id_listing_type");
+    
+    // Enhanced Form Progress Tracking
+    const progressSteps = document.querySelectorAll('.progress-step');
+    const progressBar = document.getElementById('form-progress');
+    const progressText = document.getElementById('progress-text');
+    const completionPercentage = document.getElementById('completion-percentage');
+    
+    // Form sections for progress tracking
+    const formSections = [
+      { id: 'section-basic', fields: ['title', 'property_type', 'description'] },
+      { id: 'section-location', fields: ['street', 'number', 'country', 'province', 'locality'] },
+      { id: 'section-physical', fields: ['total_surface', 'bedrooms', 'bathrooms'] },
+      { id: 'section-financial', fields: ['sale_price', 'rental_price'] },
+      { id: 'section-features', fields: ['features'] },
+      { id: 'section-images', fields: ['images'] }
+    ];
+    
+    // Enhanced Form Validation
+    function validateField(field) {
+      const fieldElement = document.getElementById(`id_${field}`);
+      if (!fieldElement) return false;
+      
+      const value = fieldElement.value.trim();
+      const isValid = value !== '';
+      
+      // Update field styling
+      fieldElement.classList.remove('is-invalid', 'is-valid');
+      const validFeedback = fieldElement.parentNode.querySelector('.valid-feedback');
+      const invalidFeedback = fieldElement.parentNode.querySelector('.invalid-feedback');
+      
+      if (isValid) {
+        fieldElement.classList.add('is-valid');
+        if (validFeedback) validFeedback.style.display = 'flex';
+        if (invalidFeedback) invalidFeedback.style.display = 'none';
+      } else {
+        fieldElement.classList.add('is-invalid');
+        if (validFeedback) validFeedback.style.display = 'none';
+        if (invalidFeedback) invalidFeedback.style.display = 'flex';
+      }
+      
+      return isValid;
+    }
+    
+    // Update Progress
+    function updateProgress() {
+      let completedSections = 0;
+      
+      formSections.forEach((section, index) => {
+        const sectionElement = document.getElementById(section.id);
+        const progressStep = progressSteps[index];
+        
+        if (!sectionElement || !progressStep) return;
+        
+        // Check if section fields are completed
+        const completedFields = section.fields.filter(field => {
+          const fieldElement = document.getElementById(`id_${field}`);
+          return fieldElement && fieldElement.value.trim() !== '';
+        });
+        
+        const isCompleted = completedFields.length >= Math.ceil(section.fields.length * 0.5); // 50% completion
+        
+        if (isCompleted) {
+          completedSections++;
+          progressStep.classList.add('completed');
+          progressStep.classList.remove('active');
+        }
+      });
+      
+      const progressPercentage = (completedSections / formSections.length) * 100;
+      progressBar.style.width = `${progressPercentage}%`;
+      progressText.textContent = `${completedSections} de ${formSections.length} secciones completadas`;
+      completionPercentage.textContent = `${Math.round(progressPercentage)}%`;
+    }
+    
+    // Smooth Scrolling for Progress Steps
+    progressSteps.forEach(step => {
+      step.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        const targetElement = document.querySelector(targetId);
+        
+        if (targetElement) {
+          targetElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+          
+          // Update active step
+          progressSteps.forEach(s => s.classList.remove('active'));
+          this.classList.add('active');
+        }
+      });
+    });
+    
+    // Enhanced Drag and Drop for Images
+    const dragDropZone = document.getElementById('dragDropZone');
+    const multipleImageInput = document.getElementById('multipleImageInput');
+    
+    if (dragDropZone && multipleImageInput) {
+      // Drag and drop events
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dragDropZone.addEventListener(eventName, preventDefaults, false);
+      });
+      
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dragDropZone.addEventListener(eventName, highlight, false);
+      });
+      
+      ['dragleave', 'drop'].forEach(eventName => {
+        dragDropZone.addEventListener(eventName, unhighlight, false);
+      });
+      
+      function highlight(e) {
+        dragDropZone.classList.add('drag-over');
+      }
+      
+      function unhighlight(e) {
+        dragDropZone.classList.remove('drag-over');
+      }
+      
+      dragDropZone.addEventListener('drop', handleDrop, false);
+      
+      function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        handleFiles(files);
+      }
+      
+      multipleImageInput.addEventListener('change', function(e) {
+        handleFiles(e.target.files);
+      });
+      
+      function handleFiles(files) {
+        [...files].forEach(uploadFile);
+      }
+      
+      function uploadFile(file) {
+        if (!file.type.startsWith('image/')) {
+          showErrorToast('Solo se permiten archivos de imagen');
+          return;
+        }
+        
+        if (file.size > 5 * 1024 * 1024) { // 5MB limit
+          showErrorToast('El archivo es demasiado grande. Máximo 5MB por imagen.');
+          return;
+        }
+        
+        // Create preview
+        createImagePreview(file);
+      }
+      
+      function createImagePreview(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const previewHtml = `
+            <div class="image-preview-item card mb-3 border-light">
+              <div class="card-body p-3">
+                <div class="row g-3 align-items-start">
+                  <div class="col-md-3">
+                    <img src="${e.target.result}" class="img-fluid rounded" alt="Vista previa" 
+                         style="max-height: 150px; width: 100%; object-fit: cover;">
+                  </div>
+                  <div class="col-md-9">
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold">
+                        <i class="bi bi-card-text me-1"></i>Descripción
+                      </label>
+                      <input type="text" class="form-control enhanced-form-control" 
+                             placeholder="Descripción de la imagen...">
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" name="cover_image" value="">
+                        <label class="form-check-label">Imagen principal</label>
+                      </div>
+                      <button type="button" class="btn btn-outline-danger btn-sm remove-preview">
+                        <i class="bi bi-trash me-1"></i>Eliminar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+          
+          const container = document.getElementById('image-forms-container') || 
+                           document.createElement('div');
+          if (!container.id) {
+            container.id = 'image-forms-container';
+            dragDropZone.parentNode.insertBefore(container, dragDropZone.nextSibling);
+          }
+          
+          container.insertAdjacentHTML('beforeend', previewHtml);
+          
+          // Add remove functionality
+          const removeBtn = container.lastElementChild.querySelector('.remove-preview');
+          removeBtn.addEventListener('click', function() {
+            this.closest('.image-preview-item').remove();
+          });
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+    
+    // Real-time validation
+    document.querySelectorAll('.enhanced-form-control').forEach(input => {
+      input.addEventListener('input', function() {
+        const fieldName = this.name;
+        if (fieldName) {
+          validateField(fieldName);
+          updateProgress();
+        }
+      });
+      
+      input.addEventListener('blur', function() {
+        const fieldName = this.name;
+        if (fieldName) {
+          validateField(fieldName);
+        }
+      });
+    });
+    
+    // Initial progress update
+    updateProgress();
+    
+    // Intersection Observer for section tracking
+    const sectionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const sectionId = entry.target.id;
+          const correspondingStep = document.querySelector(`[href="#${sectionId}"]`);
+          
+          if (correspondingStep) {
+            progressSteps.forEach(step => step.classList.remove('active'));
+            correspondingStep.classList.add('active');
+          }
+        }
+      });
+    }, {
+      threshold: 0.5,
+      rootMargin: '-100px 0px -100px 0px'
+    });
+    
+    // Observe all form sections
+    document.querySelectorAll('.form-section').forEach(section => {
+      sectionObserver.observe(section);
+    });
 
     // Función para mostrar/ocultar campos de precio según el tipo de listado
     function togglePriceFields() {
@@ -1020,14 +1664,152 @@
       );
     }
 
-    // Limpiar clases de error al escribir
-    document.querySelectorAll(".form-control").forEach((input) => {
-      input.addEventListener("input", function () {
-        this.classList.remove("is-invalid");
+    // Enhanced Toast Notifications
+    function showErrorToast(message) {
+      showToast(message, "error");
+    }
+    
+    function showSuccessToast(message) {
+      showToast(message, "success");
+    }
+
+    function showToast(message, type = "info") {
+      let toastContainer = document.querySelector(".toast-container");
+      if (!toastContainer) {
+        toastContainer = document.createElement("div");
+        toastContainer.className = "toast-container position-fixed top-0 end-0 p-3";
+        toastContainer.style.zIndex = "9999";
+        document.body.appendChild(toastContainer);
+      }
+
+      const iconClass = {
+        error: "bi-exclamation-triangle-fill text-danger",
+        success: "bi-check-circle-fill text-success",
+        info: "bi-info-circle-fill text-info"
+      }[type];
+      
+      const headerText = {
+        error: "Error",
+        success: "Éxito", 
+        info: "Información"
+      }[type];
+
+      const toastHtml = `
+        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+          <div class="toast-header">
+            <i class="${iconClass} me-2"></i>
+            <strong class="me-auto">${headerText}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body">${message}</div>
+        </div>
+      `;
+
+      toastContainer.insertAdjacentHTML("beforeend", toastHtml);
+      const toast = new bootstrap.Toast(toastContainer.lastElementChild, {
+        autohide: true,
+        delay: type === 'error' ? 5000 : 3000
       });
+      toast.show();
+
+      toastContainer.lastElementChild.addEventListener("hidden.bs.toast", function () {
+        this.remove();
+      });
+    }
+    
+    // Enhanced Form Submission
+    if (propertyForm) {
+      propertyForm.addEventListener("submit", function (e) {
+        let isValid = true;
+        const errors = [];
+
+        // Clear previous validation states
+        document.querySelectorAll(".is-invalid").forEach((field) => {
+          field.classList.remove("is-invalid");
+        });
+
+        // Validate required fields
+        const requiredFields = [
+          { name: "title", label: "Título" },
+          { name: "property_type", label: "Tipo de propiedad" },
+          { name: "property_status", label: "Estado" },
+          { name: "street", label: "Calle" },
+          { name: "total_surface", label: "Superficie total" }
+        ];
+        
+        requiredFields.forEach((field) => {
+          const fieldElement = document.getElementById(`id_${field.name}`);
+          if (fieldElement && !fieldElement.value.trim()) {
+            isValid = false;
+            fieldElement.classList.add("is-invalid");
+            errors.push(`${field.label} es requerido`);
+          }
+        });
+
+        // Validate pricing based on listing type
+        if (salePriceInput && rentalPriceInput && listingTypeSelect) {
+          const salePrice = parseFloat(salePriceInput.value) || 0;
+          const rentalPrice = parseFloat(rentalPriceInput.value) || 0;
+          const listingType = listingTypeSelect.value;
+
+          if (listingType === "sale" && salePrice <= 0) {
+            isValid = false;
+            salePriceInput.classList.add("is-invalid");
+            errors.push("Debe definir un precio de venta para propiedades en venta");
+          } else if (listingType === "rent" && rentalPrice <= 0) {
+            isValid = false;
+            rentalPriceInput.classList.add("is-invalid");
+            errors.push("Debe definir un precio de alquiler para propiedades en alquiler");
+          } else if (listingType === "both" && salePrice <= 0 && rentalPrice <= 0) {
+            isValid = false;
+            salePriceInput.classList.add("is-invalid");
+            rentalPriceInput.classList.add("is-invalid");
+            errors.push("Debe definir al menos un precio (venta o alquiler)");
+          }
+        }
+
+        if (!isValid) {
+          e.preventDefault();
+          
+          // Show errors in toast
+          errors.forEach(error => showErrorToast(error));
+          
+          // Scroll to first error
+          const firstError = document.querySelector('.is-invalid');
+          if (firstError) {
+            firstError.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center' 
+            });
+            firstError.focus();
+          }
+        } else {
+          // Show loading state
+          const submitBtn = document.querySelector('button[type="submit"]');
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Guardando...';
+          }
+        }
+      });
+    }
+    
+    // Auto-save functionality (optional)
+    let autoSaveTimeout;
+    function autoSave() {
+      clearTimeout(autoSaveTimeout);
+      autoSaveTimeout = setTimeout(() => {
+        // Could implement auto-save to localStorage here
+        console.log('Auto-saving form data...');
+      }, 2000);
+    }
+    
+    document.querySelectorAll('.enhanced-form-control').forEach(input => {
+      input.addEventListener('input', autoSave);
     });
   });
 </script>
+{% endblock %}
 
 <script src="{% static 'js/owner-autocomplete.js' %}"></script>
 <script src="{% static 'js/location-autocomplete.js' %}"></script>

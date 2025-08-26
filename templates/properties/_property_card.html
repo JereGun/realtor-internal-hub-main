@@ -1,75 +1,108 @@
 {% load humanize %}
 <div class="col">
-    <div class="card h-100 shadow-sm property-card">
-        <div class="position-relative">
+    <div class="card h-100 property-card property-card-enhanced property-transition-all property-hover-lift">
+        <div class="property-image-container position-relative">
             {% if property.cover_image %}
-                <img src="{{ property.cover_image.image.url }}" class="card-img-top property-card-img" alt="{{ property.title }}">
+                <img src="{{ property.cover_image.image.url }}" class="property-image" alt="{{ property.title }}" loading="lazy">
             {% else %}
-                <div class="card-img-top bg-light d-flex align-items-center justify-content-center property-card-img-placeholder">
-                    <i class="bi bi-building text-muted" style="font-size: 4rem;"></i>
+                <div class="property-image-placeholder">
+                    <i class="bi bi-building property-placeholder-icon"></i>
                 </div>
             {% endif %}
-            <div class="property-card-status-type">
-                <span class="badge bg-primary me-1">{{ property.property_type }}</span>
-                <span class="badge {% if property.property_status.name == 'Disponible' %}bg-success{% elif property.property_status.name == 'Vendida' %}bg-danger{% elif property.property_status.name == 'Alquilada' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+            
+            <!-- Property Badges -->
+            <div class="property-badges">
+                <span class="property-badge property-badge-type">{{ property.property_type }}</span>
+                <span class="property-badge property-badge-status {% if property.property_status.name == 'Disponible' %}property-badge-success{% elif property.property_status.name == 'Vendida' %}property-badge-danger{% elif property.property_status.name == 'Alquilada' %}property-badge-warning{% else %}property-badge-secondary{% endif %}">
                     {{ property.property_status }}
                 </span>
             </div>
-             {% if property.tags.all %}
-            <div class="property-card-tags">
+            
+            {% if property.tags.all %}
+            <div class="property-tags">
                 {% for tag in property.tags.all|slice:":2" %}
-                <span class="badge me-1" style="background-color: {{ tag.color }}; color: #fff;">{{ tag.name }}</span>
+                <span class="property-tag" style="background-color: {{ tag.color }};">{{ tag.name }}</span>
                 {% endfor %}
             </div>
             {% endif %}
+            
+            <!-- Hover Overlay with Quick Actions -->
+            <div class="property-overlay">
+                <div class="property-quick-actions">
+                    <a href="{% url 'properties:property_detail' property.pk %}" class="property-quick-action" title="Ver detalles">
+                        <i class="bi bi-eye-fill"></i>
+                    </a>
+                    <a href="{% url 'properties:property_edit' property.pk %}" class="property-quick-action" title="Editar">
+                        <i class="bi bi-pencil-fill"></i>
+                    </a>
+                    <button class="property-quick-action" title="Favorito" onclick="toggleFavorite({{ property.pk }})">
+                        <i class="bi bi-heart"></i>
+                    </button>
+                </div>
+            </div>
         </div>
         
-        <div class="card-body d-flex flex-column">
-            <h5 class="card-title fw-bold mb-1">{{ property.title|truncatechars:50 }}</h5>
-            <p class="card-text text-muted small mb-2">
-                <i class="bi bi-geo-alt-fill text-danger me-1"></i> {{ property.locality|default_if_none:property.neighborhood|default_if_none:"Ubicación no especificada"|truncatechars:35 }}
-            </p>
+        <div class="property-content">
+            <div class="property-header">
+                <h5 class="property-title">{{ property.title|truncatechars:50 }}</h5>
+                <p class="property-location">
+                    <i class="bi bi-geo-alt-fill property-location-icon"></i> 
+                    {{ property.locality|default_if_none:property.neighborhood|default_if_none:"Ubicación no especificada"|truncatechars:35 }}
+                </p>
+            </div>
             
-            <div class="d-flex justify-content-around text-center my-2 border-top border-bottom py-2">
-                <div>
-                    <i class="bi bi-rulers text-primary" data-bs-toggle="tooltip" title="Superficie Total"></i><br>
-                    <small>{{ property.total_surface|floatformat:"0" }} m²</small>
+            <div class="property-features">
+                <div class="property-feature">
+                    <i class="bi bi-rulers property-feature-icon" data-bs-toggle="tooltip" title="Superficie Total"></i>
+                    <span class="property-feature-value">{{ property.total_surface|floatformat:"0" }} m²</span>
                 </div>
-                <div>
-                    <i class="bi bi-door-closed text-primary" data-bs-toggle="tooltip" title="Dormitorios"></i><br>
-                    <small>{{ property.bedrooms }} dorm.</small>
+                <div class="property-feature">
+                    <i class="bi bi-door-closed property-feature-icon" data-bs-toggle="tooltip" title="Dormitorios"></i>
+                    <span class="property-feature-value">{{ property.bedrooms }} dorm.</span>
                 </div>
-                <div>
-                    <i class="bi bi-droplet-half text-primary" data-bs-toggle="tooltip" title="Baños"></i><br>
-                    <small>{{ property.bathrooms }} baños</small>
+                <div class="property-feature">
+                    <i class="bi bi-droplet-half property-feature-icon" data-bs-toggle="tooltip" title="Baños"></i>
+                    <span class="property-feature-value">{{ property.bathrooms }} baños</span>
                 </div>
             </div>
             
-            <div class="my-2 flex-grow-1">
+            <div class="property-pricing">
                 {% if property.listing_type == 'sale' or property.listing_type == 'both' %}
                     {% if property.sale_price %}
-                        <p class="mb-1"><strong class="text-success h5">Venta: ${{ property.sale_price|floatformat:0|intcomma }}</strong></p>
+                        <div class="property-price property-price-sale">
+                            <span class="property-price-label">Venta:</span>
+                            <span class="property-price-amount">${{ property.sale_price|floatformat:0|intcomma }}</span>
+                        </div>
                     {% endif %}
                 {% endif %}
                 {% if property.listing_type == 'rent' or property.listing_type == 'both' %}
                     {% if property.rental_price %}
-                        <p class="mb-0"><strong class="text-info h6">Alquiler: ${{ property.rental_price|floatformat:0|intcomma }}/mes</strong></p>
+                        <div class="property-price property-price-rent">
+                            <span class="property-price-label">Alquiler:</span>
+                            <span class="property-price-amount">${{ property.rental_price|floatformat:0|intcomma }}/mes</span>
+                        </div>
                     {% endif %}
                 {% endif %}
             </div>
             
-            <div class="mt-auto d-grid gap-2 d-sm-flex justify-content-sm-between align-items-center">
-                <a href="{% url 'properties:property_detail' property.pk %}" class="btn btn-primary btn-sm flex-grow-1 flex-sm-grow-0">
-                    <i class="bi bi-eye-fill me-1"></i> Ver Detalles
+            <div class="property-actions">
+                <a href="{% url 'properties:property_detail' property.pk %}" class="property-btn property-btn-primary property-btn-sm">
+                    <i class="bi bi-eye-fill"></i> Ver Detalles
                 </a>
-                <a href="{% url 'properties:property_edit' property.pk %}" class="btn btn-outline-secondary btn-sm flex-grow-1 flex-sm-grow-0 mt-1 mt-sm-0">
-                    <i class="bi bi-pencil-fill me-1"></i> Editar
+                <a href="{% url 'properties:property_edit' property.pk %}" class="property-btn property-btn-outline-primary property-btn-sm">
+                    <i class="bi bi-pencil-fill"></i> Editar
                 </a>
             </div>
         </div>
-        <div class="card-footer text-muted small">
-            <i class="bi bi-person-circle me-1"></i> {{ property.agent.short_name|default:"N/A" }}
-            <span class="float-end"><i class="bi bi-clock-history me-1"></i> {{ property.updated_at|timesince }}</span>
+        <div class="property-footer">
+            <div class="property-agent">
+                <i class="bi bi-person-circle property-agent-icon"></i> 
+                <span class="property-agent-name">{{ property.agent.short_name|default:"N/A" }}</span>
+            </div>
+            <div class="property-updated">
+                <i class="bi bi-clock-history property-updated-icon"></i> 
+                <span class="property-updated-time">{{ property.updated_at|timesince }}</span>
+            </div>
         </div>
     </div>
 </div>

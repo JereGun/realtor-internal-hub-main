@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Gallery Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="property-styles.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Property Gallery Test</h1>
+        
+        <!-- Enhanced View Controls -->
+        <div class="d-flex justify-content-between align-items-center mb-4 property-gallery-container">
+            <div class="view-toggle-buttons">
+                <button class="btn btn-sm btn-outline-primary" id="btn-grid">
+                    <i class="bi bi-grid-3x3-gap me-1"></i> Grilla
+                </button>
+                <button class="btn btn-sm btn-outline-primary ms-2" id="btn-list">
+                    <i class="bi bi-list me-1"></i> Lista
+                </button>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <div class="text-muted">
+                    <i class="bi bi-images me-1"></i>
+                    3 imágenes
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Grid View -->
+        <div id="grid-view" class="row">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="property-gallery-card">
+                    <div class="property-image-container" 
+                         data-image-url="https://via.placeholder.com/400x225/2563eb/ffffff?text=Image+1" 
+                         data-image-description="Primera imagen de prueba" 
+                         data-image-id="1">
+                        
+                        <img src="https://via.placeholder.com/400x225/2563eb/ffffff?text=Image+1" 
+                             class="property-gallery-image" 
+                             alt="Primera imagen de prueba"
+                             loading="lazy">
+                        
+                        <!-- Image Badges -->
+                        <div class="image-badges">
+                            <span class="image-badge">
+                                <i class="bi bi-star-fill me-1"></i>Portada
+                            </span>
+                        </div>
+                        
+                        <!-- Hover Overlay with Actions -->
+                        <div class="image-overlay">
+                            <div class="overlay-actions">
+                                <button class="overlay-btn" 
+                                        onclick="openImageModal('https://via.placeholder.com/400x225/2563eb/ffffff?text=Image+1', 'Primera imagen de prueba', 1)"
+                                        title="Ver imagen completa">
+                                    <i class="bi bi-zoom-in"></i>
+                                </button>
+                                <button class="overlay-btn text-danger"
+                                       title="Eliminar imagen">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body p-3">
+                        <h6 class="card-title mb-1 text-truncate">Primera imagen de prueba</h6>
+                        <small class="text-muted">
+                            <i class="bi bi-calendar3 me-1"></i>
+                            26/08/2025 14:30
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="property-gallery-card">
+                    <div class="property-image-container" 
+                         data-image-url="https://via.placeholder.com/400x225/059669/ffffff?text=Image+2" 
+                         data-image-description="Segunda imagen de prueba" 
+                         data-image-id="2">
+                        
+                        <img src="https://via.placeholder.com/400x225/059669/ffffff?text=Image+2" 
+                             class="property-gallery-image" 
+                             alt="Segunda imagen de prueba"
+                             loading="lazy">
+                        
+                        <!-- Hover Overlay with Actions -->
+                        <div class="image-overlay">
+                            <div class="overlay-actions">
+                                <button class="overlay-btn" 
+                                        onclick="openImageModal('https://via.placeholder.com/400x225/059669/ffffff?text=Image+2', 'Segunda imagen de prueba', 2)"
+                                        title="Ver imagen completa">
+                                    <i class="bi bi-zoom-in"></i>
+                                </button>
+                                <button class="overlay-btn text-danger"
+                                       title="Eliminar imagen">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body p-3">
+                        <h6 class="card-title mb-1 text-truncate">Segunda imagen de prueba</h6>
+                        <small class="text-muted">
+                            <i class="bi bi-calendar3 me-1"></i>
+                            26/08/2025 14:25
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="property-gallery-card">
+                    <div class="property-image-container" 
+                         data-image-url="https://via.placeholder.com/400x225/d97706/ffffff?text=Image+3" 
+                         data-image-description="Tercera imagen de prueba" 
+                         data-image-id="3">
+                        
+                        <img src="https://via.placeholder.com/400x225/d97706/ffffff?text=Image+3" 
+                             class="property-gallery-image" 
+                             alt="Tercera imagen de prueba"
+                             loading="lazy">
+                        
+                        <!-- Hover Overlay with Actions -->
+                        <div class="image-overlay">
+                            <div class="overlay-actions">
+                                <button class="overlay-btn" 
+                                        onclick="openImageModal('https://via.placeholder.com/400x225/d97706/ffffff?text=Image+3', 'Tercera imagen de prueba', 3)"
+                                        title="Ver imagen completa">
+                                    <i class="bi bi-zoom-in"></i>
+                                </button>
+                                <button class="overlay-btn text-danger"
+                                       title="Eliminar imagen">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body p-3">
+                        <h6 class="card-title mb-1 text-truncate">Tercera imagen de prueba</h6>
+                        <small class="text-muted">
+                            <i class="bi bi-calendar3 me-1"></i>
+                            26/08/2025 14:20
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced List View -->
+        <div id="list-view" class="d-none">
+            <div class="list-view-table">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 100px;">
+                                    <i class="bi bi-image me-1"></i>Imagen
+                                </th>
+                                <th>
+                                    <i class="bi bi-card-text me-1"></i>Descripción
+                                </th>
+                                <th style="width: 100px;" class="text-center">
+                                    <i class="bi bi-star me-1"></i>Portada
+                                </th>
+                                <th style="width: 150px;">
+                                    <i class="bi bi-calendar3 me-1"></i>Fecha
+                                </th>
+                                <th style="width: 120px;" class="text-center">
+                                    <i class="bi bi-gear me-1"></i>Acciones
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-image-url="https://via.placeholder.com/400x225/2563eb/ffffff?text=Image+1" 
+                                data-image-description="Primera imagen de prueba" 
+                                data-image-id="1">
+                                <td>
+                                    <img src="https://via.placeholder.com/400x225/2563eb/ffffff?text=Image+1" 
+                                         class="list-thumbnail property-gallery-image" 
+                                         style="width: 80px; height: 60px; object-fit: cover; cursor: pointer;" 
+                                         alt="Primera imagen de prueba"
+                                         onclick="openImageModal('https://via.placeholder.com/400x225/2563eb/ffffff?text=Image+1', 'Primera imagen de prueba', 1)"
+                                         loading="lazy">
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">Primera imagen de prueba</div>
+                                    <small class="text-muted">ID: 1</small>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-warning">
+                                        <i class="bi bi-star-fill me-1"></i>Sí
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="small">26/08/2025</div>
+                                    <div class="small text-muted">14:30</div>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary" 
+                                                onclick="openImageModal('https://via.placeholder.com/400x225/2563eb/ffffff?text=Image+1', 'Primera imagen de prueba', 1)"
+                                                title="Ver imagen completa">
+                                            <i class="bi bi-zoom-in"></i>
+                                        </button>
+                                        <button class="btn btn-outline-danger"
+                                               title="Eliminar imagen">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- Additional rows would go here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Lightbox Modal -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-enhanced modal-dialog-centered">
+            <div class="modal-content modal-content-enhanced">
+                <div class="modal-header border-0 pb-2">
+                    <h5 class="modal-title" id="imageModalTitle">
+                        <i class="bi bi-image me-2"></i>Vista de Imagen
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="modal-image-container">
+                        <img id="modalImage" class="modal-image-enhanced" alt="Imagen de propiedad">
+                        
+                        <!-- Navigation Arrows -->
+                        <button class="modal-navigation modal-nav-prev" id="modalPrevBtn" title="Imagen anterior">
+                            <i class="bi bi-chevron-left"></i>
+                        </button>
+                        <button class="modal-navigation modal-nav-next" id="modalNextBtn" title="Imagen siguiente">
+                            <i class="bi bi-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer modal-footer-enhanced justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <span id="imageDescription" class="text-muted me-3"></span>
+                        <small id="imageCounter" class="text-muted"></small>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg me-1"></i>Cerrar
+                        </button>
+                        <button id="deleteImageBtn" class="btn btn-danger">
+                            <i class="bi bi-trash me-1"></i>Eliminar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="property-gallery.js"></script>
+    <script>
+        // Test data for the gallery
+        const testImages = [
+            {
+                id: '1',
+                url: 'https://via.placeholder.com/400x225/2563eb/ffffff?text=Image+1',
+                description: 'Primera imagen de prueba',
+                index: 0
+            },
+            {
+                id: '2',
+                url: 'https://via.placeholder.com/400x225/059669/ffffff?text=Image+2',
+                description: 'Segunda imagen de prueba',
+                index: 1
+            },
+            {
+                id: '3',
+                url: 'https://via.placeholder.com/400x225/d97706/ffffff?text=Image+3',
+                description: 'Tercera imagen de prueba',
+                index: 2
+            }
+        ];
+
+        // Initialize gallery with test data
+        document.addEventListener('DOMContentLoaded', function() {
+            window.propertyGallery = new PropertyGallery();
+            
+            // Override images with test data
+            window.propertyGallery.images = testImages;
+            
+            // Setup navigation buttons
+            const prevBtn = document.getElementById('modalPrevBtn');
+            const nextBtn = document.getElementById('modalNextBtn');
+            
+            if (prevBtn && nextBtn) {
+                prevBtn.addEventListener('click', () => {
+                    window.propertyGallery.navigateImage('prev');
+                });
+                
+                nextBtn.addEventListener('click', () => {
+                    window.propertyGallery.navigateImage('next');
+                });
+            }
+            
+            // Update counter
+            const counter = document.getElementById('imageCounter');
+            if (counter) {
+                counter.textContent = `1 de ${testImages.length}`;
+            }
+        });
+
+        function openImageModal(imageUrl, description, imageId) {
+            if (window.propertyGallery) {
+                window.propertyGallery.openImageModal(imageUrl, description, imageId);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Responsive Design Test - Property Templates</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <link href="property-styles.css" rel="stylesheet" />
+    <style>
+      .test-section {
+        margin: 2rem 0;
+        padding: 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+      }
+      .viewport-info {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: var(--property-primary);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        z-index: 9999;
+        border: 1px solid white;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      .breakpoint-indicator {
+        display: none;
+        padding: 4px 8px;
+        margin: 4px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: bold;
+      }
+      @media (max-width: 575.98px) {
+        .breakpoint-xs {
+          display: inline-block;
+          background: #dc2626;
+          color: white;
+        }
+      }
+      @media (min-width: 576px) and (max-width: 767.98px) {
+        .breakpoint-sm {
+          display: inline-block;
+          background: #d97706;
+          color: white;
+        }
+      }
+      @media (min-width: 768px) and (max-width: 991.98px) {
+        .breakpoint-md {
+          display: inline-block;
+          background: #059669;
+          color: white;
+        }
+      }
+      @media (min-width: 992px) and (max-width: 1199.98px) {
+        .breakpoint-lg {
+          display: inline-block;
+          background: #0891b2;
+          color: white;
+        }
+      }
+      @media (min-width: 1200px) {
+        .breakpoint-xl {
+          display: inline-block;
+          background: #2563eb;
+          color: white;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="viewport-info">
+      <div>Viewport: <span id="viewport-size"></span></div>
+      <div>
+        <span class="breakpoint-indicator breakpoint-xs">XS (≤575px)</span>
+        <span class="breakpoint-indicator breakpoint-sm">SM (576-767px)</span>
+        <span class="breakpoint-indicator breakpoint-md">MD (768-991px)</span>
+        <span class="breakpoint-indicator breakpoint-lg">LG (992-1199px)</span>
+        <span class="breakpoint-indicator breakpoint-xl">XL (≥1200px)</span>
+      </div>
+    </div>
+
+    <div class="container-fluid mt-4">
+      <h1 class="h3 text-dark mb-4">
+        <i class="bi bi-phone me-2 text-primary"></i>Responsive Design Test
+      </h1>
+
+      <!-- Property Cards Grid Test -->
+      <div class="test-section">
+        <h3>Property Cards Grid</h3>
+        <div class="property-grid property-grid-auto">
+          <div
+            class="property-card-enhanced property-transition-all property-hover-lift"
+          >
+            <div class="property-image-container">
+              <div class="property-image-placeholder">
+                <i class="bi bi-building property-placeholder-icon"></i>
+              </div>
+              <div class="property-badges">
+                <span class="property-badge property-badge-type">Casa</span>
+                <span class="property-badge property-badge-success"
+                  >Disponible</span
+                >
+              </div>
+              <div class="property-overlay">
+                <div class="property-quick-actions">
+                  <a href="#" class="property-quick-action">
+                    <i class="bi bi-eye-fill"></i>
+                  </a>
+                  <a href="#" class="property-quick-action">
+                    <i class="bi bi-pencil-fill"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div class="property-content">
+              <div class="property-header">
+                <h5 class="property-title">Casa Moderna en Zona Residencial</h5>
+                <p class="property-location">
+                  <i class="bi bi-geo-alt-fill property-location-icon"></i>
+                  Buenos Aires, Argentina
+                </p>
+              </div>
+              <div class="property-features">
+                <div class="property-feature">
+                  <i class="bi bi-rulers property-feature-icon"></i>
+                  <span class="property-feature-value">150 m²</span>
+                </div>
+                <div class="property-feature">
+                  <i class="bi bi-door-closed property-feature-icon"></i>
+                  <span class="property-feature-value">3 dorm.</span>
+                </div>
+                <div class="property-feature">
+                  <i class="bi bi-droplet-half property-feature-icon"></i>
+                  <span class="property-feature-value">2 baños</span>
+                </div>
+              </div>
+              <div class="property-pricing">
+                <div class="property-price property-price-sale">
+                  <span class="property-price-label">Venta:</span>
+                  <span class="property-price-amount">$250,000</span>
+                </div>
+              </div>
+              <div class="property-actions">
+                <a
+                  href="#"
+                  class="property-btn property-btn-primary property-btn-sm"
+                >
+                  <i class="bi bi-eye-fill"></i> Ver Detalles
+                </a>
+                <a
+                  href="#"
+                  class="property-btn property-btn-outline-primary property-btn-sm"
+                >
+                  <i class="bi bi-pencil-fill"></i> Editar
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="property-card-enhanced property-transition-all property-hover-lift"
+          >
+            <div class="property-image-container">
+              <div class="property-image-placeholder">
+                <i class="bi bi-building property-placeholder-icon"></i>
+              </div>
+              <div class="property-badges">
+                <span class="property-badge property-badge-type"
+                  >Apartamento</span
+                >
+                <span class="property-badge property-badge-warning"
+                  >Alquilado</span
+                >
+              </div>
+            </div>
+            <div class="property-content">
+              <div class="property-header">
+                <h5 class="property-title">Apartamento Céntrico</h5>
+                <p class="property-location">
+                  <i class="bi bi-geo-alt-fill property-location-icon"></i>
+                  Centro, Buenos Aires
+                </p>
+              </div>
+              <div class="property-features">
+                <div class="property-feature">
+                  <i class="bi bi-rulers property-feature-icon"></i>
+                  <span class="property-feature-value">80 m²</span>
+                </div>
+                <div class="property-feature">
+                  <i class="bi bi-door-closed property-feature-icon"></i>
+                  <span class="property-feature-value">2 dorm.</span>
+                </div>
+                <div class="property-feature">
+                  <i class="bi bi-droplet-half property-feature-icon"></i>
+                  <span class="property-feature-value">1 baño</span>
+                </div>
+              </div>
+              <div class="property-pricing">
+                <div class="property-price property-price-rent">
+                  <span class="property-price-label">Alquiler:</span>
+                  <span class="property-price-amount">$1,200/mes</span>
+                </div>
+              </div>
+              <div class="property-actions">
+                <a
+                  href="#"
+                  class="property-btn property-btn-primary property-btn-sm"
+                >
+                  <i class="bi bi-eye-fill"></i> Ver Detalles
+                </a>
+                <a
+                  href="#"
+                  class="property-btn property-btn-outline-primary property-btn-sm"
+                >
+                  <i class="bi bi-pencil-fill"></i> Editar
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Statistics Cards Test -->
+      <div class="test-section">
+        <h3>Statistics Cards</h3>
+        <div class="property-stats-grid">
+          <div class="property-stat-card property-stat-card-primary">
+            <i class="bi bi-house property-stat-icon"></i>
+            <div class="property-stat-number">125</div>
+            <p class="property-stat-label">Total Propiedades</p>
+          </div>
+          <div class="property-stat-card property-stat-card-success">
+            <i class="bi bi-check-circle property-stat-icon"></i>
+            <div class="property-stat-number">89</div>
+            <p class="property-stat-label">Disponibles</p>
+          </div>
+          <div class="property-stat-card property-stat-card-warning">
+            <i class="bi bi-eye property-stat-icon"></i>
+            <div class="property-stat-number">15</div>
+            <p class="property-stat-label">Destacadas</p>
+          </div>
+          <div class="property-stat-card property-stat-card-info">
+            <i class="bi bi-house-heart property-stat-icon"></i>
+            <div class="property-stat-number">21</div>
+            <p class="property-stat-label">Alquiladas</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form Controls Test -->
+      <div class="test-section">
+        <h3>Form Controls</h3>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="property-form-label">Campo de texto</label>
+            <input
+              type="text"
+              class="property-form-control"
+              placeholder="Ingrese texto..."
+            />
+          </div>
+          <div class="col-md-6">
+            <label class="property-form-label">Selección</label>
+            <select class="property-form-control property-form-select">
+              <option>Opción 1</option>
+              <option>Opción 2</option>
+              <option>Opción 3</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <div class="d-flex gap-2">
+              <button class="property-btn property-btn-primary">
+                Botón Primario
+              </button>
+              <button class="property-btn property-btn-outline-primary">
+                Botón Secundario
+              </button>
+              <button class="property-btn property-btn-success">Éxito</button>
+              <button class="property-btn property-btn-warning">
+                Advertencia
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Touch-friendly Elements Test -->
+      <div class="test-section">
+        <h3>Touch-friendly Elements</h3>
+        <div class="d-flex flex-wrap gap-2">
+          <button
+            class="property-btn property-btn-primary property-touch-friendly"
+          >
+            <i class="bi bi-heart me-1"></i>Touch Button
+          </button>
+          <button
+            class="property-btn property-btn-outline-secondary property-touch-friendly"
+          >
+            <i class="bi bi-share me-1"></i>Share
+          </button>
+          <button
+            class="property-btn property-btn-success property-touch-friendly"
+          >
+            <i class="bi bi-download me-1"></i>Download
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Update viewport size display
+      function updateViewportInfo() {
+        const viewportSize = document.getElementById("viewport-size");
+        if (viewportSize) {
+          viewportSize.textContent = `${window.innerWidth}x${window.innerHeight}`;
+        }
+      }
+
+      // Initial update
+      updateViewportInfo();
+
+      // Update on resize
+      window.addEventListener("resize", updateViewportInfo);
+
+      // Test touch interactions
+      document
+        .querySelectorAll(".property-btn, .property-card-enhanced")
+        .forEach((element) => {
+          element.addEventListener("touchstart", function () {
+            this.style.transform = "scale(0.98)";
+          });
+
+          element.addEventListener("touchend", function () {
+            setTimeout(() => {
+              this.style.transform = "";
+            }, 150);
+          });
+        });
+    </script>
+  </body>
+</html>

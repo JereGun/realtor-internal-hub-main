@@ -80,12 +80,33 @@
                             </div>
                             
                             <div class="col-md-6 mb-3">
-                                <label for="{{ form.customer.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="bi bi-person text-success me-1"></i>{{ form.customer.label }}
+                                <label for="{{ form.customer_search.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-person text-success me-1"></i>{{ form.customer_search.label }}
                                 </label>
-                                {{ form.customer }}
+                                <div class="position-relative">
+                                    <div class="input-group">
+                                        {{ form.customer_search }}
+                                        <button type="button" class="btn btn-outline-success" id="btn-create-customer" title="Crear nuevo cliente">
+                                            <i class="bi bi-person-plus"></i>
+                                        </button>
+                                    </div>
+                                    {{ form.customer }}
+                                    <div id="customer-search-results" class="dropdown-menu w-100" style="display: none;"></div>
+                                    <div id="selected-customer-info" class="mt-2" style="display: none;">
+                                        <div class="alert alert-success py-2">
+                                            <i class="bi bi-check-circle me-1"></i>
+                                            <span id="selected-customer-text"></span>
+                                            <button type="button" class="btn btn-sm btn-outline-success ms-2" id="btn-clear-customer">
+                                                <i class="bi bi-x"></i> Cambiar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                                 {% if form.customer.errors %}
                                     <div class="text-danger small mt-1">{{ form.customer.errors }}</div>
+                                {% endif %}
+                                {% if form.customer_search.errors %}
+                                    <div class="text-danger small mt-1">{{ form.customer_search.errors }}</div>
                                 {% endif %}
                             </div>
                             
@@ -315,10 +336,150 @@
                         </div>
                     </form>
                 </div>
-.            </div>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- Modal para crear nuevo cliente -->
+<div class="modal fade" id="createCustomerModal" tabindex="-1" aria-labelledby="createCustomerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createCustomerModalLabel">
+                    <i class="bi bi-person-plus text-success me-2"></i>Crear Nuevo Cliente
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createCustomerForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="new_customer_first_name" class="form-label">Nombre *</label>
+                            <input type="text" class="form-control" id="new_customer_first_name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="new_customer_last_name" class="form-label">Apellido *</label>
+                            <input type="text" class="form-control" id="new_customer_last_name" required>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label for="new_customer_email" class="form-label">Email *</label>
+                            <input type="email" class="form-control" id="new_customer_email" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="new_customer_phone" class="form-label">Teléfono</label>
+                            <input type="text" class="form-control" id="new_customer_phone">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="new_customer_document" class="form-label">Documento</label>
+                            <input type="text" class="form-control" id="new_customer_document">
+                        </div>
+                    </div>
+                    <div id="create-customer-error" class="alert alert-danger" style="display: none;"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="btn-save-customer">
+                    <i class="bi bi-check-circle me-1"></i>Crear Cliente
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+#customer-search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1050;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    background-color: white;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    margin-top: 2px;
+}
+
+#customer-search-results .dropdown-item {
+    padding: 0.75rem 1rem;
+    border: none;
+    text-align: left;
+    width: 100%;
+    background: none;
+    display: block;
+}
+
+#customer-search-results .dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+#customer-search-results .dropdown-item:focus {
+    background-color: #e9ecef;
+    outline: none;
+}
+
+#customer-search-results .dropdown-item-text {
+    padding: 0.75rem 1rem;
+    color: #6c757d;
+}
+
+.customer-result {
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.customer-result:hover {
+    background-color: #f8f9fa !important;
+}
+
+.customer-result:active {
+    background-color: #e9ecef !important;
+}
+
+#selected-customer-info .alert {
+    margin-bottom: 0;
+}
+
+/* Asegurar que el contenedor padre tenga posición relativa */
+.position-relative {
+    position: relative !important;
+}
+
+/* Mejorar la apariencia del campo de búsqueda cuando está activo */
+#id_customer_search:focus {
+    border-color: #198754;
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+}
+
+/* Animación suave para mostrar/ocultar resultados */
+#customer-search-results {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+#customer-search-results[style*="block"] {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Transición suave para el botón de crear cliente */
+#btn-create-customer {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+#btn-create-customer[style*="none"] {
+    opacity: 0;
+    transform: scale(0.95);
+}
+</style>
+{% endblock %}
 
 {% block extra_js %}
 <script>
@@ -528,7 +689,261 @@ document.addEventListener('DOMContentLoaded', function() {
             this.classList.remove('is-invalid');
         });
     });
+
+    // ===== FUNCIONALIDAD DE AUTOCOMPLETADO DE CLIENTES =====
+    const customerSearchInput = document.getElementById('id_customer_search');
+    const customerHiddenInput = document.getElementById('id_customer');
+    const customerSearchResults = document.getElementById('customer-search-results');
+    const selectedCustomerInfo = document.getElementById('selected-customer-info');
+    const selectedCustomerText = document.getElementById('selected-customer-text');
+    const btnClearCustomer = document.getElementById('btn-clear-customer');
+    const btnCreateCustomer = document.getElementById('btn-create-customer');
+    const createCustomerModal = new bootstrap.Modal(document.getElementById('createCustomerModal'));
+    
+    let searchTimeout;
+    let selectedCustomer = null;
+
+    // Verificar si ya hay un cliente seleccionado al cargar la página
+    if (customerHiddenInput && customerHiddenInput.value && customerSearchInput && customerSearchInput.value) {
+        selectedCustomer = {
+            id: customerHiddenInput.value,
+            text: customerSearchInput.value
+        };
+        showSelectedCustomer();
+    }
+
+    // Búsqueda de clientes con debounce
+    if (customerSearchInput) {
+        customerSearchInput.addEventListener('input', function() {
+            const query = this.value.trim();
+            
+            clearTimeout(searchTimeout);
+            
+            if (query.length < 2) {
+                hideSearchResults();
+                return;
+            }
+            
+            searchTimeout = setTimeout(() => {
+                searchCustomers(query);
+            }, 300);
+        });
+
+        // Ocultar resultados cuando se pierde el foco (con delay para permitir clicks)
+        customerSearchInput.addEventListener('blur', function() {
+            setTimeout(() => {
+                hideSearchResults();
+            }, 200);
+        });
+
+        // Mostrar resultados cuando se hace foco si hay texto
+        customerSearchInput.addEventListener('focus', function() {
+            if (this.value.trim().length >= 2 && !selectedCustomer) {
+                searchCustomers(this.value.trim());
+            }
+        });
+    }
+
+    // Función para buscar clientes
+    function searchCustomers(query) {
+        const url = `/customers/ajax/search/?q=${encodeURIComponent(query)}`;
+        
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                showSearchResults(data.results || []);
+            })
+            .catch(error => {
+                console.error("Error buscando clientes:", error);
+                showErrorToast("Error al buscar clientes: " + error.message);
+                hideSearchResults();
+            });
+    }
+
+    // Mostrar resultados de búsqueda
+    function showSearchResults(results) {
+        if (!results || results.length === 0) {
+            customerSearchResults.innerHTML = `
+                <div class="dropdown-item-text text-muted">
+                    <i class="bi bi-search me-2"></i>No se encontraron clientes
+                    <br>
+                    <small>Haga clic en <i class="bi bi-person-plus"></i> para crear uno nuevo</small>
+                </div>
+            `;
+        } else {
+            customerSearchResults.innerHTML = results.map(customer => `
+                <button type="button" class="dropdown-item customer-result" data-customer='${JSON.stringify(customer)}'>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-person-circle text-success me-2"></i>
+                        <div>
+                            <div class="fw-semibold">${customer.full_name}</div>
+                            <small class="text-muted">${customer.email}</small>
+                        </div>
+                    </div>
+                </button>
+            `).join('');
+        }
+        
+        // Mostrar con animación
+        customerSearchResults.style.display = 'block';
+        
+        // Forzar reflow para que la animación CSS funcione
+        customerSearchResults.offsetHeight;
+        
+        // Agregar event listeners a los resultados
+        document.querySelectorAll('.customer-result').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const customer = JSON.parse(this.dataset.customer);
+                selectCustomer(customer);
+            });
+        });
+    }
+
+    // Ocultar resultados de búsqueda
+    function hideSearchResults() {
+        customerSearchResults.style.display = 'none';
+    }
+
+    // Seleccionar un cliente
+    function selectCustomer(customer) {
+        selectedCustomer = customer;
+        customerHiddenInput.value = customer.id;
+        customerSearchInput.value = customer.text;
+        hideSearchResults();
+        showSelectedCustomer();
+    }
+
+    // Mostrar información del cliente seleccionado
+    function showSelectedCustomer() {
+        if (selectedCustomer) {
+            selectedCustomerText.textContent = selectedCustomer.text;
+            selectedCustomerInfo.style.display = 'block';
+            customerSearchInput.style.display = 'none';
+            // Ocultar el botón de crear cliente cuando hay uno seleccionado
+            if (btnCreateCustomer) {
+                btnCreateCustomer.style.display = 'none';
+            }
+        }
+    }
+
+    // Limpiar selección de cliente
+    if (btnClearCustomer) {
+        btnClearCustomer.addEventListener('click', function() {
+            selectedCustomer = null;
+            customerHiddenInput.value = '';
+            customerSearchInput.value = '';
+            selectedCustomerInfo.style.display = 'none';
+            customerSearchInput.style.display = 'block';
+            // Mostrar el botón de crear cliente cuando se limpia la selección
+            if (btnCreateCustomer) {
+                btnCreateCustomer.style.display = 'block';
+            }
+            customerSearchInput.focus();
+        });
+    }
+
+    // ===== FUNCIONALIDAD DE CREACIÓN DE CLIENTES =====
+    if (btnCreateCustomer) {
+        btnCreateCustomer.addEventListener('click', function() {
+            // Limpiar formulario
+            document.getElementById('createCustomerForm').reset();
+            document.getElementById('create-customer-error').style.display = 'none';
+            
+            // Pre-llenar con datos de búsqueda si es posible
+            const searchValue = customerSearchInput.value.trim();
+            if (searchValue && !selectedCustomer) {
+                // Intentar extraer nombre del texto de búsqueda
+                const parts = searchValue.split(' ');
+                if (parts.length >= 2) {
+                    document.getElementById('new_customer_first_name').value = parts[0];
+                    document.getElementById('new_customer_last_name').value = parts.slice(1).join(' ');
+                } else if (parts.length === 1) {
+                    document.getElementById('new_customer_first_name').value = parts[0];
+                }
+            }
+            
+            createCustomerModal.show();
+        });
+    }
+
+    // Guardar nuevo cliente
+    document.getElementById('btn-save-customer').addEventListener('click', function() {
+        const formData = {
+            first_name: document.getElementById('new_customer_first_name').value.trim(),
+            last_name: document.getElementById('new_customer_last_name').value.trim(),
+            email: document.getElementById('new_customer_email').value.trim(),
+            phone: document.getElementById('new_customer_phone').value.trim(),
+            document: document.getElementById('new_customer_document').value.trim()
+        };
+
+        // Validaciones básicas
+        if (!formData.first_name || !formData.last_name || !formData.email) {
+            showCreateCustomerError('Nombre, apellido y email son requeridos');
+            return;
+        }
+
+        // Deshabilitar botón mientras se procesa
+        this.disabled = true;
+        this.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Creando...';
+
+        fetch('/customers/ajax/create/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Seleccionar el cliente recién creado
+                selectCustomer(data.customer);
+                createCustomerModal.hide();
+                showInfoToast('Cliente creado correctamente');
+            } else {
+                showCreateCustomerError(data.error || 'Error al crear el cliente');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showCreateCustomerError('Error de conexión. Intente nuevamente.');
+        })
+        .finally(() => {
+            // Rehabilitar botón
+            this.disabled = false;
+            this.innerHTML = '<i class="bi bi-check-circle me-1"></i>Crear Cliente';
+        });
+    });
+
+    // Mostrar error en el modal de creación
+    function showCreateCustomerError(message) {
+        const errorDiv = document.getElementById('create-customer-error');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+    }
+
+    // Validación del formulario principal - agregar validación de cliente
+    const originalFormValidation = contractForm.querySelector('button[type="submit"]');
+    if (originalFormValidation) {
+        contractForm.addEventListener('submit', function(e) {
+            // Validar que se haya seleccionado un cliente
+            if (!customerHiddenInput.value) {
+                e.preventDefault();
+                showErrorToast('Debe seleccionar un cliente');
+                customerSearchInput.classList.add('is-invalid');
+                customerSearchInput.focus();
+                return false;
+            }
+        });
+    }
 });
 </script>
-{% endblock %}
 {% endblock %}

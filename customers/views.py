@@ -90,6 +90,43 @@ class CustomerDeleteView(LoginRequiredMixin, DeleteView):
 
 
 @login_required
+def search_customers_ajax(request):
+    """Buscar clientes via AJAX para autocompletado"""
+    try:
+        if request.method == 'GET':
+            query = request.GET.get('q', '').strip()
+            
+            if len(query) < 2:
+                return JsonResponse({'results': []})
+            
+            # Buscar clientes que coincidan con el query
+            customers = Customer.objects.filter(
+                Q(first_name__icontains=query) |
+                Q(last_name__icontains=query) |
+                Q(email__icontains=query) |
+                Q(document__icontains=query)
+            ).order_by('first_name', 'last_name')[:10]  # Limitar a 10 resultados
+            
+            results = []
+            for customer in customers:
+                results.append({
+                    'id': customer.id,
+                    'text': f"{customer.get_full_name()} ({customer.email})",
+                    'full_name': customer.get_full_name(),
+                    'email': customer.email,
+                    'phone': customer.phone,
+                    'document': customer.document
+                })
+            
+            return JsonResponse({'results': results})
+        
+        return JsonResponse({'results': []})
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
 def create_customer_ajax(request):
     """Crear cliente via AJAX"""
     if request.method == 'POST':

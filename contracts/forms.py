@@ -17,6 +17,17 @@ class DateInput(forms.DateInput):
 
 
 class ContractForm(forms.ModelForm):
+    customer_search = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'id': 'id_customer_search',
+            'placeholder': 'Buscar cliente por nombre, email o documento...',
+            'autocomplete': 'off'
+        }),
+        label='Cliente'
+    )
+    
     class Meta:
         model = Contract
         fields = [
@@ -25,7 +36,7 @@ class ContractForm(forms.ModelForm):
         ]
         widgets = {
             'property': forms.Select(attrs={'class': 'form-control', 'id': 'id_property'}),
-            'customer': forms.Select(attrs={'class': 'form-control'}),
+            'customer': forms.HiddenInput(),
             'agent': forms.Select(attrs={'class': 'form-control','id': 'id_agent'}),
             'start_date': DateInput(attrs={'class': 'form-control', 'type': 'date'}, format='%Y-%m-%d'),
             'end_date': DateInput(attrs={'class': 'form-control', 'type': 'date'}, format='%Y-%m-%d'),
@@ -49,6 +60,9 @@ class ContractForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         if self.instance and self.instance.pk:
+            # Si estamos editando un contrato existente, prellenar el campo de búsqueda
+            if self.instance.customer:
+                self.fields['customer_search'].initial = f"{self.instance.customer.get_full_name()} ({self.instance.customer.email})"
 
             if self.instance.status in [Contract.STATUS_FINISHED, Contract.STATUS_CANCELLED]:
                 self.fields['status'].widget.attrs['disabled'] = True
@@ -58,6 +72,17 @@ class ContractForm(forms.ModelForm):
         from agents.models import Agent
         self.fields['agent'].queryset = Agent.objects.filter(is_active=True).order_by('first_name', 'last_name')
         self.fields['agent'].empty_label = None
+
+    def clean_customer(self):
+        """
+        Valida que se haya seleccionado un cliente.
+        """
+        customer = self.cleaned_data.get('customer')
+        
+        if not customer:
+            raise forms.ValidationError("Debe seleccionar un cliente.")
+        
+        return customer
 
     def clean_owner_discount_percentage(self):
         """

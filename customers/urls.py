@@ -12,5 +12,6 @@ urlpatterns = [
     path('<int:pk>/delete/', views.CustomerDeleteView.as_view(), name='customer_delete'),
     
     # AJAX endpoints
+    path('ajax/search/', views.search_customers_ajax, name='search_customers_ajax'),
     path('ajax/create/', views.create_customer_ajax, name='create_customer_ajax'),
 ]

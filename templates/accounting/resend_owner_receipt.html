@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Reenviar Comprobante {{ receipt.receipt_number }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-paper-plane mr-2"></i>
+                        Reenviar Comprobante
+                    </h3>
+                    <div class="card-tools">
+                        <a href="{% url 'accounting:owner_receipt_detail' receipt.pk %}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> Volver
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    {% if not can_resend %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            Este comprobante no puede ser reenviado porque ya fue enviado exitosamente.
+                        </div>
+                        <div class="text-center">
+                            <a href="{% url 'accounting:owner_receipt_detail' receipt.pk %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Volver al Comprobante
+                            </a>
+                        </div>
+                    {% else %}
+                        <!-- Información del Comprobante -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="alert 
+                                    {% if receipt.status == 'failed' %}alert-danger
+                                    {% else %}alert-info{% endif %}">
+                                    <h5>
+                                        <i class="fas 
+                                            {% if receipt.status == 'failed' %}fa-exclamation-triangle
+                                            {% else %}fa-info-circle{% endif %} mr-2"></i>
+                                        Estado Actual: {{ receipt.get_status_display }}
+                                    </h5>
+                                    {% if receipt.status == 'failed' %}
+                                        <p class="mb-0">
+                                            <strong>Error anterior:</strong> {{ receipt.error_message }}
+                                        </p>
+                                    {% else %}
+                                        <p class="mb-0">
+                                            El comprobante fue generado pero no se ha enviado por email.
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Detalles del Comprobante -->
+                        <div class="card card-outline card-info mb-4">
+                            <div class="card-header">
+                                <h4 class="card-title">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    Detalles del Comprobante
+                                </h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <td><strong>Número:</strong></td>
+                                                <td>{{ receipt.receipt_number }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Factura:</strong></td>
+                                                <td>{{ receipt.invoice.number }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Cliente:</strong></td>
+                                                <td>{{ receipt.invoice.customer.full_name }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Generado:</strong></td>
+                                                <td>{{ receipt.generated_at|date:"d/m/Y H:i" }}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <td><strong>Monto Bruto:</strong></td>
+                                                <td class="text-right">${{ receipt.gross_amount|floatformat:2 }}</td>
+                                            </tr>
+                                            {% if receipt.discount_percentage %}
+                                            <tr>
+                                                <td><strong>Descuento:</strong></td>
+                                                <td class="text-right">{{ receipt.discount_percentage }}%</td>
+                                            </tr>
+                                            {% endif %}
+                                            <tr class="table-success">
+                                                <td><strong>Monto Neto:</strong></td>
+                                                <td class="text-right"><strong>${{ receipt.net_amount|floatformat:2 }}</strong></td>
+                                            </tr>
+                                            <tr>
+                                                <td><strong>Email Destino:</strong></td>
+                                                <td>{{ receipt.email_sent_to|default:"No definido" }}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Confirmación de Reenvío -->
+                        <div class="card card-outline card-warning">
+                            <div class="card-header">
+                                <h4 class="card-title">
+                                    <i class="fas fa-question-circle mr-2"></i>
+                                    Confirmación de Reenvío
+                                </h4>
+                            </div>
+                            <div class="card-body">
+                                <p class="lead">
+                                    ¿Está seguro de que desea reenviar este comprobante por email?
+                                </p>
+                                
+                                {% if receipt.status == 'failed' %}
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle mr-2"></i>
+                                    Se intentará enviar nuevamente el comprobante. Si el error persiste, 
+                                    verifique la configuración de email y la dirección del propietario.
+                                </div>
+                                {% endif %}
+
+                                <div class="row mt-4">
+                                    <div class="col-md-6">
+                                        <form method="post" id="resendForm">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-warning btn-block btn-lg">
+                                                <i class="fas fa-paper-plane mr-2"></i>
+                                                Reenviar Comprobante
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <a href="{% url 'accounting:owner_receipt_detail' receipt.pk %}" 
+                                           class="btn btn-secondary btn-block btn-lg">
+                                            <i class="fas fa-times mr-2"></i>
+                                            Cancelar
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    $('#resendForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        if (confirm('¿Está seguro de que desea reenviar el comprobante?')) {
+            // Mostrar loading
+            var submitBtn = $(this).find('button[type="submit"]');
+            var originalText = submitBtn.html();
+            submitBtn.html('<i class="fas fa-spinner fa-spin mr-2"></i>Reenviando...').prop('disabled', true);
+            
+            // Submit form
+            $(this).off('submit').submit();
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Error en Comprobante de Propietario{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error en Comprobante de Propietario
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger" role="alert">
+                        <h5 class="alert-heading">
+                            <i class="fas fa-times-circle me-2"></i>
+                            {{ error_title|default:"Ha ocurrido un error" }}
+                        </h5>
+                        <p class="mb-3">{{ error_message }}</p>
+                        
+                        {% if error_type == "validation" %}
+                            <hr>
+                            <h6>Posibles soluciones:</h6>
+                            <ul class="mb-0">
+                                <li>Verifique que la factura esté en estado válido (validada, enviada o pagada)</li>
+                                <li>Asegúrese de que el contrato tenga una propiedad asociada</li>
+                                <li>Confirme que la propiedad tenga un propietario asignado</li>
+                                <li>Verifique que el propietario tenga un email válido configurado</li>
+                                <li>Revise que los montos de la factura sean correctos</li>
+                            </ul>
+                        {% elif error_type == "email" %}
+                            <hr>
+                            <h6>Posibles soluciones:</h6>
+                            <ul class="mb-0">
+                                <li>Verifique la configuración del servidor de correo</li>
+                                <li>Confirme que la dirección de email del propietario sea válida</li>
+                                <li>Intente reenviar el comprobante más tarde</li>
+                                <li>Contacte al administrador si el problema persiste</li>
+                            </ul>
+                        {% elif error_type == "pdf" %}
+                            <hr>
+                            <h6>Posibles soluciones:</h6>
+                            <ul class="mb-0">
+                                <li>Verifique que todos los datos del comprobante estén completos</li>
+                                <li>Intente generar el comprobante nuevamente</li>
+                                <li>Contacte al administrador si el problema persiste</li>
+                            </ul>
+                        {% elif error_type == "permission" %}
+                            <hr>
+                            <h6>Información:</h6>
+                            <ul class="mb-0">
+                                <li>Solo el usuario que generó el comprobante o un administrador pueden realizar esta acción</li>
+                                <li>Contacte al administrador si necesita acceso</li>
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                    {% if invoice %}
+                        <div class="card mt-3">
+                            <div class="card-header">
+                                <h6 class="mb-0">Información de la Factura</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Número:</strong> {{ invoice.number }}</p>
+                                        <p><strong>Cliente:</strong> {{ invoice.customer.get_full_name|default:invoice.customer }}</p>
+                                        <p><strong>Estado:</strong> 
+                                            <span class="badge bg-{{ invoice.status|default:'secondary' }}">
+                                                {{ invoice.get_status_display|default:invoice.status }}
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Fecha:</strong> {{ invoice.date|date:"d/m/Y" }}</p>
+                                        <p><strong>Monto:</strong> ${{ invoice.total_amount|floatformat:2 }}</p>
+                                        {% if invoice.contract %}
+                                            <p><strong>Contrato:</strong> 
+                                                {% if invoice.contract.property %}
+                                                    {{ invoice.contract.property.title }}
+                                                {% else %}
+                                                    Sin propiedad asociada
+                                                {% endif %}
+                                            </p>
+                                        {% else %}
+                                            <p><strong>Contrato:</strong> <span class="text-danger">Sin contrato asociado</span></p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if receipt %}
+                        <div class="card mt-3">
+                            <div class="card-header">
+                                <h6 class="mb-0">Información del Comprobante</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>Número:</strong> {{ receipt.receipt_number }}</p>
+                                        <p><strong>Estado:</strong> 
+                                            <span class="badge bg-{{ receipt.status|default:'secondary' }}">
+                                                {{ receipt.get_status_display|default:receipt.status }}
+                                            </span>
+                                        </p>
+                                        <p><strong>Email destino:</strong> {{ receipt.email_sent_to }}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Generado:</strong> {{ receipt.generated_at|date:"d/m/Y H:i" }}</p>
+                                        <p><strong>Generado por:</strong> {{ receipt.generated_by|default:"Sistema" }}</p>
+                                        {% if receipt.sent_at %}
+                                            <p><strong>Enviado:</strong> {{ receipt.sent_at|date:"d/m/Y H:i" }}</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% if receipt.error_message %}
+                                    <div class="alert alert-warning mt-2">
+                                        <strong>Último error:</strong> {{ receipt.error_message }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            {% if invoice %}
+                                <a href="{% url 'accounting:invoice_detail' invoice.pk %}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i>
+                                    Volver a Factura
+                                </a>
+                            {% elif receipt %}
+                                <a href="{% url 'accounting:owner_receipt_detail' receipt.pk %}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i>
+                                    Volver a Comprobante
+                                </a>
+                            {% else %}
+                                <a href="{% url 'accounting:invoice_list' %}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i>
+                                    Volver a Facturas
+                                </a>
+                            {% endif %}
+                        </div>
+                        <div>
+                            {% if error_type == "validation" and invoice %}
+                                <a href="{% url 'accounting:invoice_update' invoice.pk %}" class="btn btn-warning">
+                                    <i class="fas fa-edit me-1"></i>
+                                    Editar Factura
+                                </a>
+                            {% endif %}
+                            {% if error_type == "email" and receipt and receipt.can_resend %}
+                                <a href="{% url 'accounting:resend_owner_receipt' receipt.pk %}" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane me-1"></i>
+                                    Reintentar Envío
+                                </a>
+                            {% endif %}
+                            <a href="{% url 'accounting:owner_receipts_list' %}" class="btn btn-info">
+                                <i class="fas fa-list me-1"></i>
+                                Ver Todos los Comprobantes
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-hide success messages after 5 seconds
+    const alerts = document.querySelectorAll('.alert-success');
+    alerts.forEach(function(alert) {
+        setTimeout(function() {
+            alert.style.transition = 'opacity 0.5s';
+            alert.style.opacity = '0';
+            setTimeout(function() {
+                alert.remove();
+            }, 500);
+        }, 5000);
+    });
+});
+</script>
+{% endblock %}

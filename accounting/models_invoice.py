@@ -1,6 +1,9 @@
 from django.db import models
+from django.utils import timezone
 from core.models import BaseModel
 from customers.models import Customer
+from decimal import Decimal
+import uuid
 
 
 class Invoice(BaseModel):
@@ -277,3 +280,282 @@ class Payment(BaseModel):
 
     def __str__(self):
         return f"Pago {self.amount} a Factura Nº{self.invoice.number}"
+
+
+class OwnerReceipt(BaseModel):
+    """
+    Modelo que registra los comprobantes generados para propietarios.
+    
+    Almacena información sobre comprobantes enviados a propietarios con detalles
+    del alquiler, incluyendo montos brutos, descuentos aplicados y montos netos.
+    Mantiene un registro histórico de todos los comprobantes generados y su estado de envío.
+    """
+    
+    STATUS_CHOICES = [
+        ('generated', 'Generado'),
+        ('sent', 'Enviado'),
+        ('failed', 'Error en envío'),
+    ]
+    
+    # Relationships
+    invoice = models.ForeignKey(
+        Invoice, 
+        on_delete=models.CASCADE, 
+        related_name='owner_receipts',
+        verbose_name="Factura"
+    )
+    generated_by = models.ForeignKey(
+        'agents.Agent', 
+        on_delete=models.SET_NULL, 
+        null=True,
+        verbose_name="Generado por"
+    )
+    
+    # Receipt Information
+    receipt_number = models.CharField(
+        max_length=50, 
+        unique=True,
+        verbose_name="Número de Comprobante"
+    )
+    generated_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Fecha de Generación"
+    )
+    sent_at = models.DateTimeField(
+        null=True, 
+        blank=True,
+        verbose_name="Fecha de Envío"
+    )
+    email_sent_to = models.EmailField(
+        verbose_name="Email Enviado a"
+    )
+    pdf_file_path = models.CharField(
+        max_length=500, 
+        blank=True,
+        verbose_name="Ruta del Archivo PDF"
+    )
+    
+    # Financial Information (stored for historical record)
+    gross_amount = models.DecimalField(
+        max_digits=12, 
+        decimal_places=2,
+        verbose_name="Monto Bruto"
+    )
+    discount_percentage = models.DecimalField(
+        max_digits=5, 
+        decimal_places=2, 
+        null=True, 
+        blank=True,
+        verbose_name="Porcentaje de Descuento"
+    )
+    discount_amount = models.DecimalField(
+        max_digits=12, 
+        decimal_places=2, 
+        default=0,
+        verbose_name="Monto de Descuento"
+    )
+    net_amount = models.DecimalField(
+        max_digits=12, 
+        decimal_places=2,
+        verbose_name="Monto Neto"
+    )
+    
+    # Status and Error Handling
+    status = models.CharField(
+        max_length=20, 
+        choices=STATUS_CHOICES, 
+        default='generated',
+        verbose_name="Estado"
+    )
+    error_message = models.TextField(
+        blank=True,
+        verbose_name="Mensaje de Error"
+    )
+    
+    class Meta:
+        verbose_name = "Comprobante de Propietario"
+        verbose_name_plural = "Comprobantes de Propietarios"
+        ordering = ['-generated_at']
+        
+        # Constraints
+        constraints = [
+            # Ensure amounts are positive
+            models.CheckConstraint(
+                check=models.Q(gross_amount__gt=0),
+                name='positive_gross_amount',
+                violation_error_message="El monto bruto debe ser mayor a cero."
+            ),
+            models.CheckConstraint(
+                check=models.Q(discount_amount__gte=0),
+                name='non_negative_discount_amount',
+                violation_error_message="El monto de descuento no puede ser negativo."
+            ),
+            models.CheckConstraint(
+                check=models.Q(net_amount__gte=0),
+                name='non_negative_net_amount',
+                violation_error_message="El monto neto no puede ser negativo."
+            ),
+            # Ensure discount percentage is valid
+            models.CheckConstraint(
+                check=models.Q(discount_percentage__isnull=True) | 
+                      models.Q(discount_percentage__gte=0, discount_percentage__lte=100),
+                name='valid_discount_percentage',
+                violation_error_message="El porcentaje de descuento debe estar entre 0% y 100%."
+            ),
+        ]
+        
+        # Indexes for performance
+        indexes = [
+            models.Index(fields=['invoice', 'status']),
+            models.Index(fields=['generated_at']),
+            models.Index(fields=['status']),
+            models.Index(fields=['receipt_number']),
+        ]
+    
+    def __str__(self):
+        return f"Comprobante {self.receipt_number} - {self.invoice.number}"
+    
+    @classmethod
+    def generate_receipt_number(cls):
+        """
+        Genera un número único de comprobante.
+        
+        Returns:
+            str: Número de comprobante único en formato REC-YYYY-NNNN
+        """
+        current_year = timezone.now().year
+        prefix = f"REC-{current_year}-"
+        
+        # Get the last receipt number for this year
+        last_receipt = cls.objects.filter(
+            receipt_number__startswith=prefix
+        ).order_by('-receipt_number').first()
+        
+        if last_receipt:
+            # Extract the sequential number and increment
+            try:
+                last_number = int(last_receipt.receipt_number.split('-')[-1])
+                next_number = last_number + 1
+            except (ValueError, IndexError):
+                next_number = 1
+        else:
+            next_number = 1
+        
+        return f"{prefix}{next_number:04d}"
+    
+    def mark_as_sent(self, email_address=None):
+        """
+        Marca el comprobante como enviado.
+        
+        Args:
+            email_address (str, optional): Dirección de email donde se envió
+        """
+        self.status = 'sent'
+        self.sent_at = timezone.now()
+        if email_address:
+            self.email_sent_to = email_address
+        self.error_message = ''
+        self.save(update_fields=['status', 'sent_at', 'email_sent_to', 'error_message'])
+    
+    def mark_as_failed(self, error_message):
+        """
+        Marca el comprobante como fallido con mensaje de error.
+        
+        Args:
+            error_message (str): Mensaje de error detallado
+        """
+        self.status = 'failed'
+        self.error_message = error_message
+        self.save(update_fields=['status', 'error_message'])
+    
+    def can_resend(self):
+        """
+        Verifica si el comprobante puede ser reenviado.
+        
+        Returns:
+            bool: True si el comprobante puede ser reenviado
+        """
+        return self.status in ['generated', 'failed']
+    
+    def get_property_info(self):
+        """
+        Obtiene información de la propiedad asociada al comprobante.
+        
+        Returns:
+            dict: Información de la propiedad o None si no hay contrato
+        """
+        if self.invoice.contract and self.invoice.contract.property:
+            property_obj = self.invoice.contract.property
+            return {
+                'title': property_obj.title,
+                'address': property_obj.address,
+                'property_type': property_obj.get_property_type_display() if hasattr(property_obj, 'get_property_type_display') else '',
+            }
+        return None
+    
+    def get_owner_info(self):
+        """
+        Obtiene información del propietario de la propiedad.
+        
+        Returns:
+            dict: Información del propietario o None si no disponible
+        """
+        if (self.invoice.contract and 
+            self.invoice.contract.property and 
+            hasattr(self.invoice.contract.property, 'owner')):
+            owner = self.invoice.contract.property.owner
+            return {
+                'name': owner.full_name if hasattr(owner, 'full_name') else str(owner),
+                'email': owner.email if hasattr(owner, 'email') else '',
+            }
+        return None
+    
+    def calculate_amounts_from_invoice(self):
+        """
+        Calcula los montos basándose en la factura y contrato asociados.
+        
+        Returns:
+            dict: Diccionario con gross_amount, discount_percentage, discount_amount, net_amount
+        """
+        if not self.invoice.contract:
+            return {
+                'gross_amount': self.invoice.total_amount,
+                'discount_percentage': None,
+                'discount_amount': Decimal('0.00'),
+                'net_amount': self.invoice.total_amount,
+            }
+        
+        contract = self.invoice.contract
+        gross_amount = self.invoice.total_amount
+        discount_percentage = contract.owner_discount_percentage
+        
+        if discount_percentage:
+            discount_amount = gross_amount * (discount_percentage / Decimal('100'))
+            net_amount = gross_amount - discount_amount
+        else:
+            discount_amount = Decimal('0.00')
+            net_amount = gross_amount
+        
+        return {
+            'gross_amount': gross_amount,
+            'discount_percentage': discount_percentage,
+            'discount_amount': discount_amount,
+            'net_amount': net_amount,
+        }
+    
+    def save(self, *args, **kwargs):
+        """
+        Guarda el comprobante generando automáticamente el número si es necesario.
+        """
+        if not self.receipt_number:
+            self.receipt_number = self.generate_receipt_number()
+        
+        # Calculate amounts if not set
+        if not self.gross_amount:
+            amounts = self.calculate_amounts_from_invoice()
+            self.gross_amount = amounts['gross_amount']
+            self.discount_percentage = amounts['discount_percentage']
+            self.discount_amount = amounts['discount_amount']
+            self.net_amount = amounts['net_amount']
+        
+        super().save(*args, **kwargs)

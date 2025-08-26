@@ -108,6 +108,50 @@
                                 </div>
                             </div>
 
+                            <!-- Información de descuento al propietario -->
+                            {% if contract.owner_discount_percentage %}
+                            <div class="mb-4">
+                                <div class="bg-light rounded-3 p-3 border">
+                                    <h6 class="text-primary mb-3 fw-bold">
+                                        <i class="bi bi-percent me-1"></i>Descuento al Propietario
+                                    </h6>
+                                    <div class="row g-2">
+                                        <div class="col-12">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="text-muted small">Porcentaje de Descuento:</span>
+                                                <span class="fw-semibold text-info">{{ contract.owner_discount_percentage|floatformat:2 }}%</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="text-muted small">Monto de Descuento:</span>
+                                                <span class="fw-semibold text-danger">${{ contract.owner_discount_amount|intcomma }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="text-muted small fw-bold">Monto Neto del Propietario:</span>
+                                                <span class="fw-bold text-success">${{ contract.owner_net_amount|intcomma }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="mb-4">
+                                <div class="bg-light rounded-3 p-3 border">
+                                    <h6 class="text-muted mb-2 fw-bold">
+                                        <i class="bi bi-percent me-1"></i>Descuento al Propietario
+                                    </h6>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-muted small">Sin descuento aplicado</span>
+                                        <span class="fw-bold text-success">${{ contract.amount|intcomma }}</span>
+                                    </div>
+                                    <small class="text-muted">El propietario recibe el monto completo</small>
+                                </div>
+                            </div>
+                            {% endif %}
+
                             <!-- Fechas del contrato -->
                             <div class="row g-2 mb-4">
                                 <div class="col-6">

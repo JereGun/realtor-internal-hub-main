@@ -3,6 +3,18 @@
 
 {% block content %}
 <div class="container-fluid mt-4">
+    <!-- Breadcrumbs -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'accounting:accounting_dashboard' %}" class="text-decoration-none">
+                    <i class="bi bi-calculator me-1"></i>Contabilidad
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Facturas</li>
+        </ol>
+    </nav>
+
     <!-- Encabezado -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
@@ -389,6 +401,13 @@
                                        class="btn btn-sm btn-outline-info" title="Enviar por correo">
                                         <i class="bi bi-envelope"></i>
                                     </a>
+                                    {% endif %}
+                                    {% if invoice.contract and invoice.status in 'validated,sent,paid' %}
+                                    <button type="button" class="btn btn-sm btn-outline-warning" 
+                                            onclick="showOwnerReceiptModal({{ invoice.pk }}, '{{ invoice.number|default:invoice.id }}', {% if invoice.owner_receipts.exists %}true{% else %}false{% endif %})"
+                                            title="{% if invoice.owner_receipts.exists %}Ver comprobante propietario{% else %}Generar comprobante propietario{% endif %}">
+                                        <i class="bi bi-{% if invoice.owner_receipts.exists %}file-check{% else %}file-plus{% endif %}"></i>
+                                    </button>
                                     {% endif %}
                                     <a href="{% url 'accounting:invoice_pdf' invoice.pk %}" 
                                        class="btn btn-sm btn-outline-success" title="Descargar PDF">
@@ -863,6 +882,150 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inicializar contador
     updateSelectedCount();
 });
+
+// Función para mostrar el modal de comprobante de propietario
+function showOwnerReceiptModal(invoiceId, invoiceNumber, hasReceipt) {
+    const modal = new bootstrap.Modal(document.getElementById('ownerReceiptModal'));
+    const modalTitle = document.getElementById('ownerReceiptModalLabel');
+    const modalBody = document.getElementById('ownerReceiptModalBody');
+    const generateBtn = document.getElementById('generateOwnerReceiptBtn');
+    const previewBtn = document.getElementById('previewOwnerReceiptBtn');
+    
+    if (hasReceipt) {
+        modalTitle.textContent = `Comprobante de Propietario - Factura ${invoiceNumber}`;
+        modalBody.innerHTML = `
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                Ya existe un comprobante generado para esta factura.
+            </div>
+            <div class="d-grid gap-2">
+                <a href="/accounting/invoice/${invoiceId}/owner-receipt-detail/" class="btn btn-primary">
+                    <i class="bi bi-eye me-2"></i>Ver Comprobante Existente
+                </a>
+                <button type="button" class="btn btn-outline-warning" onclick="regenerateOwnerReceipt(${invoiceId})">
+                    <i class="bi bi-arrow-clockwise me-2"></i>Regenerar Comprobante
+                </button>
+            </div>
+        `;
+        generateBtn.style.display = 'none';
+        previewBtn.style.display = 'none';
+    } else {
+        modalTitle.textContent = `Generar Comprobante de Propietario - Factura ${invoiceNumber}`;
+        modalBody.innerHTML = `
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                Se generará un comprobante detallado para el propietario con información del alquiler y descuentos aplicados.
+            </div>
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="sendEmailCheck" checked>
+                <label class="form-check-label" for="sendEmailCheck">
+                    Enviar automáticamente por correo electrónico al propietario
+                </label>
+            </div>
+        `;
+        generateBtn.style.display = 'inline-block';
+        previewBtn.style.display = 'inline-block';
+        generateBtn.onclick = () => generateOwnerReceipt(invoiceId);
+        previewBtn.onclick = () => previewOwnerReceipt(invoiceId);
+    }
+    
+    modal.show();
+}
+
+// Función para generar comprobante de propietario
+function generateOwnerReceipt(invoiceId) {
+    const sendEmail = document.getElementById('sendEmailCheck')?.checked || false;
+    const btn = document.getElementById('generateOwnerReceiptBtn');
+    const originalText = btn.innerHTML;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Generando...';
+    
+    fetch(`/accounting/invoice/${invoiceId}/generate-owner-receipt/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: `send_email=${sendEmail}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', `Comprobante ${data.receipt_number} generado exitosamente.`);
+            bootstrap.Modal.getInstance(document.getElementById('ownerReceiptModal')).hide();
+            // Actualizar la página para mostrar el nuevo estado
+            location.reload();
+        } else {
+            showAlert('danger', `Error: ${data.error}`);
+        }
+    })
+    .catch(error => {
+        showAlert('danger', 'Error al generar el comprobante. Intente nuevamente.');
+        console.error('Error:', error);
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    });
+}
+
+// Función para previsualizar comprobante
+function previewOwnerReceipt(invoiceId) {
+    window.open(`/accounting/invoice/${invoiceId}/preview-owner-receipt/`, '_blank');
+}
+
+// Función para regenerar comprobante
+function regenerateOwnerReceipt(invoiceId) {
+    if (confirm('¿Está seguro de que desea regenerar el comprobante? Esto creará un nuevo comprobante.')) {
+        generateOwnerReceipt(invoiceId);
+    }
+}
+
+// Función para mostrar alertas
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const container = document.querySelector('.container-fluid');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
 </script>
+
+<!-- Modal para Comprobante de Propietario -->
+<div class="modal fade" id="ownerReceiptModal" tabindex="-1" aria-labelledby="ownerReceiptModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="ownerReceiptModalLabel">Comprobante de Propietario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="ownerReceiptModalBody">
+                <!-- Content will be dynamically loaded -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-outline-primary" id="previewOwnerReceiptBtn">
+                    <i class="bi bi-eye me-2"></i>Vista Previa
+                </button>
+                <button type="button" class="btn btn-warning" id="generateOwnerReceiptBtn">
+                    <i class="bi bi-file-plus me-2"></i>Generar Comprobante
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}

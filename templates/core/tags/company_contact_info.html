@@ -1,0 +1,28 @@
+{% if company %}
+    {% if company.address %}
+    <li class="mb-2">
+        <i class="bi bi-geo-alt me-2"></i>
+        {{ company.address }}
+    </li>
+    {% endif %}
+    {% if company.phone %}
+    <li class="mb-2">
+        <i class="bi bi-telephone me-2"></i>
+        {{ company.phone }}
+    </li>
+    {% endif %}
+    {% if company.email %}
+    <li class="mb-2">
+        <i class="bi bi-envelope me-2"></i>
+        {{ company.email }}
+    </li>
+    {% endif %}
+    {% if company.website %}
+    <li class="mb-2">
+        <i class="bi bi-globe me-2"></i>
+        <a href="{{ company.website }}" target="_blank" class="text-decoration-none">
+            {{ company.website }}
+        </a>
+    </li>
+    {% endif %}
+{% endif %}

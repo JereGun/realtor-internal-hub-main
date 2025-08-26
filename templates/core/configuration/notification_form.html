@@ -1,0 +1,593 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ form_action }} Notificación - Configuración{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" rel="stylesheet">
+<style>
+    .form-section {
+        background: #fff;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        margin-bottom: 2rem;
+    }
+    
+    .form-section-header {
+        background: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        border-radius: 0.5rem 0.5rem 0 0;
+        padding: 1.5rem;
+    }
+    
+    .form-section-body {
+        padding: 2rem;
+    }
+    
+    .CodeMirror {
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        font-size: 14px;
+        height: 200px;
+    }
+    
+    .CodeMirror-focused {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .field-help {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+    
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+    
+    .notification-preview {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .variables-panel {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 1rem;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .variable-tag {
+        display: inline-block;
+        background: #e9ecef;
+        color: #495057;
+        padding: 0.25rem 0.5rem;
+        margin: 0.125rem;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.15s ease-in-out;
+    }
+    
+    .variable-tag:hover {
+        background: #007bff;
+        color: white;
+    }
+    
+    .recipient-options {
+        background: #f8f9fa;
+        border-radius: 0.375rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .sms-section {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 0.375rem;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .char-counter {
+        font-size: 0.875rem;
+        color: #6c757d;
+        text-align: right;
+        margin-top: 0.25rem;
+    }
+    
+    .char-counter.warning {
+        color: #fd7e14;
+    }
+    
+    .char-counter.danger {
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'core:company_configuration' %}">Configuración</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'core:notification_settings' %}">Notificaciones</a></li>
+            <li class="breadcrumb-item active">{{ form_action }}</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-2">
+                <i class="fas fa-bell text-primary me-2"></i>
+                {{ form_action }} Configuración de Notificación
+            </h1>
+            <p class="text-muted mb-0">
+                {% if notification %}
+                    Editando: {{ notification.get_notification_type_display }}
+                {% else %}
+                    Configura una nueva notificación automática
+                {% endif %}
+            </p>
+        </div>
+        <a href="{% url 'core:notification_settings' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>
+            Volver
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Formulario -->
+            <form method="post" id="notificationForm">
+                {% csrf_token %}
+                
+                <!-- Configuración Básica -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-cog me-2"></i>
+                            Configuración Básica
+                        </h5>
+                    </div>
+                    <div class="form-section-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="{{ form.notification_type.id_for_label }}" class="form-label required-field">
+                                        {{ form.notification_type.label }}
+                                    </label>
+                                    {{ form.notification_type }}
+                                    {% if form.notification_type.help_text %}
+                                        <div class="field-help">{{ form.notification_type.help_text }}</div>
+                                    {% endif %}
+                                    {% if form.notification_type.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.notification_type.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.frequency_days.id_for_label }}" class="form-label">
+                                        {{ form.frequency_days.label }}
+                                    </label>
+                                    {{ form.frequency_days }}
+                                    {% if form.frequency_days.help_text %}
+                                        <div class="field-help">{{ form.frequency_days.help_text }}</div>
+                                    {% endif %}
+                                    {% if form.frequency_days.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.frequency_days.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        {{ form.is_enabled }}
+                                        <label class="form-check-label" for="{{ form.is_enabled.id_for_label }}">
+                                            {{ form.is_enabled.label }}
+                                        </label>
+                                    </div>
+                                    {% if form.is_enabled.help_text %}
+                                        <div class="field-help">{{ form.is_enabled.help_text }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="{{ form.days_before_event.id_for_label }}" class="form-label">
+                                        {{ form.days_before_event.label }}
+                                    </label>
+                                    {{ form.days_before_event }}
+                                    {% if form.days_before_event.help_text %}
+                                        <div class="field-help">{{ form.days_before_event.help_text }}</div>
+                                    {% endif %}
+                                    {% if form.days_before_event.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.days_before_event.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Destinatarios -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-users me-2"></i>
+                            Destinatarios
+                        </h5>
+                    </div>
+                    <div class="form-section-body">
+                        <div class="recipient-options">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        {{ form.send_to_tenant }}
+                                        <label class="form-check-label" for="{{ form.send_to_tenant.id_for_label }}">
+                                            {{ form.send_to_tenant.label }}
+                                        </label>
+                                    </div>
+                                    {% if form.send_to_tenant.help_text %}
+                                        <div class="field-help">{{ form.send_to_tenant.help_text }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        {{ form.send_to_owner }}
+                                        <label class="form-check-label" for="{{ form.send_to_owner.id_for_label }}">
+                                            {{ form.send_to_owner.label }}
+                                        </label>
+                                    </div>
+                                    {% if form.send_to_owner.help_text %}
+                                        <div class="field-help">{{ form.send_to_owner.help_text }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        {{ form.send_to_admin }}
+                                        <label class="form-check-label" for="{{ form.send_to_admin.id_for_label }}">
+                                            {{ form.send_to_admin.label }}
+                                        </label>
+                                    </div>
+                                    {% if form.send_to_admin.help_text %}
+                                        <div class="field-help">{{ form.send_to_admin.help_text }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plantilla de Email -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-envelope me-2"></i>
+                            Plantilla de Email
+                        </h5>
+                    </div>
+                    <div class="form-section-body">
+                        <div class="mb-3">
+                            <label for="{{ form.email_subject.id_for_label }}" class="form-label">
+                                {{ form.email_subject.label }}
+                            </label>
+                            {{ form.email_subject }}
+                            {% if form.email_subject.help_text %}
+                                <div class="field-help">{{ form.email_subject.help_text }}</div>
+                            {% endif %}
+                            {% if form.email_subject.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.email_subject.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.email_template.id_for_label }}" class="form-label">
+                                {{ form.email_template.label }}
+                            </label>
+                            {{ form.email_template }}
+                            {% if form.email_template.help_text %}
+                                <div class="field-help">{{ form.email_template.help_text }}</div>
+                            {% endif %}
+                            {% if form.email_template.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.email_template.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Configuración SMS -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-sms me-2"></i>
+                            Configuración SMS (Opcional)
+                        </h5>
+                    </div>
+                    <div class="form-section-body">
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.sms_enabled }}
+                                <label class="form-check-label" for="{{ form.sms_enabled.id_for_label }}">
+                                    {{ form.sms_enabled.label }}
+                                </label>
+                            </div>
+                            {% if form.sms_enabled.help_text %}
+                                <div class="field-help">{{ form.sms_enabled.help_text }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="sms-section" id="smsSection" style="display: none;">
+                            <div class="mb-3">
+                                <label for="{{ form.sms_template.id_for_label }}" class="form-label">
+                                    {{ form.sms_template.label }}
+                                </label>
+                                {{ form.sms_template }}
+                                <div class="char-counter" id="smsCharCounter">0 / 160 caracteres</div>
+                                {% if form.sms_template.help_text %}
+                                    <div class="field-help">{{ form.sms_template.help_text }}</div>
+                                {% endif %}
+                                {% if form.sms_template.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.sms_template.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'core:notification_settings' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>
+                        Cancelar
+                    </a>
+                    <div>
+                        <button type="button" class="btn btn-outline-info me-2" onclick="previewNotification()">
+                            <i class="fas fa-eye me-2"></i>
+                            Vista Previa
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>
+                            {{ form_action }} Notificación
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Panel de variables -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-tags me-2"></i>
+                        Variables Disponibles
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="variables-panel" id="variablesPanel">
+                        <div class="variable-tag" onclick="insertVariable('{{customer.name}}')">{{customer.name}}</div>
+                        <div class="variable-tag" onclick="insertVariable('{{customer.email}}')">{{customer.email}}</div>
+                        <div class="variable-tag" onclick="insertVariable('{{customer.phone}}')">{{customer.phone}}</div>
+                        <div class="variable-tag" onclick="insertVariable('{{property.address}}')">{{property.address}}</div>
+                        <div class="variable-tag" onclick="insertVariable('{{property.type}}')">{{property.type}}</div>
+                        <div class="variable-tag" onclick="insertVariable('{{contract.start_date}}')">{{contract.start_date}}</div>
+                        <div class="variable-tag" onclick="insertVariable('{{contract.end_date}}')">{{contract.end_date}}</div>
+                        <div class="variable-tag" onclick="insertVariable('{{contract.monthly_rent}}')">{{contract.monthly_rent}}</div>
+                        <div class="variable-tag" onclick="insertVariable('{{agent.name}}')">{{agent.name}}</div>
+                        <div class="variable-tag" onclick="insertVariable('{{company.name}}')">{{company.name}}</div>
+                        <div class="variable-tag" onclick="insertVariable('{{company.phone}}')">{{company.phone}}</div>
+                        <div class="variable-tag" onclick="insertVariable('{{company.email}}')">{{company.email}}</div>
+                        <div class="variable-tag" onclick="insertVariable('{{current_date}}')">{{current_date}}</div>
+                        <div class="variable-tag" onclick="insertVariable('{{due_date}}')">{{due_date}}</div>
+                        <div class="variable-tag" onclick="insertVariable('{{amount_due}}')">{{amount_due}}</div>
+                    </div>
+                    <small class="text-muted">
+                        Haz clic en una variable para insertarla en el campo activo.
+                    </small>
+                </div>
+            </div>
+
+            <!-- Vista previa -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-eye me-2"></i>
+                        Vista Previa
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="notification-preview" id="previewPanel">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-envelope fa-3x mb-3 opacity-50"></i>
+                            <p>Haz clic en "Vista Previa" para ver el resultado</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar editor CodeMirror para la plantilla de email
+    const emailEditor = CodeMirror.fromTextArea(document.getElementById('{{ form.email_template.id_for_label }}'), {
+        mode: 'htmlmixed',
+        lineNumbers: true,
+        theme: 'default',
+        lineWrapping: true,
+        autoCloseTags: true,
+        autoCloseBrackets: true
+    });
+
+    // Campo activo para insertar variables
+    let activeField = null;
+
+    // Detectar campo activo
+    document.querySelectorAll('input[type="text"], textarea').forEach(field => {
+        field.addEventListener('focus', function() {
+            activeField = this;
+        });
+    });
+
+    emailEditor.on('focus', function() {
+        activeField = emailEditor;
+    });
+
+    // Función global para insertar variables
+    window.insertVariable = function(variable) {
+        if (activeField) {
+            if (activeField === emailEditor) {
+                const cursor = emailEditor.getCursor();
+                emailEditor.replaceRange(variable, cursor);
+                emailEditor.focus();
+            } else {
+                const cursorPos = activeField.selectionStart;
+                const textBefore = activeField.value.substring(0, cursorPos);
+                const textAfter = activeField.value.substring(cursorPos);
+                activeField.value = textBefore + variable + textAfter;
+                activeField.focus();
+                activeField.setSelectionRange(cursorPos + variable.length, cursorPos + variable.length);
+            }
+        }
+    };
+
+    // Mostrar/ocultar sección SMS
+    const smsEnabledCheckbox = document.getElementById('{{ form.sms_enabled.id_for_label }}');
+    const smsSection = document.getElementById('smsSection');
+    
+    function toggleSmsSection() {
+        if (smsEnabledCheckbox.checked) {
+            smsSection.style.display = 'block';
+        } else {
+            smsSection.style.display = 'none';
+        }
+    }
+    
+    smsEnabledCheckbox.addEventListener('change', toggleSmsSection);
+    toggleSmsSection(); // Inicializar
+
+    // Contador de caracteres para SMS
+    const smsTextarea = document.getElementById('{{ form.sms_template.id_for_label }}');
+    const charCounter = document.getElementById('smsCharCounter');
+    
+    function updateCharCounter() {
+        const length = smsTextarea.value.length;
+        charCounter.textContent = `${length} / 160 caracteres`;
+        
+        charCounter.className = 'char-counter';
+        if (length > 140) {
+            charCounter.classList.add('warning');
+        }
+        if (length > 160) {
+            charCounter.classList.add('danger');
+        }
+    }
+    
+    smsTextarea.addEventListener('input', updateCharCounter);
+    updateCharCounter(); // Inicializar
+
+    // Función global para vista previa
+    window.previewNotification = function() {
+        const previewPanel = document.getElementById('previewPanel');
+        const emailSubject = document.getElementById('{{ form.email_subject.id_for_label }}').value;
+        const emailContent = emailEditor.getValue();
+        const smsEnabled = smsEnabledCheckbox.checked;
+        const smsContent = smsTextarea.value;
+        
+        let previewHtml = '<div class="mb-3">';
+        previewHtml += '<h6><i class="fas fa-envelope me-2"></i>Email</h6>';
+        previewHtml += `<div class="border p-2 mb-2"><strong>Asunto:</strong> ${emailSubject || 'Sin asunto'}</div>`;
+        previewHtml += `<div class="border p-2">${emailContent || 'Sin contenido'}</div>`;
+        previewHtml += '</div>';
+        
+        if (smsEnabled && smsContent) {
+            previewHtml += '<div class="mb-3">';
+            previewHtml += '<h6><i class="fas fa-sms me-2"></i>SMS</h6>';
+            previewHtml += `<div class="border p-2">${smsContent}</div>`;
+            previewHtml += '</div>';
+        }
+        
+        previewPanel.innerHTML = previewHtml;
+    };
+
+    // Validación en tiempo real
+    const notificationTypeSelect = document.getElementById('{{ form.notification_type.id_for_label }}');
+    notificationTypeSelect.addEventListener('change', function() {
+        if (this.value) {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        }
+    });
+
+    // Confirmación antes de salir si hay cambios
+    let formChanged = false;
+    
+    emailEditor.on('change', () => {
+        formChanged = true;
+    });
+
+    document.querySelectorAll('#notificationForm input, #notificationForm select, #notificationForm textarea').forEach(input => {
+        input.addEventListener('change', () => {
+            formChanged = true;
+        });
+    });
+
+    window.addEventListener('beforeunload', function(e) {
+        if (formChanged) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+
+    document.getElementById('notificationForm').addEventListener('submit', function() {
+        formChanged = false;
+    });
+});
+</script>
+{% endblock %}

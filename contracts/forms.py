@@ -21,7 +21,7 @@ class ContractForm(forms.ModelForm):
         model = Contract
         fields = [
             'property', 'customer', 'agent', 'start_date', 'end_date', 'amount', 
-            'currency', 'frequency', 'next_increase_date', 'terms', 'notes', 'status'
+            'currency', 'owner_discount_percentage', 'frequency', 'next_increase_date', 'terms', 'notes', 'status'
         ]
         widgets = {
             'property': forms.Select(attrs={'class': 'form-control', 'id': 'id_property'}),
@@ -31,6 +31,13 @@ class ContractForm(forms.ModelForm):
             'end_date': DateInput(attrs={'class': 'form-control', 'type': 'date'}, format='%Y-%m-%d'),
             'amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'id': 'id_amount'}),
             'currency': forms.TextInput(attrs={'class': 'form-control'}),
+            'owner_discount_percentage': forms.NumberInput(attrs={
+                'class': 'form-control', 
+                'step': '0.01', 
+                'min': '0', 
+                'max': '100',
+                'id': 'id_owner_discount_percentage'
+            }),
             'frequency': forms.Select(attrs={'class': 'form-control'}),
             'next_increase_date': DateInput(attrs={'class': 'form-control', 'type': 'date'}, format='%Y-%m-%d'),
             'terms': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
@@ -50,7 +57,27 @@ class ContractForm(forms.ModelForm):
         self.fields['status'].choices = Contract.STATUS_CHOICES
         from agents.models import Agent
         self.fields['agent'].queryset = Agent.objects.filter(is_active=True).order_by('first_name', 'last_name')
-        self.fields['agent'].empty_label = None 
+        self.fields['agent'].empty_label = None
+
+    def clean_owner_discount_percentage(self):
+        """
+        Valida el porcentaje de descuento del propietario.
+        
+        Returns:
+            Decimal: El porcentaje validado
+            
+        Raises:
+            ValidationError: Si el porcentaje está fuera del rango válido
+        """
+        percentage = self.cleaned_data.get('owner_discount_percentage')
+        
+        if percentage is not None:
+            if percentage < 0:
+                raise forms.ValidationError("El porcentaje de descuento no puede ser negativo.")
+            elif percentage > 100:
+                raise forms.ValidationError("El porcentaje de descuento no puede ser mayor a 100%.")
+        
+        return percentage 
 
 
 class ContractIncreaseForm(forms.ModelForm):
@@ -75,6 +102,15 @@ class ContractSearchForm(forms.Form):
     status = forms.ChoiceField(
         # Add 'All' option dynamically
         choices=[], 
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    has_discount = forms.ChoiceField(
+        choices=[
+            ('', 'Todos'),
+            ('yes', 'Con descuento'),
+            ('no', 'Sin descuento'),
+        ],
         required=False,
         widget=forms.Select(attrs={'class': 'form-control'})
     )

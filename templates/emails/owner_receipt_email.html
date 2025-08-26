@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprobante de Alquiler - {{ property_address }}</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .email-header {
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        
+        .email-header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .email-header p {
+            margin: 10px 0 0 0;
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .email-body {
+            padding: 30px 20px;
+        }
+        
+        .greeting {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .content-section {
+            margin-bottom: 25px;
+        }
+        
+        .property-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            margin: 20px 0;
+        }
+        
+        .property-info h3 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+            font-size: 18px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #34495e;
+        }
+        
+        .info-value {
+            color: #2c3e50;
+        }
+        
+        .amount-highlight {
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+            border: 2px solid #27ae60;
+        }
+        
+        .amount-highlight .amount {
+            font-size: 28px;
+            font-weight: bold;
+            color: #27ae60;
+            display: block;
+        }
+        
+        .amount-highlight .label {
+            font-size: 14px;
+            color: #155724;
+            margin-top: 5px;
+        }
+        
+        .attachment-info {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+        
+        .attachment-info .icon {
+            font-size: 20px;
+            margin-right: 10px;
+        }
+        
+        .cta-section {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .cta-text {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .email-footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #ecf0f1;
+        }
+        
+        .company-info {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .contact-info {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .disclaimer {
+            font-size: 12px;
+            color: #999;
+            margin-top: 20px;
+            font-style: italic;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .email-container {
+                margin: 10px;
+                border-radius: 0;
+            }
+            
+            .email-header {
+                padding: 20px 15px;
+            }
+            
+            .email-body {
+                padding: 20px 15px;
+            }
+            
+            .info-row {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .amount-highlight .amount {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Email Header -->
+        <div class="email-header">
+            <h1>Comprobante de Alquiler</h1>
+            <p>{{ company_name }}</p>
+        </div>
+
+        <!-- Email Body -->
+        <div class="email-body">
+            <div class="greeting">
+                Estimado/a {{ owner_name }},
+            </div>
+
+            <div class="content-section">
+                <p>
+                    Nos complace enviarle el comprobante detallado correspondiente al alquiler de su propiedad 
+                    para el período de <strong>{{ period }}</strong>.
+                </p>
+            </div>
+
+            <!-- Property Information -->
+            <div class="property-info">
+                <h3>Información de la Propiedad</h3>
+                <div class="info-row">
+                    <span class="info-label">Dirección:</span>
+                    <span class="info-value">{{ property_address }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Período:</span>
+                    <span class="info-value">{{ period }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Factura N°:</span>
+                    <span class="info-value">{{ invoice_number }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Comprobante N°:</span>
+                    <span class="info-value">{{ receipt_number }}</span>
+                </div>
+            </div>
+
+            <!-- Amount Highlight -->
+            <div class="amount-highlight">
+                <span class="amount">${{ net_amount|floatformat:2 }}</span>
+                <span class="label">Monto Neto a Recibir</span>
+            </div>
+
+            <!-- Attachment Information -->
+            <div class="attachment-info">
+                <span class="icon">📎</span>
+                <strong>Comprobante Adjunto:</strong> Encontrará el comprobante detallado en formato PDF adjunto a este correo, 
+                donde podrá ver el desglose completo de los cálculos incluyendo el monto bruto, descuentos aplicados y el monto neto.
+            </div>
+
+            <div class="content-section">
+                <p>
+                    Este comprobante incluye toda la información relevante sobre su propiedad, el contrato de alquiler 
+                    y el detalle financiero del período correspondiente. Le recomendamos conservar este documento 
+                    para sus registros contables.
+                </p>
+            </div>
+
+            <!-- Call to Action -->
+            <div class="cta-section">
+                <div class="cta-text">
+                    Si tiene alguna consulta sobre este comprobante, no dude en contactarnos.
+                </div>
+            </div>
+
+            <div class="content-section">
+                <p>
+                    Agradecemos su confianza en nuestros servicios y esperamos seguir gestionando su propiedad 
+                    con la profesionalidad que nos caracteriza.
+                </p>
+                <p>
+                    Saludos cordiales,<br>
+                    <strong>{{ company_name }}</strong>
+                </p>
+            </div>
+        </div>
+
+        <!-- Email Footer -->
+        <div class="email-footer">
+            <div class="company-info">
+                <strong>{{ company_name }}</strong><br>
+                Gestión Inmobiliaria Profesional
+            </div>
+            
+            <div class="contact-info">
+                Para consultas: contacto@inmobiliaria.com | Tel: (011) 1234-5678
+            </div>
+
+            <div class="disclaimer">
+                Este es un mensaje automático. Por favor, no responda directamente a este correo.
+                Para consultas específicas, utilice nuestros canales de contacto oficiales.
+            </div>
+        </div>
+    </div>
+</body>
+</html>

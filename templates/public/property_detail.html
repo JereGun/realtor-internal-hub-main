@@ -1,7 +1,7 @@
 {% extends "public_base.html" %}
 {% load humanize %}
 
-{% block title %}{{ property.title }} - {{ property.property_type.name }} en {{ property.locality.name|default:property.neighborhood }} | Inmobiliaria Premium{% endblock %}
+{% block title %}{{ property.title }} - {{ property.property_type.name }} en {{ property.locality.name|default:property.neighborhood }} | {{ company.name|default:"Inmobiliaria Premium" }}{% endblock %}
 
 {% block meta_description %}{{ property.title }} - {{ property.property_type.name }} de {{ property.bedrooms }} dormitorios y {{ property.bathrooms }} baños en {{ property.locality.name|default:property.neighborhood }}. {{ property.total_surface }}m². {% if property.sale_price %}Precio: ${{ property.sale_price|floatformat:0|intcomma }}{% elif property.rental_price %}Alquiler: ${{ property.rental_price|floatformat:0|intcomma }}/mes{% endif %}.{% endblock %}
 

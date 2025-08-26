@@ -1,0 +1,557 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ form_action }} Plantilla - Configuración{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/default.min.css" rel="stylesheet">
+<style>
+    .form-section {
+        background: #fff;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        margin-bottom: 2rem;
+    }
+    
+    .form-section-header {
+        background: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        border-radius: 0.5rem 0.5rem 0 0;
+        padding: 1.5rem;
+    }
+    
+    .form-section-body {
+        padding: 2rem;
+    }
+    
+    .CodeMirror {
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        font-size: 14px;
+        height: auto;
+        min-height: 200px;
+    }
+    
+    .CodeMirror-focused {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .variables-panel {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 1rem;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .variable-tag {
+        display: inline-block;
+        background: #e9ecef;
+        color: #495057;
+        padding: 0.25rem 0.5rem;
+        margin: 0.125rem;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.15s ease-in-out;
+    }
+    
+    .variable-tag:hover {
+        background: #007bff;
+        color: white;
+    }
+    
+    .preview-panel {
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 1rem;
+        background: white;
+        min-height: 300px;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+    
+    .preview-loading {
+        text-align: center;
+        color: #6c757d;
+        padding: 2rem;
+    }
+    
+    .field-help {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+    
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+    
+    .editor-tabs {
+        border-bottom: 1px solid #dee2e6;
+        margin-bottom: 1rem;
+    }
+    
+    .editor-tabs .nav-link {
+        border: none;
+        border-bottom: 2px solid transparent;
+        color: #6c757d;
+    }
+    
+    .editor-tabs .nav-link.active {
+        color: #007bff;
+        border-bottom-color: #007bff;
+        background: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'core:company_configuration' %}">Configuración</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'core:document_templates' %}">Plantillas</a></li>
+            <li class="breadcrumb-item active">{{ form_action }}</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-2">
+                <i class="fas fa-file-alt text-primary me-2"></i>
+                {{ form_action }} Plantilla de Documento
+            </h1>
+            <p class="text-muted mb-0">
+                {% if template %}
+                    Editando: {{ template.template_name }}
+                {% else %}
+                    Crea una nueva plantilla personalizada
+                {% endif %}
+            </p>
+        </div>
+        <a href="{% url 'core:document_templates' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>
+            Volver
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Formulario -->
+            <form method="post" id="templateForm">
+                {% csrf_token %}
+                
+                <!-- Información Básica -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Información Básica
+                        </h5>
+                    </div>
+                    <div class="form-section-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    <label for="{{ form.template_name.id_for_label }}" class="form-label required-field">
+                                        {{ form.template_name.label }}
+                                    </label>
+                                    {{ form.template_name }}
+                                    {% if form.template_name.help_text %}
+                                        <div class="field-help">{{ form.template_name.help_text }}</div>
+                                    {% endif %}
+                                    {% if form.template_name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.template_name.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.template_type.id_for_label }}" class="form-label required-field">
+                                        {{ form.template_type.label }}
+                                    </label>
+                                    {{ form.template_type }}
+                                    {% if form.template_type.help_text %}
+                                        <div class="field-help">{{ form.template_type.help_text }}</div>
+                                    {% endif %}
+                                    {% if form.template_type.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.template_type.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                    {{ form.is_active.label }}
+                                </label>
+                            </div>
+                            {% if form.is_active.help_text %}
+                                <div class="field-help">{{ form.is_active.help_text }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Editor de Contenido -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-code me-2"></i>
+                            Contenido de la Plantilla
+                        </h5>
+                    </div>
+                    <div class="form-section-body">
+                        <!-- Pestañas del editor -->
+                        <ul class="nav nav-tabs editor-tabs" id="editorTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="header-tab" data-bs-toggle="tab" 
+                                        data-bs-target="#header-content" type="button" role="tab">
+                                    <i class="fas fa-header me-2"></i>Encabezado
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="footer-tab" data-bs-toggle="tab" 
+                                        data-bs-target="#footer-content" type="button" role="tab">
+                                    <i class="fas fa-footer me-2"></i>Pie de Página
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="css-tab" data-bs-toggle="tab" 
+                                        data-bs-target="#css-content" type="button" role="tab">
+                                    <i class="fas fa-palette me-2"></i>CSS
+                                </button>
+                            </li>
+                        </ul>
+
+                        <!-- Contenido de las pestañas -->
+                        <div class="tab-content" id="editorTabContent">
+                            <!-- Encabezado -->
+                            <div class="tab-pane fade show active" id="header-content" role="tabpanel">
+                                <div class="mb-3">
+                                    <label for="{{ form.header_content.id_for_label }}" class="form-label">
+                                        {{ form.header_content.label }}
+                                    </label>
+                                    {{ form.header_content }}
+                                    {% if form.header_content.help_text %}
+                                        <div class="field-help">{{ form.header_content.help_text }}</div>
+                                    {% endif %}
+                                    {% if form.header_content.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.header_content.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Pie de página -->
+                            <div class="tab-pane fade" id="footer-content" role="tabpanel">
+                                <div class="mb-3">
+                                    <label for="{{ form.footer_content.id_for_label }}" class="form-label">
+                                        {{ form.footer_content.label }}
+                                    </label>
+                                    {{ form.footer_content }}
+                                    {% if form.footer_content.help_text %}
+                                        <div class="field-help">{{ form.footer_content.help_text }}</div>
+                                    {% endif %}
+                                    {% if form.footer_content.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.footer_content.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- CSS -->
+                            <div class="tab-pane fade" id="css-content" role="tabpanel">
+                                <div class="mb-3">
+                                    <label for="{{ form.custom_css.id_for_label }}" class="form-label">
+                                        {{ form.custom_css.label }}
+                                    </label>
+                                    {{ form.custom_css }}
+                                    {% if form.custom_css.help_text %}
+                                        <div class="field-help">{{ form.custom_css.help_text }}</div>
+                                    {% endif %}
+                                    {% if form.custom_css.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.custom_css.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de acción -->
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'core:document_templates' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-2"></i>
+                        Cancelar
+                    </a>
+                    <div>
+                        <button type="button" class="btn btn-outline-info me-2" onclick="generatePreview()">
+                            <i class="fas fa-eye me-2"></i>
+                            Vista Previa
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>
+                            {{ form_action }} Plantilla
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Panel de variables -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-tags me-2"></i>
+                        Variables Disponibles
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="variables-panel" id="variablesPanel">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            Cargando variables...
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        Haz clic en una variable para insertarla en el editor activo.
+                    </small>
+                </div>
+            </div>
+
+            <!-- Panel de vista previa -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-eye me-2"></i>
+                        Vista Previa
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="preview-panel" id="previewPanel">
+                        <div class="preview-loading">
+                            <i class="fas fa-file-alt fa-3x mb-3 opacity-50"></i>
+                            <p>Haz clic en "Vista Previa" para ver el resultado</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar editores CodeMirror
+    const headerEditor = CodeMirror.fromTextArea(document.getElementById('{{ form.header_content.id_for_label }}'), {
+        mode: 'htmlmixed',
+        lineNumbers: true,
+        theme: 'default',
+        lineWrapping: true,
+        autoCloseTags: true,
+        autoCloseBrackets: true
+    });
+
+    const footerEditor = CodeMirror.fromTextArea(document.getElementById('{{ form.footer_content.id_for_label }}'), {
+        mode: 'htmlmixed',
+        lineNumbers: true,
+        theme: 'default',
+        lineWrapping: true,
+        autoCloseTags: true,
+        autoCloseBrackets: true
+    });
+
+    const cssEditor = CodeMirror.fromTextArea(document.getElementById('{{ form.custom_css.id_for_label }}'), {
+        mode: 'css',
+        lineNumbers: true,
+        theme: 'default',
+        lineWrapping: true,
+        autoCloseBrackets: true
+    });
+
+    // Editor activo
+    let activeEditor = headerEditor;
+
+    // Cambiar editor activo según la pestaña
+    document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function(e) {
+            const target = e.target.getAttribute('data-bs-target');
+            switch(target) {
+                case '#header-content':
+                    activeEditor = headerEditor;
+                    break;
+                case '#footer-content':
+                    activeEditor = footerEditor;
+                    break;
+                case '#css-content':
+                    activeEditor = cssEditor;
+                    break;
+            }
+            activeEditor.refresh();
+        });
+    });
+
+    // Cargar variables disponibles
+    function loadVariables() {
+        const templateType = document.getElementById('{{ form.template_type.id_for_label }}').value || 'invoice';
+        
+        fetch(`{% url 'core:template_variables_api' %}?type=${templateType}`)
+            .then(response => response.json())
+            .then(data => {
+                const panel = document.getElementById('variablesPanel');
+                if (data.success) {
+                    panel.innerHTML = '';
+                    data.variables.forEach(variable => {
+                        const tag = document.createElement('span');
+                        tag.className = 'variable-tag';
+                        tag.textContent = variable;
+                        tag.onclick = () => insertVariable(variable);
+                        panel.appendChild(tag);
+                    });
+                } else {
+                    panel.innerHTML = '<div class="text-danger">Error cargando variables</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('variablesPanel').innerHTML = '<div class="text-danger">Error cargando variables</div>';
+            });
+    }
+
+    // Insertar variable en el editor activo
+    function insertVariable(variable) {
+        const cursor = activeEditor.getCursor();
+        activeEditor.replaceRange(variable, cursor);
+        activeEditor.focus();
+    }
+
+    // Cargar variables al cambiar tipo de plantilla
+    document.getElementById('{{ form.template_type.id_for_label }}').addEventListener('change', loadVariables);
+
+    // Cargar variables inicialmente
+    loadVariables();
+
+    // Función global para generar vista previa
+    window.generatePreview = function() {
+        const previewPanel = document.getElementById('previewPanel');
+        previewPanel.innerHTML = `
+            <div class="preview-loading">
+                <div class="spinner-border spinner-border-sm" role="status"></div>
+                <p class="mt-2">Generando vista previa...</p>
+            </div>
+        `;
+
+        const templateContent = headerEditor.getValue() + '\n' + footerEditor.getValue();
+        const templateType = document.getElementById('{{ form.template_type.id_for_label }}').value;
+
+        fetch('{% url "core:template_preview_api" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                template_content: templateContent,
+                template_type: templateType
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                previewPanel.innerHTML = data.preview_html;
+            } else {
+                previewPanel.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error: ${data.error}
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            previewPanel.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Error generando vista previa
+                </div>
+            `;
+        });
+    };
+
+    // Validación en tiempo real
+    const templateNameInput = document.getElementById('{{ form.template_name.id_for_label }}');
+    templateNameInput.addEventListener('blur', function() {
+        if (this.value.trim().length < 3) {
+            this.classList.add('is-invalid');
+        } else {
+            this.classList.remove('is-invalid');
+            this.classList.add('is-valid');
+        }
+    });
+
+    // Confirmación antes de salir si hay cambios
+    let formChanged = false;
+    
+    [headerEditor, footerEditor, cssEditor].forEach(editor => {
+        editor.on('change', () => {
+            formChanged = true;
+        });
+    });
+
+    document.querySelectorAll('#templateForm input, #templateForm select').forEach(input => {
+        input.addEventListener('change', () => {
+            formChanged = true;
+        });
+    });
+
+    window.addEventListener('beforeunload', function(e) {
+        if (formChanged) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+
+    document.getElementById('templateForm').addEventListener('submit', function() {
+        formChanged = false;
+    });
+});
+</script>
+{% endblock %}

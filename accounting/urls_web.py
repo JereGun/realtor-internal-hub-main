@@ -29,4 +29,12 @@ urlpatterns = [
     path('notifications/<int:pk>/mark-as-read/', views_web.mark_notification_as_read, name='mark_notification_as_read'),
     path('notifications/mark-all-as-read/', views_web.mark_all_notifications_as_read, name='mark_all_notifications_as_read'),
     path('invoices/send-bulk-emails/', views_web.send_bulk_emails, name='send_bulk_emails'),
+    
+    # Owner Receipt URLs
+    path('invoice/<int:invoice_pk>/generate-owner-receipt/', views_web.generate_owner_receipt, name='generate_owner_receipt'),
+    path('invoice/<int:invoice_pk>/preview-owner-receipt/', views_web.preview_owner_receipt, name='preview_owner_receipt'),
+    path('owner-receipt/<int:receipt_pk>/', views_web.owner_receipt_detail, name='owner_receipt_detail'),
+    path('owner-receipt/<int:receipt_pk>/resend/', views_web.resend_owner_receipt, name='resend_owner_receipt'),
+    path('owner-receipt/<int:receipt_pk>/pdf/', views_web.owner_receipt_pdf, name='owner_receipt_pdf'),
+    path('owner-receipts/', views_web.owner_receipts_list, name='owner_receipts_list'),
 ]

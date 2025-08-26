@@ -1,0 +1,294 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Generar Comprobante - Factura {{ invoice.number|default:invoice.id }}{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/owner-receipts.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Encabezado -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'accounting:accounting_dashboard' %}" class="text-decoration-none">
+                            <i class="bi bi-house-door me-1"></i>Accounting
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'accounting:invoice_detail' invoice.pk %}" class="text-decoration-none">
+                            Factura {{ invoice.number|default:invoice.id }}
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Generar Comprobante</li>
+                </ol>
+            </nav>
+            <h1 class="h3 text-dark mb-1">
+                <i class="bi bi-file-earmark-plus me-2 text-primary"></i>
+                Generar Comprobante de Propietario
+            </h1>
+            <p class="text-muted mb-0">Confirme la generación del comprobante para {{ receipt_data.owner.name }}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'accounting:invoice_detail' invoice.pk %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Volver a Factura
+            </a>
+            <a href="{% url 'accounting:preview_owner_receipt' invoice.pk %}" class="btn btn-outline-info">
+                <i class="bi bi-eye me-1"></i>Vista Previa Completa
+            </a>
+        </div>
+    </div>
+
+    <!-- Alerta de confirmación -->
+    <div class="alert alert-warning border-0 shadow-sm mb-4">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-exclamation-triangle me-3 fs-4"></i>
+            <div>
+                <h6 class="mb-1">Confirmación de Generación</h6>
+                <p class="mb-0">Se generará un comprobante oficial para el propietario con la información mostrada a continuación. Una vez generado, el comprobante será registrado en el sistema.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información de la factura -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="bi bi-receipt me-2"></i>Información de la Factura
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Número de Factura</label>
+                            <div class="fw-bold">{{ invoice.number|default:invoice.id }}</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Estado</label>
+                            <div>
+                                <span class="badge 
+                                    {% if invoice.status == 'paid' %}bg-success
+                                    {% elif invoice.status == 'sent' %}bg-info
+                                    {% elif invoice.status == 'validated' %}bg-warning text-dark
+                                    {% elif invoice.status == 'draft' %}bg-secondary
+                                    {% elif invoice.status == 'cancelled' %}bg-danger
+                                    {% else %}bg-light text-dark
+                                    {% endif %}">
+                                    {{ invoice.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Fecha de Emisión</label>
+                            <div>{{ invoice.date|date:'d/m/Y' }}</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Fecha de Vencimiento</label>
+                            <div>{{ invoice.due_date|date:'d/m/Y'|default:'N/A' }}</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Monto Total</label>
+                            <div class="fw-bold fs-5">${{ invoice.total_amount|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Cliente</label>
+                            <div class="fw-semibold">{{ invoice.customer.get_full_name }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview de cálculos -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="bi bi-calculator me-2"></i>Cálculos del Comprobante
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                <span class="text-muted">Monto Bruto:</span>
+                                <span class="fw-bold fs-5">${{ receipt_data.financial.gross_amount|floatformat:2 }}</span>
+                            </div>
+                        </div>
+                        {% if receipt_data.financial.discount_percentage > 0 %}
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                <span class="text-muted">Descuento ({{ receipt_data.financial.discount_percentage }}%):</span>
+                                <span class="text-danger">-${{ receipt_data.financial.discount_amount|floatformat:2 }}</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center py-3 bg-light rounded">
+                                <span class="fw-bold">Monto Neto para Propietario:</span>
+                                <span class="fw-bold fs-4 text-success">${{ receipt_data.financial.net_amount|floatformat:2 }}</span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle me-1"></i>
+                                El propietario recibirá el {{ receipt_data.financial.net_percentage }}% del monto total
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información del propietario y propiedad -->
+    <div class="row g-4 mb-4">
+        <!-- Propietario -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="bi bi-person-check me-2"></i>Propietario
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center mx-auto" 
+                             style="width: 60px; height: 60px;">
+                            <span class="text-white fw-bold fs-4">
+                                {{ receipt_data.owner.name|first }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <h6 class="fw-bold mb-2">{{ receipt_data.owner.name }}</h6>
+                        <div class="text-muted small mb-1">
+                            <i class="bi bi-envelope me-1 text-primary"></i>{{ receipt_data.owner.email }}
+                        </div>
+                        {% if receipt_data.owner.phone %}
+                        <div class="text-muted small">
+                            <i class="bi bi-telephone me-1 text-primary"></i>{{ receipt_data.owner.phone }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Propiedad -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="bi bi-house me-2"></i>Propiedad
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <i class="bi bi-house-door text-info" style="font-size: 3rem;"></i>
+                    </div>
+                    <div class="text-center">
+                        <h6 class="fw-bold mb-2">{{ receipt_data.property.title }}</h6>
+                        <div class="text-muted small mb-1">
+                            <i class="bi bi-geo-alt me-1 text-info"></i>{{ receipt_data.property.address }}
+                        </div>
+                        {% if receipt_data.property.property_type %}
+                        <div class="text-muted small">
+                            <i class="bi bi-building me-1 text-info"></i>{{ receipt_data.property.property_type }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario de confirmación -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="bi bi-check-circle me-2"></i>Confirmación de Generación
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="generateReceiptForm">
+                        {% csrf_token %}
+                        
+                        <!-- Opciones de envío -->
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="sendEmailCheck" name="send_email" value="true" checked>
+                                <label class="form-check-label fw-semibold" for="sendEmailCheck">
+                                    <i class="bi bi-envelope me-2"></i>Enviar automáticamente por correo electrónico
+                                </label>
+                            </div>
+                            <div class="form-text">
+                                <i class="bi bi-info-circle me-1"></i>
+                                El comprobante será enviado a <strong>{{ receipt_data.owner.email }}</strong>
+                            </div>
+                        </div>
+
+                        <!-- Información adicional -->
+                        <div class="alert alert-info border-0 mb-4">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <small class="text-muted fw-semibold">Número de comprobante:</small>
+                                    <div class="fw-bold">{{ receipt_data.preview_info.number }}</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <small class="text-muted fw-semibold">Fecha de generación:</small>
+                                    <div class="fw-bold">{{ receipt_data.preview_info.generated_at|date:'d/m/Y H:i' }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                            <div class="text-muted small">
+                                <i class="bi bi-shield-check me-1"></i>
+                                El comprobante será registrado oficialmente en el sistema
+                            </div>
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'accounting:invoice_detail' invoice.pk %}" class="btn btn-outline-secondary btn-lg">
+                                    <i class="bi bi-x-circle me-2"></i>Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-success btn-lg" id="generateBtn">
+                                    <i class="bi bi-check-circle me-2"></i>Generar Comprobante
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced form handling is managed by owner-receipts.js -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sendEmailCheck = document.getElementById('sendEmailCheck');
+    const generateBtn = document.getElementById('generateBtn');
+    
+    // Update button text based on checkbox state
+    function updateButtonText() {
+        const icon = '<i class="bi bi-check-circle me-2"></i>';
+        if (sendEmailCheck.checked) {
+            generateBtn.innerHTML = icon + 'Generar y Enviar Comprobante';
+        } else {
+            generateBtn.innerHTML = icon + 'Generar Comprobante';
+        }
+    }
+    
+    sendEmailCheck.addEventListener('change', updateButtonText);
+    updateButtonText(); // Initialize
+});
+</script>
+{% endblock %}

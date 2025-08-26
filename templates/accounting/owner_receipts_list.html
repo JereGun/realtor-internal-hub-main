@@ -1,0 +1,381 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Comprobantes de Propietarios{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/owner-receipts.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Encabezado -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'accounting:accounting_dashboard' %}" class="text-decoration-none">
+                            <i class="bi bi-house-door me-1"></i>Accounting
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Comprobantes de Propietarios</li>
+                </ol>
+            </nav>
+            <h1 class="h3 text-dark mb-1">
+                <i class="bi bi-file-earmark-check me-2 text-primary"></i>Comprobantes de Propietarios
+            </h1>
+            <p class="text-muted mb-0">Gestione los comprobantes enviados a propietarios</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'accounting:invoice_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Volver a Facturas
+            </a>
+            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" 
+                    data-bs-target="#filtersCard" aria-expanded="false">
+                <i class="bi bi-funnel me-1"></i>Filtros
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="collapse mb-4" id="filtersCard">
+        <div class="card shadow-sm border-light">
+            <div class="card-header bg-light border-bottom">
+                <h5 class="mb-0 text-dark fw-bold">
+                    <i class="bi bi-funnel me-2"></i>Filtros de Búsqueda
+                </h5>
+            </div>
+            <div class="card-body p-4">
+                <form method="get" action="{% url 'accounting:owner_receipts_list' %}" id="filterForm">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label for="searchQuery" class="form-label fw-semibold">
+                                <i class="bi bi-search me-1"></i>Búsqueda General
+                            </label>
+                            <input type="text" name="q" id="searchQuery" class="form-control" 
+                                   placeholder="Buscar por número de comprobante, propietario o propiedad..." 
+                                   value="{{ query|default:'' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="statusFilter" class="form-label fw-semibold">
+                                <i class="bi bi-flag me-1"></i>Estado
+                            </label>
+                            <select name="status" id="statusFilter" class="form-select">
+                                <option value="">Todos los estados</option>
+                                <option value="generated" {% if status == 'generated' %}selected{% endif %}>Generado</option>
+                                <option value="sent" {% if status == 'sent' %}selected{% endif %}>Enviado</option>
+                                <option value="failed" {% if status == 'failed' %}selected{% endif %}>Error en envío</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="ownerFilter" class="form-label fw-semibold">
+                                <i class="bi bi-person me-1"></i>Propietario
+                            </label>
+                            <select name="owner" id="ownerFilter" class="form-select">
+                                <option value="">Todos los propietarios</option>
+                                {% for owner in owners %}
+                                    <option value="{{ owner.id }}" {% if owner_id|stringformat:"s" == owner.id|stringformat:"s" %}selected{% endif %}>
+                                        {{ owner.get_full_name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Filtros de fecha -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-calendar-event me-1"></i>Fecha de Generación
+                            </label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <input type="date" name="date_from" class="form-control" 
+                                           value="{{ date_from|default:'' }}" placeholder="Desde">
+                                </div>
+                                <div class="col-6">
+                                    <input type="date" name="date_to" class="form-control" 
+                                           value="{{ date_to|default:'' }}" placeholder="Hasta">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de Acción -->
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                        <div class="text-muted small">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Use los filtros para encontrar comprobantes específicos
+                        </div>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'accounting:owner_receipts_list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Limpiar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search me-1"></i>Buscar
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas Rápidas -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-file-earmark-check fs-1 mb-2"></i>
+                    <h5 class="card-title">{{ total_receipts }}</h5>
+                    <p class="card-text mb-0">Total Comprobantes</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-check-circle fs-1 mb-2"></i>
+                    <h5 class="card-title">{{ sent_receipts }}</h5>
+                    <p class="card-text mb-0">Enviados</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-clock fs-1 mb-2"></i>
+                    <h5 class="card-title">{{ generated_receipts }}</h5>
+                    <p class="card-text mb-0">Generados</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 bg-danger text-white">
+                <div class="card-body text-center">
+                    <i class="bi bi-exclamation-triangle fs-1 mb-2"></i>
+                    <h5 class="card-title">{{ failed_receipts }}</h5>
+                    <p class="card-text mb-0">Con Error</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de comprobantes -->
+    <div class="card shadow-sm border-light">
+        <div class="card-header bg-light border-bottom py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-dark fw-bold">
+                    <i class="bi bi-table me-2"></i>Lista de Comprobantes
+                </h5>
+                <div class="d-flex align-items-center gap-3">
+                    <small class="text-muted">
+                        Mostrando {{ receipts.start_index }}-{{ receipts.end_index }} de {{ receipts.paginator.count }} comprobantes
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col" class="border-0 ps-4">
+                                <i class="bi bi-hash text-muted me-1"></i>Número
+                            </th>
+                            <th scope="col" class="border-0">
+                                <i class="bi bi-receipt text-muted me-1"></i>Factura
+                            </th>
+                            <th scope="col" class="border-0">
+                                <i class="bi bi-person text-muted me-1"></i>Propietario
+                            </th>
+                            <th scope="col" class="border-0">
+                                <i class="bi bi-house text-muted me-1"></i>Propiedad
+                            </th>
+                            <th scope="col" class="border-0">
+                                <i class="bi bi-calendar-event text-muted me-1"></i>Generado
+                            </th>
+                            <th scope="col" class="border-0">
+                                <i class="bi bi-flag text-muted me-1"></i>Estado
+                            </th>
+                            <th scope="col" class="border-0 text-end">
+                                <i class="bi bi-currency-dollar text-muted me-1"></i>Monto Neto
+                            </th>
+                            <th scope="col" class="border-0 text-center pe-4">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for receipt in receipts %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-file-earmark-check text-primary me-2"></i>
+                                    <span class="fw-semibold">{{ receipt.receipt_number }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-receipt text-secondary me-2"></i>
+                                    <a href="{% url 'accounting:invoice_detail' receipt.invoice.pk %}" 
+                                       class="text-decoration-none fw-semibold">
+                                        {{ receipt.invoice.number|default:receipt.invoice.id }}
+                                    </a>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="me-2">
+                                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" 
+                                             style="width: 32px; height: 32px;">
+                                            <span class="text-white fw-bold small">
+                                                {{ receipt.invoice.customer.first_name|first }}{{ receipt.invoice.customer.last_name|first }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">{{ receipt.invoice.customer.get_full_name }}</div>
+                                        <small class="text-muted">{{ receipt.email_sent_to|default:receipt.invoice.customer.email }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                {% if receipt.invoice.contract.property %}
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-house text-info me-2"></i>
+                                        <div>
+                                            <div class="fw-semibold">{{ receipt.invoice.contract.property.title|truncatechars:30 }}</div>
+                                            <small class="text-muted">{{ receipt.invoice.contract.property.address|truncatechars:40 }}</small>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <span class="text-muted">Sin propiedad</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-calendar-check text-success me-2"></i>
+                                    <div>
+                                        <div>{{ receipt.generated_at|date:'d/m/Y' }}</div>
+                                        <small class="text-muted">{{ receipt.generated_at|date:'H:i' }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge 
+                                    {% if receipt.status == 'sent' %}bg-success
+                                    {% elif receipt.status == 'generated' %}bg-warning text-dark
+                                    {% elif receipt.status == 'failed' %}bg-danger
+                                    {% else %}bg-secondary
+                                    {% endif %}">
+                                    {% if receipt.status == 'sent' %}Enviado
+                                    {% elif receipt.status == 'generated' %}Generado
+                                    {% elif receipt.status == 'failed' %}Error
+                                    {% else %}{{ receipt.get_status_display }}
+                                    {% endif %}
+                                </span>
+                                {% if receipt.sent_at %}
+                                    <div class="small text-muted mt-1">
+                                        {{ receipt.sent_at|date:'d/m/Y H:i' }}
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <span class="fw-bold text-success fs-6">${{ receipt.net_amount|floatformat:2 }}</span>
+                                {% if receipt.discount_amount > 0 %}
+                                    <div class="small text-muted">
+                                        Bruto: ${{ receipt.gross_amount|floatformat:2 }}
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td class="text-center pe-4">
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'accounting:owner_receipt_detail' receipt.pk %}" 
+                                       class="btn btn-sm btn-outline-primary" title="Ver detalle">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    {% if receipt.can_resend %}
+                                    <button type="button" class="btn btn-sm btn-outline-info" 
+                                            data-action="resend" 
+                                            data-receipt-id="{{ receipt.pk }}"
+                                            title="Reenviar por correo"
+                                            data-bs-toggle="tooltip">
+                                        <i class="bi bi-envelope"></i>
+                                    </button>
+                                    {% endif %}
+                                    <a href="{% url 'accounting:owner_receipt_pdf' receipt.pk %}" 
+                                       class="btn btn-sm btn-outline-success" title="Descargar PDF">
+                                        <i class="bi bi-file-earmark-pdf"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                                    <p class="mt-3 mb-1 fw-semibold">No hay comprobantes que mostrar</p>
+                                    <p class="mb-0">Intente ajustar los filtros o generar comprobantes desde las facturas</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Paginación -->
+        {% if receipts.has_other_pages %}
+        <div class="card-footer bg-light border-top">
+            <nav aria-label="Paginación de comprobantes">
+                <ul class="pagination pagination-sm justify-content-center mb-0">
+                    {% if receipts.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1">
+                                <i class="bi bi-chevron-double-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ receipts.previous_page_number }}">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in receipts.paginator.page_range %}
+                        {% if num == receipts.number %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > receipts.number|add:'-3' and num < receipts.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if receipts.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ receipts.next_page_number }}">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ receipts.paginator.num_pages }}">
+                                <i class="bi bi-chevron-double-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- CSRF Token for AJAX requests -->
+{% csrf_token %}
+
+<!-- Enhanced AJAX functionality is handled by owner-receipts.js -->
+{% endblock %}

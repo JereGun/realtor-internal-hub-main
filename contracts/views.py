@@ -23,6 +23,7 @@ class ContractListView(LoginRequiredMixin, ListView):
         if form.is_valid():
             search = form.cleaned_data.get('search')
             status = form.cleaned_data.get('status')
+            has_discount = form.cleaned_data.get('has_discount')
             
             if search:
                 queryset = queryset.filter(
@@ -35,8 +36,46 @@ class ContractListView(LoginRequiredMixin, ListView):
             
             if status:
                 queryset = queryset.filter(status=status)
+            
+            if has_discount == 'yes':
+                queryset = queryset.filter(
+                    owner_discount_percentage__isnull=False,
+                    owner_discount_percentage__gt=0
+                )
+            elif has_discount == 'no':
+                queryset = queryset.filter(
+                    Q(owner_discount_percentage__isnull=True) |
+                    Q(owner_discount_percentage=0)
+                )
         
-        return queryset.order_by('-created_at')
+        # Handle sorting
+        sort_by = self.request.GET.get('sort', '-created_at')
+        valid_sort_fields = [
+            'created_at', '-created_at', 'start_date', '-start_date',
+            'amount', '-amount', 'owner_discount_percentage', '-owner_discount_percentage'
+        ]
+        
+        if sort_by in valid_sort_fields:
+            # Handle null values for discount percentage sorting
+            if sort_by in ['owner_discount_percentage', '-owner_discount_percentage']:
+                from django.db.models import Case, When, Value, DecimalField
+                queryset = queryset.annotate(
+                    discount_sort=Case(
+                        When(owner_discount_percentage__isnull=True, then=Value(-1)),
+                        default='owner_discount_percentage',
+                        output_field=DecimalField()
+                    )
+                )
+                if sort_by == 'owner_discount_percentage':
+                    queryset = queryset.order_by('discount_sort')
+                else:
+                    queryset = queryset.order_by('-discount_sort')
+            else:
+                queryset = queryset.order_by(sort_by)
+        else:
+            queryset = queryset.order_by('-created_at')
+        
+        return queryset
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

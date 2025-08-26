@@ -1,12 +1,12 @@
 {% extends "public_base.html" %}
 
-{% block title %}Agentes Inmobiliarios Profesionales | Inmobiliaria Premium{% endblock %}
+{% block title %}Agentes Inmobiliarios Profesionales | {{ company.name|default:"Inmobiliaria Premium" }}{% endblock %}
 
 {% block meta_description %}Conoce a nuestro equipo de agentes inmobiliarios profesionales. Expertos en venta y alquiler de propiedades con años de experiencia. Atención personalizada y servicio de calidad.{% endblock %}
 
 {% block meta_keywords %}agentes inmobiliarios, profesionales inmobiliarios, expertos en propiedades, venta de propiedades, alquiler de propiedades, asesoramiento inmobiliario, equipo profesional{% endblock %}
 
-{% block og_title %}Agentes Inmobiliarios Expertos - Inmobiliaria Premium{% endblock %}
+{% block og_title %}Agentes Inmobiliarios Expertos - {{ company.name|default:"Inmobiliaria Premium" }}{% endblock %}
 {% block og_description %}Nuestro equipo de agentes profesionales te ayudará a encontrar tu propiedad ideal. Experiencia, conocimiento del mercado y atención personalizada.{% endblock %}
 
 {% block structured_data %}
@@ -32,7 +32,7 @@
                 {% if agent.image_path %}"image": "{{ request.scheme }}://{{ request.get_host }}{{ agent.image_path.url }}",{% endif %}
                 "worksFor": {
                     "@type": "RealEstateAgent",
-                    "name": "Inmobiliaria Premium"
+                    "name": "{{ company.name|default:"Inmobiliaria Premium" }}"
                 },
                 "hasOfferCatalog": {
                     "@type": "OfferCatalog",

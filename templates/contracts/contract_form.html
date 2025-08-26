@@ -176,6 +176,45 @@
                                     <div class="text-danger small mt-1">{{ form.currency.errors }}</div>
                                 {% endif %}
                             </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.owner_discount_percentage.id_for_label }}" class="form-label fw-semibold">
+                                    <i class="bi bi-percent text-danger me-1"></i>{{ form.owner_discount_percentage.label }}
+                                </label>
+                                <div class="input-group">
+                                    {{ form.owner_discount_percentage }}
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                {% if form.owner_discount_percentage.errors %}
+                                    <div class="text-danger small mt-1">{{ form.owner_discount_percentage.errors }}</div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Porcentaje de descuento que se aplicará al propietario (0-100%)
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="row">
+                                    <div class="col-12 mb-2">
+                                        <label class="form-label fw-semibold text-muted">
+                                            <i class="bi bi-calculator text-secondary me-1"></i>Cálculos Automáticos
+                                        </label>
+                                    </div>
+                                    <div class="col-12 mb-2">
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light">Descuento $</span>
+                                            <input type="text" class="form-control bg-light" id="calculated_discount_amount" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-success text-white">Neto Propietario $</span>
+                                            <input type="text" class="form-control bg-light fw-bold" id="calculated_net_amount" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Información de Aumentos -->
@@ -287,6 +326,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const contractForm = document.getElementById('contractForm');
     const propertySelect = document.getElementById('id_property');
     const amountInput = document.getElementById('id_amount');
+    const ownerDiscountInput = document.getElementById('id_owner_discount_percentage');
+    const calculatedDiscountAmount = document.getElementById('calculated_discount_amount');
+    const calculatedNetAmount = document.getElementById('calculated_net_amount');
     const startDateInput = document.getElementById('id_start_date');
     const endDateInput = document.getElementById('id_end_date');
 
@@ -300,6 +342,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     .then(data => {
                         if (data.rental_price && amountInput) {
                             amountInput.value = data.rental_price;
+                            // Recalcular después de actualizar el monto
+                            calculateOwnerAmounts();
                             // Mostrar toast de información
                             showInfoToast('Monto actualizado automáticamente basado en la propiedad seleccionada');
                         }
@@ -310,6 +354,52 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Función para formatear moneda
+    function formatCurrency(amount) {
+        if (isNaN(amount) || amount === null || amount === undefined) {
+            return '0.00';
+        }
+        return parseFloat(amount).toLocaleString('es-AR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    // Función para calcular montos del propietario
+    function calculateOwnerAmounts() {
+        const amount = parseFloat(amountInput?.value) || 0;
+        const discountPercentage = parseFloat(ownerDiscountInput?.value) || 0;
+        
+        // Calcular monto de descuento
+        const discountAmount = amount * (discountPercentage / 100);
+        
+        // Calcular monto neto del propietario
+        const netAmount = amount - discountAmount;
+        
+        // Actualizar campos calculados
+        if (calculatedDiscountAmount) {
+            calculatedDiscountAmount.value = formatCurrency(discountAmount);
+        }
+        
+        if (calculatedNetAmount) {
+            calculatedNetAmount.value = formatCurrency(netAmount);
+        }
+    }
+
+    // Event listeners para cálculos en tiempo real
+    if (amountInput) {
+        amountInput.addEventListener('input', calculateOwnerAmounts);
+        amountInput.addEventListener('change', calculateOwnerAmounts);
+    }
+    
+    if (ownerDiscountInput) {
+        ownerDiscountInput.addEventListener('input', calculateOwnerAmounts);
+        ownerDiscountInput.addEventListener('change', calculateOwnerAmounts);
+    }
+
+    // Calcular montos iniciales al cargar la página
+    calculateOwnerAmounts();
 
     // Validación de fechas
     if (startDateInput && endDateInput) {
@@ -359,6 +449,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     isValid = false;
                     amountInput.classList.add('is-invalid');
                     showErrorToast('El monto debe ser mayor a cero');
+                }
+            }
+
+            // Validar porcentaje de descuento
+            if (ownerDiscountInput && ownerDiscountInput.value) {
+                const percentage = parseFloat(ownerDiscountInput.value);
+                if (percentage < 0) {
+                    isValid = false;
+                    ownerDiscountInput.classList.add('is-invalid');
+                    showErrorToast('El porcentaje de descuento no puede ser negativo');
+                } else if (percentage > 100) {
+                    isValid = false;
+                    ownerDiscountInput.classList.add('is-invalid');
+                    showErrorToast('El porcentaje de descuento no puede ser mayor a 100%');
                 }
             }
 

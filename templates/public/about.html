@@ -1,12 +1,12 @@
 {% extends "public_base.html" %}
 
-{% block title %}Sobre Nosotros - 15 Años de Experiencia Inmobiliaria | Inmobiliaria Premium{% endblock %}
+{% block title %}Sobre Nosotros - 15 Años de Experiencia Inmobiliaria | {{ company.name|default:"Inmobiliaria Premium" }}{% endblock %}
 
-{% block meta_description %}Conoce la historia de Inmobiliaria Premium. Más de 15 años de experiencia, 500+ familias felices, 1000+ propiedades vendidas. Valores, misión y equipo profesional comprometido con tu hogar ideal.{% endblock %}
+{% block meta_description %}Conoce la historia de {{ company.name|default:"Inmobiliaria Premium" }}. Más de 15 años de experiencia, 500+ familias felices, 1000+ propiedades vendidas. Valores, misión y equipo profesional comprometido con tu hogar ideal.{% endblock %}
 
 {% block meta_keywords %}sobre nosotros, historia inmobiliaria, experiencia inmobiliaria, valores empresariales, equipo profesional, 15 años experiencia, inmobiliaria confiable, misión empresarial{% endblock %}
 
-{% block og_title %}Sobre Inmobiliaria Premium - 15 Años Construyendo Sueños{% endblock %}
+{% block og_title %}Sobre {{ company.name|default:"Inmobiliaria Premium" }} - 15 Años Construyendo Sueños{% endblock %}
 {% block og_description %}Descubre nuestra historia: 15+ años de experiencia, 500+ familias felices, 1000+ propiedades vendidas. Conoce nuestros valores, misión y el equipo que hará realidad tu sueño inmobiliario.{% endblock %}
 
 {% block structured_data %}
@@ -15,7 +15,7 @@
     "@type": "AboutPage",
     "mainEntity": {
         "@type": "RealEstateAgent",
-        "name": "Inmobiliaria Premium",
+        "name": "{{ company.name|default:"Inmobiliaria Premium" }}",
         "foundingDate": "2008",
         "description": "Inmobiliaria especializada en venta y alquiler de propiedades con más de 15 años de experiencia en el mercado",
         "url": "{{ request.scheme }}://{{ request.get_host }}",
@@ -371,7 +371,7 @@
         <div class="row align-items-center mb-5">
             <div class="col-lg-6 mb-4 mb-lg-0">
                 <h2 class="display-5 fw-bold mb-4">Nuestra Historia</h2>
-                <p class="lead mb-4">Fundada en 2008, Inmobiliaria Premium nació con la visión de revolucionar el mercado inmobiliario local, ofreciendo un servicio personalizado y de excelencia.</p>
+                <p class="lead mb-4">Fundada en 2008, {{ company.name|default:"Inmobiliaria Premium" }} nació con la visión de revolucionar el mercado inmobiliario local, ofreciendo un servicio personalizado y de excelencia.</p>
                 <p class="mb-4">Comenzamos como una pequeña oficina con grandes sueños y la determinación de hacer la diferencia en la vida de nuestros clientes. Hoy, somos líderes en el mercado, pero mantenemos los mismos valores que nos definieron desde el primer día.</p>
                 <p class="mb-0">Cada propiedad que vendemos, cada familia que ayudamos a encontrar su hogar, es parte de nuestra historia y la razón por la que seguimos creciendo.</p>
             </div>

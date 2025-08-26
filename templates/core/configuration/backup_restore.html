@@ -1,0 +1,586 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Respaldo y Restauración - Configuración{% endblock %}
+
+{% block extra_css %}
+<style>
+    .backup-section {
+        background: #fff;
+        border-radius: 0.5rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        margin-bottom: 2rem;
+    }
+    
+    .backup-section-header {
+        background: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        border-radius: 0.5rem 0.5rem 0 0;
+        padding: 1.5rem;
+    }
+    
+    .backup-section-body {
+        padding: 2rem;
+    }
+    
+    .backup-action-card {
+        border: 2px dashed #dee2e6;
+        border-radius: 0.5rem;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.15s ease-in-out;
+        cursor: pointer;
+        margin-bottom: 1.5rem;
+    }
+    
+    .backup-action-card:hover {
+        border-color: #007bff;
+        background-color: #f8f9fa;
+    }
+    
+    .backup-action-card.active {
+        border-color: #007bff;
+        background-color: #e7f3ff;
+    }
+    
+    .backup-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #6c757d;
+    }
+    
+    .backup-action-card:hover .backup-icon,
+    .backup-action-card.active .backup-icon {
+        color: #007bff;
+    }
+    
+    .file-drop-zone {
+        border: 2px dashed #dee2e6;
+        border-radius: 0.5rem;
+        padding: 3rem 2rem;
+        text-align: center;
+        transition: all 0.15s ease-in-out;
+        background: #f8f9fa;
+    }
+    
+    .file-drop-zone.dragover {
+        border-color: #007bff;
+        background-color: #e7f3ff;
+    }
+    
+    .file-drop-zone input[type="file"] {
+        display: none;
+    }
+    
+    .backup-info {
+        background: #e7f3ff;
+        border: 1px solid #b3d7ff;
+        border-radius: 0.375rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .backup-warning {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 0.375rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .backup-success {
+        background: #d1edff;
+        border: 1px solid #b3d7ff;
+        border-radius: 0.375rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .progress-container {
+        display: none;
+        margin-top: 1rem;
+    }
+    
+    .backup-history {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .backup-item {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        padding: 0.75rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .backup-item:last-child {
+        border-bottom: none;
+    }
+    
+    .backup-item-info {
+        flex-grow: 1;
+    }
+    
+    .backup-item-actions {
+        margin-left: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'core:company_configuration' %}">Configuración</a></li>
+            <li class="breadcrumb-item active">Respaldo</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-2">
+                <i class="fas fa-download text-primary me-2"></i>
+                Respaldo y Restauración
+            </h1>
+            <p class="text-muted mb-0">Gestiona copias de seguridad de todas las configuraciones</p>
+        </div>
+        <a href="{% url 'core:company_configuration' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>
+            Volver
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Crear Respaldo -->
+            <div class="backup-section">
+                <div class="backup-section-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-download me-2"></i>
+                        Crear Respaldo
+                    </h5>
+                </div>
+                <div class="backup-section-body">
+                    <div class="backup-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>¿Qué se incluye en el respaldo?</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Datos básicos de la empresa</li>
+                            <li>Configuraciones del sistema</li>
+                            <li>Plantillas de documentos</li>
+                            <li>Configuraciones de notificaciones</li>
+                            <li>Configuraciones personalizadas</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="backup-action-card" onclick="createBackup()">
+                        <i class="fas fa-download backup-icon"></i>
+                        <h5>Crear Respaldo Completo</h5>
+                        <p class="text-muted mb-0">Genera un archivo con todas las configuraciones actuales</p>
+                    </div>
+                    
+                    <div class="progress-container" id="backupProgress">
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                 role="progressbar" style="width: 0%"></div>
+                        </div>
+                        <small class="text-muted mt-2 d-block">Creando respaldo...</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Restaurar Respaldo -->
+            <div class="backup-section">
+                <div class="backup-section-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-upload me-2"></i>
+                        Restaurar Respaldo
+                    </h5>
+                </div>
+                <div class="backup-section-body">
+                    <div class="backup-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Advertencia:</strong> La restauración sobrescribirá las configuraciones actuales. 
+                        Se recomienda crear un respaldo antes de proceder.
+                    </div>
+                    
+                    <form id="restoreForm" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="file-drop-zone" id="dropZone">
+                            <i class="fas fa-cloud-upload-alt backup-icon"></i>
+                            <h5>Seleccionar Archivo de Respaldo</h5>
+                            <p class="text-muted mb-3">Arrastra un archivo JSON aquí o haz clic para seleccionar</p>
+                            <input type="file" id="backupFile" name="backup_file" accept=".json">
+                            <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('backupFile').click()">
+                                <i class="fas fa-folder-open me-2"></i>
+                                Seleccionar Archivo
+                            </button>
+                        </div>
+                        
+                        <div id="fileInfo" style="display: none;" class="mt-3">
+                            <div class="backup-success">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <strong>Archivo seleccionado:</strong> <span id="fileName"></span>
+                                <br>
+                                <small class="text-muted">Tamaño: <span id="fileSize"></span></small>
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="overwriteConfirm">
+                                <label class="form-check-label" for="overwriteConfirm">
+                                    Confirmo que deseo sobrescribir las configuraciones actuales
+                                </label>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between">
+                                <button type="button" class="btn btn-outline-secondary" onclick="clearFile()">
+                                    <i class="fas fa-times me-2"></i>
+                                    Cancelar
+                                </button>
+                                <button type="button" class="btn btn-warning" onclick="restoreBackup()">
+                                    <i class="fas fa-upload me-2"></i>
+                                    Restaurar Configuraciones
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-container" id="restoreProgress">
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" 
+                                     role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <small class="text-muted mt-2 d-block">Restaurando configuraciones...</small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Información del Sistema -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Información del Sistema
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <strong>Empresa:</strong> {{ company.name }}
+                    </div>
+                    <div class="mb-2">
+                        <strong>Plantillas:</strong> {{ company.document_templates.count }}
+                    </div>
+                    <div class="mb-2">
+                        <strong>Notificaciones:</strong> {{ company.notification_settings.count }}
+                    </div>
+                    <div class="mb-2">
+                        <strong>Configuraciones:</strong> {{ company.configurations.count }}
+                    </div>
+                    <hr>
+                    <small class="text-muted">
+                        <i class="fas fa-clock me-1"></i>
+                        Última actualización: {{ company.updated_at|date:"d/m/Y H:i" }}
+                    </small>
+                </div>
+            </div>
+
+            <!-- Recomendaciones -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        Recomendaciones
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Crea respaldos regularmente
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Guarda los archivos en lugar seguro
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Prueba la restauración periódicamente
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Documenta los cambios importantes
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Ayuda -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-question-circle me-2"></i>
+                        Ayuda
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="card-text small">
+                        <strong>Formato de archivo:</strong> Los respaldos se guardan en formato JSON.
+                    </p>
+                    <p class="card-text small">
+                        <strong>Compatibilidad:</strong> Solo restaura respaldos creados en la misma versión del sistema.
+                    </p>
+                    <p class="card-text small">
+                        <strong>Seguridad:</strong> Los archivos de respaldo no contienen contraseñas ni datos sensibles.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Restauración</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>¡Atención!</strong> Esta acción sobrescribirá todas las configuraciones actuales.
+                </div>
+                <p>¿Está seguro de que desea continuar con la restauración?</p>
+                <div id="restoreSummary"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-warning" onclick="confirmRestore()">
+                    <i class="fas fa-upload me-2"></i>
+                    Confirmar Restauración
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('backupFile');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+
+    // Drag and drop functionality
+    dropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleFileSelect(files[0]);
+        }
+    });
+
+    fileInput.addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            handleFileSelect(e.target.files[0]);
+        }
+    });
+
+    function handleFileSelect(file) {
+        if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
+            alert('Por favor, selecciona un archivo JSON válido.');
+            return;
+        }
+
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        fileInfo.style.display = 'block';
+        
+        // Store file for later use
+        fileInput.files = createFileList(file);
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function createFileList(file) {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        return dt.files;
+    }
+});
+
+// Función para crear respaldo
+function createBackup() {
+    const progressContainer = document.getElementById('backupProgress');
+    const progressBar = progressContainer.querySelector('.progress-bar');
+    
+    progressContainer.style.display = 'block';
+    
+    // Simular progreso
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += 10;
+        progressBar.style.width = progress + '%';
+        
+        if (progress >= 100) {
+            clearInterval(interval);
+            
+            // Realizar la descarga real
+            fetch('{% url "core:create_backup_api" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                }
+                throw new Error('Error al crear el respaldo');
+            })
+            .then(blob => {
+                // Crear enlace de descarga
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `backup_configuracion_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.json`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                
+                showAlert('Respaldo creado y descargado correctamente', 'success');
+                progressContainer.style.display = 'none';
+                progressBar.style.width = '0%';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('Error al crear el respaldo: ' + error.message, 'danger');
+                progressContainer.style.display = 'none';
+                progressBar.style.width = '0%';
+            });
+        }
+    }, 100);
+}
+
+// Función para restaurar respaldo
+function restoreBackup() {
+    const overwriteConfirm = document.getElementById('overwriteConfirm');
+    const fileInput = document.getElementById('backupFile');
+    
+    if (!overwriteConfirm.checked) {
+        alert('Debe confirmar que desea sobrescribir las configuraciones actuales.');
+        return;
+    }
+    
+    if (!fileInput.files.length) {
+        alert('Por favor, seleccione un archivo de respaldo.');
+        return;
+    }
+    
+    const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+    modal.show();
+}
+
+// Función para confirmar restauración
+function confirmRestore() {
+    const modal = bootstrap.Modal.getInstance(document.getElementById('confirmModal'));
+    modal.hide();
+    
+    const progressContainer = document.getElementById('restoreProgress');
+    const progressBar = progressContainer.querySelector('.progress-bar');
+    const fileInput = document.getElementById('backupFile');
+    
+    progressContainer.style.display = 'block';
+    
+    const formData = new FormData();
+    formData.append('backup_file', fileInput.files[0]);
+    formData.append('overwrite', 'true');
+    
+    fetch('{% url "core:restore_backup_api" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        progressContainer.style.display = 'none';
+        
+        if (data.success) {
+            showAlert(data.message, 'success');
+            clearFile();
+            
+            // Mostrar resumen de cambios si está disponible
+            if (data.changes_summary) {
+                console.log('Cambios aplicados:', data.changes_summary);
+            }
+        } else {
+            showAlert('Error al restaurar: ' + data.error, 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('Error al restaurar el respaldo', 'danger');
+        progressContainer.style.display = 'none';
+    });
+}
+
+// Función para limpiar archivo seleccionado
+function clearFile() {
+    document.getElementById('backupFile').value = '';
+    document.getElementById('fileInfo').style.display = 'none';
+    document.getElementById('overwriteConfirm').checked = false;
+}
+
+// Función para mostrar alertas
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const container = document.querySelector('.container');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    // Auto-dismiss después de 5 segundos
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

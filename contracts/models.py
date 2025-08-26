@@ -34,6 +34,14 @@ class Contract(BaseModel):
     # Financial Information
     amount = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Monto")
     currency = models.CharField(max_length=10, default='ARS', verbose_name="Moneda")
+    owner_discount_percentage = models.DecimalField(
+        max_digits=5, 
+        decimal_places=2, 
+        null=True, 
+        blank=True,
+        verbose_name="Porcentaje de Descuento al Propietario (%)",
+        help_text="Porcentaje que se descontará al propietario (0-100%)"
+    )
     
     # Automatic Price Increase (without percentage - agent will set new amount directly)
     frequency = models.CharField(max_length=20, choices=FREQUENCY_CHOICES, blank=True, null=True, verbose_name="Frecuencia de Aumento")
@@ -86,6 +94,13 @@ class Contract(BaseModel):
                 name='end_date_after_start_date',
                 violation_error_message="La fecha de fin debe ser posterior a la fecha de inicio."
             ),
+            # Validar que el porcentaje de descuento esté entre 0 y 100
+            models.CheckConstraint(
+                check=models.Q(owner_discount_percentage__isnull=True) | 
+                      models.Q(owner_discount_percentage__gte=0, owner_discount_percentage__lte=100),
+                name='valid_owner_discount_percentage',
+                violation_error_message="El porcentaje de descuento debe estar entre 0% y 100%."
+            ),
 
         ]
         
@@ -132,6 +147,13 @@ class Contract(BaseModel):
         # Validar monto
         if self.amount is not None and self.amount <= 0:
             errors['amount'] = "El monto debe ser mayor a cero."
+        
+        # Validar porcentaje de descuento del propietario
+        if self.owner_discount_percentage is not None:
+            if self.owner_discount_percentage < 0:
+                errors['owner_discount_percentage'] = "El porcentaje de descuento no puede ser negativo."
+            elif self.owner_discount_percentage > 100:
+                errors['owner_discount_percentage'] = "El porcentaje de descuento no puede ser mayor a 100%."
         
         # Validar que no existan contratos activos superpuestos para la misma propiedad
         if self.property_id and self.start_date:
@@ -237,6 +259,29 @@ class Contract(BaseModel):
         elif self.start_date <= today and (not self.end_date or today <= self.end_date):
             self.status = self.STATUS_ACTIVE
             self.is_active = True
+
+    def owner_discount_amount(self):
+        """
+        Calcula el monto de descuento al propietario.
+        
+        Returns:
+            Decimal: Monto de descuento calculado basado en el porcentaje de descuento
+                    y el monto del contrato, o 0.00 si no hay descuento.
+        """
+        if self.owner_discount_percentage and self.amount:
+            return self.amount * (self.owner_discount_percentage / Decimal('100'))
+        return Decimal('0.00')
+    
+    def owner_net_amount(self):
+        """
+        Calcula el monto neto que recibirá el propietario después del descuento.
+        
+        Returns:
+            Decimal: Monto neto del propietario (monto total - descuento).
+        """
+        if self.amount:
+            return self.amount - self.owner_discount_amount()
+        return Decimal('0.00')
 
     def commission_amount(self):
         """

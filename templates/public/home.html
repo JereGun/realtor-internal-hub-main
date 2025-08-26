@@ -1,13 +1,13 @@
 {% extends "public_base.html" %}
 {% load humanize %}
 
-{% block title %}Inmobiliaria Premium - Encuentra tu Hogar Ideal | Venta y Alquiler de Propiedades{% endblock %}
+{% block title %}{{ company.name|default:"Inmobiliaria Premium" }} - Encuentra tu Hogar Ideal | Venta y Alquiler de Propiedades{% endblock %}
 
-{% block meta_description %}Inmobiliaria Premium: Más de 15 años ayudando a encontrar el hogar perfecto. Venta y alquiler de casas, departamentos y propiedades. Servicio profesional, agentes expertos y atención personalizada.{% endblock %}
+{% block meta_description %}{{ company.name|default:"Inmobiliaria Premium" }}: Más de 15 años ayudando a encontrar el hogar perfecto. Venta y alquiler de casas, departamentos y propiedades. Servicio profesional, agentes expertos y atención personalizada.{% endblock %}
 
 {% block meta_keywords %}inmobiliaria, propiedades, casas en venta, departamentos en alquiler, bienes raíces, agentes inmobiliarios, hogar ideal, venta de propiedades, alquiler de propiedades, inmobiliaria premium{% endblock %}
 
-{% block og_title %}Inmobiliaria Premium - Tu Hogar Ideal Te Espera{% endblock %}
+{% block og_title %}{{ company.name|default:"Inmobiliaria Premium" }} - Tu Hogar Ideal Te Espera{% endblock %}
 
 {% block og_description %}Descubre más de {{ total_properties }} propiedades disponibles. 15+ años de experiencia, 500+ familias felices. Encuentra tu hogar perfecto con nosotros.{% endblock %}
 
@@ -15,17 +15,17 @@
 {
     "@context": "https://schema.org",
     "@type": "RealEstateAgent",
-    "name": "Inmobiliaria Premium",
-    "description": "Inmobiliaria especializada en venta y alquiler de propiedades con más de 15 años de experiencia",
+    "name": "{{ company.name|default:"Inmobiliaria Premium" }}",
+    "description": "{{ company.name|default:"Inmobiliaria Premium" }} - Inmobiliaria especializada en venta y alquiler de propiedades con más de 15 años de experiencia",
     "url": "{{ request.scheme }}://{{ request.get_host }}",
-    "telephone": "+54-11-1234-5678",
-    "email": "info@inmobiliaria.com",
+    "telephone": "{{ company.phone|default:"+54-11-1234-5678" }}",
+    "email": "{{ company.email|default:"info@inmobiliaria.com" }}",
     "address": {
         "@type": "PostalAddress",
-        "streetAddress": "Av. Principal 123",
-        "addressLocality": "Ciudad",
-        "addressRegion": "Provincia",
-        "addressCountry": "AR"
+        "streetAddress": "{{ company.address|default:"Av. Principal 123" }}",
+        "addressLocality": "{{ company_config.city|default:"Ciudad" }}",
+        "addressRegion": "{{ company_config.state_province|default:"Provincia" }}",
+        "addressCountry": "{{ company_config.country|default:"AR" }}"
     },
     "openingHours": [
         "Mo-Fr 09:00-18:00",

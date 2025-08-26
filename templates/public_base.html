@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Inmobiliaria Premium{% endblock %}</title>
+    <title>{% block title %}{{ company.name|default:"Inmobiliaria Premium" }}{% endblock %}</title>
     
     <!-- SEO Meta Tags -->
-    <meta name="description" content="{% block meta_description %}Inmobiliaria Premium - Encuentra tu hogar ideal. Más de 15 años de experiencia en venta y alquiler de propiedades. Servicio profesional y personalizado.{% endblock %}">
+    <meta name="description" content="{% block meta_description %}{{ company.name|default:"Inmobiliaria Premium" }} - Encuentra tu hogar ideal. Más de 15 años de experiencia en venta y alquiler de propiedades. Servicio profesional y personalizado.{% endblock %}">
     <meta name="keywords" content="{% block meta_keywords %}inmobiliaria, propiedades, casas, departamentos, venta, alquiler, bienes raíces, agentes inmobiliarios{% endblock %}">
-    <meta name="author" content="Inmobiliaria Premium">
+    <meta name="author" content="{{ company.name|default:"Inmobiliaria Premium" }}">
     <meta name="robots" content="index, follow">
     <meta name="language" content="Spanish">
     <meta name="revisit-after" content="7 days">
@@ -16,17 +16,17 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="{% block og_type %}website{% endblock %}">
     <meta property="og:url" content="{% block og_url %}{{ request.build_absolute_uri }}{% endblock %}">
-    <meta property="og:title" content="{% block og_title %}Inmobiliaria Premium{% endblock %}">
-    <meta property="og:description" content="{% block og_description %}Inmobiliaria Premium - Encuentra tu hogar ideal. Más de 15 años de experiencia en venta y alquiler de propiedades.{% endblock %}">
-    <meta property="og:image" content="{% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% load static %}{% static 'images/og-default.jpg' %}{% endblock %}">
-    <meta property="og:site_name" content="Inmobiliaria Premium">
+    <meta property="og:title" content="{% block og_title %}{{ company.name|default:"Inmobiliaria Premium" }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{{ company.name|default:"Inmobiliaria Premium" }} - Encuentra tu hogar ideal. Más de 15 años de experiencia en venta y alquiler de propiedades.{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{% if company.logo %}{{ company.logo.url }}{% else %}{{ request.scheme }}://{{ request.get_host }}{% load static %}{% static 'images/og-default.jpg' %}{% endif %}{% endblock %}">
+    <meta property="og:site_name" content="{{ company.name|default:"Inmobiliaria Premium" }}">
     <meta property="og:locale" content="es_ES">
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="{% block twitter_url %}{{ request.build_absolute_uri }}{% endblock %}">
-    <meta property="twitter:title" content="{% block twitter_title %}Inmobiliaria Premium{% endblock %}">
-    <meta property="twitter:description" content="{% block twitter_description %}Inmobiliaria Premium - Encuentra tu hogar ideal. Más de 15 años de experiencia.{% endblock %}">
+    <meta property="twitter:title" content="{% block twitter_title %}{{ company.name|default:"Inmobiliaria Premium" }}{% endblock %}">
+    <meta property="twitter:description" content="{% block twitter_description %}{{ company.name|default:"Inmobiliaria Premium" }} - Encuentra tu hogar ideal. Más de 15 años de experiencia.{% endblock %}">
     <meta property="twitter:image" content="{% block twitter_image %}{{ request.scheme }}://{{ request.get_host }}{% load static %}{% static 'images/twitter-default.jpg' %}{% endblock %}">
     
     <!-- Canonical URL -->
@@ -49,17 +49,17 @@
     {
         "@context": "https://schema.org",
         "@type": "RealEstateAgent",
-        "name": "Inmobiliaria Premium",
-        "description": "Inmobiliaria especializada en venta y alquiler de propiedades con más de 15 años de experiencia",
+        "name": "{{ company.name|default:"Inmobiliaria Premium" }}",
+        "description": "{{ company.name|default:"Inmobiliaria Premium" }} - Inmobiliaria especializada en venta y alquiler de propiedades con más de 15 años de experiencia",
         "url": "{{ request.scheme }}://{{ request.get_host }}",
-        "telephone": "+54-11-1234-5678",
-        "email": "info@inmobiliaria.com",
+        "telephone": "{{ company.phone|default:"+54-11-1234-5678" }}",
+        "email": "{{ company.email|default:"info@inmobiliaria.com" }}",
         "address": {
             "@type": "PostalAddress",
-            "streetAddress": "Av. Principal 123",
-            "addressLocality": "Ciudad",
-            "addressRegion": "Provincia",
-            "addressCountry": "AR"
+            "streetAddress": "{{ company.address|default:"Av. Principal 123" }}",
+            "addressLocality": "{{ company_config.city|default:"Ciudad" }}",
+            "addressRegion": "{{ company_config.state_province|default:"Provincia" }}",
+            "addressCountry": "{{ company_config.country|default:"AR" }}"
         },
         "openingHours": [
             "Mo-Fr 09:00-18:00",
@@ -246,7 +246,12 @@
     <nav class="navbar navbar-expand-lg navbar-custom fixed-top">
         <div class="container">
             <a class="navbar-brand" href="{% url 'public:home' %}">
-                <i class="bi bi-building me-2"></i>Inmobiliaria Premium
+                {% if company.logo %}
+                    <img src="{{ company.logo.url }}" alt="{{ company.name }}" height="32" class="me-2">
+                {% else %}
+                    <i class="bi bi-building me-2"></i>
+                {% endif %}
+                {{ company.name|default:"Inmobiliaria Premium" }}
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -290,7 +295,14 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 mb-4">
-                    <h5><i class="bi bi-building me-2"></i>Inmobiliaria Premium</h5>
+                    <h5>
+                        {% if company.logo %}
+                            <img src="{{ company.logo.url }}" alt="{{ company.name }}" height="24" class="me-2">
+                        {% else %}
+                            <i class="bi bi-building me-2"></i>
+                        {% endif %}
+                        {{ company.name|default:"Inmobiliaria Premium" }}
+                    </h5>
                     <p class="mb-3">Tu socio de confianza en bienes raíces. Encontramos el hogar perfecto para ti con el mejor servicio y atención personalizada.</p>
                     <div class="d-flex gap-3">
                         <a href="#" class="text-decoration-none">
@@ -331,18 +343,8 @@
                 <div class="col-lg-3 mb-4">
                     <h5>Contacto</h5>
                     <ul class="list-unstyled">
-                        <li class="mb-2">
-                            <i class="bi bi-geo-alt me-2"></i>
-                            Av. Principal 123, Ciudad
-                        </li>
-                        <li class="mb-2">
-                            <i class="bi bi-telephone me-2"></i>
-                            +54 11 1234-5678
-                        </li>
-                        <li class="mb-2">
-                            <i class="bi bi-envelope me-2"></i>
-                            info@inmobiliaria.com
-                        </li>
+                        {% load company_tags %}
+                        {% render_company_contact %}
                         <li class="mb-2">
                             <i class="bi bi-clock me-2"></i>
                             Lun - Vie: 9:00 - 18:00
@@ -355,7 +357,7 @@
             
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <p class="mb-0">&copy; 2024 Inmobiliaria Premium. Todos los derechos reservados.</p>
+                    <p class="mb-0">&copy; 2024 {{ company.name|default:"Inmobiliaria Premium" }}. Todos los derechos reservados.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <a href="#" class="me-3">Política de Privacidad</a>

@@ -1,0 +1,654 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Previsualización - Comprobante de Propietario{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/owner-receipts.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Encabezado -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'accounting:accounting_dashboard' %}" class="text-decoration-none">
+                            <i class="bi bi-house-door me-1"></i>Accounting
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'accounting:invoice_detail' invoice.pk %}" class="text-decoration-none">
+                            Factura {{ invoice.number|default:invoice.id }}
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Previsualización Comprobante</li>
+                </ol>
+            </nav>
+            <h1 class="h3 text-dark mb-1">
+                <i class="bi bi-eye me-2 text-primary"></i>
+                Previsualización del Comprobante
+            </h1>
+            <p class="text-muted mb-0">Vista previa del comprobante para {{ receipt_data.owner.name }}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'accounting:invoice_detail' invoice.pk %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Volver a Factura
+            </a>
+            <a href="{% url 'accounting:generate_owner_receipt' invoice.pk %}" class="btn btn-success">
+                <i class="bi bi-check-circle me-1"></i>Generar Comprobante
+            </a>
+        </div>
+    </div>
+
+    <!-- Alerta de previsualización -->
+    <div class="alert alert-info border-0 shadow-sm mb-4">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-info-circle me-3 fs-4"></i>
+            <div>
+                <h6 class="mb-1">Vista Previa del Comprobante</h6>
+                <p class="mb-0">Esta es una previsualización del comprobante que se generará. Los datos mostrados son los que se incluirán en el comprobante oficial. Revise toda la información antes de proceder con la generación.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información principal -->
+    <div class="row g-4 mb-4">
+        <!-- Información del comprobante -->
+        <div class="col-lg-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="bi bi-file-earmark-check me-2"></i>Información del Comprobante
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Número (Preview)</label>
+                            <div class="fw-bold text-primary">{{ receipt_data.preview_info.number }}</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Factura Asociada</label>
+                            <div>
+                                <a href="{% url 'accounting:invoice_detail' invoice.pk %}" 
+                                   class="text-decoration-none fw-semibold">
+                                    <i class="bi bi-receipt me-1"></i>{{ receipt_data.invoice.number }}
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Fecha de Generación</label>
+                            <div>{{ receipt_data.preview_info.generated_at|date:'d/m/Y H:i' }}</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Generado por</label>
+                            <div>{{ receipt_data.preview_info.generated_by }}</div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label text-muted small fw-semibold">Estado</label>
+                            <div>
+                                <span class="badge bg-info fs-6">
+                                    <i class="bi bi-eye me-1"></i>{{ receipt_data.preview_info.status|default:"Vista Previa" }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información financiera -->
+        <div class="col-lg-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="bi bi-calculator me-2"></i>Cálculos Financieros
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                <span class="text-muted">Monto Bruto:</span>
+                                <span class="fw-bold fs-5">${{ receipt_data.financial.gross_amount|floatformat:2 }}</span>
+                            </div>
+                        </div>
+                        {% if receipt_data.financial.discount_percentage > 0 %}
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                                <span class="text-muted">Descuento ({{ receipt_data.financial.discount_percentage }}%):</span>
+                                <span class="text-danger">-${{ receipt_data.financial.discount_amount|floatformat:2 }}</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center py-3 bg-light rounded">
+                                <span class="fw-bold">Monto Neto para Propietario:</span>
+                                <span class="fw-bold fs-4 text-success">${{ receipt_data.financial.net_amount|floatformat:2 }}</span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle me-1"></i>
+                                El propietario recibirá el {{ receipt_data.financial.net_percentage|floatformat:1 }}% del monto total de la factura
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información de las partes -->
+    <div class="row g-4 mb-4">
+        <!-- Propietario -->
+        <div class="col-lg-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="bi bi-person-check me-2"></i>Propietario
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label text-muted small fw-semibold">Nombre</label>
+                            <div class="fw-semibold">{{ receipt_data.owner.name }}</div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label text-muted small fw-semibold">Email</label>
+                            <div>
+                                <i class="bi bi-envelope me-1 text-primary"></i>{{ receipt_data.owner.email }}
+                            </div>
+                        </div>
+                        {% if receipt_data.owner.phone %}
+                        <div class="col-12">
+                            <label class="form-label text-muted small fw-semibold">Teléfono</label>
+                            <div>
+                                <i class="bi bi-telephone me-1 text-primary"></i>{{ receipt_data.owner.phone }}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Propiedad -->
+        <div class="col-lg-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="bi bi-house me-2"></i>Propiedad
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label text-muted small fw-semibold">Título</label>
+                            <div class="fw-semibold">{{ receipt_data.property.title }}</div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label text-muted small fw-semibold">Dirección</label>
+                            <div>
+                                <i class="bi bi-geo-alt me-1 text-primary"></i>{{ receipt_data.property.address }}
+                            </div>
+                        </div>
+                        {% if receipt_data.property.property_type %}
+                        <div class="col-12">
+                            <label class="form-label text-muted small fw-semibold">Tipo</label>
+                            <div>{{ receipt_data.property.property_type }}</div>
+                        </div>
+                        {% endif %}
+                        {% if receipt_data.property.neighborhood %}
+                        <div class="col-12">
+                            <label class="form-label text-muted small fw-semibold">Barrio</label>
+                            <div>{{ receipt_data.property.neighborhood }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inquilino -->
+        <div class="col-lg-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="bi bi-person me-2"></i>Inquilino
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label text-muted small fw-semibold">Nombre</label>
+                            <div class="fw-semibold">{{ receipt_data.customer.name }}</div>
+                        </div>
+                        {% if receipt_data.customer.email %}
+                        <div class="col-12">
+                            <label class="form-label text-muted small fw-semibold">Email</label>
+                            <div>
+                                <i class="bi bi-envelope me-1 text-primary"></i>{{ receipt_data.customer.email }}
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if receipt_data.customer.phone %}
+                        <div class="col-12">
+                            <label class="form-label text-muted small fw-semibold">Teléfono</label>
+                            <div>
+                                <i class="bi bi-telephone me-1 text-primary"></i>{{ receipt_data.customer.phone }}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información del contrato y factura -->
+    <div class="row g-4 mb-4">
+        <!-- Contrato -->
+        <div class="col-lg-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="bi bi-file-earmark-text me-2"></i>Información del Contrato
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Fecha Inicio</label>
+                            <div>{{ receipt_data.contract.start_date|date:'d/m/Y'|default:'N/A' }}</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Fecha Fin</label>
+                            <div>{{ receipt_data.contract.end_date|date:'d/m/Y'|default:'N/A' }}</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Monto Contrato</label>
+                            <div class="fw-semibold">${{ receipt_data.contract.amount|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Estado</label>
+                            <div>{{ receipt_data.contract.status }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Factura -->
+        <div class="col-lg-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="bi bi-receipt me-2"></i>Información de la Factura
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Número</label>
+                            <div class="fw-semibold">{{ receipt_data.invoice.number }}</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Estado</label>
+                            <div>{{ receipt_data.invoice.status }}</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Fecha Emisión</label>
+                            <div>{{ receipt_data.invoice.date|date:'d/m/Y' }}</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Fecha Vencimiento</label>
+                            <div>{{ receipt_data.invoice.due_date|date:'d/m/Y'|default:'N/A' }}</div>
+                        </div>
+                        {% if receipt_data.invoice.description %}
+                        <div class="col-12">
+                            <label class="form-label text-muted small fw-semibold">Descripción</label>
+                            <div>{{ receipt_data.invoice.description }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agente (si disponible) -->
+    {% if receipt_data.agent.name != 'N/A' %}
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="bi bi-person-badge me-2"></i>Agente Responsable
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Nombre</label>
+                            <div class="fw-semibold">{{ receipt_data.agent.name }}</div>
+                        </div>
+                        {% if receipt_data.agent.license_number %}
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Matrícula</label>
+                            <div>{{ receipt_data.agent.license_number }}</div>
+                        </div>
+                        {% endif %}
+                        {% if receipt_data.agent.email %}
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Email</label>
+                            <div>
+                                <i class="bi bi-envelope me-1 text-primary"></i>{{ receipt_data.agent.email }}
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if receipt_data.agent.phone %}
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Teléfono</label>
+                            <div>
+                                <i class="bi bi-telephone me-1 text-primary"></i>{{ receipt_data.agent.phone }}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Vista previa del documento -->
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="bi bi-file-earmark-pdf me-2"></i>Vista Previa del Documento
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Simulación del documento del comprobante -->
+                    <div class="border rounded p-4 bg-white" style="max-width: 600px; margin: 0 auto;">
+                        <!-- Encabezado del documento -->
+                        <div class="text-center mb-4 pb-3 border-bottom">
+                            <h4 class="fw-bold text-primary mb-1">COMPROBANTE DE PROPIETARIO</h4>
+                            <p class="text-muted mb-0">Número: {{ receipt_data.preview_info.number }}</p>
+                            <small class="text-muted">Fecha: {{ receipt_data.preview_info.generated_at|date:'d/m/Y' }}</small>
+                        </div>
+
+                        <!-- Información del propietario -->
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-dark mb-2">Propietario:</h6>
+                            <div class="ps-3">
+                                <div><strong>{{ receipt_data.owner.name }}</strong></div>
+                                <div class="text-muted small">{{ receipt_data.owner.email }}</div>
+                                {% if receipt_data.owner.phone %}
+                                <div class="text-muted small">{{ receipt_data.owner.phone }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Información de la propiedad -->
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-dark mb-2">Propiedad:</h6>
+                            <div class="ps-3">
+                                <div><strong>{{ receipt_data.property.title }}</strong></div>
+                                <div class="text-muted small">{{ receipt_data.property.address }}</div>
+                                {% if receipt_data.property.property_type %}
+                                <div class="text-muted small">{{ receipt_data.property.property_type }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Información de la factura -->
+                        <div class="mb-3">
+                            <h6 class="fw-bold text-dark mb-2">Factura Asociada:</h6>
+                            <div class="ps-3">
+                                <div><strong>Número:</strong> {{ receipt_data.invoice.number }}</div>
+                                <div><strong>Fecha:</strong> {{ receipt_data.invoice.date|date:'d/m/Y' }}</div>
+                                <div><strong>Inquilino:</strong> {{ receipt_data.customer.name }}</div>
+                            </div>
+                        </div>
+
+                        <!-- Cálculos financieros -->
+                        <div class="border-top pt-3">
+                            <h6 class="fw-bold text-dark mb-3">Detalle Financiero:</h6>
+                            <div class="row">
+                                <div class="col-8">Monto Bruto del Alquiler:</div>
+                                <div class="col-4 text-end fw-bold">${{ receipt_data.financial.gross_amount|floatformat:2 }}</div>
+                            </div>
+                            {% if receipt_data.financial.discount_percentage > 0 %}
+                            <div class="row text-danger">
+                                <div class="col-8">Descuento ({{ receipt_data.financial.discount_percentage }}%):</div>
+                                <div class="col-4 text-end">-${{ receipt_data.financial.discount_amount|floatformat:2 }}</div>
+                            </div>
+                            {% endif %}
+                            <hr class="my-2">
+                            <div class="row fs-5 fw-bold text-success">
+                                <div class="col-8">Monto Neto a Recibir:</div>
+                                <div class="col-4 text-end">${{ receipt_data.financial.net_amount|floatformat:2 }}</div>
+                            </div>
+                        </div>
+
+                        <!-- Pie del documento -->
+                        <div class="text-center mt-4 pt-3 border-top">
+                            <small class="text-muted">
+                                Este comprobante certifica el monto neto correspondiente al propietario<br>
+                                por el alquiler de la propiedad en el período indicado.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Esta es una representación visual de cómo se verá el comprobante final
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botones de acción -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center py-4">
+                    <h5 class="mb-3">¿Desea proceder con la generación del comprobante?</h5>
+                    <p class="text-muted mb-4">Una vez generado, el comprobante será creado oficialmente en el sistema con un número único y podrá ser enviado al propietario por correo electrónico.</p>
+                    
+                    <!-- Información adicional -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <i class="bi bi-file-earmark-check text-primary fs-2"></i>
+                                <div class="small text-muted mt-1">Se creará registro oficial</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <i class="bi bi-envelope text-info fs-2"></i>
+                                <div class="small text-muted mt-1">Listo para envío por email</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <i class="bi bi-file-earmark-pdf text-success fs-2"></i>
+                                <div class="small text-muted mt-1">PDF disponible para descarga</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{% url 'accounting:invoice_detail' invoice.pk %}" class="btn btn-outline-secondary btn-lg">
+                            <i class="bi bi-arrow-left me-2"></i>Cancelar
+                        </a>
+                        <a href="{% url 'accounting:generate_owner_receipt' invoice.pk %}" class="btn btn-success btn-lg">
+                            <i class="bi bi-check-circle me-2"></i>Generar Comprobante Oficial
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript para mejorar la experiencia de usuario -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Agregar efecto de hover a las tarjetas
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-2px)';
+            this.style.transition = 'transform 0.2s ease';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+
+    // Resaltar el documento de vista previa
+    const previewDoc = document.querySelector('.border.rounded.p-4.bg-white');
+    if (previewDoc) {
+        previewDoc.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+        previewDoc.style.transition = 'box-shadow 0.3s ease';
+        
+        previewDoc.addEventListener('mouseenter', function() {
+            this.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
+        });
+        
+        previewDoc.addEventListener('mouseleave', function() {
+            this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+        });
+    }
+
+    // Confirmación antes de generar
+    const generateBtn = document.querySelector('a[href*="generate_owner_receipt"]');
+    if (generateBtn) {
+        generateBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const confirmModal = document.createElement('div');
+            confirmModal.className = 'modal fade';
+            confirmModal.innerHTML = `
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="bi bi-check-circle me-2 text-success"></i>
+                                Confirmar Generación
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="text-center mb-3">
+                                <i class="bi bi-file-earmark-check text-primary" style="font-size: 3rem;"></i>
+                            </div>
+                            <p class="text-center mb-3">
+                                ¿Está seguro de que desea generar el comprobante oficial para 
+                                <strong>${'{{ receipt_data.owner.name }}'}</strong>?
+                            </p>
+                            <div class="alert alert-info">
+                                <small>
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Una vez generado, el comprobante tendrá un número oficial y será registrado en el sistema.
+                                </small>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-circle me-1"></i>Cancelar
+                            </button>
+                            <a href="${this.href}" class="btn btn-success">
+                                <i class="bi bi-check-circle me-1"></i>Generar Comprobante
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(confirmModal);
+            const modal = new bootstrap.Modal(confirmModal);
+            modal.show();
+            
+            // Limpiar el modal cuando se cierre
+            confirmModal.addEventListener('hidden.bs.modal', function() {
+                document.body.removeChild(confirmModal);
+            });
+        });
+    }
+
+    // Animación de entrada para las tarjetas
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    });
+
+    // Aplicar animación a las tarjetas
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+        observer.observe(card);
+    });
+});
+</script>
+
+{% block extra_css %}
+<style>
+    /* Estilos adicionales para la vista previa */
+    .preview-document {
+        background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+    }
+    
+    .preview-document:hover {
+        border-color: #007bff;
+    }
+    
+    /* Animaciones suaves */
+    .card {
+        transition: all 0.3s ease;
+    }
+    
+    .card:hover {
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+    }
+    
+    /* Estilos para el documento de vista previa */
+    .border.rounded.p-4.bg-white {
+        background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%) !important;
+        border: 2px solid #dee2e6 !important;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .container-fluid {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+        
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+{% endblock %}

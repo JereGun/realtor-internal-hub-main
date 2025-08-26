@@ -1,0 +1,439 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Comprobante {{ receipt.receipt_number }}{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/owner-receipts.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Encabezado -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-2">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'accounting:accounting_dashboard' %}" class="text-decoration-none">
+                            <i class="bi bi-house-door me-1"></i>Accounting
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'accounting:owner_receipts_list' %}" class="text-decoration-none">
+                            Comprobantes
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ receipt.receipt_number }}</li>
+                </ol>
+            </nav>
+            <h1 class="h3 text-dark mb-1">
+                <i class="bi bi-file-earmark-check me-2 text-primary"></i>
+                Comprobante {{ receipt.receipt_number }}
+            </h1>
+            <p class="text-muted mb-0">Detalles del comprobante de propietario</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'accounting:owner_receipts_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>Volver a Lista
+            </a>
+            {% if can_download_pdf %}
+            <a href="{% url 'accounting:owner_receipt_pdf' receipt.pk %}" 
+               class="btn btn-outline-success" target="_blank">
+                <i class="bi bi-file-earmark-pdf me-1"></i>Descargar PDF
+            </a>
+            {% endif %}
+            {% if can_resend %}
+            <button type="button" class="btn btn-primary" 
+                    data-action="resend" 
+                    data-receipt-id="{{ receipt.pk }}"
+                    data-bs-toggle="tooltip"
+                    title="{% if receipt.status == 'failed' %}Reenviar comprobante por correo{% else %}Enviar comprobante por correo{% endif %}">
+                <i class="bi bi-envelope me-1"></i>
+                {% if receipt.status == 'failed' %}Reenviar{% else %}Enviar{% endif %}
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Estado del comprobante -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center
+                                        {% if receipt.status == 'sent' %}bg-success
+                                        {% elif receipt.status == 'generated' %}bg-warning
+                                        {% elif receipt.status == 'failed' %}bg-danger
+                                        {% else %}bg-secondary
+                                        {% endif %}" style="width: 60px; height: 60px;">
+                                        <i class="bi 
+                                            {% if receipt.status == 'sent' %}bi-check-circle
+                                            {% elif receipt.status == 'generated' %}bi-clock
+                                            {% elif receipt.status == 'failed' %}bi-exclamation-triangle
+                                            {% else %}bi-file-earmark-check
+                                            {% endif %} text-white fs-3"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h5 class="mb-1">
+                                        Estado: 
+                                        <span class="badge 
+                                            {% if receipt.status == 'sent' %}bg-success
+                                            {% elif receipt.status == 'generated' %}bg-warning text-dark
+                                            {% elif receipt.status == 'failed' %}bg-danger
+                                            {% else %}bg-secondary
+                                            {% endif %} fs-6">
+                                            {% if receipt.status == 'sent' %}Enviado
+                                            {% elif receipt.status == 'generated' %}Generado
+                                            {% elif receipt.status == 'failed' %}Error en envío
+                                            {% else %}{{ receipt.get_status_display }}
+                                            {% endif %}
+                                        </span>
+                                    </h5>
+                                    <p class="text-muted mb-0">
+                                        {% if receipt.status == 'sent' %}
+                                            Comprobante enviado exitosamente el {{ receipt.sent_at|date:'d/m/Y \a \l\a\s H:i' }}
+                                        {% elif receipt.status == 'generated' %}
+                                            Comprobante generado, listo para enviar
+                                        {% elif receipt.status == 'failed' %}
+                                            Error al enviar el comprobante
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <div class="text-muted small">
+                                <div><i class="bi bi-calendar-check me-1"></i>Generado: {{ receipt.generated_at|date:'d/m/Y H:i' }}</div>
+                                {% if receipt.sent_at %}
+                                <div><i class="bi bi-envelope-check me-1"></i>Enviado: {{ receipt.sent_at|date:'d/m/Y H:i' }}</div>
+                                {% endif %}
+                                {% if receipt.generated_by %}
+                                <div><i class="bi bi-person me-1"></i>Por: {{ receipt.generated_by.get_full_name }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información principal -->
+    <div class="row g-4 mb-4">
+        <!-- Información del comprobante -->
+        <div class="col-lg-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="bi bi-file-earmark-check me-2"></i>Información del Comprobante
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Número</label>
+                            <div class="fw-bold">{{ receipt.receipt_number }}</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Factura Asociada</label>
+                            <div>
+                                <a href="{% url 'accounting:invoice_detail' receipt.invoice.pk %}" 
+                                   class="text-decoration-none fw-semibold">
+                                    <i class="bi bi-receipt me-1"></i>{{ receipt.invoice.number|default:receipt.invoice.id }}
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Email Enviado a</label>
+                            <div>
+                                {% if receipt.email_sent_to %}
+                                    <i class="bi bi-envelope me-1 text-primary"></i>{{ receipt.email_sent_to }}
+                                {% else %}
+                                    <span class="text-muted">No enviado</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Estado de Factura</label>
+                            <div>
+                                <span class="badge 
+                                    {% if receipt.invoice.status == 'paid' %}bg-success
+                                    {% elif receipt.invoice.status == 'sent' %}bg-info
+                                    {% elif receipt.invoice.status == 'validated' %}bg-warning text-dark
+                                    {% elif receipt.invoice.status == 'draft' %}bg-secondary
+                                    {% elif receipt.invoice.status == 'cancelled' %}bg-danger
+                                    {% else %}bg-light text-dark
+                                    {% endif %}">
+                                    {{ receipt.invoice.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información financiera -->
+        <div class="col-lg-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="bi bi-currency-dollar me-2"></i>Información Financiera
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Monto Bruto</label>
+                            <div class="fw-bold fs-5">${{ receipt.gross_amount|floatformat:2 }}</div>
+                        </div>
+                        {% if receipt.discount_percentage %}
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Descuento</label>
+                            <div class="text-warning fw-bold">
+                                {{ receipt.discount_percentage }}% (-${{ receipt.discount_amount|floatformat:2 }})
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="col-12">
+                            <hr class="my-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <label class="form-label text-muted small fw-semibold mb-0">Monto Neto para Propietario</label>
+                                <div class="fw-bold fs-4 text-success">${{ receipt.net_amount|floatformat:2 }}</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Total Pagado</label>
+                            <div class="fw-bold text-info">${{ total_paid|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-muted small fw-semibold">Saldo Pendiente</label>
+                            <div class="fw-bold {% if balance > 0 %}text-warning{% else %}text-success{% endif %}">
+                                ${{ balance|floatformat:2 }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información de entidades relacionadas -->
+    <div class="row g-4 mb-4">
+        <!-- Información del propietario -->
+        <div class="col-lg-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="bi bi-person me-2"></i>Propietario
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if owner_info %}
+                        <div class="text-center mb-3">
+                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center mx-auto" 
+                                 style="width: 60px; height: 60px;">
+                                <span class="text-white fw-bold fs-4">
+                                    {{ owner_info.name|first }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <h6 class="fw-bold mb-1">{{ owner_info.name }}</h6>
+                            {% if owner_info.email %}
+                                <div class="text-muted small mb-1">
+                                    <i class="bi bi-envelope me-1"></i>{{ owner_info.email }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted">
+                            <i class="bi bi-person-x fs-1 mb-2"></i>
+                            <p class="mb-0">Información del propietario no disponible</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Información de la propiedad -->
+        <div class="col-lg-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="bi bi-house me-2"></i>Propiedad
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if property_info %}
+                        <div class="text-center mb-3">
+                            <i class="bi bi-house-door text-info" style="font-size: 3rem;"></i>
+                        </div>
+                        <div class="text-center">
+                            <h6 class="fw-bold mb-2">{{ property_info.title }}</h6>
+                            <div class="text-muted small mb-1">
+                                <i class="bi bi-geo-alt me-1"></i>{{ property_info.address }}
+                            </div>
+                            {% if property_info.property_type %}
+                                <div class="text-muted small">
+                                    <i class="bi bi-building me-1"></i>{{ property_info.property_type }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted">
+                            <i class="bi bi-house-x fs-1 mb-2"></i>
+                            <p class="mb-0">Información de la propiedad no disponible</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Información del inquilino -->
+        <div class="col-lg-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="bi bi-person-badge me-2"></i>Inquilino
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center mx-auto" 
+                             style="width: 60px; height: 60px;">
+                            <span class="text-white fw-bold fs-4">
+                                {{ receipt.invoice.customer.first_name|first }}{{ receipt.invoice.customer.last_name|first }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <h6 class="fw-bold mb-1">{{ receipt.invoice.customer.get_full_name }}</h6>
+                        {% if receipt.invoice.customer.email %}
+                            <div class="text-muted small mb-1">
+                                <i class="bi bi-envelope me-1"></i>{{ receipt.invoice.customer.email }}
+                            </div>
+                        {% endif %}
+                        {% if receipt.invoice.customer.phone %}
+                            <div class="text-muted small">
+                                <i class="bi bi-telephone me-1"></i>{{ receipt.invoice.customer.phone }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información de la factura -->
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="bi bi-receipt me-2"></i>Detalles de la Factura
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small fw-semibold">Número de Factura</label>
+                            <div class="fw-bold">{{ receipt.invoice.number|default:receipt.invoice.id }}</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small fw-semibold">Fecha de Emisión</label>
+                            <div>{{ receipt.invoice.date|date:'d/m/Y' }}</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small fw-semibold">Fecha de Vencimiento</label>
+                            <div>{{ receipt.invoice.due_date|date:'d/m/Y' }}</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small fw-semibold">Monto Total</label>
+                            <div class="fw-bold">${{ receipt.invoice.total_amount|floatformat:2 }}</div>
+                        </div>
+                        {% if receipt.invoice.description %}
+                        <div class="col-12">
+                            <label class="form-label text-muted small fw-semibold">Descripción</label>
+                            <div class="border rounded p-2 bg-light">{{ receipt.invoice.description }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial de envíos -->
+    {% if send_history %}
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0 text-dark fw-bold">
+                        <i class="bi bi-clock-history me-2"></i>Historial de Envíos
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        {% for event in send_history %}
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="me-3">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center
+                                    {% if event.status == 'success' %}bg-success
+                                    {% elif event.status == 'error' %}bg-danger
+                                    {% else %}bg-secondary
+                                    {% endif %}" style="width: 40px; height: 40px;">
+                                    <i class="bi 
+                                        {% if event.status == 'success' %}bi-check-circle
+                                        {% elif event.status == 'error' %}bi-exclamation-triangle
+                                        {% else %}bi-clock
+                                        {% endif %} text-white"></i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-semibold">{{ event.action }}</div>
+                                <div class="text-muted small">{{ event.date|date:'d/m/Y H:i' }}</div>
+                                {% if event.email %}
+                                    <div class="text-muted small">Enviado a: {{ event.email }}</div>
+                                {% endif %}
+                                {% if event.error %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="bi bi-exclamation-circle me-1"></i>{{ event.error }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Error message si existe -->
+    {% if receipt.status == 'failed' and receipt.error_message %}
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="alert alert-danger" role="alert">
+                <h6 class="alert-heading">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Error en el Envío
+                </h6>
+                <p class="mb-0">{{ receipt.error_message }}</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- CSRF Token for AJAX requests -->
+{% csrf_token %}
+
+<!-- Enhanced AJAX functionality is handled by owner-receipts.js -->
+{% endblock %}

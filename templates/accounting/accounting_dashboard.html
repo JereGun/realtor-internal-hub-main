@@ -10,9 +10,22 @@
 
             <!-- Encabezado -->
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h4 text-dark mb-0">
-                    <i class="bi bi-bar-chart-line me-2"></i> Dashboard de Contabilidad
-                </h1>
+                <div>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb mb-2">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'core:dashboard' %}" class="text-decoration-none">
+                                    <i class="bi bi-house-door me-1"></i>Dashboard
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active" aria-current="page">Contabilidad</li>
+                        </ol>
+                    </nav>
+                    <h1 class="h3 text-dark mb-1">
+                        <i class="bi bi-calculator me-2 text-primary"></i>Dashboard de Contabilidad
+                    </h1>
+                    <p class="text-muted mb-0">Gestione facturas, pagos y comprobantes de propietarios</p>
+                </div>
             </div>
 
             <!-- Contenido del Dashboard -->
@@ -42,11 +55,58 @@
                 </div>
             </div>
 
+            <!-- Acciones Rápidas -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-light">
+                            <h5 class="card-title mb-0">
+                                <i class="bi bi-lightning me-2"></i>Acciones Rápidas
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <a href="{% url 'accounting:invoice_create' %}" class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
+                                        <i class="bi bi-receipt fs-1 mb-2"></i>
+                                        <span class="fw-semibold">Nueva Factura</span>
+                                        <small class="text-muted">Crear factura</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-3">
+                                    <a href="{% url 'accounting:invoice_list' %}" class="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
+                                        <i class="bi bi-list-ul fs-1 mb-2"></i>
+                                        <span class="fw-semibold">Ver Facturas</span>
+                                        <small class="text-muted">Gestionar facturas</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-3">
+                                    <a href="{% url 'accounting:owner_receipts_list' %}" class="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
+                                        <i class="bi bi-file-earmark-check fs-1 mb-2"></i>
+                                        <span class="fw-semibold">Comprobantes</span>
+                                        <small class="text-muted">Propietarios</small>
+                                    </a>
+                                </div>
+                                <div class="col-md-3">
+                                    <a href="{% url 'accounting:payment_list' %}" class="btn btn-outline-success w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
+                                        <i class="bi bi-credit-card fs-1 mb-2"></i>
+                                        <span class="fw-semibold">Pagos</span>
+                                        <small class="text-muted">Ver pagos</small>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="row">
                 <div class="col-md-6">
                     <div class="card shadow-sm border-0 mb-4">
                         <div class="card-body">
-                            <h5 class="card-title">Pagos Recientes</h5>
+                            <h5 class="card-title">
+                                <i class="bi bi-credit-card me-2"></i>Pagos Recientes
+                            </h5>
                             <p>Aquí se mostrarán los pagos más recientes.</p>
                             <a href="{% url 'accounting:payment_list' %}" class="btn btn-sm btn-outline-primary">Ver todos los pagos</a>
                         </div>
@@ -55,7 +115,23 @@
                 <div class="col-md-6">
                     <div class="card shadow-sm border-0 mb-4">
                         <div class="card-body">
-                            <h5 class="card-title">Facturas Pendientes</h5>
+                            <h5 class="card-title">
+                                <i class="bi bi-file-earmark-check me-2"></i>Comprobantes Recientes
+                            </h5>
+                            <p>Aquí se mostrarán los comprobantes de propietarios más recientes.</p>
+                            <a href="{% url 'accounting:owner_receipts_list' %}" class="btn btn-sm btn-outline-warning">Ver todos los comprobantes</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="bi bi-receipt me-2"></i>Facturas Pendientes
+                            </h5>
                             <p>Aquí se mostrarán las facturas con estado 'sent' o 'draft'.</p>
                             <a href="{% url 'accounting:invoice_list' %}" class="btn btn-sm btn-outline-primary">Ver todas las facturas</a>
                         </div>

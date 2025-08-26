@@ -1,13 +1,13 @@
 {% extends "public_base.html" %}
 {% load humanize %}
 
-{% block title %}Propiedades en Venta y Alquiler | Inmobiliaria Premium{% endblock %}
+{% block title %}Propiedades en Venta y Alquiler | {{ company.name|default:"Inmobiliaria Premium" }}{% endblock %}
 
 {% block meta_description %}Explora nuestra amplia selección de propiedades en venta y alquiler. Casas, departamentos y locales comerciales en las mejores ubicaciones. Filtros avanzados para encontrar tu propiedad ideal.{% endblock %}
 
 {% block meta_keywords %}propiedades en venta, propiedades en alquiler, casas, departamentos, locales comerciales, bienes raíces, inmuebles, filtros de búsqueda, propiedades premium{% endblock %}
 
-{% block og_title %}Propiedades en Venta y Alquiler - Inmobiliaria Premium{% endblock %}
+{% block og_title %}Propiedades en Venta y Alquiler - {{ company.name|default:"Inmobiliaria Premium" }}{% endblock %}
 {% block og_description %}Descubre {{ properties.paginator.count|default:"cientos de" }} propiedades disponibles. Usa nuestros filtros avanzados para encontrar tu hogar perfecto.{% endblock %}
 
 {% block extra_css %}

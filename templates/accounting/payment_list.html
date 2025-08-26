@@ -8,6 +8,18 @@
     <div class="row">
         <div class="col-12 col-lg-10 mx-auto">
 
+            <!-- Breadcrumbs -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'accounting:accounting_dashboard' %}" class="text-decoration-none">
+                            <i class="bi bi-calculator me-1"></i>Contabilidad
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active" aria-current="page">Pagos</li>
+                </ol>
+            </nav>
+
             <!-- Encabezado -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h1 class="h4 text-dark mb-0">

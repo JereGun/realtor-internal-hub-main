@@ -1,0 +1,388 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Plantillas de Documentos - Configuración{% endblock %}
+
+{% block extra_css %}
+<style>
+    .template-card {
+        border: none;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        transition: all 0.15s ease-in-out;
+        margin-bottom: 1.5rem;
+    }
+    
+    .template-card:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+    }
+    
+    .template-type-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+    }
+    
+    .template-status {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 0.5rem;
+    }
+    
+    .template-status.active {
+        background-color: #28a745;
+    }
+    
+    .template-status.inactive {
+        background-color: #dc3545;
+    }
+    
+    .template-actions {
+        opacity: 0;
+        transition: opacity 0.15s ease-in-out;
+    }
+    
+    .template-card:hover .template-actions {
+        opacity: 1;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #6c757d;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'core:dashboard' %}">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'core:company_configuration' %}">Configuración</a></li>
+            <li class="breadcrumb-item active">Plantillas</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-2">
+                <i class="fas fa-file-alt text-primary me-2"></i>
+                Plantillas de Documentos
+            </h1>
+            <p class="text-muted mb-0">Gestiona las plantillas para facturas, contratos y otros documentos</p>
+        </div>
+        <div>
+            <a href="{% url 'core:company_configuration' %}" class="btn btn-outline-secondary me-2">
+                <i class="fas fa-arrow-left me-2"></i>
+                Volver
+            </a>
+            <a href="{% url 'core:document_template_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>
+                Nueva Plantilla
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <label for="typeFilter" class="form-label">Filtrar por tipo:</label>
+                    <select class="form-select" id="typeFilter">
+                        <option value="">Todos los tipos</option>
+                        <option value="invoice">Facturas</option>
+                        <option value="contract">Contratos</option>
+                        <option value="receipt">Recibos</option>
+                        <option value="report">Informes</option>
+                        <option value="email">Emails</option>
+                        <option value="letter">Cartas</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="statusFilter" class="form-label">Filtrar por estado:</label>
+                    <select class="form-select" id="statusFilter">
+                        <option value="">Todos los estados</option>
+                        <option value="active">Activas</option>
+                        <option value="inactive">Inactivas</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="searchFilter" class="form-label">Buscar:</label>
+                    <input type="text" class="form-control" id="searchFilter" placeholder="Nombre de plantilla...">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de plantillas -->
+    <div id="templatesContainer">
+        {% if templates %}
+            <div class="row" id="templatesList">
+                {% for template in templates %}
+                <div class="col-lg-6 template-item" 
+                     data-type="{{ template.template_type }}" 
+                     data-status="{% if template.is_active %}active{% else %}inactive{% endif %}"
+                     data-name="{{ template.template_name|lower }}">
+                    <div class="card template-card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <span class="template-status {% if template.is_active %}active{% else %}inactive{% endif %}"></span>
+                                <h6 class="card-title mb-0">{{ template.template_name }}</h6>
+                            </div>
+                            <div class="template-actions">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'core:document_template_edit' template.id %}" 
+                                       class="btn btn-outline-primary" 
+                                       title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" 
+                                            class="btn btn-outline-info" 
+                                            onclick="previewTemplate({{ template.id }})"
+                                            title="Vista previa">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button type="button" 
+                                            class="btn btn-outline-danger" 
+                                            onclick="deleteTemplate({{ template.id }}, '{{ template.template_name }}')"
+                                            title="Eliminar">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="template-type-badge bg-secondary text-white">
+                                    {{ template.get_template_type_display }}
+                                </span>
+                                <small class="text-muted">
+                                    Actualizada: {{ template.updated_at|date:"d/m/Y H:i" }}
+                                </small>
+                            </div>
+                            
+                            {% if template.header_content %}
+                                <p class="card-text small text-muted mb-2">
+                                    <strong>Encabezado:</strong> 
+                                    {{ template.header_content|truncatechars:100 }}
+                                </p>
+                            {% endif %}
+                            
+                            {% if template.footer_content %}
+                                <p class="card-text small text-muted mb-2">
+                                    <strong>Pie de página:</strong> 
+                                    {{ template.footer_content|truncatechars:100 }}
+                                </p>
+                            {% endif %}
+                            
+                            {% if template.custom_css %}
+                                <p class="card-text small text-info">
+                                    <i class="fas fa-palette me-1"></i>
+                                    Incluye CSS personalizado
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card">
+                <div class="card-body empty-state">
+                    <i class="fas fa-file-alt empty-state-icon"></i>
+                    <h5>No hay plantillas configuradas</h5>
+                    <p class="text-muted">Crea tu primera plantilla para personalizar los documentos de tu empresa.</p>
+                    <a href="{% url 'core:document_template_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>
+                        Crear Primera Plantilla
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal para vista previa -->
+<div class="modal fade" id="previewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Vista Previa de Plantilla</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="previewContent" class="border p-3" style="min-height: 300px;">
+                    <div class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Elementos de filtro
+    const typeFilter = document.getElementById('typeFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    const searchFilter = document.getElementById('searchFilter');
+    const templateItems = document.querySelectorAll('.template-item');
+
+    // Función de filtrado
+    function filterTemplates() {
+        const typeValue = typeFilter.value.toLowerCase();
+        const statusValue = statusFilter.value.toLowerCase();
+        const searchValue = searchFilter.value.toLowerCase();
+
+        templateItems.forEach(item => {
+            const itemType = item.dataset.type;
+            const itemStatus = item.dataset.status;
+            const itemName = item.dataset.name;
+
+            const typeMatch = !typeValue || itemType === typeValue;
+            const statusMatch = !statusValue || itemStatus === statusValue;
+            const searchMatch = !searchValue || itemName.includes(searchValue);
+
+            if (typeMatch && statusMatch && searchMatch) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        // Mostrar mensaje si no hay resultados
+        const visibleItems = Array.from(templateItems).filter(item => item.style.display !== 'none');
+        const container = document.getElementById('templatesContainer');
+        let noResultsMsg = document.getElementById('noResultsMessage');
+
+        if (visibleItems.length === 0 && templateItems.length > 0) {
+            if (!noResultsMsg) {
+                noResultsMsg = document.createElement('div');
+                noResultsMsg.id = 'noResultsMessage';
+                noResultsMsg.className = 'text-center text-muted py-5';
+                noResultsMsg.innerHTML = `
+                    <i class="fas fa-search fa-3x mb-3 opacity-50"></i>
+                    <h5>No se encontraron plantillas</h5>
+                    <p>Intenta ajustar los filtros de búsqueda</p>
+                `;
+                container.appendChild(noResultsMsg);
+            }
+            noResultsMsg.style.display = 'block';
+        } else if (noResultsMsg) {
+            noResultsMsg.style.display = 'none';
+        }
+    }
+
+    // Event listeners para filtros
+    typeFilter.addEventListener('change', filterTemplates);
+    statusFilter.addEventListener('change', filterTemplates);
+    searchFilter.addEventListener('input', filterTemplates);
+});
+
+// Función para vista previa de plantilla
+function previewTemplate(templateId) {
+    const modal = new bootstrap.Modal(document.getElementById('previewModal'));
+    const previewContent = document.getElementById('previewContent');
+    
+    // Mostrar loading
+    previewContent.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Cargando vista previa...</span>
+            </div>
+        </div>
+    `;
+    
+    modal.show();
+    
+    // Simular carga de vista previa (aquí iría la llamada AJAX real)
+    setTimeout(() => {
+        previewContent.innerHTML = `
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Vista previa de la plantilla ID: ${templateId}
+            </div>
+            <p>Aquí se mostraría el contenido renderizado de la plantilla con datos de ejemplo.</p>
+        `;
+    }, 1000);
+}
+
+// Función para eliminar plantilla
+function deleteTemplate(templateId, templateName) {
+    if (confirm(`¿Está seguro de que desea eliminar la plantilla "${templateName}"?`)) {
+        fetch(`{% url 'core:delete_template_api' 0 %}`.replace('0', templateId), {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Mostrar mensaje de éxito
+                showAlert(data.message, 'success');
+                
+                // Remover el elemento de la lista
+                const templateItem = document.querySelector(`[data-name="${templateName.toLowerCase()}"]`);
+                if (templateItem) {
+                    templateItem.remove();
+                }
+                
+                // Verificar si quedan plantillas
+                const remainingItems = document.querySelectorAll('.template-item');
+                if (remainingItems.length === 0) {
+                    location.reload(); // Recargar para mostrar estado vacío
+                }
+            } else {
+                showAlert('Error al eliminar la plantilla: ' + data.error, 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showAlert('Error al eliminar la plantilla', 'danger');
+        });
+    }
+}
+
+// Función para mostrar alertas
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const container = document.querySelector('.container');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    // Auto-dismiss después de 5 segundos
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

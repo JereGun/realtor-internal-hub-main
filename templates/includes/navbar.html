@@ -60,6 +60,14 @@
                         Nueva Factura
                     </a>
                 </li>
+                <li>
+                    <a class="dropdown-item {% if 'owner_receipt' in request.resolver_match.url_name and request.resolver_match.app_name == 'accounting' %}active{% endif %}" 
+                       href="{% url 'accounting:owner_receipts_list' %}"
+                       title="Gestionar comprobantes enviados a propietarios">
+                        <i class="bi bi-file-earmark-check me-2"></i>
+                        Comprobantes de Propietarios
+                    </a>
+                </li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item disabled" href="#">Reportes (próximamente)</a></li>
             </ul>

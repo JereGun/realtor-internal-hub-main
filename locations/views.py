@@ -52,7 +52,33 @@ def get_cities(request):
 def autocomplete_countries(request):
     """Autocompletado de países"""
     term = request.GET.get('term', '')
-    countries = Country.objects.filter(name__icontains=term)[:10]
+    country_id = request.GET.get('id')
+    
+    # Si se proporciona un ID específico, devolver ese país
+    if country_id:
+        try:
+            country = Country.objects.get(id=country_id)
+            results = [{
+                'id': country.id,
+                'text': country.name,
+                'name': country.name
+            }]
+            return JsonResponse({'results': results})
+        except Country.DoesNotExist:
+            return JsonResponse({'results': []})
+    
+    # Búsqueda más flexible sin acentos
+    from django.db.models import Q
+    import unicodedata
+    
+    # Normalizar término de búsqueda
+    normalized_term = unicodedata.normalize('NFD', term.lower()).encode('ascii', 'ignore').decode('ascii')
+    
+    # Buscar tanto con el término original como normalizado
+    countries = Country.objects.filter(
+        Q(name__icontains=term) | 
+        Q(name__icontains=normalized_term)
+    ).distinct()[:10]
     
     results = [{
         'id': country.id,
@@ -68,8 +94,35 @@ def autocomplete_states(request):
     """Autocompletado de provincias/estados"""
     term = request.GET.get('term', '')
     country_id = request.GET.get('country_id')
+    state_id = request.GET.get('id')
     
-    states = State.objects.filter(name__icontains=term)
+    # Si se proporciona un ID específico, devolver esa provincia
+    if state_id:
+        try:
+            state = State.objects.get(id=state_id)
+            results = [{
+                'id': state.id,
+                'text': f"{state.name}, {state.country.name}",
+                'name': state.name,
+                'country': state.country.name,
+                'country_id': state.country.id
+            }]
+            return JsonResponse({'results': results})
+        except State.DoesNotExist:
+            return JsonResponse({'results': []})
+    
+    # Búsqueda más flexible sin acentos
+    from django.db.models import Q
+    import unicodedata
+    
+    # Normalizar término de búsqueda
+    normalized_term = unicodedata.normalize('NFD', term.lower()).encode('ascii', 'ignore').decode('ascii')
+    
+    states = State.objects.filter(
+        Q(name__icontains=term) | 
+        Q(name__icontains=normalized_term)
+    )
+    
     if country_id:
         states = states.filter(country_id=country_id)
     
@@ -89,8 +142,37 @@ def autocomplete_cities(request):
     """Autocompletado de ciudades"""
     term = request.GET.get('term', '')
     state_id = request.GET.get('state_id')
+    city_id = request.GET.get('id')
     
-    cities = City.objects.filter(name__icontains=term)
+    # Si se proporciona un ID específico, devolver esa ciudad
+    if city_id:
+        try:
+            city = City.objects.get(id=city_id)
+            results = [{
+                'id': city.id,
+                'text': f"{city.name}, {city.state.name}, {city.state.country.name}",
+                'name': city.name,
+                'state': city.state.name,
+                'state_id': city.state.id,
+                'country': city.state.country.name,
+                'country_id': city.state.country.id
+            }]
+            return JsonResponse({'results': results})
+        except City.DoesNotExist:
+            return JsonResponse({'results': []})
+    
+    # Búsqueda más flexible sin acentos
+    from django.db.models import Q
+    import unicodedata
+    
+    # Normalizar término de búsqueda
+    normalized_term = unicodedata.normalize('NFD', term.lower()).encode('ascii', 'ignore').decode('ascii')
+    
+    cities = City.objects.filter(
+        Q(name__icontains=term) | 
+        Q(name__icontains=normalized_term)
+    )
+    
     if state_id:
         cities = cities.filter(state_id=state_id)
     

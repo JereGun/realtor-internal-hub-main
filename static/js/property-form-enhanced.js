@@ -11,20 +11,7 @@
 class PropertyFormEnhancer {
   constructor() {
     this.form = document.getElementById('propertyForm');
-    this.progressSteps = document.querySelectorAll('.progress-step');
-    this.progressBar = document.getElementById('form-progress');
-    this.progressText = document.getElementById('progress-text');
-    this.completionPercentage = document.getElementById('completion-percentage');
-    
-    this.formSections = [
-      { id: 'section-basic', fields: ['title', 'property_type', 'description'], weight: 0.2 },
-      { id: 'section-location', fields: ['street', 'number', 'country', 'province', 'locality'], weight: 0.15 },
-      { id: 'section-physical', fields: ['total_surface', 'bedrooms', 'bathrooms'], weight: 0.15 },
-      { id: 'section-financial', fields: ['sale_price', 'rental_price'], weight: 0.2 },
-      { id: 'section-features', fields: ['features'], weight: 0.1 },
-      { id: 'section-images', fields: ['images'], weight: 0.2 }
-    ];
-    
+
     this.validationRules = {
       title: { required: true, minLength: 5, maxLength: 200 },
       property_type: { required: true },
@@ -34,65 +21,31 @@ class PropertyFormEnhancer {
       bedrooms: { min: 0, max: 20 },
       bathrooms: { min: 0, max: 10 }
     };
-    
+
     this.init();
   }
-  
+
   init() {
-    this.setupProgressNavigation();
     this.setupFormValidation();
     this.setupDragAndDrop();
     this.setupAutoSave();
-    this.setupSectionObserver();
-    this.updateProgress();
-    
+
     console.log('Property Form Enhancer initialized');
   }
-  
-  setupProgressNavigation() {
-    this.progressSteps.forEach(step => {
-      step.addEventListener('click', (e) => {
-        e.preventDefault();
-        const targetId = step.getAttribute('href');
-        const targetElement = document.querySelector(targetId);
-        
-        if (targetElement) {
-          this.scrollToSection(targetElement);
-          this.setActiveStep(step);
-        }
-      });
-    });
-  }
-  
-  scrollToSection(element) {
-    const headerOffset = 100;
-    const elementPosition = element.getBoundingClientRect().top;
-    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-    
-    window.scrollTo({
-      top: offsetPosition,
-      behavior: 'smooth'
-    });
-  }
-  
-  setActiveStep(activeStep) {
-    this.progressSteps.forEach(step => step.classList.remove('active'));
-    activeStep.classList.add('active');
-  }
-  
+
+
   setupFormValidation() {
     // Real-time validation
     document.querySelectorAll('.enhanced-form-control').forEach(input => {
       input.addEventListener('input', () => {
         this.validateField(input);
-        this.updateProgress();
       });
-      
+
       input.addEventListener('blur', () => {
         this.validateField(input);
       });
     });
-    
+
     // Form submission validation
     if (this.form) {
       this.form.addEventListener('submit', (e) => {
@@ -102,30 +55,30 @@ class PropertyFormEnhancer {
       });
     }
   }
-  
+
   validateField(field) {
     const fieldName = field.name;
     const value = field.value.trim();
     const rules = this.validationRules[fieldName];
-    
+
     if (!rules) return true;
-    
+
     const errors = [];
-    
+
     // Required validation
     if (rules.required && !value) {
       errors.push(`${this.getFieldLabel(fieldName)} es requerido`);
     }
-    
+
     // Length validations
     if (value && rules.minLength && value.length < rules.minLength) {
       errors.push(`Mínimo ${rules.minLength} caracteres`);
     }
-    
+
     if (value && rules.maxLength && value.length > rules.maxLength) {
       errors.push(`Máximo ${rules.maxLength} caracteres`);
     }
-    
+
     // Numeric validations
     if (value && rules.min !== undefined) {
       const numValue = parseFloat(value);
@@ -133,24 +86,24 @@ class PropertyFormEnhancer {
         errors.push(`Valor mínimo: ${rules.min}`);
       }
     }
-    
+
     if (value && rules.max !== undefined) {
       const numValue = parseFloat(value);
       if (isNaN(numValue) || numValue > rules.max) {
         errors.push(`Valor máximo: ${rules.max}`);
       }
     }
-    
+
     this.updateFieldValidationState(field, errors);
     return errors.length === 0;
   }
-  
+
   updateFieldValidationState(field, errors) {
     field.classList.remove('is-invalid', 'is-valid');
-    
+
     const validFeedback = field.parentNode.querySelector('.valid-feedback');
     const invalidFeedback = field.parentNode.querySelector('.invalid-feedback');
-    
+
     if (errors.length > 0) {
       field.classList.add('is-invalid');
       if (invalidFeedback) {
@@ -173,22 +126,22 @@ class PropertyFormEnhancer {
       if (invalidFeedback) invalidFeedback.style.display = 'none';
     }
   }
-  
+
   validateForm() {
     let isValid = true;
     const errors = [];
-    
+
     document.querySelectorAll('.enhanced-form-control').forEach(field => {
       if (!this.validateField(field)) {
         isValid = false;
       }
     });
-    
+
     // Custom business logic validations
     const listingType = document.getElementById('id_listing_type')?.value;
     const salePrice = parseFloat(document.getElementById('id_sale_price')?.value) || 0;
     const rentalPrice = parseFloat(document.getElementById('id_rental_price')?.value) || 0;
-    
+
     if (listingType === 'sale' && salePrice <= 0) {
       errors.push('Debe definir un precio de venta');
       isValid = false;
@@ -199,138 +152,99 @@ class PropertyFormEnhancer {
       errors.push('Debe definir al menos un precio');
       isValid = false;
     }
-    
+
     if (!isValid) {
       errors.forEach(error => this.showToast(error, 'error'));
       this.scrollToFirstError();
     }
-    
+
     return isValid;
   }
-  
+
   scrollToFirstError() {
     const firstError = document.querySelector('.is-invalid');
     if (firstError) {
-      this.scrollToSection(firstError.closest('.form-section') || firstError);
+      const headerOffset = 100;
+      const elementPosition = firstError.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
       firstError.focus();
     }
   }
-  
-  updateProgress() {
-    let totalWeight = 0;
-    let completedWeight = 0;
-    
-    this.formSections.forEach((section, index) => {
-      const sectionElement = document.getElementById(section.id);
-      const progressStep = this.progressSteps[index];
-      
-      if (!sectionElement || !progressStep) return;
-      
-      totalWeight += section.weight;
-      
-      // Calculate section completion
-      const completedFields = section.fields.filter(fieldName => {
-        const field = document.getElementById(`id_${fieldName}`);
-        return field && field.value.trim() !== '';
-      });
-      
-      const completionRatio = completedFields.length / section.fields.length;
-      const isCompleted = completionRatio >= 0.5; // 50% completion threshold
-      
-      if (isCompleted) {
-        completedWeight += section.weight * completionRatio;
-        progressStep.classList.add('completed');
-      } else {
-        progressStep.classList.remove('completed');
-        completedWeight += section.weight * completionRatio;
-      }
-    });
-    
-    const progressPercentage = Math.round((completedWeight / totalWeight) * 100);
-    
-    if (this.progressBar) {
-      this.progressBar.style.width = `${progressPercentage}%`;
-    }
-    
-    if (this.progressText) {
-      const completedSections = document.querySelectorAll('.progress-step.completed').length;
-      this.progressText.textContent = `${completedSections} de ${this.formSections.length} secciones completadas`;
-    }
-    
-    if (this.completionPercentage) {
-      this.completionPercentage.textContent = `${progressPercentage}%`;
-    }
-  }
-  
+
   setupDragAndDrop() {
     const dragDropZone = document.getElementById('dragDropZone');
     const multipleImageInput = document.getElementById('multipleImageInput');
-    
+
     if (!dragDropZone || !multipleImageInput) return;
-    
+
     // Prevent default drag behaviors
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
       dragDropZone.addEventListener(eventName, this.preventDefaults, false);
       document.body.addEventListener(eventName, this.preventDefaults, false);
     });
-    
+
     // Highlight drop zone when item is dragged over it
     ['dragenter', 'dragover'].forEach(eventName => {
       dragDropZone.addEventListener(eventName, () => {
         dragDropZone.classList.add('drag-over');
       }, false);
     });
-    
+
     ['dragleave', 'drop'].forEach(eventName => {
       dragDropZone.addEventListener(eventName, () => {
         dragDropZone.classList.remove('drag-over');
       }, false);
     });
-    
+
     // Handle dropped files
     dragDropZone.addEventListener('drop', (e) => {
       const files = e.dataTransfer.files;
       this.handleFiles(files);
     }, false);
-    
+
     // Handle file input change
     multipleImageInput.addEventListener('change', (e) => {
       this.handleFiles(e.target.files);
     });
   }
-  
+
   preventDefaults(e) {
     e.preventDefault();
     e.stopPropagation();
   }
-  
+
   handleFiles(files) {
     [...files].forEach(file => this.processFile(file));
   }
-  
+
   processFile(file) {
     // Validate file type
     if (!file.type.startsWith('image/')) {
       this.showToast('Solo se permiten archivos de imagen', 'error');
       return;
     }
-    
+
     // Validate file size (5MB limit)
     if (file.size > 5 * 1024 * 1024) {
       this.showToast('El archivo es demasiado grande. Máximo 5MB por imagen.', 'error');
       return;
     }
-    
+
     // Check maximum number of images
     const existingImages = document.querySelectorAll('.image-preview-item').length;
     if (existingImages >= 10) {
       this.showToast('Máximo 10 imágenes permitidas', 'error');
       return;
     }
-    
+
     this.createImagePreview(file);
   }
-  
+
   createImagePreview(file) {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -339,7 +253,7 @@ class PropertyFormEnhancer {
     };
     reader.readAsDataURL(file);
   }
-  
+
   generateImagePreviewHTML(imageSrc, fileName) {
     return `
       <div class="image-preview-item card mb-3 border-light">
@@ -372,7 +286,7 @@ class PropertyFormEnhancer {
       </div>
     `;
   }
-  
+
   addImagePreview(html) {
     let container = document.getElementById('image-forms-container');
     if (!container) {
@@ -382,18 +296,18 @@ class PropertyFormEnhancer {
       const dragDropZone = document.getElementById('dragDropZone');
       dragDropZone.parentNode.insertBefore(container, dragDropZone.nextSibling);
     }
-    
+
     container.insertAdjacentHTML('beforeend', html);
-    
+
     // Add remove functionality to the new preview
     const removeBtn = container.lastElementChild.querySelector('.remove-preview');
-    removeBtn.addEventListener('click', function() {
+    removeBtn.addEventListener('click', function () {
       this.closest('.image-preview-item').remove();
     });
-    
+
     this.showToast('Imagen agregada correctamente', 'success');
   }
-  
+
   setupAutoSave() {
     let autoSaveTimeout;
     const autoSave = () => {
@@ -402,24 +316,24 @@ class PropertyFormEnhancer {
         this.saveFormData();
       }, 2000);
     };
-    
+
     document.querySelectorAll('.enhanced-form-control').forEach(input => {
       input.addEventListener('input', autoSave);
     });
   }
-  
+
   saveFormData() {
     const formData = new FormData(this.form);
     const data = {};
-    
+
     for (let [key, value] of formData.entries()) {
       data[key] = value;
     }
-    
+
     localStorage.setItem('property_form_autosave', JSON.stringify(data));
     console.log('Form data auto-saved');
   }
-  
+
   loadFormData() {
     const savedData = localStorage.getItem('property_form_autosave');
     if (savedData) {
@@ -436,29 +350,9 @@ class PropertyFormEnhancer {
       }
     }
   }
-  
-  setupSectionObserver() {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const sectionId = entry.target.id;
-          const correspondingStep = document.querySelector(`[href="#${sectionId}"]`);
-          
-          if (correspondingStep) {
-            this.setActiveStep(correspondingStep);
-          }
-        }
-      });
-    }, {
-      threshold: 0.5,
-      rootMargin: '-100px 0px -100px 0px'
-    });
-    
-    document.querySelectorAll('.form-section').forEach(section => {
-      observer.observe(section);
-    });
-  }
-  
+
+
+
   getFieldLabel(fieldName) {
     const labelMap = {
       title: 'Título',
@@ -469,10 +363,10 @@ class PropertyFormEnhancer {
       bedrooms: 'Dormitorios',
       bathrooms: 'Baños'
     };
-    
+
     return labelMap[fieldName] || fieldName;
   }
-  
+
   showToast(message, type = 'info') {
     let toastContainer = document.querySelector('.toast-container');
     if (!toastContainer) {
@@ -481,19 +375,19 @@ class PropertyFormEnhancer {
       toastContainer.style.zIndex = '9999';
       document.body.appendChild(toastContainer);
     }
-    
+
     const iconClass = {
       error: 'bi-exclamation-triangle-fill text-danger',
       success: 'bi-check-circle-fill text-success',
       info: 'bi-info-circle-fill text-info'
     }[type];
-    
+
     const headerText = {
       error: 'Error',
       success: 'Éxito',
       info: 'Información'
     }[type];
-    
+
     const toastHtml = `
       <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
@@ -504,17 +398,17 @@ class PropertyFormEnhancer {
         <div class="toast-body">${message}</div>
       </div>
     `;
-    
+
     toastContainer.insertAdjacentHTML('beforeend', toastHtml);
     const toastElement = toastContainer.lastElementChild;
     const toast = new bootstrap.Toast(toastElement, {
       autohide: true,
       delay: type === 'error' ? 5000 : 3000
     });
-    
+
     toast.show();
-    
-    toastElement.addEventListener('hidden.bs.toast', function() {
+
+    toastElement.addEventListener('hidden.bs.toast', function () {
       this.remove();
     });
   }
@@ -545,24 +439,7 @@ class ResponsiveFormEnhancer {
       formContainer.style.padding = '16px 0';
     }
 
-    // Optimize progress indicator for mobile
-    const progressIndicator = document.querySelector('.form-progress-indicator');
-    if (progressIndicator) {
-      progressIndicator.style.position = 'relative';
-      progressIndicator.style.top = 'auto';
-      progressIndicator.style.margin = '0 -16px 20px -16px';
-      progressIndicator.style.borderRadius = '0';
-    }
 
-    // Mobile-friendly progress steps
-    const progressSteps = document.querySelector('.progress-steps');
-    if (progressSteps) {
-      progressSteps.style.display = 'flex';
-      progressSteps.style.overflowX = 'auto';
-      progressSteps.style.gap = '8px';
-      progressSteps.style.padding = '8px 16px';
-      progressSteps.style.scrollbarWidth = 'thin';
-    }
 
     // Optimize form sections for mobile
     const formSections = document.querySelectorAll('.form-section');
@@ -619,12 +496,7 @@ class ResponsiveFormEnhancer {
       formContainer.style.padding = '24px';
     }
 
-    // Tablet progress indicator
-    const progressIndicator = document.querySelector('.form-progress-indicator');
-    if (progressIndicator) {
-      progressIndicator.style.position = 'sticky';
-      progressIndicator.style.top = '20px';
-    }
+
 
     // Tablet form sections
     const formSections = document.querySelectorAll('.form-section');
@@ -650,15 +522,15 @@ class ResponsiveFormEnhancer {
 
   initializeTouchFriendlyControls() {
     // Touch feedback for interactive elements
-    const interactiveElements = document.querySelectorAll('.form-control, .form-select, .btn, .form-check-input, .progress-step');
-    
+    const interactiveElements = document.querySelectorAll('.form-control, .form-select, .btn, .form-check-input');
+
     interactiveElements.forEach(element => {
-      element.addEventListener('touchstart', function() {
+      element.addEventListener('touchstart', function () {
         this.style.transform = 'scale(0.98)';
         this.style.transition = 'transform 0.1s ease';
       });
-      
-      element.addEventListener('touchend', function() {
+
+      element.addEventListener('touchend', function () {
         setTimeout(() => {
           this.style.transform = '';
           this.style.transition = '';
@@ -682,12 +554,12 @@ class ResponsiveFormEnhancer {
     // Touch-friendly drag and drop
     const dragDropZone = document.getElementById('dragDropZone');
     if (dragDropZone) {
-      dragDropZone.addEventListener('touchstart', function() {
+      dragDropZone.addEventListener('touchstart', function () {
         this.style.backgroundColor = 'var(--property-light)';
         this.style.borderColor = 'var(--property-primary)';
       });
-      
-      dragDropZone.addEventListener('touchend', function() {
+
+      dragDropZone.addEventListener('touchend', function () {
         setTimeout(() => {
           this.style.backgroundColor = '';
           this.style.borderColor = '';
@@ -722,7 +594,7 @@ class ResponsiveFormEnhancer {
         border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
       `;
-      
+
       summary.innerHTML = `
         <div class="d-flex justify-content-between align-items-start">
           <div>
@@ -734,9 +606,9 @@ class ResponsiveFormEnhancer {
           <button type="button" class="btn-close" onclick="this.parentElement.parentElement.remove()"></button>
         </div>
       `;
-      
+
       document.body.appendChild(summary);
-      
+
       // Auto-remove after 10 seconds
       setTimeout(() => {
         if (summary.parentNode) {
@@ -746,10 +618,10 @@ class ResponsiveFormEnhancer {
     };
 
     // Enhanced validation for mobile
-    form.addEventListener('submit', function(e) {
+    form.addEventListener('submit', function (e) {
       const errors = [];
       const requiredFields = form.querySelectorAll('[required]');
-      
+
       requiredFields.forEach(field => {
         if (!field.value.trim()) {
           const label = form.querySelector(`label[for="${field.id}"]`);
@@ -760,13 +632,13 @@ class ResponsiveFormEnhancer {
 
       if (errors.length > 0) {
         showMobileValidationSummary(errors);
-        
+
         // Scroll to first error field
         const firstErrorField = form.querySelector('.is-invalid, [required]:invalid');
         if (firstErrorField) {
-          firstErrorField.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center' 
+          firstErrorField.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
           });
           firstErrorField.focus();
         }
@@ -784,20 +656,8 @@ class ResponsiveFormEnhancer {
       // Handle landscape orientation on mobile
       if (viewport.width <= 767 && viewport.width > viewport.height) {
         document.body.classList.add('mobile-landscape');
-        
-        // Hide progress indicator in landscape
-        const progressIndicator = document.querySelector('.form-progress-indicator');
-        if (progressIndicator) {
-          progressIndicator.style.display = 'none';
-        }
       } else {
         document.body.classList.remove('mobile-landscape');
-        
-        // Show progress indicator in portrait
-        const progressIndicator = document.querySelector('.form-progress-indicator');
-        if (progressIndicator) {
-          progressIndicator.style.display = '';
-        }
       }
 
       // Adjust form section spacing
@@ -903,16 +763,6 @@ responsiveFormStyles.textContent = `
   
   /* Tablet form optimizations */
   @media (min-width: 768px) and (max-width: 991px) {
-    .form-progress-indicator {
-      position: sticky !important;
-      top: 20px !important;
-    }
-    
-    .progress-steps {
-      display: grid !important;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
-      gap: 12px !important;
-    }
     
     .form-section {
       padding: 24px !important;
@@ -963,10 +813,6 @@ responsiveFormStyles.textContent = `
   
   /* Landscape mobile optimizations */
   @media (max-width: 767px) and (orientation: landscape) {
-    .form-progress-indicator {
-      display: none !important;
-    }
-    
     .property-form-container {
       padding: 8px 0 !important;
     }
@@ -987,7 +833,7 @@ responsiveFormStyles.textContent = `
 document.head.appendChild(responsiveFormStyles);
 
 // Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   new PropertyFormEnhancer();
   new ResponsiveFormEnhancer();
 });

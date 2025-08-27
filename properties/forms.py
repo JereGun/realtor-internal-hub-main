@@ -2,6 +2,7 @@ from django import forms
 from django.forms import inlineformset_factory
 from .models import Property, PropertyImage, Feature, Tag, PropertyType, PropertyStatus
 from customers.models import Customer
+from locations.models import Country, State, City
 import json
 
 
@@ -86,16 +87,16 @@ class PropertyForm(forms.ModelForm):
                 'class': 'form-control neighborhood-autocomplete',
                 'placeholder': 'Escriba el nombre del barrio...'
             }),
-            'locality': forms.TextInput(attrs={ # Changed to TextInput
-                'class': 'form-control city-autocomplete', # Changed to city-autocomplete for consistency
+            'locality': forms.TextInput(attrs={
+                'class': 'form-control enhanced-form-control city-autocomplete',
                 'placeholder': 'Buscar ciudad...'
             }),
-            'province': forms.TextInput(attrs={ # Changed to TextInput
-                'class': 'form-control state-autocomplete', # Changed to state-autocomplete for consistency
+            'province': forms.TextInput(attrs={
+                'class': 'form-control enhanced-form-control state-autocomplete',
                 'placeholder': 'Buscar provincia...'
             }),
-            'country': forms.TextInput(attrs={ # Changed to TextInput
-                'class': 'form-control country-autocomplete', # Added class for JS targeting
+            'country': forms.TextInput(attrs={
+                'class': 'form-control enhanced-form-control country-autocomplete',
                 'placeholder': 'Buscar país...'
             }),
             'total_surface': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
@@ -123,6 +124,10 @@ class PropertyForm(forms.ModelForm):
             'features': forms.CheckboxSelectMultiple(attrs={'class': 'features-checkbox-list'}),
             'tags': forms.CheckboxSelectMultiple(attrs={'class': 'tags-checkbox-list'}),
         }
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        return cleaned_data
     
     def save(self, commit=True):
         instance = super().save(commit=commit)

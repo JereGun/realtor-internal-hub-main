@@ -8,290 +8,14 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/property-styles.css' %}">
-<style>
-  /* Enhanced Form Styles */
-  .property-form-container {
-    background: linear-gradient(135deg, var(--property-light) 0%, #ffffff 100%);
-    min-height: 100vh;
-    padding: var(--property-spacing-lg) 0;
-  }
-  
-  .form-progress-indicator {
-    background: white;
-    border-radius: var(--property-radius-lg);
-    box-shadow: var(--property-shadow-sm);
-    padding: var(--property-spacing-md);
-    margin-bottom: var(--property-spacing-xl);
-    position: sticky;
-    top: 20px;
-    z-index: var(--property-z-sticky);
-  }
-  
-  .progress-step {
-    display: flex;
-    align-items: center;
-    padding: var(--property-spacing-sm) var(--property-spacing-md);
-    border-radius: var(--property-radius-md);
-    transition: var(--property-transition-normal);
-    cursor: pointer;
-    text-decoration: none;
-    color: var(--property-gray-600);
-  }
-  
-  .progress-step:hover {
-    background: var(--property-light);
-    color: var(--property-primary);
-    text-decoration: none;
-  }
-  
-  .progress-step.active {
-    background: var(--property-primary-light);
-    color: var(--property-primary);
-    font-weight: var(--property-font-weight-semibold);
-  }
-  
-  .progress-step.completed {
-    color: var(--property-success);
-  }
-  
-  .progress-step-icon {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: var(--property-spacing-sm);
-    font-size: var(--property-font-size-sm);
-    transition: var(--property-transition-normal);
-  }
-  
-  .progress-step.active .progress-step-icon {
-    background: var(--property-primary);
-    color: white;
-  }
-  
-  .progress-step.completed .progress-step-icon {
-    background: var(--property-success);
-    color: white;
-  }
-  
-  .form-section {
-    background: white;
-    border-radius: var(--property-radius-lg);
-    box-shadow: var(--property-shadow-sm);
-    margin-bottom: var(--property-spacing-xl);
-    overflow: hidden;
-    transition: var(--property-transition-normal);
-  }
-  
-  .form-section:hover {
-    box-shadow: var(--property-shadow-md);
-  }
-  
-  .section-header {
-    background: linear-gradient(135deg, var(--property-light) 0%, var(--property-gray-100) 100%);
-    padding: var(--property-spacing-lg);
-    border-bottom: 1px solid var(--property-gray-200);
-    position: relative;
-  }
-  
-  .section-header::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: var(--property-primary);
-  }
-  
-  .section-content {
-    padding: var(--property-spacing-xl);
-  }
-  
-  .enhanced-form-control {
-    border: 2px solid var(--property-gray-200);
-    border-radius: var(--property-radius-md);
-    padding: var(--property-spacing-md);
-    transition: var(--property-transition-normal);
-    font-size: var(--property-font-size-base);
-  }
-  
-  .enhanced-form-control:focus {
-    border-color: var(--property-primary);
-    box-shadow: 0 0 0 3px var(--property-primary-light);
-    outline: none;
-  }
-  
-  .enhanced-form-control.is-invalid {
-    border-color: var(--property-danger);
-    box-shadow: 0 0 0 3px var(--property-danger-light);
-  }
-  
-  .enhanced-form-control.is-valid {
-    border-color: var(--property-success);
-    box-shadow: 0 0 0 3px var(--property-success-light);
-  }
-  
-  .form-floating-label {
-    position: relative;
-  }
-  
-  .form-floating-label .form-label {
-    position: absolute;
-    top: 50%;
-    left: var(--property-spacing-md);
-    transform: translateY(-50%);
-    background: white;
-    padding: 0 var(--property-spacing-xs);
-    color: var(--property-gray-500);
-    transition: var(--property-transition-normal);
-    pointer-events: none;
-    z-index: 1;
-  }
-  
-  .form-floating-label .enhanced-form-control:focus + .form-label,
-  .form-floating-label .enhanced-form-control:not(:placeholder-shown) + .form-label {
-    top: 0;
-    font-size: var(--property-font-size-sm);
-    color: var(--property-primary);
-    font-weight: var(--property-font-weight-medium);
-  }
-  
-  .drag-drop-zone {
-    border: 2px dashed var(--property-gray-300);
-    border-radius: var(--property-radius-lg);
-    padding: var(--property-spacing-2xl);
-    text-align: center;
-    transition: var(--property-transition-normal);
-    cursor: pointer;
-    background: var(--property-light);
-  }
-  
-  .drag-drop-zone:hover,
-  .drag-drop-zone.drag-over {
-    border-color: var(--property-primary);
-    background: var(--property-primary-light);
-    transform: translateY(-2px);
-  }
-  
-  .validation-feedback {
-    display: flex;
-    align-items: center;
-    margin-top: var(--property-spacing-xs);
-    font-size: var(--property-font-size-sm);
-    transition: var(--property-transition-normal);
-  }
-  
-  .validation-feedback.invalid-feedback {
-    color: var(--property-danger);
-  }
-  
-  .validation-feedback.valid-feedback {
-    color: var(--property-success);
-  }
-  
-  .validation-feedback i {
-    margin-right: var(--property-spacing-xs);
-  }
-  
-  .form-actions {
-    background: white;
-    border-radius: var(--property-radius-lg);
-    box-shadow: var(--property-shadow-md);
-    padding: var(--property-spacing-xl);
-    position: sticky;
-    bottom: 20px;
-    z-index: var(--property-z-sticky);
-  }
-  
-  .btn-enhanced {
-    padding: var(--property-spacing-md) var(--property-spacing-xl);
-    border-radius: var(--property-radius-md);
-    font-weight: var(--property-font-weight-semibold);
-    transition: var(--property-transition-normal);
-    border: none;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .btn-enhanced::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    transition: var(--property-transition-normal);
-  }
-  
-  .btn-enhanced:hover::before {
-    left: 100%;
-  }
-  
-  .btn-primary-enhanced {
-    background: linear-gradient(135deg, var(--property-primary) 0%, var(--property-primary-hover) 100%);
-    color: white;
-  }
-  
-  .btn-primary-enhanced:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--property-shadow-lg);
-  }
-</style>
 {% endblock %}
 
 {% block content %}
 <div class="property-form-container">
   <div class="container-fluid">
     <div class="row">
-      <!-- Progress Indicator Sidebar -->
-      <div class="col-lg-3 col-xl-2">
-        <div class="form-progress-indicator">
-          <h6 class="fw-bold mb-3 text-dark">
-            <i class="bi bi-list-check me-2"></i>Progreso del Formulario
-          </h6>
-          <div class="progress-steps">
-            <a href="#section-basic" class="progress-step active" data-section="basic">
-              <div class="progress-step-icon">1</div>
-              <span>Información Básica</span>
-            </a>
-            <a href="#section-location" class="progress-step" data-section="location">
-              <div class="progress-step-icon">2</div>
-              <span>Ubicación</span>
-            </a>
-            <a href="#section-physical" class="progress-step" data-section="physical">
-              <div class="progress-step-icon">3</div>
-              <span>Características</span>
-            </a>
-            <a href="#section-financial" class="progress-step" data-section="financial">
-              <div class="progress-step-icon">4</div>
-              <span>Información Financiera</span>
-            </a>
-            <a href="#section-features" class="progress-step" data-section="features">
-              <div class="progress-step-icon">5</div>
-              <span>Características</span>
-            </a>
-            <a href="#section-images" class="progress-step" data-section="images">
-              <div class="progress-step-icon">6</div>
-              <span>Imágenes</span>
-            </a>
-          </div>
-          <div class="mt-3">
-            <div class="progress" style="height: 6px;">
-              <div class="progress-bar bg-primary" role="progressbar" style="width: 16.67%" id="form-progress"></div>
-            </div>
-            <small class="text-muted mt-1 d-block">
-              <span id="progress-text">1 de 6 secciones completadas</span>
-            </small>
-          </div>
-        </div>
-      </div>
-      
       <!-- Main Form Content -->
-      <div class="col-lg-9 col-xl-10">
+      <div class="col-12">
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
           <div>
@@ -308,35 +32,27 @@
               nueva propiedad inmobiliaria {% endif %}
             </p>
           </div>
-          <a
-            href="{% if form.instance.pk %}{% url 'properties:property_detail' form.instance.pk %}{% else %}{% url 'properties:property_list' %}{% endif %}"
-            class="btn btn-outline-secondary"
-          >
+          <a href="{% if form.instance.pk %}{% url 'properties:property_detail' form.instance.pk %}{% else %}{% url 'properties:property_list' %}{% endif %}"
+            class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-1"></i>
             {% if form.instance.pk %}Cancelar Cambios{% else %}Volver al listado{% endif %}
           </a>
         </div>
-
-        <form
-          method="post"
-          enctype="multipart/form-data"
-          novalidate
-          id="propertyForm"
-        >
+        <form method="post" enctype="multipart/form-data" novalidate id="propertyForm">
           {% csrf_token %}
-          
           <!-- Global Form Errors -->
           {% if form.errors %}
-          <div class="alert alert-danger border-0 shadow-sm mb-4" style="border-left: 4px solid var(--property-danger) !important;">
+          <div class="alert alert-danger border-0 shadow-sm mb-4"
+            style="border-left: 4px solid var(--property-danger) !important;">
             <div class="d-flex align-items-center mb-2">
               <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
               <strong>Errores en el formulario:</strong>
             </div>
             <ul class="mb-0">
               {% for field, errors in form.errors.items %}
-                {% for error in errors %}
-                  <li>{{ field }}: {{ error }}</li>
-                {% endfor %}
+              {% for error in errors %}
+              <li>{{ field }}: {{ error }}</li>
+              {% endfor %}
               {% endfor %}
             </ul>
           </div>
@@ -361,16 +77,10 @@
             </div>
             <div class="section-content">
               <div class="row">
-
                 <div class="col-md-8 mb-4">
                   <div class="form-floating-label">
-                    <input type="text" 
-                           class="form-control enhanced-form-control" 
-                           id="{{ form.title.id_for_label }}" 
-                           name="{{ form.title.name }}" 
-                           value="{{ form.title.value|default:'' }}"
-                           placeholder=" "
-                           required>
+                    <input type="text" class="form-control enhanced-form-control" id="{{ form.title.id_for_label }}"
+                      name="{{ form.title.name }}" value="{{ form.title.value|default:'' }}" placeholder=" " required>
                     <label for="{{ form.title.id_for_label }}" class="form-label">
                       <i class="bi bi-house text-primary me-1"></i>
                       {{ form.title.label }}
@@ -387,23 +97,20 @@
                     Título válido
                   </div>
                 </div>
-
                 <div class="col-md-4 mb-4">
                   <label for="{{ form.property_type.id_for_label }}" class="form-label fw-semibold">
                     <i class="bi bi-house-door text-success me-1"></i>
                     {{ form.property_type.label }}
                   </label>
-                  <select class="form-select enhanced-form-control" 
-                          id="{{ form.property_type.id_for_label }}" 
-                          name="{{ form.property_type.name }}"
-                          required>
+                  <select class="form-select enhanced-form-control" id="{{ form.property_type.id_for_label }}"
+                    name="{{ form.property_type.name }}" required>
                     <option value="">Seleccionar tipo...</option>
                     {% for choice in form.property_type.field.choices %}
-                      {% if choice.0 %}
-                        <option value="{{ choice.0 }}" {% if form.property_type.value == choice.0 %}selected{% endif %}>
-                          {{ choice.1 }}
-                        </option>
-                      {% endif %}
+                    {% if choice.0 %}
+                    <option value="{{ choice.0 }}" {% if form.property_type.value == choice.0 %}selected{% endif %}>
+                      {{ choice.1 }}
+                    </option>
+                    {% endif %}
                     {% endfor %}
                   </select>
                   {% if form.property_type.errors %}
@@ -417,17 +124,16 @@
                     Tipo seleccionado
                   </div>
                 </div>
-
                 <div class="col-12 mb-4">
                   <label for="{{ form.description.id_for_label }}" class="form-label fw-semibold">
                     <i class="bi bi-card-text text-info me-1"></i>
                     {{ form.description.label }}
                   </label>
-                  <textarea class="form-control enhanced-form-control" 
-                            id="{{ form.description.id_for_label }}" 
-                            name="{{ form.description.name }}" 
-                            rows="4" 
-                            placeholder="Describa las características principales de la propiedad...">{{ form.description.value|default:'' }}</textarea>
+                  <textarea class="form-control enhanced-form-control" id="{{ form.description.id_for_label }}"
+                    name="{{ form.description.name }}" rows="4"
+                    placeholder="Describa las características principales de la propiedad...">
+                    {{ form.description.value|default:'' }}
+                  </textarea>
                   {% if form.description.errors %}
                   <div class="validation-feedback invalid-feedback">
                     <i class="bi bi-exclamation-circle"></i>
@@ -439,23 +145,20 @@
                     Describa las características principales de la propiedad
                   </div>
                 </div>
-
                 <div class="col-md-6 mb-4">
                   <label for="{{ form.property_status.id_for_label }}" class="form-label fw-semibold">
                     <i class="bi bi-flag text-warning me-1"></i>
                     {{ form.property_status.label }}
                   </label>
-                  <select class="form-select enhanced-form-control" 
-                          id="{{ form.property_status.id_for_label }}" 
-                          name="{{ form.property_status.name }}"
-                          required>
+                  <select class="form-select enhanced-form-control" id="{{ form.property_status.id_for_label }}"
+                    name="{{ form.property_status.name }}" required>
                     <option value="">Seleccionar estado...</option>
                     {% for choice in form.property_status.field.choices %}
-                      {% if choice.0 %}
-                        <option value="{{ choice.0 }}" {% if form.property_status.value == choice.0 %}selected{% endif %}>
-                          {{ choice.1 }}
-                        </option>
-                      {% endif %}
+                    {% if choice.0 %}
+                    <option value="{{ choice.0 }}" {% if form.property_status.value == choice.0 %}selected{% endif %}></option>
+                      {{ choice.1 }}
+                    </option>
+                    {% endif %}
                     {% endfor %}
                   </select>
                   {% if form.property_status.errors %}
@@ -465,19 +168,17 @@
                   </div>
                   {% endif %}
                 </div>
-
                 <div class="col-md-6 mb-4">
                   <label for="{{ form.agent.id_for_label }}" class="form-label fw-semibold">
                     <i class="bi bi-person-badge text-info me-1"></i>
                     {{ form.agent.label }}
                   </label>
-                  <select class="form-select enhanced-form-control" 
-                          id="{{ form.agent.id_for_label }}" 
-                          name="{{ form.agent.name }}">
+                  <select class="form-select enhanced-form-control" id="{{ form.agent.id_for_label }}"
+                    name="{{ form.agent.name }}">
                     {% for choice in form.agent.field.choices %}
-                      <option value="{{ choice.0 }}" {% if form.agent.value == choice.0 %}selected{% endif %}>
-                        {{ choice.1 }}
-                      </option>
+                    <option value="{{ choice.0 }}" {% if form.agent.value == choice.0 %}selected{% endif %}>
+                      {{ choice.1 }}
+                    </option>
                     {% endfor %}
                   </select>
                   {% if form.agent.errors %}
@@ -493,22 +194,20 @@
                   </div>
                   {% endif %}
                 </div>
-
                 <div class="col-md-6 mb-4">
                   <label for="{{ form.owner.id_for_label }}" class="form-label fw-semibold">
                     <i class="bi bi-person text-secondary me-1"></i>
                     {{ form.owner.label }}
                   </label>
-                  <select class="form-select enhanced-form-control" 
-                          id="{{ form.owner.id_for_label }}" 
-                          name="{{ form.owner.name }}">
+                  <select class="form-select enhanced-form-control" id="{{ form.owner.id_for_label }}"
+                    name="{{ form.owner.name }}">
                     <option value="">Seleccionar propietario...</option>
                     {% for choice in form.owner.field.choices %}
-                      {% if choice.0 %}
-                        <option value="{{ choice.0 }}" {% if form.owner.value == choice.0 %}selected{% endif %}>
-                          {{ choice.1 }}
-                        </option>
-                      {% endif %}
+                    {% if choice.0 %}
+                    <option value="{{ choice.0 }}" {% if form.owner.value == choice.0 %}selected{% endif %}>
+                      {{ choice.1 }}
+                    </option>
+                    {% endif %}
                     {% endfor %}
                   </select>
                   {% if form.owner.errors %}
@@ -522,19 +221,17 @@
                     Propietario de la propiedad (opcional)
                   </div>
                 </div>
-
                 <div class="col-md-6 mb-4">
                   <label for="{{ form.listing_type.id_for_label }}" class="form-label fw-semibold">
                     <i class="bi bi-tags text-warning me-1"></i>
                     {{ form.listing_type.label }}
                   </label>
-                  <select class="form-select enhanced-form-control" 
-                          id="{{ form.listing_type.id_for_label }}" 
-                          name="{{ form.listing_type.name }}">
+                  <select class="form-select enhanced-form-control" id="{{ form.listing_type.id_for_label }}"
+                    name="{{ form.listing_type.name }}">
                     {% for choice in form.listing_type.field.choices %}
-                      <option value="{{ choice.0 }}" {% if form.listing_type.value == choice.0 %}selected{% endif %}>
-                        {{ choice.1 }}
-                      </option>
+                    <option value="{{ choice.0 }}" {% if form.listing_type.value == choice.0 %}selected{% endif %}>
+                      {{ choice.1 }}
+                    </option>
                     {% endfor %}
                   </select>
                   {% if form.listing_type.errors %}
@@ -551,7 +248,6 @@
               </div>
             </div>
           </div>
-
           <!-- Ubicación -->
           <div class="form-section" id="section-location">
             <div class="section-header">
@@ -569,431 +265,369 @@
             </div>
             <div class="section-content">
               <div class="row">
-
-              <div class="col-md-6 mb-3">
-                <label
-                  for="{{ form.street.id_for_label }}"
-                  class="form-label fw-semibold"
-                >
-                  <i class="bi bi-signpost text-success me-1"></i>
-                  {{form.street.label }}
-                </label>
-                {{ form.street }} {% if form.street.errors %}
-                <div class="text-danger small mt-1">
-                  {{ form.street.errors }}
+                <div class="col-md-6 mb-3">
+                  <label for="{{ form.street.id_for_label }}" class="form-label fw-semibold">
+                    <i class="bi bi-signpost text-success me-1"></i>
+                    {{form.street.label }}
+                  </label>
+                  {{ form.street }} {% if form.street.errors %}
+                  <div class="text-danger small mt-1">
+                    {{ form.street.errors }}
+                  </div>
+                  {% endif %}
                 </div>
-                {% endif %}
-              </div>
-
-              <div class="col-md-3 mb-3">
-                <label
-                  for="{{ form.number.id_for_label }}"
-                  class="form-label fw-semibold"
-                >
-                  <i class="bi bi-hash text-success me-1"></i>
-                  {{form.number.label }}
-                </label>
-                {{ form.number }} {% if form.number.errors %}
-                <div class="text-danger small mt-1">
-                  {{ form.number.errors }}
+                <div class="col-md-3 mb-3">
+                  <label for="{{ form.number.id_for_label }}" class="form-label fw-semibold">
+                    <i class="bi bi-hash text-success me-1"></i>
+                    {{form.number.label }}
+                  </label>
+                  {{ form.number }} {% if form.number.errors %}
+                  <div class="text-danger small mt-1">
+                    {{ form.number.errors }}
+                  </div>
+                  {% endif %}
                 </div>
-                {% endif %}
-              </div>
-
-              <div class="col-md-3 mb-3">
-                <label
-                  for="{{ form.neighborhood.id_for_label }}"
-                  class="form-label fw-semibold"
-                >
-                  <i class="bi bi-map text-info me-1"></i>
-                  {{form.neighborhood.label }}
-                </label>
-                {{ form.neighborhood }} {% if form.neighborhood.errors %}
-                <div class="text-danger small mt-1">
-                  {{ form.neighborhood.errors }}
+                <div class="col-md-3 mb-3">
+                  <label for="{{ form.neighborhood.id_for_label }}" class="form-label fw-semibold">
+                    <i class="bi bi-map text-info me-1"></i>
+                    {{form.neighborhood.label }}
+                  </label>
+                  {{ form.neighborhood }} {% if form.neighborhood.errors %}
+                  <div class="text-danger small mt-1">
+                    {{ form.neighborhood.errors }}
+                  </div>
+                  {% endif %}
                 </div>
-                {% endif %}
-              </div>
-
-              <div class="col-md-4 mb-3">
-                <label
-                  for="{{ form.country.id_for_label }}"
-                  class="form-label fw-semibold"
-                >
-                  <i class="bi bi-globe text-primary me-1"></i>
-                  {{form.country.label }}
-                </label>
-                {{ form.country }} {% if form.country.errors %}
-                <div class="text-danger small mt-1">
-                  {{ form.country.errors }}
+                <div class="col-md-4 mb-3">
+                  <label for="{{ form.country.id_for_label }}" class="form-label fw-semibold">
+                    <i class="bi bi-globe text-primary me-1"></i>
+                    {{form.country.label }}
+                  </label>
+                  <div class="location-autocomplete-container">
+                    {{ form.country }}
+                  </div>
+                  {% if form.country.errors %}
+                  <div class="text-danger small mt-1">
+                    {{ form.country.errors }}
+                  </div>
+                  {% endif %}
+                  <div class="form-text">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Escriba para buscar o crear un nuevo país
+                  </div>
                 </div>
-                {% endif %}
-              </div>
-
-              <div class="col-md-4 mb-3">
-                <label
-                  for="{{ form.province.id_for_label }}"
-                  class="form-label fw-semibold"
-                >
-                  <i class="bi bi-map text-warning me-1"></i>
-                  {{form.province.label }}
-                </label>
-                {{ form.province }} {% if form.province.errors %}
-                <div class="text-danger small mt-1">
-                  {{ form.province.errors }}
+                <div class="col-md-4 mb-3">
+                  <label for="{{ form.province.id_for_label }}" class="form-label fw-semibold">
+                    <i class="bi bi-map text-warning me-1"></i>
+                    {{form.province.label }}
+                  </label>
+                  <div class="location-autocomplete-container">
+                    {{ form.province }}
+                  </div>
+                  {% if form.province.errors %}
+                  <div class="text-danger small mt-1">
+                    {{ form.province.errors }}
+                  </div>
+                  {% endif %}
+                  <div class="form-text">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Seleccione primero un país, luego escriba para buscar provincia
+                  </div>
                 </div>
-                {% endif %}
-              </div>
-
                 <div class="col-md-4 mb-4">
                   <label for="{{ form.locality.id_for_label }}" class="form-label fw-semibold">
                     <i class="bi bi-geo-alt text-info me-1"></i>
                     {{ form.locality.label }}
                   </label>
-                  <input type="text" 
-                         class="form-control enhanced-form-control" 
-                         id="{{ form.locality.id_for_label }}" 
-                         name="{{ form.locality.name }}" 
-                         value="{{ form.locality.value|default:'' }}">
+                  <div class="location-autocomplete-container">
+                    {{ form.locality }}
+                  </div>
                   {% if form.locality.errors %}
                   <div class="validation-feedback invalid-feedback">
                     <i class="bi bi-exclamation-circle"></i>
                     {{ form.locality.errors.0 }}
                   </div>
                   {% endif %}
+                  <div class="form-text">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Seleccione primero una provincia, luego escriba para buscar ciudad
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-            <!-- Características Físicas -->
-            <div class="row mb-5">
-              <div class="col-12">
-                <div class="d-flex align-items-center mb-4">
-                  <div class="bg-warning rounded-circle p-2 me-3">
-                    <i class="bi bi-rulers text-white"></i>
-                  </div>
-                  <div>
-                    <h4 class="text-warning mb-1 fw-bold">
-                      Características Físicas
-                    </h4>
-                    <p class="text-muted small mb-0">
-                      Detalles técnicos y dimensiones
-                    </p>
-                  </div>
+          <!-- Características Físicas -->
+          <div class="row mb-5" id="section-physical">
+            <div class="col-12">
+              <div class="d-flex align-items-center mb-4">
+                <div class="bg-warning rounded-circle p-2 me-3">
+                  <i class="bi bi-rulers text-white"></i>
+                </div>
+                <div>
+                  <h4 class="text-warning mb-1 fw-bold">
+                    Características Físicas
+                  </h4>
+                  <p class="text-muted small mb-0">
+                    Detalles técnicos y dimensiones
+                  </p>
                 </div>
               </div>
-
-              <div class="col-md-6 mb-3">
-                <label
-                  for="{{ form.total_surface.id_for_label }}"
-                  class="form-label fw-semibold">
-                  <i class="bi bi-rulers text-warning me-1"></i>
-                  {{form.total_surface.label }}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="{{ form.total_surface.id_for_label }}" class="form-label fw-semibold">
+                <i class="bi bi-rulers text-warning me-1"></i>
+                {{form.total_surface.label }}
+              </label>
+              <div class="input-group">
+                {{ form.total_surface }}
+                <span class="input-group-text">m²</span>
+              </div>
+              {% if form.total_surface.errors %}
+              <div class="text-danger small mt-1">
+                {{ form.total_surface.errors }}
+              </div>
+              {% endif %}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="{{ form.covered_surface.id_for_label }}" class="form-label fw-semibold">
+                <i class="bi bi-rulers text-secondary me-1"></i>
+                {{ form.covered_surface.label }}
+              </label>
+              <div class="input-group">
+                {{ form.covered_surface }}
+                <span class="input-group-text">m²</span>
+              </div>
+              {% if form.covered_surface.errors %}
+              <div class="text-danger small mt-1">
+                {{ form.covered_surface.errors }}
+              </div>
+              {% endif %}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="{{ form.year_built.id_for_label }}" class="form-label fw-semibold">
+                <i class="bi bi-calendar text-secondary me-1"></i>
+                {{ form.year_built.label }}
+              </label>
+              {{ form.year_built }} {% if form.year_built.errors %}
+              <div class="text-danger small mt-1">
+                {{ form.year_built.errors }}
+              </div>
+              {% endif %}
+            </div>
+            <div class="col-md-3 mb-3">
+              <label for="{{ form.bedrooms.id_for_label }}" class="form-label fw-semibold">
+                <i class="bi bi-door-closed text-primary me-1"></i>
+                {{ form.bedrooms.label }}
+              </label>
+              {{ form.bedrooms }} {% if form.bedrooms.errors %}
+              <div class="text-danger small mt-1">
+                {{ form.bedrooms.errors }}
+              </div>
+              {% endif %}
+            </div>
+            <div class="col-md-3 mb-3">
+              <label for="{{ form.bathrooms.id_for_label }}" class="form-label fw-semibold">
+                <i class="bi bi-droplet text-info me-1"></i>
+                {{ form.bathrooms.label }}
+              </label>
+              {{ form.bathrooms }} {% if form.bathrooms.errors %}
+              <div class="text-danger small mt-1">
+                {{ form.bathrooms.errors }}
+              </div>
+              {% endif %}
+            </div>
+            <div class="col-md-3 mb-3">
+              <div class="form-check form-switch mt-4 pt-2">
+                {{ form.garage }}
+                <label class="form-check-label fw-semibold" for="{{ form.garage.id_for_label }}">
+                  <i class="bi bi-car-front text-success me-1"></i>
+                  {{ form.garage.label }}
                 </label>
-                <div class="input-group">
-                  {{ form.total_surface }}
-                  <span class="input-group-text">m²</span>
-                </div>
-                {% if form.total_surface.errors %}
-                <div class="text-danger small mt-1">
-                  {{ form.total_surface.errors }}
-                </div>
-                {% endif %}
               </div>
-
-              <div class="col-md-6 mb-3">
-                <label
-                  for="{{ form.covered_surface.id_for_label }}"
-                  class="form-label fw-semibold"
-                >
-                  <i class="bi bi-rulers text-secondary me-1"></i>
-                  {{ form.covered_surface.label }}
+            </div>
+            <div class="col-md-3 mb-3">
+              <div class="form-check form-switch mt-4 pt-2">
+                {{ form.furnished }}
+                <label class="form-check-label fw-semibold" for="{{ form.furnished.id_for_label }}">
+                  <i class="bi bi-house-check text-info me-1"></i>
+                  {{ form.furnished.label }}
                 </label>
-                <div class="input-group">
-                  {{ form.covered_surface }}
-                  <span class="input-group-text">m²</span>
-                </div>
-                {% if form.covered_surface.errors %}
-                <div class="text-danger small mt-1">
-                  {{ form.covered_surface.errors }}
-                </div>
-                {% endif %}
               </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="{{ form.orientation.id_for_label }}" class="form-label fw-semibold">
+                <i class="bi bi-compass text-secondary me-1"></i>
+                {{ form.orientation.label }}
+              </label>
+              {{ form.orientation }} {% if form.orientation.errors %}
+              <div class="text-danger small mt-1">
+                {{ form.orientation.errors }}
+              </div>
+              {% endif %}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="{{ form.floors.id_for_label }}" class="form-label fw-semibold">
+                <i class="bi bi-building text-warning me-1"></i>
+                {{ form.floors.label }}
+              </label>
+              {{ form.floors }} {% if form.floors.errors %}
+              <div class="text-danger small mt-1">
+                {{ form.floors.errors }}
+              </div>
+              {% endif %}
+            </div>
+          </div>
 
-              <div class="col-md-6 mb-3">
-                <label
-                  for="{{ form.year_built.id_for_label }}"
-                  class="form-label fw-semibold"
-                >
-                  <i class="bi bi-calendar text-secondary me-1"></i>
-                  {{ form.year_built.label }}
+          <!-- Información Financiera -->
+          <div class="row mb-5" id="section-financial">
+            <div class="col-12">
+              <div class="d-flex align-items-center mb-4">
+                <div class="bg-info rounded-circle p-2 me-3">
+                  <i class="bi bi-currency-dollar text-white"></i>
+                </div>
+                <div>
+                  <h4 class="text-info mb-1 fw-bold">
+                    Información Financiera
+                  </h4>
+                  <p class="text-muted small mb-0">
+                    Precios y costos asociados
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="{{ form.sale_price.id_for_label }}" class="form-label fw-semibold">
+                <i class="bi bi-tag text-success me-1"></i>
+                {{ form.sale_price.label }}
+              </label>
+              <div class="input-group">
+                <span class="input-group-text">$</span>
+                {{ form.sale_price }}
+              </div>
+              {% if form.sale_price.errors %}
+              <div class="text-danger small mt-1">
+                {{ form.sale_price.errors }}
+              </div>
+              {% endif %}
+              <div class="form-text">
+                <i class="bi bi-info-circle me-1"></i>
+                Precio de venta de la propiedad (opcional)
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="{{ form.rental_price.id_for_label }}" class="form-label fw-semibold">
+                <i class="bi bi-calendar-month text-info me-1"></i>
+                {{ form.rental_price.label }}
+              </label>
+              <div class="input-group">
+                <span class="input-group-text">$</span>
+                {{ form.rental_price }}
+                <span class="input-group-text">/mes</span>
+              </div>
+              {% if form.rental_price.errors %}
+              <div class="text-danger small mt-1">
+                {{ form.rental_price.errors }}
+              </div>
+              {% endif %}
+              <div class="form-text">
+                <i class="bi bi-info-circle me-1"></i>
+                Precio de alquiler mensual (opcional)
+              </div>
+            </div>
+            <div class="col-md-12 mb-3">
+              <label for="{{ form.expenses.id_for_label }}" class="form-label fw-semibold">
+                <i class="bi bi-receipt text-warning me-1"></i>
+                {{ form.expenses.label }}
+              </label>
+              <div class="input-group">
+                <span class="input-group-text">$</span>
+                {{ form.expenses }}
+                <span class="input-group-text">/mes</span>
+              </div>
+              {% if form.expenses.errors %}
+              <div class="text-danger small mt-1">
+                {{ form.expenses.errors }}
+              </div>
+              {% endif %}
+              <div class="form-text">
+                <i class="bi bi-info-circle me-1"></i>
+                Gastos comunes o expensas mensuales (opcional)
+              </div>
+            </div>
+          </div>
+
+          <!-- Características y Etiquetas -->
+          <div class="row mb-5" id="section-features">
+            <div class="col-12">
+              <div class="d-flex align-items-center mb-4">
+                <div class="bg-success rounded-circle p-2 me-3">
+                  <i class="bi bi-tags text-white"></i>
+                </div>
+                <div>
+                  <h4 class="text-success mb-1 fw-bold">
+                    Características y Etiquetas
+                  </h4>
+                  <p class="text-muted small mb-0">
+                    Comodidades y etiquetas especiales
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold">
+                <i class="bi bi-star text-warning me-1"></i>
+                {{ form.features.label }}
+              </label>
+              <div class="border rounded p-3 bg-light" style="max-height: 200px; overflow-y: auto">
+                {{ form.features }}
+              </div>
+              {% if form.features.errors %}
+              <div class="text-danger small mt-1">
+                {{ form.features.errors }}
+              </div>
+              {% endif %}
+              <div class="mt-2">
+                <label for="{{ form.new_features.id_for_label }}" class="form-label fw-semibold small">
+                  Agregar nuevas características
                 </label>
-                {{ form.year_built }} {% if form.year_built.errors %}
+                {{ form.new_features }} {% if form.new_features.errors %}
                 <div class="text-danger small mt-1">
-                  {{ form.year_built.errors }}
-                </div>
-                {% endif %}
-              </div>
-
-              <div class="col-md-3 mb-3">
-                <label
-                  for="{{ form.bedrooms.id_for_label }}"
-                  class="form-label fw-semibold"
-                >
-                  <i class="bi bi-door-closed text-primary me-1"></i>
-                  {{ form.bedrooms.label }}
-                </label>
-                {{ form.bedrooms }} {% if form.bedrooms.errors %}
-                <div class="text-danger small mt-1">
-                  {{ form.bedrooms.errors }}
-                </div>
-                {% endif %}
-              </div>
-
-              <div class="col-md-3 mb-3">
-                <label
-                  for="{{ form.bathrooms.id_for_label }}"
-                  class="form-label fw-semibold"
-                >
-                  <i class="bi bi-droplet text-info me-1"></i>
-                  {{ form.bathrooms.label }}
-                </label>
-                {{ form.bathrooms }} {% if form.bathrooms.errors %}
-                <div class="text-danger small mt-1">
-                  {{ form.bathrooms.errors }}
-                </div>
-                {% endif %}
-              </div>
-
-              <div class="col-md-3 mb-3">
-                <div class="form-check form-switch mt-4 pt-2">
-                  {{ form.garage }}
-                  <label
-                    class="form-check-label fw-semibold"
-                    for="{{ form.garage.id_for_label }}">
-                    <i class="bi bi-car-front text-success me-1"></i>
-                    {{ form.garage.label }}
-                  </label>
-                </div>
-              </div>
-
-              <div class="col-md-3 mb-3">
-                <div class="form-check form-switch mt-4 pt-2">
-                  {{ form.furnished }}
-                  <label
-                    class="form-check-label fw-semibold"
-                    for="{{ form.furnished.id_for_label }}">
-                    <i class="bi bi-house-check text-info me-1"></i>
-                    {{ form.furnished.label }}
-                  </label>
-                </div>
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label
-                  for="{{ form.orientation.id_for_label }}"
-                  class="form-label fw-semibold"
-                >
-                  <i class="bi bi-compass text-secondary me-1"></i>
-                  {{ form.orientation.label }}
-                </label>
-                {{ form.orientation }} {% if form.orientation.errors %}
-                <div class="text-danger small mt-1">
-                  {{ form.orientation.errors }}
-                </div>
-                {% endif %}
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label
-                  for="{{ form.floors.id_for_label }}"
-                  class="form-label fw-semibold"
-                >
-                  <i class="bi bi-building text-warning me-1"></i>
-                  {{ form.floors.label }}
-                </label>
-                {{ form.floors }} {% if form.floors.errors %}
-                <div class="text-danger small mt-1">
-                  {{ form.floors.errors }}
+                  {{ form.new_features.errors }}
                 </div>
                 {% endif %}
               </div>
             </div>
-
-            <!-- Información Financiera -->
-            <div class="row mb-5">
-              <div class="col-12">
-                <div class="d-flex align-items-center mb-4">
-                  <div class="bg-info rounded-circle p-2 me-3">
-                    <i class="bi bi-currency-dollar text-white"></i>
-                  </div>
-                  <div>
-                    <h4 class="text-info mb-1 fw-bold">
-                      Información Financiera
-                    </h4>
-                    <p class="text-muted small mb-0">
-                      Precios y costos asociados
-                    </p>
-                  </div>
-                </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold">
+                <i class="bi bi-tag text-info me-1"></i>{{ form.tags.label }}
+              </label>
+              <div class="border rounded p-3 bg-light" style="max-height: 200px; overflow-y: auto">
+                {{ form.tags }}
               </div>
-
-              <div class="col-md-6 mb-3">
-                <label
-                  for="{{ form.sale_price.id_for_label }}"
-                  class="form-label fw-semibold"
-                >
-                  <i class="bi bi-tag text-success me-1"></i> 
-                  {{ form.sale_price.label }}
+              {% if form.tags.errors %}
+              <div class="text-danger small mt-1">{{ form.tags.errors }}</div>
+              {% endif %}
+              <div class="mt-2">
+                <label for="{{ form.new_tags.id_for_label }}" class="form-label fw-semibold small">
+                  Agregar nuevas etiquetas
                 </label>
-                <div class="input-group">
-                  <span class="input-group-text">$</span>
-                  {{ form.sale_price }}
-                </div>
-                {% if form.sale_price.errors %}
+                {{ form.new_tags }} {% if form.new_tags.errors %}
                 <div class="text-danger small mt-1">
-                  {{ form.sale_price.errors }}
+                  {{ form.new_tags.errors }}
                 </div>
                 {% endif %}
-                <div class="form-text">
-                  <i class="bi bi-info-circle me-1"></i>
-                  Precio de venta de la propiedad (opcional)
-                </div>
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label
-                  for="{{ form.rental_price.id_for_label }}"
-                  class="form-label fw-semibold"
-                >
-                  <i class="bi bi-calendar-month text-info me-1"></i>
-                  {{ form.rental_price.label }}
-                </label>
-                <div class="input-group">
-                  <span class="input-group-text">$</span>
-                  {{ form.rental_price }}
-                  <span class="input-group-text">/mes</span>
-                </div>
-                {% if form.rental_price.errors %}
-                <div class="text-danger small mt-1">
-                  {{ form.rental_price.errors }}
-                </div>
-                {% endif %}
-                <div class="form-text">
-                  <i class="bi bi-info-circle me-1"></i>
-                  Precio de alquiler mensual (opcional)
-                </div>
-              </div>
-
-              <div class="col-md-12 mb-3">
-                <label for="{{ form.expenses.id_for_label }}" class="form-label fw-semibold">
-                  <i class="bi bi-receipt text-warning me-1"></i>
-                  {{ form.expenses.label }}
-                </label>
-                <div class="input-group">
-                  <span class="input-group-text">$</span>
-                  {{ form.expenses }}
-                  <span class="input-group-text">/mes</span>
-                </div>
-                {% if form.expenses.errors %}
-                <div class="text-danger small mt-1">
-                  {{ form.expenses.errors }}
-                </div>
-                {% endif %}
-                <div class="form-text">
-                  <i class="bi bi-info-circle me-1"></i>
-                  Gastos comunes o expensas mensuales (opcional)
-                </div>
               </div>
             </div>
-
-            <!-- Características y Etiquetas -->
-            <div class="row mb-5">
-              <div class="col-12">
-                <div class="d-flex align-items-center mb-4">
-                  <div class="bg-success rounded-circle p-2 me-3">
-                    <i class="bi bi-tags text-white"></i>
-                  </div>
-                  <div>
-                    <h4 class="text-success mb-1 fw-bold">
-                      Características y Etiquetas
-                    </h4>
-                    <p class="text-muted small mb-0">
-                      Comodidades y etiquetas especiales
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label class="form-label fw-semibold">
-                  <i class="bi bi-star text-warning me-1"></i>
-                  {{ form.features.label }}
-                </label>
-                <div
-                  class="border rounded p-3 bg-light"
-                  style="max-height: 200px; overflow-y: auto"
-                >
-                  {{ form.features }}
-                </div>
-                {% if form.features.errors %}
-                <div class="text-danger small mt-1">
-                  {{ form.features.errors }}
-                </div>
-                {% endif %}
-                <div class="mt-2">
-                  <label
-                    for="{{ form.new_features.id_for_label }}"
-                    class="form-label fw-semibold small"
-                  >
-                    Agregar nuevas características
-                  </label>
-                  {{ form.new_features }} {% if form.new_features.errors %}
-                  <div class="text-danger small mt-1">
-                    {{ form.new_features.errors }}
-                  </div>
-                  {% endif %}
-                </div>
-              </div>
-
-              <div class="col-md-6 mb-3">
-                <label class="form-label fw-semibold">
-                  <i class="bi bi-tag text-info me-1"></i>{{ form.tags.label }}
-                </label>
-                <div
-                  class="border rounded p-3 bg-light"
-                  style="max-height: 200px; overflow-y: auto"
-                >
-                  {{ form.tags }}
-                </div>
-                {% if form.tags.errors %}
-                <div class="text-danger small mt-1">{{ form.tags.errors }}</div>
-                {% endif %}
-                <div class="mt-2">
-                  <label
-                    for="{{ form.new_tags.id_for_label }}"
-                    class="form-label fw-semibold small"
-                  >
-                    Agregar nuevas etiquetas
-                  </label>
-                  {{ form.new_tags }} {% if form.new_tags.errors %}
-                  <div class="text-danger small mt-1">
-                    {{ form.new_tags.errors }}
-                  </div>
-                  {% endif %}
-                </div>
-              </div>
-
-              <div class="col-12">
-                <div class="alert alert-info border-info">
-                  <i class="bi bi-lightbulb me-2"></i>
-                  <strong>Consejo:</strong> Seleccione características y
-                  etiquetas existentes o escriba nuevas (separadas por coma)
-                  para crearlas automáticamente.
-                </div>
+            <div class="col-12">
+              <div class="alert alert-info border-info">
+                <i class="bi bi-lightbulb me-2"></i>
+                <strong>Consejo:</strong> Seleccione características y
+                etiquetas existentes o escriba nuevas (separadas por coma)
+                para crearlas automáticamente.
               </div>
             </div>
+          </div>
 
           <!-- Imágenes -->
           {% if image_formset %}
@@ -1018,12 +652,9 @@
                   <i class="bi bi-cloud-upload display-4 text-primary mb-3"></i>
                   <h5 class="text-primary mb-2">Arrastra y suelta tus imágenes aquí</h5>
                   <p class="text-muted mb-3">o haz clic para seleccionar archivos</p>
-                  <input type="file" 
-                         id="multipleImageInput" 
-                         multiple 
-                         accept="image/*" 
-                         style="display: none;">
-                  <button type="button" class="btn btn-primary btn-enhanced" onclick="document.getElementById('multipleImageInput').click()">
+                  <input type="file" id="multipleImageInput" multiple accept="image/*" style="display: none;">
+                  <button type="button" class="btn btn-primary btn-enhanced"
+                    onclick="document.getElementById('multipleImageInput').click()">
                     <i class="bi bi-plus-circle me-2"></i>Seleccionar Imágenes
                   </button>
                   <div class="mt-2">
@@ -1034,126 +665,86 @@
                   </div>
                 </div>
               </div>
-
-              <div class="alert alert-info border-0 shadow-sm mb-4" style="border-left: 4px solid var(--property-info) !important;">
+              <div class="alert alert-info border-0 shadow-sm mb-4"
+                style="border-left: 4px solid var(--property-info) !important;">
                 <i class="bi bi-lightbulb me-2"></i>
-                <strong>Consejo:</strong> La primera imagen será la imagen principal. Puedes reordenar las imágenes arrastrándolas.
+                <strong>Consejo:</strong> La primera imagen será la imagen principal. Puedes reordenar las imágenes
+                arrastrándolas.
               </div>
-
-                {{ image_formset.management_form }}
-
-                <div id="image-forms-container">
-                  {% for image_form in image_formset %}
-                  <div class="image-form-container card mb-3 border-light">
-                    <div class="card-body p-3">
-                      {% if image_form.instance.pk %}{{ image_form.DELETE }}{{ image_form.id }}{% endif %}
-
-                      <div class="row g-3 align-items-start">
-                        <div class="col-md-3">
-                          <div class="image-preview-container">
-                            {% if image_form.instance.image %}
-                            <img
-                              src="{{ image_form.instance.image.url }}"
-                              class="img-fluid rounded"
-                              alt="Vista previa"
-                              style="
-                                max-height: 150px;
-                                width: 100%;
-                                object-fit: cover;
-                              "
-                            />
-                            {% else %}
-                            <div
-                              class="bg-light d-flex align-items-center justify-content-center rounded"
-                              style="height: 150px"
-                            >
-                              <i
-                                class="bi bi-image text-muted"
-                                style="font-size: 2rem"
-                              ></i>
-                            </div>
-                            {% endif %}
+              {{ image_formset.management_form }}
+              <div id="image-forms-container">
+                {% for image_form in image_formset %}
+                <div class="image-form-container card mb-3 border-light">
+                  <div class="card-body p-3">
+                    {% if image_form.instance.pk %}{{ image_form.DELETE }}{{ image_form.id }}{% endif %}
+                    <div class="row g-3 align-items-start">
+                      <div class="col-md-3">
+                        <div class="image-preview-container">
+                          {% if image_form.instance.image %}
+                          <img src="{{ image_form.instance.image.url }}" class="img-fluid rounded" alt="Vista previa"
+                            style="max-height: 150px; width: 100%; object-fit: cover;" />
+                          {% else %}
+                          <div class="bg-light d-flex align-items-center justify-content-center rounded"
+                            style="height: 150px">
+                            <i class="bi bi-image text-muted" style="font-size: 2rem"></i>
                           </div>
+                          {% endif %}
                         </div>
-                        <div class="col-md-9">
-                          <div class="mb-3">
-                            <label class="form-label fw-semibold">
-                              <i class="bi bi-image me-1"></i>Imagen
+                      </div>
+                      <div class="col-md-9">
+                        <div class="mb-3">
+                          <label class="form-label fw-semibold">
+                            <i class="bi bi-image me-1"></i>Imagen
+                          </label>
+                          {{ image_form.image }}
+                        </div>
+                        <div class="mb-3">
+                          <label class="form-label fw-semibold">
+                            <i class="bi bi-card-text me-1"></i>Descripción
+                          </label>
+                          {{ image_form.description }}
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                          <div class="form-check">
+                            {{ image_form.is_cover }}
+                            <label class="form-check-label" for="{{ image_form.is_cover.id_for_label }}">
+                              Imagen principal
                             </label>
-                            {{ image_form.image }}
                           </div>
-                          <div class="mb-3">
-                            <label class="form-label fw-semibold">
-                              <i class="bi bi-card-text me-1"></i>Descripción
-                            </label>
-                            {{ image_form.description }}
-                          </div>
-                          <div
-                            class="d-flex justify-content-between align-items-center"
-                          >
-                            <div class="form-check">
-                              {{ image_form.is_cover }}
-                              <label
-                                class="form-check-label"
-                                for="{{ image_form.is_cover.id_for_label }}"
-                              >
-                                Imagen principal
-                              </label>
-                            </div>
-                            {% if image_form.instance.pk %}
-                            <button
-                              type="button"
-                              class="btn btn-outline-danger btn-sm mark-for-deletion"
-                            >
-                              <i class="bi bi-trash me-1"></i>Eliminar
-                            </button>
-                            {% else %}
-                            <button
-                              type="button"
-                              class="btn btn-outline-secondary btn-sm remove-image-form"
-                            >
-                              <i class="bi bi-x me-1"></i>Quitar
-                            </button>
-                            {% endif %}
-                          </div>
+                          {% if image_form.instance.pk %}
+                          <button type="button" class="btn btn-outline-danger btn-sm mark-for-deletion">
+                            <i class="bi bi-trash me-1"></i>Eliminar
+                          </button>
+                          {% else %}
+                          <button type="button" class="btn btn-outline-secondary btn-sm remove-image-form">
+                            <i class="bi bi-x me-1"></i>Quitar
+                          </button>
+                          {% endif %}
                         </div>
                       </div>
                     </div>
                   </div>
-                  {% endfor %}
                 </div>
-
-                <button
-                  type="button"
-                  id="add-image-form"
-                  class="btn btn-outline-primary"
-                >
-                  <i class="bi bi-plus-circle me-1"></i>Agregar Imagen
-                </button>
+                {% endfor %}
               </div>
+              <button type="button" id="add-image-form" class="btn btn-outline-primary">
+                <i class="bi bi-plus-circle me-1"></i>Agregar Imagen
+              </button>
             </div>
-            {% endif %}
-
+          </div>
+          {% endif %}
         </form>
-        
         <!-- Form Actions -->
         <div class="form-actions">
           <div class="d-flex justify-content-between align-items-center">
-            <div class="form-progress-summary">
-              <small class="text-muted">
-                <i class="bi bi-info-circle me-1"></i>
-                Progreso: <span id="completion-percentage">16%</span> completado
-              </small>
-            </div>
+
             <div class="action-buttons">
-              <a
-                href="{% if form.instance.pk %}{% url 'properties:property_detail' form.instance.pk %}{% else %}{% url 'properties:property_list' %}{% endif %}"
-                class="btn btn-outline-secondary me-3"
-              >
+              <a href="{% if form.instance.pk %}{% url 'properties:property_detail' form.instance.pk %}{% else %}{% url 'properties:property_list' %}{% endif %}"
+                class="btn btn-outline-secondary me-3">
                 <i class="bi bi-x-circle me-1"></i> Cancelar
               </a>
               <button type="submit" form="propertyForm" class="btn btn-primary-enhanced btn-enhanced">
-                <i class="bi bi-check-circle-fill me-2"></i> 
+                <i class="bi bi-check-circle-fill me-2"></i>
                 {% if form.instance.pk %}Actualizar Propiedad{% else %}Guardar Propiedad{% endif %}
               </button>
             </div>
@@ -1163,654 +754,9 @@
     </div>
   </div>
 </div>
-
+{% endblock %}
 {% block extra_js %}
 <script src="{% static 'js/property-form-enhanced.js' %}"></script>
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const propertyForm = document.getElementById("propertyForm");
-    const salePriceInput = document.getElementById("id_sale_price");
-    const rentalPriceInput = document.getElementById("id_rental_price");
-    const listingTypeSelect = document.getElementById("id_listing_type");
-    
-    // Enhanced Form Progress Tracking
-    const progressSteps = document.querySelectorAll('.progress-step');
-    const progressBar = document.getElementById('form-progress');
-    const progressText = document.getElementById('progress-text');
-    const completionPercentage = document.getElementById('completion-percentage');
-    
-    // Form sections for progress tracking
-    const formSections = [
-      { id: 'section-basic', fields: ['title', 'property_type', 'description'] },
-      { id: 'section-location', fields: ['street', 'number', 'country', 'province', 'locality'] },
-      { id: 'section-physical', fields: ['total_surface', 'bedrooms', 'bathrooms'] },
-      { id: 'section-financial', fields: ['sale_price', 'rental_price'] },
-      { id: 'section-features', fields: ['features'] },
-      { id: 'section-images', fields: ['images'] }
-    ];
-    
-    // Enhanced Form Validation
-    function validateField(field) {
-      const fieldElement = document.getElementById(`id_${field}`);
-      if (!fieldElement) return false;
-      
-      const value = fieldElement.value.trim();
-      const isValid = value !== '';
-      
-      // Update field styling
-      fieldElement.classList.remove('is-invalid', 'is-valid');
-      const validFeedback = fieldElement.parentNode.querySelector('.valid-feedback');
-      const invalidFeedback = fieldElement.parentNode.querySelector('.invalid-feedback');
-      
-      if (isValid) {
-        fieldElement.classList.add('is-valid');
-        if (validFeedback) validFeedback.style.display = 'flex';
-        if (invalidFeedback) invalidFeedback.style.display = 'none';
-      } else {
-        fieldElement.classList.add('is-invalid');
-        if (validFeedback) validFeedback.style.display = 'none';
-        if (invalidFeedback) invalidFeedback.style.display = 'flex';
-      }
-      
-      return isValid;
-    }
-    
-    // Update Progress
-    function updateProgress() {
-      let completedSections = 0;
-      
-      formSections.forEach((section, index) => {
-        const sectionElement = document.getElementById(section.id);
-        const progressStep = progressSteps[index];
-        
-        if (!sectionElement || !progressStep) return;
-        
-        // Check if section fields are completed
-        const completedFields = section.fields.filter(field => {
-          const fieldElement = document.getElementById(`id_${field}`);
-          return fieldElement && fieldElement.value.trim() !== '';
-        });
-        
-        const isCompleted = completedFields.length >= Math.ceil(section.fields.length * 0.5); // 50% completion
-        
-        if (isCompleted) {
-          completedSections++;
-          progressStep.classList.add('completed');
-          progressStep.classList.remove('active');
-        }
-      });
-      
-      const progressPercentage = (completedSections / formSections.length) * 100;
-      progressBar.style.width = `${progressPercentage}%`;
-      progressText.textContent = `${completedSections} de ${formSections.length} secciones completadas`;
-      completionPercentage.textContent = `${Math.round(progressPercentage)}%`;
-    }
-    
-    // Smooth Scrolling for Progress Steps
-    progressSteps.forEach(step => {
-      step.addEventListener('click', function(e) {
-        e.preventDefault();
-        const targetId = this.getAttribute('href');
-        const targetElement = document.querySelector(targetId);
-        
-        if (targetElement) {
-          targetElement.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-          });
-          
-          // Update active step
-          progressSteps.forEach(s => s.classList.remove('active'));
-          this.classList.add('active');
-        }
-      });
-    });
-    
-    // Enhanced Drag and Drop for Images
-    const dragDropZone = document.getElementById('dragDropZone');
-    const multipleImageInput = document.getElementById('multipleImageInput');
-    
-    if (dragDropZone && multipleImageInput) {
-      // Drag and drop events
-      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dragDropZone.addEventListener(eventName, preventDefaults, false);
-      });
-      
-      function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      
-      ['dragenter', 'dragover'].forEach(eventName => {
-        dragDropZone.addEventListener(eventName, highlight, false);
-      });
-      
-      ['dragleave', 'drop'].forEach(eventName => {
-        dragDropZone.addEventListener(eventName, unhighlight, false);
-      });
-      
-      function highlight(e) {
-        dragDropZone.classList.add('drag-over');
-      }
-      
-      function unhighlight(e) {
-        dragDropZone.classList.remove('drag-over');
-      }
-      
-      dragDropZone.addEventListener('drop', handleDrop, false);
-      
-      function handleDrop(e) {
-        const dt = e.dataTransfer;
-        const files = dt.files;
-        handleFiles(files);
-      }
-      
-      multipleImageInput.addEventListener('change', function(e) {
-        handleFiles(e.target.files);
-      });
-      
-      function handleFiles(files) {
-        [...files].forEach(uploadFile);
-      }
-      
-      function uploadFile(file) {
-        if (!file.type.startsWith('image/')) {
-          showErrorToast('Solo se permiten archivos de imagen');
-          return;
-        }
-        
-        if (file.size > 5 * 1024 * 1024) { // 5MB limit
-          showErrorToast('El archivo es demasiado grande. Máximo 5MB por imagen.');
-          return;
-        }
-        
-        // Create preview
-        createImagePreview(file);
-      }
-      
-      function createImagePreview(file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const previewHtml = `
-            <div class="image-preview-item card mb-3 border-light">
-              <div class="card-body p-3">
-                <div class="row g-3 align-items-start">
-                  <div class="col-md-3">
-                    <img src="${e.target.result}" class="img-fluid rounded" alt="Vista previa" 
-                         style="max-height: 150px; width: 100%; object-fit: cover;">
-                  </div>
-                  <div class="col-md-9">
-                    <div class="mb-3">
-                      <label class="form-label fw-semibold">
-                        <i class="bi bi-card-text me-1"></i>Descripción
-                      </label>
-                      <input type="text" class="form-control enhanced-form-control" 
-                             placeholder="Descripción de la imagen...">
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                      <div class="form-check">
-                        <input class="form-check-input" type="radio" name="cover_image" value="">
-                        <label class="form-check-label">Imagen principal</label>
-                      </div>
-                      <button type="button" class="btn btn-outline-danger btn-sm remove-preview">
-                        <i class="bi bi-trash me-1"></i>Eliminar
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          `;
-          
-          const container = document.getElementById('image-forms-container') || 
-                           document.createElement('div');
-          if (!container.id) {
-            container.id = 'image-forms-container';
-            dragDropZone.parentNode.insertBefore(container, dragDropZone.nextSibling);
-          }
-          
-          container.insertAdjacentHTML('beforeend', previewHtml);
-          
-          // Add remove functionality
-          const removeBtn = container.lastElementChild.querySelector('.remove-preview');
-          removeBtn.addEventListener('click', function() {
-            this.closest('.image-preview-item').remove();
-          });
-        };
-        reader.readAsDataURL(file);
-      }
-    }
-    
-    // Real-time validation
-    document.querySelectorAll('.enhanced-form-control').forEach(input => {
-      input.addEventListener('input', function() {
-        const fieldName = this.name;
-        if (fieldName) {
-          validateField(fieldName);
-          updateProgress();
-        }
-      });
-      
-      input.addEventListener('blur', function() {
-        const fieldName = this.name;
-        if (fieldName) {
-          validateField(fieldName);
-        }
-      });
-    });
-    
-    // Initial progress update
-    updateProgress();
-    
-    // Intersection Observer for section tracking
-    const sectionObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const sectionId = entry.target.id;
-          const correspondingStep = document.querySelector(`[href="#${sectionId}"]`);
-          
-          if (correspondingStep) {
-            progressSteps.forEach(step => step.classList.remove('active'));
-            correspondingStep.classList.add('active');
-          }
-        }
-      });
-    }, {
-      threshold: 0.5,
-      rootMargin: '-100px 0px -100px 0px'
-    });
-    
-    // Observe all form sections
-    document.querySelectorAll('.form-section').forEach(section => {
-      sectionObserver.observe(section);
-    });
-
-    // Función para mostrar/ocultar campos de precio según el tipo de listado
-    function togglePriceFields() {
-      const listingType = listingTypeSelect ? listingTypeSelect.value : "";
-      const salePriceContainer = salePriceInput
-        ? salePriceInput.closest(".col-md-6")
-        : null;
-      const rentalPriceContainer = rentalPriceInput
-        ? rentalPriceInput.closest(".col-md-6")
-        : null;
-
-      if (salePriceContainer && rentalPriceContainer) {
-        if (listingType === "sale") {
-          salePriceContainer.style.display = "block";
-          rentalPriceContainer.style.display = "none";
-          rentalPriceInput.value = "";
-        } else if (listingType === "rent") {
-          salePriceContainer.style.display = "none";
-          rentalPriceContainer.style.display = "block";
-          salePriceInput.value = "";
-        } else {
-          // both or default
-          salePriceContainer.style.display = "block";
-          rentalPriceContainer.style.display = "block";
-        }
-      }
-    }
-
-    // Aplicar toggle inicial y agregar listener
-    if (listingTypeSelect) {
-      togglePriceFields();
-      listingTypeSelect.addEventListener("change", togglePriceFields);
-    }
-
-    // Validación del formulario
-    if (propertyForm) {
-      propertyForm.addEventListener("submit", function (e) {
-        let isValid = true;
-
-        // Limpiar errores previos
-        document.querySelectorAll(".is-invalid").forEach((field) => {
-          field.classList.remove("is-invalid");
-        });
-
-        // Validar campos requeridos
-        const requiredFields = [
-          "title",
-          "property_type",
-          "property_status",
-          "agent",
-          "street",
-          "total_surface",
-        ];
-        requiredFields.forEach((fieldName) => {
-          const field = document.getElementById(`id_${fieldName}`);
-          if (field && !field.value.trim()) {
-            isValid = false;
-            field.classList.add("is-invalid");
-          }
-        });
-
-        // Validar que al menos un precio esté definido
-        if (salePriceInput && rentalPriceInput) {
-          const salePrice = parseFloat(salePriceInput.value) || 0;
-          const rentalPrice = parseFloat(rentalPriceInput.value) || 0;
-          const listingType = listingTypeSelect ? listingTypeSelect.value : "";
-
-          if (listingType === "sale" && salePrice <= 0) {
-            isValid = false;
-            salePriceInput.classList.add("is-invalid");
-            showErrorToast(
-              "Debe definir un precio de venta para propiedades en venta"
-            );
-          } else if (listingType === "rent" && rentalPrice <= 0) {
-            isValid = false;
-            rentalPriceInput.classList.add("is-invalid");
-            showErrorToast(
-              "Debe definir un precio de alquiler para propiedades en alquiler"
-            );
-          } else if (
-            listingType === "both" &&
-            salePrice <= 0 &&
-            rentalPrice <= 0
-          ) {
-            isValid = false;
-            salePriceInput.classList.add("is-invalid");
-            rentalPriceInput.classList.add("is-invalid");
-            showErrorToast(
-              "Debe definir al menos un precio (venta o alquiler)"
-            );
-          }
-        }
-
-        if (!isValid) {
-          e.preventDefault();
-          showErrorToast(
-            "Por favor, corrija los errores en el formulario antes de continuar"
-          );
-        }
-      });
-    }
-
-    // Manejo de imágenes
-    let formCount = parseInt(
-      document.querySelector("#id_images-TOTAL_FORMS")?.value || 0
-    );
-
-    document
-      .getElementById("add-image-form")
-      ?.addEventListener("click", function () {
-        const container = document.getElementById("image-forms-container");
-        const emptyForm =
-          document.getElementById("empty-form")?.innerHTML || "";
-
-        if (emptyForm && formCount < 10) {
-          // Máximo 10 imágenes
-          const newForm = emptyForm.replace(/__prefix__/g, formCount);
-          container.insertAdjacentHTML("beforeend", newForm);
-          formCount++;
-          const totalFormsInput = document.querySelector(
-            "#id_images-TOTAL_FORMS"
-          );
-          if (totalFormsInput) {
-            totalFormsInput.value = formCount;
-          }
-        } else if (formCount >= 10) {
-          showErrorToast("Máximo 10 imágenes permitidas por propiedad");
-        }
-      });
-
-    // Remover formularios de imagen
-    document.addEventListener("click", function (e) {
-      if (
-        e.target.classList.contains("remove-image-form") ||
-        e.target.closest(".remove-image-form")
-      ) {
-        e.preventDefault();
-        const formContainer = e.target.closest(".image-form-container");
-        if (formContainer) {
-          formContainer.remove();
-          formCount--;
-          const totalFormsInput = document.querySelector(
-            "#id_images-TOTAL_FORMS"
-          );
-          if (totalFormsInput) {
-            totalFormsInput.value = formCount;
-          }
-        }
-      }
-
-      if (
-        e.target.classList.contains("mark-for-deletion") ||
-        e.target.closest(".mark-for-deletion")
-      ) {
-        e.preventDefault();
-        const formContainer = e.target.closest(".image-form-container");
-        const deleteCheckbox = formContainer.querySelector(
-          'input[name$="-DELETE"]'
-        );
-        if (deleteCheckbox) {
-          deleteCheckbox.checked = true;
-          formContainer.style.opacity = "0.5";
-          const button = e.target.closest(".mark-for-deletion");
-          button.innerHTML =
-            '<i class="bi bi-check me-1"></i>Marcado para eliminar';
-          button.disabled = true;
-          button.classList.remove("btn-outline-danger");
-          button.classList.add("btn-success");
-        }
-      }
-    });
-
-    // Preview de imágenes
-    document.addEventListener("change", function (e) {
-      if (
-        e.target.type === "file" &&
-        e.target.accept &&
-        e.target.accept.includes("image")
-      ) {
-        const file = e.target.files[0];
-        const previewContainer = e.target
-          .closest(".image-form-container")
-          .querySelector(".image-preview-container");
-
-        if (file && previewContainer) {
-          const reader = new FileReader();
-          reader.onload = function (e) {
-            previewContainer.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded" alt="Vista previa" style="max-height: 150px; width: 100%; object-fit: cover;">`;
-          };
-          reader.readAsDataURL(file);
-        }
-      }
-    });
-
-    // Función para mostrar toast de error
-    function showErrorToast(message) {
-      showToast(message, "error");
-    }
-
-    // Función genérica para mostrar toasts
-    function showToast(message, type = "info") {
-      let toastContainer = document.querySelector(".toast-container");
-      if (!toastContainer) {
-        toastContainer = document.createElement("div");
-        toastContainer.className =
-          "toast-container position-fixed top-0 end-0 p-3";
-        document.body.appendChild(toastContainer);
-      }
-
-      const iconClass =
-        type === "error"
-          ? "bi-exclamation-triangle-fill text-danger"
-          : "bi-info-circle-fill text-info";
-      const headerText = type === "error" ? "Error" : "Información";
-
-      const toastHtml = `
-            <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header">
-                    <i class="${iconClass} me-2"></i>
-                    <strong class="me-auto">${headerText}</strong>
-                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-                </div>
-                <div class="toast-body">
-                    ${message}
-                </div>
-            </div>
-        `;
-
-      toastContainer.insertAdjacentHTML("beforeend", toastHtml);
-      const toast = new bootstrap.Toast(toastContainer.lastElementChild);
-      toast.show();
-
-      toastContainer.lastElementChild.addEventListener(
-        "hidden.bs.toast",
-        function () {
-          this.remove();
-        }
-      );
-    }
-
-    // Enhanced Toast Notifications
-    function showErrorToast(message) {
-      showToast(message, "error");
-    }
-    
-    function showSuccessToast(message) {
-      showToast(message, "success");
-    }
-
-    function showToast(message, type = "info") {
-      let toastContainer = document.querySelector(".toast-container");
-      if (!toastContainer) {
-        toastContainer = document.createElement("div");
-        toastContainer.className = "toast-container position-fixed top-0 end-0 p-3";
-        toastContainer.style.zIndex = "9999";
-        document.body.appendChild(toastContainer);
-      }
-
-      const iconClass = {
-        error: "bi-exclamation-triangle-fill text-danger",
-        success: "bi-check-circle-fill text-success",
-        info: "bi-info-circle-fill text-info"
-      }[type];
-      
-      const headerText = {
-        error: "Error",
-        success: "Éxito", 
-        info: "Información"
-      }[type];
-
-      const toastHtml = `
-        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-          <div class="toast-header">
-            <i class="${iconClass} me-2"></i>
-            <strong class="me-auto">${headerText}</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-          </div>
-          <div class="toast-body">${message}</div>
-        </div>
-      `;
-
-      toastContainer.insertAdjacentHTML("beforeend", toastHtml);
-      const toast = new bootstrap.Toast(toastContainer.lastElementChild, {
-        autohide: true,
-        delay: type === 'error' ? 5000 : 3000
-      });
-      toast.show();
-
-      toastContainer.lastElementChild.addEventListener("hidden.bs.toast", function () {
-        this.remove();
-      });
-    }
-    
-    // Enhanced Form Submission
-    if (propertyForm) {
-      propertyForm.addEventListener("submit", function (e) {
-        let isValid = true;
-        const errors = [];
-
-        // Clear previous validation states
-        document.querySelectorAll(".is-invalid").forEach((field) => {
-          field.classList.remove("is-invalid");
-        });
-
-        // Validate required fields
-        const requiredFields = [
-          { name: "title", label: "Título" },
-          { name: "property_type", label: "Tipo de propiedad" },
-          { name: "property_status", label: "Estado" },
-          { name: "street", label: "Calle" },
-          { name: "total_surface", label: "Superficie total" }
-        ];
-        
-        requiredFields.forEach((field) => {
-          const fieldElement = document.getElementById(`id_${field.name}`);
-          if (fieldElement && !fieldElement.value.trim()) {
-            isValid = false;
-            fieldElement.classList.add("is-invalid");
-            errors.push(`${field.label} es requerido`);
-          }
-        });
-
-        // Validate pricing based on listing type
-        if (salePriceInput && rentalPriceInput && listingTypeSelect) {
-          const salePrice = parseFloat(salePriceInput.value) || 0;
-          const rentalPrice = parseFloat(rentalPriceInput.value) || 0;
-          const listingType = listingTypeSelect.value;
-
-          if (listingType === "sale" && salePrice <= 0) {
-            isValid = false;
-            salePriceInput.classList.add("is-invalid");
-            errors.push("Debe definir un precio de venta para propiedades en venta");
-          } else if (listingType === "rent" && rentalPrice <= 0) {
-            isValid = false;
-            rentalPriceInput.classList.add("is-invalid");
-            errors.push("Debe definir un precio de alquiler para propiedades en alquiler");
-          } else if (listingType === "both" && salePrice <= 0 && rentalPrice <= 0) {
-            isValid = false;
-            salePriceInput.classList.add("is-invalid");
-            rentalPriceInput.classList.add("is-invalid");
-            errors.push("Debe definir al menos un precio (venta o alquiler)");
-          }
-        }
-
-        if (!isValid) {
-          e.preventDefault();
-          
-          // Show errors in toast
-          errors.forEach(error => showErrorToast(error));
-          
-          // Scroll to first error
-          const firstError = document.querySelector('.is-invalid');
-          if (firstError) {
-            firstError.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'center' 
-            });
-            firstError.focus();
-          }
-        } else {
-          // Show loading state
-          const submitBtn = document.querySelector('button[type="submit"]');
-          if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Guardando...';
-          }
-        }
-      });
-    }
-    
-    // Auto-save functionality (optional)
-    let autoSaveTimeout;
-    function autoSave() {
-      clearTimeout(autoSaveTimeout);
-      autoSaveTimeout = setTimeout(() => {
-        // Could implement auto-save to localStorage here
-        console.log('Auto-saving form data...');
-      }, 2000);
-    }
-    
-    document.querySelectorAll('.enhanced-form-control').forEach(input => {
-      input.addEventListener('input', autoSave);
-    });
-  });
-</script>
-{% endblock %}
-
 <script src="{% static 'js/owner-autocomplete.js' %}"></script>
 <script src="{% static 'js/location-autocomplete.js' %}"></script>
 {% endblock %}

@@ -73,6 +73,9 @@ class LocationAutocomplete {
         this.elements.neighborhood.forEach(input => {
             this.setupNeighborhoodField(input);
         });
+        
+        // Cargar valores iniciales si existen
+        this.loadInitialValues();
     }
     
     setupAutocompleteField(input, type) {
@@ -123,12 +126,14 @@ class LocationAutocomplete {
         const hiddenInput = document.createElement('input');
         hiddenInput.type = 'hidden';
         hiddenInput.name = input.name;
-        hiddenInput.id = input.id;
+        hiddenInput.id = input.id + '_hidden';
         
-        // Cambiar el name y id del input visible
-        input.name = input.name + '_display';
+        // Cambiar solo el id del input visible, mantener el name
         input.id = input.id + '_display';
         input.setAttribute('autocomplete', 'off');
+        
+        // Hacer que el input visible no se envíe en el formulario
+        input.removeAttribute('name');
         
         return hiddenInput;
     }
@@ -208,7 +213,10 @@ class LocationAutocomplete {
         const type = autocomplete.type;
         
         let url = this.options.urls[type === 'state' ? 'states' : type === 'city' ? 'cities' : 'countries'];
-        url += `?term=${encodeURIComponent(query)}`;
+        
+        // Normalizar la consulta para búsqueda más flexible
+        const normalizedQuery = this.normalizeSearchTerm(query);
+        url += `?term=${encodeURIComponent(normalizedQuery)}`;
         
         // Agregar filtros jerárquicos
         if (type === 'state' && this.selectedValues.country) {
@@ -231,6 +239,15 @@ class LocationAutocomplete {
             console.error('Error en búsqueda de ubicación:', error);
             this.showError(autocomplete.dropdown, 'Error al buscar ubicación');
         });
+    }
+    
+    normalizeSearchTerm(term) {
+        // Normalizar el término de búsqueda para hacerlo más flexible
+        // Remover acentos y convertir a minúsculas
+        return term
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, ''); // Remover diacríticos
     }
     
     showResults(input, results, query) {
@@ -315,6 +332,10 @@ class LocationAutocomplete {
             bubbles: true 
         });
         input.dispatchEvent(event);
+        
+        // Validar el campo
+        input.classList.remove('is-invalid');
+        input.classList.add('is-valid');
     }
     
     clearSelection(input) {
@@ -327,6 +348,9 @@ class LocationAutocomplete {
         
         // Limpiar campos dependientes
         this.clearDependentFields(type);
+        
+        // Remover validación
+        input.classList.remove('is-valid', 'is-invalid');
     }
     
     clearDependentFields(type) {
@@ -352,6 +376,7 @@ class LocationAutocomplete {
                 field.value = '';
                 field._autocomplete.hiddenInput.value = '';
                 field._autocomplete.selectedValue = null;
+                field.classList.remove('is-valid', 'is-invalid');
             }
         });
     }
@@ -709,6 +734,59 @@ class LocationAutocomplete {
     getCSRFToken() {
         return document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
                document.querySelector('meta[name="csrf-token"]')?.content || '';
+    }
+    
+    loadInitialValues() {
+        // Cargar valores iniciales de los campos ocultos si existen
+        this.elements.country.forEach(input => {
+            const hiddenInput = input._autocomplete?.hiddenInput;
+            if (hiddenInput && hiddenInput.value) {
+                // Si hay un valor en el campo oculto, cargar la información
+                this.loadLocationData(input, 'country', hiddenInput.value);
+            }
+        });
+        
+        this.elements.state.forEach(input => {
+            const hiddenInput = input._autocomplete?.hiddenInput;
+            if (hiddenInput && hiddenInput.value) {
+                this.loadLocationData(input, 'state', hiddenInput.value);
+            }
+        });
+        
+        this.elements.city.forEach(input => {
+            const hiddenInput = input._autocomplete?.hiddenInput;
+            if (hiddenInput && hiddenInput.value) {
+                this.loadLocationData(input, 'city', hiddenInput.value);
+            }
+        });
+    }
+    
+    loadLocationData(input, type, id) {
+        // Cargar datos de ubicación por ID para mostrar en el campo
+        const urls = {
+            'country': '/locations/ajax/countries/autocomplete/',
+            'state': '/locations/ajax/states/autocomplete/',
+            'city': '/locations/ajax/cities/autocomplete/'
+        };
+        
+        fetch(`${urls[type]}?id=${id}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': this.getCSRFToken()
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.results && data.results.length > 0) {
+                const location = data.results[0];
+                input.value = location.name;
+                input._autocomplete.selectedValue = location;
+                this.selectedValues[type] = location;
+            }
+        })
+        .catch(error => {
+            console.error('Error cargando datos de ubicación:', error);
+        });
     }
 }
 

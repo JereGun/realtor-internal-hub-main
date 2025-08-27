@@ -985,6 +985,83 @@
   outline-offset: 2px;
 }
 
+/* ===== LOCATION AUTOCOMPLETE STYLES ===== */
+
+/* Contenedor de autocompletado */
+.location-autocomplete-container {
+  position: relative;
+  width: 100%;
+}
+
+/* Dropdown de autocompletado */
+.location-autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid var(--property-gray-300);
+  border-radius: var(--property-radius-md);
+  box-shadow: var(--property-shadow-lg);
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1050;
+  display: none;
+  margin-top: 2px;
+}
+
+/* Items del dropdown */
+.location-autocomplete-dropdown .dropdown-item {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  border-bottom: 1px solid var(--property-gray-100);
+  transition: background-color var(--property-transition-fast);
+  display: flex;
+  align-items: center;
+  gap: var(--property-spacing-sm);
+}
+
+.location-autocomplete-dropdown .dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.location-autocomplete-dropdown .dropdown-item:hover {
+  background-color: var(--property-primary-light);
+}
+
+.location-autocomplete-dropdown .dropdown-item.no-results {
+  cursor: default;
+  color: var(--property-gray-500);
+  font-style: italic;
+}
+
+.location-autocomplete-dropdown .dropdown-item.create-new {
+  background-color: var(--property-light);
+  color: var(--property-primary);
+  font-weight: var(--property-font-weight-medium);
+  border-top: 2px solid var(--property-gray-200);
+}
+
+.location-autocomplete-dropdown .dropdown-item.create-new:hover {
+  background-color: var(--property-primary-light);
+}
+
+/* Asegurar que los contenedores de sección no corten el dropdown */
+.section-content {
+  overflow: visible !important;
+}
+
+.form-section {
+  overflow: visible !important;
+}
+
+.property-form-container .container-fluid,
+.property-form-container .row,
+.property-form-container .col-lg-9,
+.property-form-container .col-xl-10 {
+  overflow: visible !important;
+}
+
 /* =
 ==== PROPERTY CARD COMPONENT ENHANCEMENTS ===== */
 
@@ -2459,11 +2536,11 @@
   }
 }
 
-pacing-md{
-padding-left: var(--property-spacing-md);
-padding-right: var(--property-spacing-md);
-padding-top: var(--property-spacing-sm);
-padding-bottom: var(--property-spacing-sm);
+pacing-md {
+  padding-left: var(--property-spacing-md);
+  padding-right: var(--property-spacing-md);
+  padding-top: var(--property-spacing-sm);
+  padding-bottom: var(--property-spacing-sm);
 }
 
 .property-title {
@@ -3569,9 +3646,13 @@ padding-bottom: var(--property-spacing-sm);
   color: white;
 }
 
-.progress-step.completed .progress-step-icon::before {
+.form-progress-indicator .progress-step.completed .progress-step-icon::before {
   content: "✓";
   font-size: var(--property-font-size-sm);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 /* Form Sections */
@@ -3583,6 +3664,59 @@ padding-bottom: var(--property-spacing-sm);
   overflow: hidden;
   transition: var(--property-transition-normal);
   border: 1px solid var(--property-gray-200);
+}
+
+/* Fix for select elements - prevent unwanted pseudo-elements */
+.form-select::before,
+.form-select::after,
+.enhanced-form-control.form-select::before,
+.enhanced-form-control.form-select::after,
+select.enhanced-form-control::before,
+select.enhanced-form-control::after,
+select.form-select::before,
+select.form-select::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Ensure select options don't inherit unwanted styles */
+.form-select option::before,
+.form-select option::after,
+select option::before,
+select option::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Additional fix for any element with enhanced-form-control class that might be affected */
+.enhanced-form-control:not(.progress-step-icon)::before,
+.enhanced-form-control:not(.progress-step-icon)::after {
+  content: none !important;
+}
+
+/* Override Bootstrap 5 validation styles that add checkmarks to valid selects */
+.form-select.is-valid,
+.form-select.is-valid:focus,
+select.is-valid,
+select.is-valid:focus {
+  background-image: none !important;
+  padding-right: 0.75rem !important;
+}
+
+/* Remove Bootstrap's validation checkmarks from all form controls */
+.is-valid.form-select,
+.is-valid.enhanced-form-control,
+select.is-valid {
+  background-image: none !important;
+}
+
+/* Ensure no pseudo-elements are added by Bootstrap validation */
+.is-valid::before,
+.is-valid::after,
+.form-select.is-valid::before,
+.form-select.is-valid::after {
+  content: none !important;
+  display: none !important;
 }
 
 .form-section:hover {

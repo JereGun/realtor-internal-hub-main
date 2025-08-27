@@ -20,13 +20,13 @@ class PropertyListEnhancer {
      */
     initAnimatedCounters() {
         const counters = document.querySelectorAll('.property-stat-number[data-count]');
-        
+
         const animateCounter = (element) => {
             const target = parseInt(element.getAttribute('data-count'));
             const duration = 1500; // 1.5 seconds
             const increment = target / (duration / 16); // 60fps
             let current = 0;
-            
+
             const updateCounter = () => {
                 current += increment;
                 if (current < target) {
@@ -36,7 +36,7 @@ class PropertyListEnhancer {
                     element.textContent = target.toLocaleString();
                 }
             };
-            
+
             updateCounter();
         };
 
@@ -75,7 +75,7 @@ class PropertyListEnhancer {
         const createActiveFiltersDisplay = () => {
             const activeFilters = this.getActiveFilters();
             const existingDisplay = document.querySelector('.property-active-filters');
-            
+
             if (activeFilters.length === 0) {
                 if (existingDisplay) {
                     existingDisplay.remove();
@@ -157,7 +157,7 @@ class PropertyListEnhancer {
         for (const [name, value] of formData.entries()) {
             if (value && value.trim() !== '' && filterLabels[name]) {
                 let displayValue = value;
-                
+
                 // Format specific values
                 if (name.includes('price') && !isNaN(value)) {
                     displayValue = '$' + parseInt(value).toLocaleString();
@@ -206,7 +206,7 @@ class PropertyListEnhancer {
      */
     initFilterStateTracking() {
         const filterInputs = document.querySelectorAll('#filterForm input, #filterForm select');
-        
+
         filterInputs.forEach(input => {
             const updateFilterState = () => {
                 if (input.value && input.value.trim() !== '') {
@@ -231,13 +231,13 @@ class PropertyListEnhancer {
     initAdvancedFiltersToggle() {
         const toggleButton = document.querySelector('[data-bs-target="#advancedFilters"]');
         const advancedSection = document.getElementById('advancedFilters');
-        
+
         if (!toggleButton || !advancedSection) return;
 
         const updateToggleState = () => {
             const isExpanded = advancedSection.classList.contains('show');
             toggleButton.setAttribute('aria-expanded', isExpanded);
-            
+
             const icon = toggleButton.querySelector('.property-advanced-icon');
             if (icon) {
                 icon.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
@@ -247,7 +247,7 @@ class PropertyListEnhancer {
         // Listen for Bootstrap collapse events
         advancedSection.addEventListener('shown.bs.collapse', updateToggleState);
         advancedSection.addEventListener('hidden.bs.collapse', updateToggleState);
-        
+
         // Initial state
         updateToggleState();
     }
@@ -296,7 +296,7 @@ class PropertyListEnhancer {
      */
     initTableRowHoverEffects() {
         const tableRows = document.querySelectorAll('.property-table tbody tr');
-        
+
         tableRows.forEach(row => {
             row.addEventListener('mouseenter', () => {
                 row.style.transform = 'translateX(4px)';
@@ -315,7 +315,7 @@ class PropertyListEnhancer {
      */
     initTableImagePreview() {
         const tableImages = document.querySelectorAll('.property-table-image');
-        
+
         tableImages.forEach(img => {
             img.addEventListener('mouseenter', () => {
                 img.style.transform = 'scale(1.1)';
@@ -334,7 +334,7 @@ class PropertyListEnhancer {
      */
     initTableActionTooltips() {
         const actionButtons = document.querySelectorAll('.property-table-action');
-        
+
         actionButtons.forEach(button => {
             // Add tooltip based on button class
             let tooltipText = '';
@@ -369,11 +369,11 @@ class PropertyListEnhancer {
         if (!searchInput) return;
 
         let searchTimeout;
-        
+
         searchInput.addEventListener('input', (e) => {
             clearTimeout(searchTimeout);
             const query = e.target.value.trim();
-            
+
             // Add visual feedback for active search
             if (query.length > 0) {
                 searchInput.classList.add('has-value');
@@ -420,7 +420,6 @@ class PropertyListEnhancer {
             searchInput.focus();
         });
     }
-}
 
     /**
      * Initialize responsive enhancements
@@ -438,13 +437,13 @@ class PropertyListEnhancer {
     initTouchFriendlyInteractions() {
         // Add touch feedback to buttons
         const buttons = document.querySelectorAll('.property-btn, .property-table-action');
-        
+
         buttons.forEach(button => {
-            button.addEventListener('touchstart', function() {
+            button.addEventListener('touchstart', function () {
                 this.style.transform = 'scale(0.95)';
             });
-            
-            button.addEventListener('touchend', function() {
+
+            button.addEventListener('touchend', function () {
                 setTimeout(() => {
                     this.style.transform = '';
                 }, 150);
@@ -455,15 +454,15 @@ class PropertyListEnhancer {
         const tableContainer = document.querySelector('.table-responsive');
         if (tableContainer) {
             let isScrolling = false;
-            
+
             tableContainer.addEventListener('touchstart', () => {
                 isScrolling = false;
             });
-            
+
             tableContainer.addEventListener('touchmove', () => {
                 isScrolling = true;
             });
-            
+
             // Prevent accidental clicks while scrolling
             tableContainer.addEventListener('touchend', (e) => {
                 if (isScrolling) {
@@ -479,7 +478,7 @@ class PropertyListEnhancer {
     initResponsiveTableHandling() {
         const table = document.querySelector('.property-table');
         const tableContainer = document.querySelector('.table-responsive');
-        
+
         if (!table || !tableContainer) return;
 
         // Add scroll indicators for mobile
@@ -500,10 +499,10 @@ class PropertyListEnhancer {
                     z-index: 10;
                     animation: pulse 2s infinite;
                 `;
-                
+
                 tableContainer.style.position = 'relative';
                 tableContainer.appendChild(scrollIndicator);
-                
+
                 // Hide indicator after first scroll
                 tableContainer.addEventListener('scroll', () => {
                     scrollIndicator.style.display = 'none';
@@ -512,7 +511,7 @@ class PropertyListEnhancer {
         };
 
         addScrollIndicators();
-        
+
         // Update on resize
         window.addEventListener('resize', debounce(() => {
             const existingIndicator = tableContainer.querySelector('.table-scroll-indicator');
@@ -529,7 +528,7 @@ class PropertyListEnhancer {
     initMobileFilterEnhancements() {
         const filterToggle = document.querySelector('[data-bs-target="#filtersCard"]');
         const filtersCard = document.getElementById('filtersCard');
-        
+
         if (!filterToggle || !filtersCard) return;
 
         // Add mobile-specific filter behavior
@@ -552,7 +551,7 @@ class PropertyListEnhancer {
                 const isExpanded = filtersCard.classList.contains('show');
                 const icon = filterToggle.querySelector('i');
                 const text = filterToggle.childNodes[filterToggle.childNodes.length - 1];
-                
+
                 if (icon) {
                     icon.className = isExpanded ? 'bi bi-x me-1' : 'bi bi-funnel me-1';
                 }
@@ -609,7 +608,7 @@ class PropertyListEnhancer {
 
         // Adjust on resize with debounce
         window.addEventListener('resize', debounce(adjustForViewport, 250));
-        
+
         // Adjust on orientation change
         window.addEventListener('orientationchange', () => {
             setTimeout(adjustForViewport, 100);

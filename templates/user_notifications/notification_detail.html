@@ -8,6 +8,7 @@
 {% block extra_js %}
 {% load static %}
 <script src="{% static 'js/notifications.js' %}"></script>
+<script src="{% static 'js/notifications-enhanced.js' %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -17,11 +18,11 @@
             <i class="bi bi-bell-fill me-2"></i>Detalle de Notificación
         </h2>
         <div class="btn-group">
-            <a href="{% url 'user_notifications:notification_list' %}" class="btn btn-outline-secondary">
+            <a href="{% url 'user_notifications:notification_list' %}" class="btn-modern btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i> Volver a la lista
             </a>
             {% if related_object_info.url %}
-                <a href="{{ related_object_info.url }}" class="btn btn-primary">
+                <a href="{{ related_object_info.url }}" class="btn-modern btn-primary">
                     <i class="bi bi-box-arrow-up-right"></i> Ver {{ related_object_info.type|title }}
                 </a>
             {% endif %}
@@ -31,20 +32,22 @@
     <div class="row">
         <div class="col-lg-8">
             <!-- Notification Details Card -->
-            <div class="card mb-4">
-                <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Información de la Notificación</h5>
-                    <span class="badge 
-                        {% if notification.notification_type == 'invoice_due_soon' %}bg-warning text-dark
-                        {% elif notification.notification_type == 'invoice_overdue' %}bg-danger
-                        {% elif notification.notification_type == 'invoice_payment_received' %}bg-success
-                        {% elif notification.notification_type == 'contract_expiration' %}bg-warning text-dark
-                        {% elif notification.notification_type == 'contract_increase' %}bg-info
-                        {% else %}bg-secondary{% endif %}">
+            <div class="notification-card {% if not notification.is_read %}unread{% endif %} mb-4">
+                <div class="notification-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle me-2"></i>Información de la Notificación
+                    </h5>
+                    <span class="notification-type-badge 
+                        {% if notification.notification_type == 'invoice_due_soon' %}invoice-due-soon
+                        {% elif notification.notification_type == 'invoice_overdue' %}invoice-overdue
+                        {% elif notification.notification_type == 'invoice_payment_received' %}invoice-payment-received
+                        {% elif notification.notification_type == 'contract_expiration' %}contract-expiration
+                        {% elif notification.notification_type == 'contract_increase' %}contract-increase
+                        {% else %}invoice-payment-received{% endif %}">
                         {{ notification.get_notification_type_display }}
                     </span>
                 </div>
-                <div class="card-body">
+                <div class="notification-body">
                     <div class="row">
                         <div class="col-md-6">
                             <h4 class="mb-3">{{ notification.title }}</h4>
@@ -88,11 +91,13 @@
         <div class="col-lg-4">
             <!-- Related Object Card -->
             {% if related_object_info %}
-            <div class="card mb-4">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">Objeto Relacionado</h5>
+            <div class="notification-card mb-4">
+                <div class="notification-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-link-45deg me-2"></i>Objeto Relacionado
+                    </h5>
                 </div>
-                <div class="card-body">
+                <div class="notification-body">
                     <div class="mb-3">
                         <strong>Tipo:</strong>
                         <span class="text-muted">{{ related_object_info.type|title }}</span>
@@ -153,7 +158,7 @@
                     
                     {% if related_object_info.url %}
                     <div class="d-grid">
-                        <a href="{{ related_object_info.url }}" class="btn btn-primary">
+                        <a href="{{ related_object_info.url }}" class="btn-modern btn-primary">
                             <i class="bi bi-box-arrow-up-right"></i> Ver {{ related_object_info.type|title }}
                         </a>
                     </div>
@@ -163,21 +168,23 @@
             {% endif %}
 
             <!-- Actions Card -->
-            <div class="card">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">Acciones</h5>
+            <div class="notification-card">
+                <div class="notification-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-gear me-2"></i>Acciones
+                    </h5>
                 </div>
-                <div class="card-body">
+                <div class="notification-body">
                     {% if not notification.is_read %}
                     <div class="d-grid gap-2 mb-3">
-                        <button type="button" class="btn btn-success" data-notification-id="{{ notification.id }}" class="mark-read-btn">
+                        <button type="button" class="btn-modern btn-success" data-notification-id="{{ notification.id }}" class="mark-read-btn">
                             <i class="bi bi-check"></i> Marcar como leída
                         </button>
                     </div>
                     {% endif %}
                     
                     <div class="d-grid gap-2">
-                        <a href="{% url 'user_notifications:notification_list' %}" class="btn btn-outline-secondary">
+                        <a href="{% url 'user_notifications:notification_list' %}" class="btn-modern btn-outline-secondary">
                             <i class="bi bi-arrow-left"></i> Volver a la lista
                         </a>
                     </div>

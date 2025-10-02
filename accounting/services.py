@@ -145,8 +145,11 @@ class OwnerReceiptService:
                 if discount_percentage < 0 or discount_percentage > 100:
                     raise OwnerReceiptValidationError(f"El porcentaje de descuento debe estar entre 0% y 100%. Valor actual: {discount_percentage}%")
                 
+                # Calcular y redondear a 2 decimales para evitar problemas de validación
                 discount_amount = gross_amount * (discount_percentage / Decimal('100')) if discount_percentage else Decimal('0.00')
+                discount_amount = discount_amount.quantize(Decimal('0.01'))
                 net_amount = gross_amount - discount_amount
+                net_amount = net_amount.quantize(Decimal('0.01'))
                 
                 if net_amount < 0:
                     raise OwnerReceiptValidationError("El monto neto no puede ser negativo. Verifique el porcentaje de descuento.")

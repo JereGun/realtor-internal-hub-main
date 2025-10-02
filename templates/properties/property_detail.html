@@ -1,43 +1,45 @@
 {% extends 'base.html' %}
 {% load humanize %}
+{% load static %}
 
 {% block page_title %}{{ property.title }}{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% load static %}{% static 'css/property-styles.css' %}">
+<link rel="stylesheet" href="{% static 'css/property-styles.css' %}">
+<link rel="stylesheet" href="{% static 'css/property-form.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid mt-4">
-    <!-- Enhanced Header -->
-    <div class="property-detail-header mb-4">
+    <!-- Modern Page Header -->
+    <div class="page-header mb-4">
         <div class="row align-items-center">
             <div class="col-lg-8">
-                <div class="property-header-content">
-                    <h1 class="property-detail-title">
-                        <i class="bi bi-house-door me-2 text-primary"></i>{{ property.title }}
+                <div>
+                    <h1 class="h2 mb-2 text-white fw-bold">
+                        <i class="bi bi-house-door me-2"></i>{{ property.title }}
                     </h1>
-                    <div class="property-detail-location">
-                        <i class="bi bi-geo-alt me-1 text-danger"></i>
+                    <div class="mb-2 opacity-90">
+                        <i class="bi bi-geo-alt me-1"></i>
                         <span>{{ property.full_address }}</span>
                     </div>
-                    <div class="property-detail-badges mt-2">
-                        <span class="property-badge property-badge-type">{{ property.property_type.name }}</span>
-                        <span class="property-badge property-badge-{% if property.property_status.name == 'Disponible' %}success{% elif property.property_status.name == 'Vendida' %}danger{% elif property.property_status.name == 'Alquilada' %}info{% elif property.property_status.name == 'En Proceso' %}warning{% else %}secondary{% endif %}">
+                    <div class="d-flex gap-2">
+                        <span class="badge bg-light text-dark">{{ property.property_type.name }}</span>
+                        <span class="badge {% if property.property_status.name == 'Disponible' %}bg-success{% elif property.property_status.name == 'Vendida' %}bg-danger{% elif property.property_status.name == 'Alquilada' %}bg-info{% elif property.property_status.name == 'En Proceso' %}bg-warning{% else %}bg-secondary{% endif %}">
                             {{ property.property_status.name }}
                         </span>
                     </div>
                 </div>
             </div>
             <div class="col-lg-4">
-                <div class="property-header-actions">
-                    <a href="{% url 'properties:property_edit' property.pk %}" class="property-btn property-btn-warning">
+                <div class="d-flex gap-2 justify-content-lg-end">
+                    <a href="{% url 'properties:property_edit' property.pk %}" class="btn-modern btn-warning">
                         <i class="bi bi-pencil me-1"></i>Editar
                     </a>
-                    <a href="{% url 'properties:property_delete' property.pk %}" class="property-btn property-btn-outline-danger">
+                    <a href="{% url 'properties:property_delete' property.pk %}" class="btn-modern btn-outline-light">
                         <i class="bi bi-trash me-1"></i>Eliminar
                     </a>
-                    <a href="{% url 'properties:property_list' %}" class="property-btn property-btn-outline-secondary">
+                    <a href="{% url 'properties:property_list' %}" class="btn-modern btn-outline-light">
                         <i class="bi bi-arrow-left me-1"></i>Volver
                     </a>
                 </div>
@@ -50,22 +52,25 @@
         <div class="row g-4">
             <!-- Main Content Column -->
             <div class="col-lg-8">
-                <!-- Enhanced Image Gallery -->
+                <!-- Modern Image Gallery -->
                 {% if property.images.all %}
-                <div class="property-gallery-container mb-4">
-                    <div class="property-gallery-header">
-                        <h5 class="property-section-title">
-                            <i class="bi bi-images me-2"></i>Galería de Imágenes
-                        </h5>
-                        <div class="property-gallery-actions">
-                            <span class="property-badge property-badge-info">
-                                {{ property.images.count }} imagen{{ property.images.count|pluralize:"es" }}
-                            </span>
-                            <a href="{% url 'properties:add_image' property.pk %}" class="property-btn property-btn-sm property-btn-primary">
-                                <i class="bi bi-plus-circle me-1"></i>Agregar
-                            </a>
+                <div class="card-modern mb-4">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="bi bi-images me-2"></i>Galería de Imágenes
+                            </h5>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-info">
+                                    {{ property.images.count }} imagen{{ property.images.count|pluralize:"es" }}
+                                </span>
+                                <a href="{% url 'properties:add_image' property.pk %}" class="btn-modern btn-primary btn-sm">
+                                    <i class="bi bi-plus-circle me-1"></i>Agregar
+                                </a>
+                            </div>
                         </div>
                     </div>
+                    <div class="card-body p-0">
                     
                     <div class="property-gallery-main">
                         <div id="propertyCarousel" class="property-carousel" data-bs-ride="carousel">
@@ -125,75 +130,81 @@
                     </div>
                 </div>
                 {% else %}
-                <div class="property-gallery-empty mb-4">
-                    <div class="property-empty-state">
-                        <div class="property-empty-icon">
-                            <i class="bi bi-image"></i>
+                <div class="card-modern mb-4 text-center py-5">
+                    <div class="card-body">
+                        <div class="bg-light rounded-circle p-4 d-inline-flex mb-3">
+                            <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
                         </div>
-                        <h5 class="property-empty-title">Sin imágenes</h5>
-                        <p class="property-empty-description">Esta propiedad no tiene imágenes cargadas</p>
-                        <a href="{% url 'properties:add_image' property.pk %}" class="property-btn property-btn-primary">
+                        <h5 class="text-muted mb-2">Sin imágenes</h5>
+                        <p class="text-muted mb-3">Esta propiedad no tiene imágenes cargadas</p>
+                        <a href="{% url 'properties:add_image' property.pk %}" class="btn-modern btn-primary">
                             <i class="bi bi-plus-circle me-1"></i>Agregar Primera Imagen
                         </a>
                     </div>
                 </div>
                 {% endif %}
 
-                <!-- Enhanced Information Layout -->
+                <!-- Modern Information Layout -->
                 <div class="property-info-container">
                     {% if property.description %}
-                    <div class="property-info-card mb-4">
-                        <div class="property-info-header">
-                            <h5 class="property-section-title">
+                    <div class="card-modern mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
                                 <i class="bi bi-card-text me-2"></i>Descripción
                             </h5>
                         </div>
-                        <div class="property-info-content">
-                            <p class="property-description">{{ property.description|linebreaksbr }}</p>
+                        <div class="card-body">
+                            <p class="mb-0">{{ property.description|linebreaksbr }}</p>
                         </div>
                     </div>
                     {% endif %}
                     
                     <div class="property-features-grid">
                         <!-- Main Features Card -->
-                        <div class="property-info-card property-features-card">
-                            <div class="property-info-header">
-                                <h5 class="property-section-title">
+                        <div class="card-modern mb-4">
+                            <div class="card-header">
+                                <h5 class="mb-0">
                                     <i class="bi bi-house-gear me-2"></i>Características Principales
                                 </h5>
                             </div>
-                            <div class="property-info-content">
-                                <div class="property-feature-list">
+                            <div class="card-body">
+                                <div class="row g-3">
                                     {% if property.bedrooms %}
-                                    <div class="property-feature-item">
-                                        <div class="property-feature-icon property-feature-icon-primary">
-                                            <i class="bi bi-door-closed"></i>
-                                        </div>
-                                        <div class="property-feature-content">
-                                            <span class="property-feature-label">Dormitorios</span>
-                                            <span class="property-feature-value">{{ property.bedrooms }}</span>
+                                    <div class="col-md-6 col-lg-4">
+                                        <div class="d-flex align-items-center p-3 bg-light rounded">
+                                            <div class="bg-primary rounded-circle p-2 me-3">
+                                                <i class="bi bi-door-closed text-white"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">{{ property.bedrooms }}</div>
+                                                <small class="text-muted">Dormitorios</small>
+                                            </div>
                                         </div>
                                     </div>
                                     {% endif %}
                                     {% if property.bathrooms %}
-                                    <div class="property-feature-item">
-                                        <div class="property-feature-icon property-feature-icon-info">
-                                            <i class="bi bi-droplet"></i>
-                                        </div>
-                                        <div class="property-feature-content">
-                                            <span class="property-feature-label">Baños</span>
-                                            <span class="property-feature-value">{{ property.bathrooms }}</span>
+                                    <div class="col-md-6 col-lg-4">
+                                        <div class="d-flex align-items-center p-3 bg-light rounded">
+                                            <div class="bg-info rounded-circle p-2 me-3">
+                                                <i class="bi bi-droplet text-white"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">{{ property.bathrooms }}</div>
+                                                <small class="text-muted">Baños</small>
+                                            </div>
                                         </div>
                                     </div>
                                     {% endif %}
                                     {% if property.total_surface %}
-                                    <div class="property-feature-item">
-                                        <div class="property-feature-icon property-feature-icon-warning">
-                                            <i class="bi bi-rulers"></i>
-                                        </div>
-                                        <div class="property-feature-content">
-                                            <span class="property-feature-label">Superficie Total</span>
-                                            <span class="property-feature-value">{{ property.total_surface }} m²</span>
+                                    <div class="col-md-6 col-lg-4">
+                                        <div class="d-flex align-items-center p-3 bg-light rounded">
+                                            <div class="bg-warning rounded-circle p-2 me-3">
+                                                <i class="bi bi-rulers text-white"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">{{ property.total_surface }} m²</div>
+                                                <small class="text-muted">Superficie Total</small>
+                                            </div>
                                         </div>
                                     </div>
                                     {% endif %}

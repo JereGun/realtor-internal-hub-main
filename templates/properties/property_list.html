@@ -6,57 +6,60 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/property-styles.css' %}">
+<link rel="stylesheet" href="{% static 'css/property-form.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid mt-4">
-    <!-- Encabezado -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 text-dark mb-1">
-                <i class="bi bi-house-door me-2 text-primary"></i>Gestión de Propiedades
-            </h1>
-            <p class="text-muted mb-0">Administre todas las propiedades inmobiliarias</p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{% url 'properties:property_create' %}" class="btn btn-primary">
-                <i class="bi bi-plus-circle me-1"></i>Nueva Propiedad
-            </a>
-            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" 
-                    data-bs-target="#filtersCard" aria-expanded="false">
-                <i class="bi bi-funnel me-1"></i>Filtros
-            </button>
+    <!-- Modern Page Header -->
+    <div class="page-header mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h2 mb-2 text-white fw-bold">
+                    <i class="bi bi-house-door me-2"></i>Gestión de Propiedades
+                </h1>
+                <p class="mb-0 opacity-90">Administre todas las propiedades inmobiliarias</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'properties:property_create' %}" class="btn-modern btn-success">
+                    <i class="bi bi-plus-circle me-1"></i>Nueva Propiedad
+                </a>
+                <button class="btn-modern btn-outline-light" type="button" data-bs-toggle="collapse" 
+                        data-bs-target="#filtersCard" aria-expanded="false">
+                    <i class="bi bi-funnel me-1"></i>Filtros
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- Filtros -->
     <div class="collapse mb-4" id="filtersCard">
-        <div class="property-filters-card">
-            <div class="property-filters-header">
-                <h5 class="property-filters-title">
-                    <i class="bi bi-funnel property-filters-icon"></i>Filtros de Búsqueda
+        <div class="card-modern">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-funnel me-2 text-primary"></i>Filtros de Búsqueda
                 </h5>
             </div>
-            <div class="property-filters-body">
+            <div class="card-body">
                 <form method="get" id="filterForm" class="needs-validation" novalidate>
                     <!-- Filtros Básicos -->
                     <div class="row g-3 mb-4">
                         <div class="col-md-4">
-                            <div class="property-filter-group">
-                                <label for="searchQuery" class="property-filter-label">
-                                    <i class="bi bi-search"></i>Búsqueda General
+                            <div class="form-group">
+                                <label for="searchQuery" class="form-label">
+                                    <i class="bi bi-search me-1"></i>Búsqueda General
                                 </label>
-                                <input type="text" name="search" id="searchQuery" class="property-filter-control" 
+                                <input type="text" name="search" id="searchQuery" class="form-control-modern" 
                                        placeholder="Buscar por título, dirección o descripción..." 
                                        value="{{ request.GET.search|default:'' }}">
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="property-filter-group">
-                                <label for="typeFilter" class="property-filter-label">
-                                    <i class="bi bi-house-door"></i>Tipo de Propiedad
+                            <div class="form-group">
+                                <label for="typeFilter" class="form-label">
+                                    <i class="bi bi-house-door me-1"></i>Tipo de Propiedad
                                 </label>
-                                <select name="property_type" id="typeFilter" class="property-filter-control">
+                                <select name="property_type" id="typeFilter" class="form-control-modern form-select-modern">
                                     <option value="">Todos los tipos</option>
                                     {% for type in property_types %}
                                         <option value="{{ type.id }}" {% if request.GET.property_type == type.id|stringformat:"s" %}selected{% endif %}>
@@ -67,11 +70,11 @@
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <div class="property-filter-group">
-                                <label for="statusFilter" class="property-filter-label">
-                                    <i class="bi bi-flag"></i>Estado
+                            <div class="form-group">
+                                <label for="statusFilter" class="form-label">
+                                    <i class="bi bi-flag me-1"></i>Estado
                                 </label>
-                                <select name="property_status" id="statusFilter" class="property-filter-control">
+                                <select name="property_status" id="statusFilter" class="form-control-modern form-select-modern">
                                     <option value="">Todos los estados</option>
                                     {% for status in property_statuses %}
                                         <option value="{{ status.id }}" {% if request.GET.property_status == status.id|stringformat:"s" %}selected{% endif %}>
@@ -82,11 +85,11 @@
                             </div>
                         </div>
                         <div class="col-md-2">
-                            <div class="property-filter-group">
-                                <label for="sortFilter" class="property-filter-label">
-                                    <i class="bi bi-sort-down"></i>Ordenar por
+                            <div class="form-group">
+                                <label for="sortFilter" class="form-label">
+                                    <i class="bi bi-sort-down me-1"></i>Ordenar por
                                 </label>
-                                <select name="sort" id="sortFilter" class="property-filter-control">
+                                <select name="sort" id="sortFilter" class="form-control-modern form-select-modern">
                                     <option value="-created_at" {% if request.GET.sort == '-created_at' or not request.GET.sort %}selected{% endif %}>Más recientes</option>
                                     <option value="created_at" {% if request.GET.sort == 'created_at' %}selected{% endif %}>Más antiguos</option>
                                     <option value="title" {% if request.GET.sort == 'title' %}selected{% endif %}>Título (A-Z)</option>
@@ -254,17 +257,17 @@
                     </div>
 
                     <!-- Botones de Acción -->
-                    <div class="property-filter-actions">
-                        <div class="property-filter-info">
-                            <i class="bi bi-info-circle"></i>
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <div class="text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
                             Use los filtros para encontrar propiedades específicas
                         </div>
-                        <div class="property-filter-buttons">
-                            <a href="{% url 'properties:property_list' %}" class="property-btn property-btn-outline-primary">
-                                <i class="bi bi-arrow-clockwise"></i>Limpiar
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'properties:property_list' %}" class="btn-modern btn-outline-secondary">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Limpiar
                             </a>
-                            <button type="submit" class="property-btn property-btn-primary">
-                                <i class="bi bi-search"></i>Buscar
+                            <button type="submit" class="btn-modern btn-primary">
+                                <i class="bi bi-search me-1"></i>Buscar
                             </button>
                         </div>
                     </div>
@@ -274,38 +277,62 @@
     </div>
 
     <!-- Estadísticas Rápidas -->
-    <div class="property-stats-grid">
-        <div class="property-stat-card property-stat-card-primary">
-            <i class="bi bi-house property-stat-icon"></i>
-            <div class="property-stat-number" data-count="{{ total_properties_count|default:0 }}">{{ total_properties_count|default:0 }}</div>
-            <p class="property-stat-label">Total Propiedades</p>
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card-modern text-center">
+                <div class="card-body">
+                    <div class="bg-primary rounded-circle p-3 d-inline-flex mb-3">
+                        <i class="bi bi-house text-white fs-4"></i>
+                    </div>
+                    <div class="h3 fw-bold text-primary mb-1" data-count="{{ total_properties_count|default:0 }}">{{ total_properties_count|default:0 }}</div>
+                    <p class="text-muted mb-0">Total Propiedades</p>
+                </div>
+            </div>
         </div>
-        <div class="property-stat-card property-stat-card-success">
-            <i class="bi bi-check-circle property-stat-icon"></i>
-            <div class="property-stat-number" data-count="{{ available_properties_count|default:0 }}">{{ available_properties_count|default:0 }}</div>
-            <p class="property-stat-label">Disponibles</p>
+        <div class="col-md-3">
+            <div class="card-modern text-center">
+                <div class="card-body">
+                    <div class="bg-success rounded-circle p-3 d-inline-flex mb-3">
+                        <i class="bi bi-check-circle text-white fs-4"></i>
+                    </div>
+                    <div class="h3 fw-bold text-success mb-1" data-count="{{ available_properties_count|default:0 }}">{{ available_properties_count|default:0 }}</div>
+                    <p class="text-muted mb-0">Disponibles</p>
+                </div>
+            </div>
         </div>
-        <div class="property-stat-card property-stat-card-warning">
-            <i class="bi bi-eye property-stat-icon"></i>
-            <div class="property-stat-number" data-count="{{ featured_properties_count|default:0 }}">{{ featured_properties_count|default:0 }}</div>
-            <p class="property-stat-label">Destacadas</p>
+        <div class="col-md-3">
+            <div class="card-modern text-center">
+                <div class="card-body">
+                    <div class="bg-warning rounded-circle p-3 d-inline-flex mb-3">
+                        <i class="bi bi-eye text-white fs-4"></i>
+                    </div>
+                    <div class="h3 fw-bold text-warning mb-1" data-count="{{ featured_properties_count|default:0 }}">{{ featured_properties_count|default:0 }}</div>
+                    <p class="text-muted mb-0">Destacadas</p>
+                </div>
+            </div>
         </div>
-        <div class="property-stat-card property-stat-card-info">
-            <i class="bi bi-house-heart property-stat-icon"></i>
-            <div class="property-stat-number" data-count="{{ rented_properties_count|default:0 }}">{{ rented_properties_count|default:0 }}</div>
-            <p class="property-stat-label">Alquiladas</p>
+        <div class="col-md-3">
+            <div class="card-modern text-center">
+                <div class="card-body">
+                    <div class="bg-info rounded-circle p-3 d-inline-flex mb-3">
+                        <i class="bi bi-house-heart text-white fs-4"></i>
+                    </div>
+                    <div class="h3 fw-bold text-info mb-1" data-count="{{ rented_properties_count|default:0 }}">{{ rented_properties_count|default:0 }}</div>
+                    <p class="text-muted mb-0">Alquiladas</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Tabla de propiedades -->
     {% if properties %}
-    <div class="property-table-container">
-        <div class="property-table-header">
+    <div class="card-modern">
+        <div class="card-header">
             <div class="d-flex justify-content-between align-items-center">
-                <h5 class="property-table-title">
-                    <i class="bi bi-table"></i>Lista de Propiedades
+                <h5 class="mb-0">
+                    <i class="bi bi-table me-2"></i>Lista de Propiedades
                 </h5>
-                <div class="property-table-meta">
+                <div class="text-muted">
                     <small>
                         Mostrando {{ properties|length }} propiedades
                     </small>
@@ -313,7 +340,7 @@
             </div>
         </div>
         <div class="table-responsive">
-            <table class="property-table">
+            <table class="table table-hover mb-0">
                 <thead>
                     <tr>
                         <th scope="col">
@@ -439,18 +466,18 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="property-table-actions">
-                            <div class="property-table-action-group">
+                        <td class="text-center">
+                            <div class="btn-group" role="group">
                                 <a href="{% url 'properties:property_detail' property.pk %}" 
-                                   class="property-table-action property-table-action-view">
+                                   class="btn-modern btn-outline-primary btn-sm">
                                     <i class="bi bi-eye"></i>
                                 </a>
                                 <a href="{% url 'properties:property_edit' property.pk %}" 
-                                   class="property-table-action property-table-action-edit">
+                                   class="btn-modern btn-outline-secondary btn-sm">
                                     <i class="bi bi-pencil"></i>
                                 </a>
                                 <a href="{% url 'properties:property_delete' property.pk %}" 
-                                   class="property-table-action property-table-action-delete">
+                                   class="btn-modern btn-outline-danger btn-sm">
                                     <i class="bi bi-trash"></i>
                                 </a>
                             </div>
@@ -518,27 +545,29 @@
         {% endif %}
     </div>
     {% else %}
-    <div class="property-search-state">
-        <div class="property-search-state-icon">
-            <i class="bi bi-search"></i>
-        </div>
-        <h3 class="property-search-state-title">No se encontraron propiedades</h3>
-        <p class="property-search-state-message">
+    <div class="card-modern text-center py-5">
+        <div class="card-body">
+            <div class="bg-light rounded-circle p-4 d-inline-flex mb-4">
+                <i class="bi bi-search text-muted" style="font-size: 3rem;"></i>
+            </div>
+            <h3 class="text-muted mb-3">No se encontraron propiedades</h3>
+            <p class="text-muted mb-4">
+                {% if request.GET %}
+                    No hay propiedades que coincidan con los filtros aplicados. Intente modificar los criterios de búsqueda.
+                {% else %}
+                    No hay propiedades registradas en el sistema.
+                {% endif %}
+            </p>
             {% if request.GET %}
-                No hay propiedades que coincidan con los filtros aplicados. Intente modificar los criterios de búsqueda.
+                <a href="{% url 'properties:property_list' %}" class="btn-modern btn-outline-primary">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Limpiar Filtros
+                </a>
             {% else %}
-                No hay propiedades registradas en el sistema.
+                <a href="{% url 'properties:property_create' %}" class="btn-modern btn-primary btn-lg">
+                    <i class="bi bi-plus-circle me-1"></i>Crear Primera Propiedad
+                </a>
             {% endif %}
-        </p>
-        {% if request.GET %}
-            <a href="{% url 'properties:property_list' %}" class="property-btn property-btn-outline-primary">
-                <i class="bi bi-arrow-clockwise"></i>Limpiar Filtros
-            </a>
-        {% else %}
-            <a href="{% url 'properties:property_create' %}" class="property-btn property-btn-primary property-btn-lg">
-                <i class="bi bi-plus-circle"></i>Crear Primera Propiedad
-            </a>
-        {% endif %}
+        </div>
     </div>
     {% endif %}
 </div>

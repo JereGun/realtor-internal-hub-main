@@ -8,38 +8,42 @@
 
 {% block content %}
 <div class="container-fluid mt-4">
+    <!-- Breadcrumbs -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb breadcrumb-modern">
+            <li class="breadcrumb-item">
+                <a href="{% url 'accounting:accounting_dashboard' %}" class="text-decoration-none">
+                    <i class="bi bi-calculator me-1"></i>Contabilidad
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Comprobantes de Propietarios</li>
+        </ol>
+    </nav>
+
     <!-- Encabezado -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-2">
-                    <li class="breadcrumb-item">
-                        <a href="{% url 'accounting:accounting_dashboard' %}" class="text-decoration-none">
-                            <i class="bi bi-house-door me-1"></i>Accounting
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item active" aria-current="page">Comprobantes de Propietarios</li>
-                </ol>
-            </nav>
-            <h1 class="h3 text-dark mb-1">
-                <i class="bi bi-file-earmark-check me-2 text-primary"></i>Comprobantes de Propietarios
-            </h1>
-            <p class="text-muted mb-0">Gestione los comprobantes enviados a propietarios</p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{% url 'accounting:invoice_list' %}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i>Volver a Facturas
-            </a>
-            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" 
-                    data-bs-target="#filtersCard" aria-expanded="false">
-                <i class="bi bi-funnel me-1"></i>Filtros
-            </button>
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h2 mb-2">
+                    <i class="bi bi-file-earmark-check me-3"></i>Comprobantes de Propietarios
+                </h1>
+                <p class="mb-0 opacity-90">Gestione los comprobantes enviados a propietarios</p>
+            </div>
+            <div class="d-flex gap-3">
+                <a href="{% url 'accounting:invoice_list' %}" class="btn btn-outline-light btn-modern">
+                    <i class="bi bi-arrow-left me-2"></i>Volver a Facturas
+                </a>
+                <button class="btn btn-outline-light btn-modern" type="button" data-bs-toggle="collapse" 
+                        data-bs-target="#filtersCard" aria-expanded="false">
+                    <i class="bi bi-funnel me-2"></i>Filtros
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- Filtros -->
     <div class="collapse mb-4" id="filtersCard">
-        <div class="card shadow-sm border-light">
+        <div class="card card-modern">
             <div class="card-header bg-light border-bottom">
                 <h5 class="mb-0 text-dark fw-bold">
                     <i class="bi bi-funnel me-2"></i>Filtros de Búsqueda
@@ -52,7 +56,7 @@
                             <label for="searchQuery" class="form-label fw-semibold">
                                 <i class="bi bi-search me-1"></i>Búsqueda General
                             </label>
-                            <input type="text" name="q" id="searchQuery" class="form-control" 
+                            <input type="text" name="q" id="searchQuery" class="form-control form-control-modern" 
                                    placeholder="Buscar por número de comprobante, propietario o propiedad..." 
                                    value="{{ query|default:'' }}">
                         </div>
@@ -60,7 +64,7 @@
                             <label for="statusFilter" class="form-label fw-semibold">
                                 <i class="bi bi-flag me-1"></i>Estado
                             </label>
-                            <select name="status" id="statusFilter" class="form-select">
+                            <select name="status" id="statusFilter" class="form-select form-control-modern">
                                 <option value="">Todos los estados</option>
                                 <option value="generated" {% if status == 'generated' %}selected{% endif %}>Generado</option>
                                 <option value="sent" {% if status == 'sent' %}selected{% endif %}>Enviado</option>
@@ -71,7 +75,7 @@
                             <label for="ownerFilter" class="form-label fw-semibold">
                                 <i class="bi bi-person me-1"></i>Propietario
                             </label>
-                            <select name="owner" id="ownerFilter" class="form-select">
+                            <select name="owner" id="ownerFilter" class="form-select form-control-modern">
                                 <option value="">Todos los propietarios</option>
                                 {% for owner in owners %}
                                     <option value="{{ owner.id }}" {% if owner_id|stringformat:"s" == owner.id|stringformat:"s" %}selected{% endif %}>
@@ -90,11 +94,11 @@
                             </label>
                             <div class="row g-2">
                                 <div class="col-6">
-                                    <input type="date" name="date_from" class="form-control" 
+                                    <input type="date" name="date_from" class="form-control form-control-modern" 
                                            value="{{ date_from|default:'' }}" placeholder="Desde">
                                 </div>
                                 <div class="col-6">
-                                    <input type="date" name="date_to" class="form-control" 
+                                    <input type="date" name="date_to" class="form-control form-control-modern" 
                                            value="{{ date_to|default:'' }}" placeholder="Hasta">
                                 </div>
                             </div>
@@ -108,10 +112,10 @@
                             Use los filtros para encontrar comprobantes específicos
                         </div>
                         <div class="btn-group" role="group">
-                            <a href="{% url 'accounting:owner_receipts_list' %}" class="btn btn-outline-secondary">
+                            <a href="{% url 'accounting:owner_receipts_list' %}" class="btn btn-outline-secondary btn-modern">
                                 <i class="bi bi-arrow-clockwise me-1"></i>Limpiar
                             </a>
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary btn-modern">
                                 <i class="bi bi-search me-1"></i>Buscar
                             </button>
                         </div>
@@ -122,47 +126,47 @@
     </div>
 
     <!-- Estadísticas Rápidas -->
-    <div class="row g-3 mb-4">
+    <div class="row g-4 mb-4">
         <div class="col-md-3">
-            <div class="card border-0 bg-primary text-white">
-                <div class="card-body text-center">
-                    <i class="bi bi-file-earmark-check fs-1 mb-2"></i>
-                    <h5 class="card-title">{{ total_receipts }}</h5>
-                    <p class="card-text mb-0">Total Comprobantes</p>
+            <div class="card card-modern border-0 bg-primary text-white stat-card">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-file-earmark-check fs-1 mb-3 opacity-75"></i>
+                    <h4 class="card-title mb-1">{{ total_receipts }}</h4>
+                    <p class="card-text mb-0 opacity-90">Total Comprobantes</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card border-0 bg-success text-white">
-                <div class="card-body text-center">
-                    <i class="bi bi-check-circle fs-1 mb-2"></i>
-                    <h5 class="card-title">{{ sent_receipts }}</h5>
-                    <p class="card-text mb-0">Enviados</p>
+            <div class="card card-modern border-0 bg-success text-white stat-card">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-check-circle fs-1 mb-3 opacity-75"></i>
+                    <h4 class="card-title mb-1">{{ sent_receipts }}</h4>
+                    <p class="card-text mb-0 opacity-90">Enviados</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card border-0 bg-warning text-white">
-                <div class="card-body text-center">
-                    <i class="bi bi-clock fs-1 mb-2"></i>
-                    <h5 class="card-title">{{ generated_receipts }}</h5>
-                    <p class="card-text mb-0">Generados</p>
+            <div class="card card-modern border-0 bg-warning text-white stat-card">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-clock fs-1 mb-3 opacity-75"></i>
+                    <h4 class="card-title mb-1">{{ generated_receipts }}</h4>
+                    <p class="card-text mb-0 opacity-90">Generados</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card border-0 bg-danger text-white">
-                <div class="card-body text-center">
-                    <i class="bi bi-exclamation-triangle fs-1 mb-2"></i>
-                    <h5 class="card-title">{{ failed_receipts }}</h5>
-                    <p class="card-text mb-0">Con Error</p>
+            <div class="card card-modern border-0 bg-danger text-white stat-card">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-exclamation-triangle fs-1 mb-3 opacity-75"></i>
+                    <h4 class="card-title mb-1">{{ failed_receipts }}</h4>
+                    <p class="card-text mb-0 opacity-90">Con Error</p>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Tabla de comprobantes -->
-    <div class="card shadow-sm border-light">
+    <div class="card card-modern">
         <div class="card-header bg-light border-bottom py-3">
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="mb-0 text-dark fw-bold">
@@ -261,7 +265,7 @@
                                 </div>
                             </td>
                             <td>
-                                <span class="badge 
+                                <span class="badge rounded-pill
                                     {% if receipt.status == 'sent' %}bg-success
                                     {% elif receipt.status == 'generated' %}bg-warning text-dark
                                     {% elif receipt.status == 'failed' %}bg-danger
@@ -290,11 +294,11 @@
                             <td class="text-center pe-4">
                                 <div class="btn-group" role="group">
                                     <a href="{% url 'accounting:owner_receipt_detail' receipt.pk %}" 
-                                       class="btn btn-sm btn-outline-primary" title="Ver detalle">
+                                       class="btn btn-sm btn-outline-primary btn-modern" title="Ver detalle">
                                         <i class="bi bi-eye"></i>
                                     </a>
                                     {% if receipt.can_resend %}
-                                    <button type="button" class="btn btn-sm btn-outline-info" 
+                                    <button type="button" class="btn btn-sm btn-outline-info btn-modern" 
                                             data-action="resend" 
                                             data-receipt-id="{{ receipt.pk }}"
                                             title="Reenviar por correo"
@@ -303,7 +307,7 @@
                                     </button>
                                     {% endif %}
                                     <a href="{% url 'accounting:owner_receipt_pdf' receipt.pk %}" 
-                                       class="btn btn-sm btn-outline-success" title="Descargar PDF">
+                                       class="btn btn-sm btn-outline-success btn-modern" title="Descargar PDF">
                                         <i class="bi bi-file-earmark-pdf"></i>
                                     </a>
                                 </div>

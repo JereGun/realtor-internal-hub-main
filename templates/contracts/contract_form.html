@@ -1,237 +1,263 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
+{% load widget_tweaks %}
 
 {% block page_title %}
-    {% if form.instance.pk %}Editar Contrato #{{ form.instance.pk }}{% else %}Nuevo Contrato{% endif %}
+{% if form.instance.pk %}Editar Contrato #{{ form.instance.pk }}{% else %}Nuevo Contrato{% endif %}
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid mt-4">
     <div class="row justify-content-center">
         <div class="col-lg-10 col-xl-8">
-            <!-- Encabezado -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h1 class="h3 text-dark mb-1">
-                        {% if form.instance.pk %}
-                            <i class="bi bi-pencil-square me-2 text-primary"></i>Editar Contrato
-                        {% else %}
-                            <i class="bi bi-file-earmark-plus me-2 text-primary"></i>Nuevo Contrato
-                        {% endif %}
-                    </h1>
-                    <p class="text-muted mb-0">
-                        {% if form.instance.pk %}
+            <!-- Encabezado Moderno -->
+            <div class="page-header mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="h2 mb-2 fw-bold">
+                            {% if form.instance.pk %}
+                            <i class="bi bi-pencil-square me-3"></i>Editar Contrato
+                            {% else %}
+                            <i class="bi bi-file-earmark-plus me-3"></i>Nuevo Contrato
+                            {% endif %}
+                        </h1>
+                        <p class="mb-0 opacity-90">
+                            {% if form.instance.pk %}
                             Actualice la información del contrato #{{ form.instance.pk }}
-                        {% else %}
+                            {% else %}
                             Complete la información del nuevo contrato inmobiliario
-                        {% endif %}
-                    </p>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <a href="{% if form.instance.pk %}{% url 'contracts:contract_detail' form.instance.pk %}{% else %}{% url 'contracts:contract_list' %}{% endif %}"
+                        class="btn btn-modern btn-outline-light btn-lg">
+                        <i class="bi bi-arrow-left me-2"></i>
+                        {% if form.instance.pk %}Cancelar{% else %}Volver{% endif %}
+                    </a>
                 </div>
-                <a href="{% if form.instance.pk %}{% url 'contracts:contract_detail' form.instance.pk %}{% else %}{% url 'contracts:contract_list' %}{% endif %}" 
-                   class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left me-1"></i>
-                    {% if form.instance.pk %}Cancelar Cambios{% else %}Volver al listado{% endif %}
-                </a>
             </div>
 
-            <div class="card shadow-sm border-light">
-                <div class="card-body p-4">
+            <div class="card-modern">
+                <div class="card-body p-5">
                     <form method="post" novalidate id="contractForm">
                         {% csrf_token %}
-                        
+
                         {% if form.errors %}
-                            <div class="alert alert-danger border-danger">
-                                <div class="d-flex align-items-center mb-2">
-                                    <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
-                                    <strong>Errores en el formulario:</strong>
-                                </div>
-                                <ul class="mb-0">
-                                    {% for field, errors in form.errors.items %}
-                                        {% for error in errors %}
-                                            <li>{{ field }}: {{ error }}</li>
-                                        {% endfor %}
-                                    {% endfor %}
-                                </ul>
+                        <div class="alert-modern alert-modern-danger mb-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                <strong>Errores en el formulario:</strong>
                             </div>
+                            <ul class="mb-0">
+                                {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                <li>{{ field }}: {{ error }}</li>
+                                {% endfor %}
+                                {% endfor %}
+                            </ul>
+                        </div>
                         {% endif %}
 
                         <!-- Información Básica -->
-                        <div class="row mb-5">
-                            <div class="col-12">
-                                <div class="d-flex align-items-center mb-4">
-                                    <div class="bg-primary rounded-circle p-2 me-3">
-                                        <i class="bi bi-info-circle text-white"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-primary mb-1 fw-bold">Información Básica</h4>
-                                        <p class="text-muted small mb-0">Datos principales del contrato</p>
-                                    </div>
+                        <div class="form-section mb-5">
+                            <div class="form-section-header">
+                                <div class="form-section-icon form-section-icon-primary">
+                                    <i class="bi bi-info-circle"></i>
+                                </div>
+                                <div class="form-section-content">
+                                    <h4 class="form-section-title">Información Básica</h4>
+                                    <p class="form-section-description">Datos principales del contrato</p>
                                 </div>
                             </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.property.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="bi bi-house text-primary me-1"></i>{{ form.property.label }}
-                                </label>
-                                {{ form.property }}
-                                {% if form.property.errors %}
-                                    <div class="text-danger small mt-1">{{ form.property.errors }}</div>
-                                {% endif %}
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.customer_search.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="bi bi-person text-success me-1"></i>{{ form.customer_search.label }}
-                                </label>
-                                <div class="position-relative">
-                                    <div class="input-group">
-                                        {{ form.customer_search }}
-                                        <button type="button" class="btn btn-outline-success" id="btn-create-customer" title="Crear nuevo cliente">
-                                            <i class="bi bi-person-plus"></i>
-                                        </button>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label for="{{ form.property.id_for_label }}" class="form-label-modern">
+                                        <i class="bi bi-house text-primary me-2"></i>{{ form.property.label }}
+                                    </label>
+                                    <div class="form-control-wrapper">
+                                        {{ form.property|add_class:"form-select-modern" }}
                                     </div>
-                                    {{ form.customer }}
-                                    <div id="customer-search-results" class="dropdown-menu w-100" style="display: none;"></div>
-                                    <div id="selected-customer-info" class="mt-2" style="display: none;">
-                                        <div class="alert alert-success py-2">
-                                            <i class="bi bi-check-circle me-1"></i>
-                                            <span id="selected-customer-text"></span>
-                                            <button type="button" class="btn btn-sm btn-outline-success ms-2" id="btn-clear-customer">
-                                                <i class="bi bi-x"></i> Cambiar
+                                    {% if form.property.errors %}
+                                    <div class="form-error">{{ form.property.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6 mb-4">
+                                    <label for="{{ form.customer_search.id_for_label }}" class="form-label-modern">
+                                        <i class="bi bi-person text-success me-2"></i>{{ form.customer_search.label }}
+                                    </label>
+                                    <div class="position-relative">
+                                        <div class="input-group">
+                                            {{ form.customer_search|add_class:"form-control-modern" }}
+                                            <button type="button" class="btn btn-modern btn-outline-success"
+                                                id="btn-create-customer" title="Crear nuevo cliente">
+                                                <i class="bi bi-person-plus"></i>
                                             </button>
                                         </div>
+                                        {{ form.customer }}
+                                        <div id="customer-search-results" class="dropdown-menu w-100"
+                                            style="display: none;"></div>
+                                        <div id="selected-customer-info" class="mt-3" style="display: none;">
+                                            <div class="alert-modern alert-modern-success">
+                                                <i class="bi bi-check-circle me-2"></i>
+                                                <span id="selected-customer-text"></span>
+                                                <button type="button"
+                                                    class="btn btn-modern btn-sm btn-outline-success ms-2"
+                                                    id="btn-clear-customer">
+                                                    <i class="bi bi-x"></i> Cambiar
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
+                                    {% if form.customer.errors %}
+                                    <div class="form-error">{{ form.customer.errors }}</div>
+                                    {% endif %}
+                                    {% if form.customer_search.errors %}
+                                    <div class="form-error">{{ form.customer_search.errors }}</div>
+                                    {% endif %}
                                 </div>
-                                {% if form.customer.errors %}
-                                    <div class="text-danger small mt-1">{{ form.customer.errors }}</div>
-                                {% endif %}
-                                {% if form.customer_search.errors %}
-                                    <div class="text-danger small mt-1">{{ form.customer_search.errors }}</div>
-                                {% endif %}
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.agent.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="bi bi-person-badge text-info me-1"></i>{{ form.agent.label }}
-                                </label>
-                                {{ form.agent }}
-                                {% if form.agent.errors %}
-                                    <div class="text-danger small mt-1">{{ form.agent.errors }}</div>
-                                {% endif %}
-                                {% if not form.instance.pk %}
-                                <div class="form-text">
-                                    <i class="bi bi-info-circle me-1"></i>
-                                    Por defecto eres tú como agente, pero puedes cambiarlo si es necesario.
+
+                                <div class="col-md-6 mb-4">
+                                    <label for="{{ form.agent.id_for_label }}" class="form-label-modern">
+                                        <i class="bi bi-person-badge text-info me-2"></i>{{ form.agent.label }}
+                                    </label>
+                                    <div class="form-control-wrapper">
+                                        {{ form.agent|add_class:"form-select-modern" }}
+                                    </div>
+                                    {% if form.agent.errors %}
+                                    <div class="form-error">{{ form.agent.errors }}</div>
+                                    {% endif %}
+                                    {% if not form.instance.pk %}
+                                    <div class="form-help">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        Por defecto eres tú como agente, pero puedes cambiarlo si es necesario.
+                                    </div>
+                                    {% endif %}
                                 </div>
-                                {% endif %}
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.status.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="bi bi-flag text-warning me-1"></i>{{ form.status.label }}
-                                </label>
-                                {{ form.status }}
-                                {% if form.status.errors %}
-                                    <div class="text-danger small mt-1">{{ form.status.errors }}</div>
-                                {% endif %}
+
+                                <div class="col-md-6 mb-4">
+                                    <label for="{{ form.status.id_for_label }}" class="form-label-modern">
+                                        <i class="bi bi-flag text-warning me-2"></i>{{ form.status.label }}
+                                    </label>
+                                    <div class="form-control-wrapper">
+                                        {{ form.status|add_class:"form-select-modern" }}
+                                    </div>
+                                    {% if form.status.errors %}
+                                    <div class="form-error">{{ form.status.errors }}</div>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
 
                         <!-- Información Temporal y Financiera -->
-                        <div class="row mb-5">
-                            <div class="col-12">
-                                <div class="d-flex align-items-center mb-4">
-                                    <div class="bg-success rounded-circle p-2 me-3">
-                                        <i class="bi bi-calendar-dollar text-white"></i>
+                        <div class="form-section mb-5">
+                            <div class="form-section-header">
+                                <div class="form-section-icon form-section-icon-success">
+                                    <i class="bi bi-calendar-dollar"></i>
+                                </div>
+                                <div class="form-section-content">
+                                    <h4 class="form-section-title">Fechas y Montos</h4>
+                                    <p class="form-section-description">Información temporal y financiera</p>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label for="{{ form.start_date.id_for_label }}" class="form-label-modern">
+                                        <i class="bi bi-calendar-check text-success me-2"></i>{{ form.start_date.label
+                                        }}
+                                    </label>
+                                    <div class="form-control-wrapper">
+                                        {{ form.start_date|add_class:"form-control-modern" }}
                                     </div>
-                                    <div>
-                                        <h4 class="text-success mb-1 fw-bold">Fechas y Montos</h4>
-                                        <p class="text-muted small mb-0">Información temporal y financiera</p>
+                                    {% if form.start_date.errors %}
+                                    <div class="form-error">{{ form.start_date.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6 mb-4">
+                                    <label for="{{ form.end_date.id_for_label }}" class="form-label-modern">
+                                        <i class="bi bi-calendar-x text-danger me-2"></i>{{ form.end_date.label }}
+                                    </label>
+                                    <div class="form-control-wrapper">
+                                        {{ form.end_date|add_class:"form-control-modern" }}
+                                    </div>
+                                    {% if form.end_date.errors %}
+                                    <div class="form-error">{{ form.end_date.errors }}</div>
+                                    {% endif %}
+                                    <div class="form-help">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        Deje vacío para un contrato sin fecha de finalización
                                     </div>
                                 </div>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.start_date.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="bi bi-calendar-check text-success me-1"></i>{{ form.start_date.label }}
-                                </label>
-                                {{ form.start_date }}
-                                {% if form.start_date.errors %}
-                                    <div class="text-danger small mt-1">{{ form.start_date.errors }}</div>
-                                {% endif %}
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.end_date.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="bi bi-calendar-x text-danger me-1"></i>{{ form.end_date.label }}
-                                </label>
-                                {{ form.end_date }}
-                                {% if form.end_date.errors %}
-                                    <div class="text-danger small mt-1">{{ form.end_date.errors }}</div>
-                                {% endif %}
-                                <div class="form-text">
-                                    <i class="bi bi-info-circle me-1"></i>
-                                    Deje vacío para un contrato sin fecha de finalización
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-8 mb-3">
-                                <label for="{{ form.amount.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="bi bi-currency-dollar text-warning me-1"></i>{{ form.amount.label }}
-                                </label>
-                                <div class="input-group">
-                                    <span class="input-group-text">$</span>
-                                    {{ form.amount }}
-                                </div>
-                                {% if form.amount.errors %}
-                                    <div class="text-danger small mt-1">{{ form.amount.errors }}</div>
-                                {% endif %}
-                            </div>
-                            
-                            <div class="col-md-4 mb-3">
-                                <label for="{{ form.currency.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="bi bi-cash text-info me-1"></i>{{ form.currency.label }}
-                                </label>
-                                {{ form.currency }}
-                                {% if form.currency.errors %}
-                                    <div class="text-danger small mt-1">{{ form.currency.errors }}</div>
-                                {% endif %}
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.owner_discount_percentage.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="bi bi-percent text-danger me-1"></i>{{ form.owner_discount_percentage.label }}
-                                </label>
-                                <div class="input-group">
-                                    {{ form.owner_discount_percentage }}
-                                    <span class="input-group-text">%</span>
-                                </div>
-                                {% if form.owner_discount_percentage.errors %}
-                                    <div class="text-danger small mt-1">{{ form.owner_discount_percentage.errors }}</div>
-                                {% endif %}
-                                <div class="form-text">
-                                    <i class="bi bi-info-circle me-1"></i>
-                                    Porcentaje de descuento que se aplicará al propietario (0-100%)
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <div class="row">
-                                    <div class="col-12 mb-2">
-                                        <label class="form-label fw-semibold text-muted">
-                                            <i class="bi bi-calculator text-secondary me-1"></i>Cálculos Automáticos
-                                        </label>
+
+                                <div class="col-md-8 mb-4">
+                                    <label for="{{ form.amount.id_for_label }}" class="form-label-modern">
+                                        <i class="bi bi-currency-dollar text-warning me-2"></i>{{ form.amount.label }}
+                                    </label>
+                                    <div class="input-group-modern">
+                                        <span class="input-group-text-modern">$</span>
+                                        {{ form.amount|add_class:"form-control-modern" }}
                                     </div>
-                                    <div class="col-12 mb-2">
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-light">Descuento $</span>
-                                            <input type="text" class="form-control bg-light" id="calculated_discount_amount" readonly>
+                                    {% if form.amount.errors %}
+                                    <div class="form-error">{{ form.amount.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-4 mb-4">
+                                    <label for="{{ form.currency.id_for_label }}" class="form-label-modern">
+                                        <i class="bi bi-cash text-info me-2"></i>{{ form.currency.label }}
+                                    </label>
+                                    <div class="form-control-wrapper">
+                                        {{ form.currency|add_class:"form-select-modern" }}
+                                    </div>
+                                    {% if form.currency.errors %}
+                                    <div class="form-error">{{ form.currency.errors }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.owner_discount_percentage.id_for_label }}"
+                                        class="form-label fw-semibold">
+                                        <i class="bi bi-percent text-danger me-1"></i>{{
+                                        form.owner_discount_percentage.label }}
+                                    </label>
+                                    <div class="input-group">
+                                        {{ form.owner_discount_percentage }}
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                    {% if form.owner_discount_percentage.errors %}
+                                    <div class="text-danger small mt-1">{{ form.owner_discount_percentage.errors }}
+                                    </div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Porcentaje de descuento que se aplicará al propietario (0-100%)
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <div class="row">
+                                        <div class="col-12 mb-2">
+                                            <label class="form-label fw-semibold text-muted">
+                                                <i class="bi bi-calculator text-secondary me-1"></i>Cálculos Automáticos
+                                            </label>
                                         </div>
-                                    </div>
-                                    <div class="col-12">
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-success text-white">Neto Propietario $</span>
-                                            <input type="text" class="form-control bg-light fw-bold" id="calculated_net_amount" readonly>
+                                        <div class="col-12 mb-2">
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-light">Descuento $</span>
+                                                <input type="text" class="form-control bg-light"
+                                                    id="calculated_discount_amount" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="input-group">
+                                                <span class="input-group-text bg-success text-white">Neto Propietario
+                                                    $</span>
+                                                <input type="text" class="form-control bg-light fw-bold"
+                                                    id="calculated_net_amount" readonly>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -239,99 +265,110 @@
                         </div>
 
                         <!-- Información de Aumentos -->
-                        <div class="row mb-5">
-                            <div class="col-12">
-                                <div class="d-flex align-items-center mb-4">
-                                    <div class="bg-warning rounded-circle p-2 me-3">
-                                        <i class="bi bi-graph-up-arrow text-white"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-warning mb-1 fw-bold">Aumentos Programados</h4>
-                                        <p class="text-muted small mb-0">Configuración de aumentos automáticos (opcional)</p>
-                                    </div>
+                        <div class="form-section mb-5">
+                            <div class="form-section-header">
+                                <div class="form-section-icon form-section-icon-warning">
+                                    <i class="bi bi-graph-up-arrow"></i>
+                                </div>
+                                <div class="form-section-content">
+                                    <h4 class="form-section-title">Aumentos Programados</h4>
+                                    <p class="form-section-description">Configuración de aumentos automáticos (opcional)
+                                    </p>
                                 </div>
                             </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.frequency.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="bi bi-clock text-warning me-1"></i>{{ form.frequency.label }}
-                                </label>
-                                {{ form.frequency }}
-                                {% if form.frequency.errors %}
-                                    <div class="text-danger small mt-1">{{ form.frequency.errors }}</div>
-                                {% endif %}
-                                <div class="form-text">
-                                    <i class="bi bi-info-circle me-1"></i>
-                                    Frecuencia con la que se revisarán los aumentos
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.frequency.id_for_label }}" class="form-label-modern">
+                                        <i class="bi bi-clock text-warning me-2"></i>{{ form.frequency.label }}
+                                    </label>
+                                    <div class="form-control-wrapper">
+                                        {{ form.frequency|add_class:"form-select-modern" }}
+                                    </div>
+                                    {% if form.frequency.errors %}
+                                    <div class="form-error">{{ form.frequency.errors }}</div>
+                                    {% endif %}
+                                    <div class="form-help">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        Frecuencia con la que se revisarán los aumentos
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <label for="{{ form.next_increase_date.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="bi bi-calendar-plus text-warning me-1"></i>{{ form.next_increase_date.label }}
-                                </label>
-                                {{ form.next_increase_date }}
-                                {% if form.next_increase_date.errors %}
-                                    <div class="text-danger small mt-1">{{ form.next_increase_date.errors }}</div>
-                                {% endif %}
-                                <div class="form-text">
-                                    <i class="bi bi-info-circle me-1"></i>
-                                    Fecha en la que se debe revisar el próximo aumento
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.next_increase_date.id_for_label }}" class="form-label-modern">
+                                        <i class="bi bi-calendar-plus text-warning me-2"></i>{{
+                                        form.next_increase_date.label }}
+                                    </label>
+                                    <div class="form-control-wrapper">
+                                        {{ form.next_increase_date|add_class:"form-control-modern" }}
+                                    </div>
+                                    {% if form.next_increase_date.errors %}
+                                    <div class="form-error">{{ form.next_increase_date.errors }}</div>
+                                    {% endif %}
+                                    <div class="form-help">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        Fecha en la que se debe revisar el próximo aumento
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Términos y Condiciones -->
-                        <div class="row mb-4">
-                            <div class="col-12">
-                                <div class="d-flex align-items-center mb-4">
-                                    <div class="bg-info rounded-circle p-2 me-3">
-                                        <i class="bi bi-file-text text-white"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="text-info mb-1 fw-bold">Términos y Condiciones</h4>
-                                        <p class="text-muted small mb-0">Información adicional del contrato</p>
-                                    </div>
+                        <div class="form-section mb-4">
+                            <div class="form-section-header">
+                                <div class="form-section-icon form-section-icon-info">
+                                    <i class="bi bi-file-text"></i>
+                                </div>
+                                <div class="form-section-content">
+                                    <h4 class="form-section-title">Términos y Condiciones</h4>
+                                    <p class="form-section-description">Información adicional del contrato</p>
                                 </div>
                             </div>
-                            
-                            <div class="col-12 mb-3">
-                                <label for="{{ form.terms.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="bi bi-file-text text-primary me-1"></i>{{ form.terms.label }}
-                                </label>
-                                {{ form.terms }}
-                                {% if form.terms.errors %}
-                                    <div class="text-danger small mt-1">{{ form.terms.errors }}</div>
-                                {% endif %}
-                                <div class="form-text">
-                                    <i class="bi bi-info-circle me-1"></i>
-                                    Especifique los términos y condiciones del contrato
+
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label for="{{ form.terms.id_for_label }}" class="form-label-modern">
+                                        <i class="bi bi-file-text text-primary me-2"></i>{{ form.terms.label }}
+                                    </label>
+                                    <div class="form-control-wrapper">
+                                        {{ form.terms|add_class:"form-control-modern" }}
+                                    </div>
+                                    {% if form.terms.errors %}
+                                    <div class="form-error">{{ form.terms.errors }}</div>
+                                    {% endif %}
+                                    <div class="form-help">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        Especifique los términos y condiciones del contrato
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <div class="col-12 mb-3">
-                                <label for="{{ form.notes.id_for_label }}" class="form-label fw-semibold">
-                                    <i class="bi bi-sticky text-warning me-1"></i>{{ form.notes.label }}
-                                </label>
-                                {{ form.notes }}
-                                {% if form.notes.errors %}
-                                    <div class="text-danger small mt-1">{{ form.notes.errors }}</div>
-                                {% endif %}
-                                <div class="form-text">
-                                    <i class="bi bi-info-circle me-1"></i>
-                                    Notas adicionales o comentarios internos
+
+                                <div class="col-12 mb-3">
+                                    <label for="{{ form.notes.id_for_label }}" class="form-label-modern">
+                                        <i class="bi bi-sticky text-warning me-2"></i>{{ form.notes.label }}
+                                    </label>
+                                    <div class="form-control-wrapper">
+                                        {{ form.notes|add_class:"form-control-modern" }}
+                                    </div>
+                                    {% if form.notes.errors %}
+                                    <div class="form-error">{{ form.notes.errors }}</div>
+                                    {% endif %}
+                                    <div class="form-help">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        Notas adicionales o comentarios internos
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        
-                        <hr class="my-4">
-                        
-                        <div class="d-flex justify-content-end">
-                            <a href="{% if form.instance.pk %}{% url 'contracts:contract_detail' form.instance.pk %}{% else %}{% url 'contracts:contract_list' %}{% endif %}" class="btn btn-outline-secondary me-2">
-                                <i class="bi bi-x-circle me-1"></i> Cancelar
+
+                        <div class="section-divider"></div>
+
+                        <div class="form-actions">
+                            <a href="{% if form.instance.pk %}{% url 'contracts:contract_detail' form.instance.pk %}{% else %}{% url 'contracts:contract_list' %}{% endif %}"
+                                class="btn btn-modern btn-outline-secondary btn-lg">
+                                <i class="bi bi-x-circle me-2"></i>Cancelar
                             </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check-circle-fill me-1"></i> Guardar Contrato
+                            <button type="submit" class="btn btn-modern btn-primary btn-lg">
+                                <i class="bi bi-check-circle-fill me-2"></i>Guardar Contrato
                             </button>
                         </div>
                     </form>
@@ -342,46 +379,48 @@
 </div>
 
 <!-- Modal para crear nuevo cliente -->
-<div class="modal fade" id="createCustomerModal" tabindex="-1" aria-labelledby="createCustomerModalLabel" aria-hidden="true">
+<div class="modal fade" id="createCustomerModal" tabindex="-1" aria-labelledby="createCustomerModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="createCustomerModalLabel">
+        <div class="modal-content-modern">
+            <div class="modal-header-modern">
+                <h5 class="modal-title fw-bold" id="createCustomerModalLabel">
                     <i class="bi bi-person-plus text-success me-2"></i>Crear Nuevo Cliente
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close-modern" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body-modern">
                 <form id="createCustomerForm">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="new_customer_first_name" class="form-label">Nombre *</label>
-                            <input type="text" class="form-control" id="new_customer_first_name" required>
+                            <label for="new_customer_first_name" class="form-label-modern">Nombre *</label>
+                            <input type="text" class="form-control-modern" id="new_customer_first_name" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="new_customer_last_name" class="form-label">Apellido *</label>
-                            <input type="text" class="form-control" id="new_customer_last_name" required>
+                            <label for="new_customer_last_name" class="form-label-modern">Apellido *</label>
+                            <input type="text" class="form-control-modern" id="new_customer_last_name" required>
                         </div>
                         <div class="col-12 mb-3">
-                            <label for="new_customer_email" class="form-label">Email *</label>
-                            <input type="email" class="form-control" id="new_customer_email" required>
+                            <label for="new_customer_email" class="form-label-modern">Email *</label>
+                            <input type="email" class="form-control-modern" id="new_customer_email" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="new_customer_phone" class="form-label">Teléfono</label>
-                            <input type="text" class="form-control" id="new_customer_phone">
+                            <label for="new_customer_phone" class="form-label-modern">Teléfono</label>
+                            <input type="text" class="form-control-modern" id="new_customer_phone">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="new_customer_document" class="form-label">Documento</label>
-                            <input type="text" class="form-control" id="new_customer_document">
+                            <label for="new_customer_document" class="form-label-modern">Documento</label>
+                            <input type="text" class="form-control-modern" id="new_customer_document">
                         </div>
                     </div>
-                    <div id="create-customer-error" class="alert alert-danger" style="display: none;"></div>
+                    <div id="create-customer-error" class="alert-modern alert-modern-danger" style="display: none;">
+                    </div>
                 </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-success" id="btn-save-customer">
-                    <i class="bi bi-check-circle me-1"></i>Crear Cliente
+            <div class="modal-footer-modern">
+                <button type="button" class="btn btn-modern btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-modern btn-success" id="btn-save-customer">
+                    <i class="bi bi-check-circle me-2"></i>Crear Cliente
                 </button>
             </div>
         </div>
@@ -391,277 +430,277 @@
 
 {% block extra_css %}
 <style>
-#customer-search-results {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    z-index: 1050;
-    max-height: 300px;
-    overflow-y: auto;
-    border: 1px solid #dee2e6;
-    border-radius: 0.375rem;
-    background-color: white;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-    margin-top: 2px;
-}
+    #customer-search-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 1050;
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        background-color: white;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        margin-top: 2px;
+    }
 
-#customer-search-results .dropdown-item {
-    padding: 0.75rem 1rem;
-    border: none;
-    text-align: left;
-    width: 100%;
-    background: none;
-    display: block;
-}
+    #customer-search-results .dropdown-item {
+        padding: 0.75rem 1rem;
+        border: none;
+        text-align: left;
+        width: 100%;
+        background: none;
+        display: block;
+    }
 
-#customer-search-results .dropdown-item:hover {
-    background-color: #f8f9fa;
-}
+    #customer-search-results .dropdown-item:hover {
+        background-color: #f8f9fa;
+    }
 
-#customer-search-results .dropdown-item:focus {
-    background-color: #e9ecef;
-    outline: none;
-}
+    #customer-search-results .dropdown-item:focus {
+        background-color: #e9ecef;
+        outline: none;
+    }
 
-#customer-search-results .dropdown-item-text {
-    padding: 0.75rem 1rem;
-    color: #6c757d;
-}
+    #customer-search-results .dropdown-item-text {
+        padding: 0.75rem 1rem;
+        color: #6c757d;
+    }
 
-.customer-result {
-    cursor: pointer;
-    transition: background-color 0.15s ease-in-out;
-}
+    .customer-result {
+        cursor: pointer;
+        transition: background-color 0.15s ease-in-out;
+    }
 
-.customer-result:hover {
-    background-color: #f8f9fa !important;
-}
+    .customer-result:hover {
+        background-color: #f8f9fa !important;
+    }
 
-.customer-result:active {
-    background-color: #e9ecef !important;
-}
+    .customer-result:active {
+        background-color: #e9ecef !important;
+    }
 
-#selected-customer-info .alert {
-    margin-bottom: 0;
-}
+    #selected-customer-info .alert {
+        margin-bottom: 0;
+    }
 
-/* Asegurar que el contenedor padre tenga posición relativa */
-.position-relative {
-    position: relative !important;
-}
+    /* Asegurar que el contenedor padre tenga posición relativa */
+    .position-relative {
+        position: relative !important;
+    }
 
-/* Mejorar la apariencia del campo de búsqueda cuando está activo */
-#id_customer_search:focus {
-    border-color: #198754;
-    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
-}
+    /* Mejorar la apariencia del campo de búsqueda cuando está activo */
+    #id_customer_search:focus {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+    }
 
-/* Animación suave para mostrar/ocultar resultados */
-#customer-search-results {
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: opacity 0.15s ease, transform 0.15s ease;
-}
+    /* Animación suave para mostrar/ocultar resultados */
+    #customer-search-results {
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: opacity 0.15s ease, transform 0.15s ease;
+    }
 
-#customer-search-results[style*="block"] {
-    opacity: 1;
-    transform: translateY(0);
-}
+    #customer-search-results[style*="block"] {
+        opacity: 1;
+        transform: translateY(0);
+    }
 
-/* Transición suave para el botón de crear cliente */
-#btn-create-customer {
-    transition: opacity 0.2s ease, transform 0.2s ease;
-}
+    /* Transición suave para el botón de crear cliente */
+    #btn-create-customer {
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
 
-#btn-create-customer[style*="none"] {
-    opacity: 0;
-    transform: scale(0.95);
-}
+    #btn-create-customer[style*="none"] {
+        opacity: 0;
+        transform: scale(0.95);
+    }
 </style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const contractForm = document.getElementById('contractForm');
-    const propertySelect = document.getElementById('id_property');
-    const amountInput = document.getElementById('id_amount');
-    const ownerDiscountInput = document.getElementById('id_owner_discount_percentage');
-    const calculatedDiscountAmount = document.getElementById('calculated_discount_amount');
-    const calculatedNetAmount = document.getElementById('calculated_net_amount');
-    const startDateInput = document.getElementById('id_start_date');
-    const endDateInput = document.getElementById('id_end_date');
+    document.addEventListener('DOMContentLoaded', function () {
+        const contractForm = document.getElementById('contractForm');
+        const propertySelect = document.getElementById('id_property');
+        const amountInput = document.getElementById('id_amount');
+        const ownerDiscountInput = document.getElementById('id_owner_discount_percentage');
+        const calculatedDiscountAmount = document.getElementById('calculated_discount_amount');
+        const calculatedNetAmount = document.getElementById('calculated_net_amount');
+        const startDateInput = document.getElementById('id_start_date');
+        const endDateInput = document.getElementById('id_end_date');
 
-    // Auto-completar monto basado en la propiedad seleccionada
-    if (propertySelect) {
-        propertySelect.addEventListener('change', function() {
-            const propertyId = this.value;
-            if (propertyId) {
-                fetch(`/contracts/ajax/get_property_rental_price/?property_id=${propertyId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.rental_price && amountInput) {
-                            amountInput.value = data.rental_price;
-                            // Recalcular después de actualizar el monto
-                            calculateOwnerAmounts();
-                            // Mostrar toast de información
-                            showInfoToast('Monto actualizado automáticamente basado en la propiedad seleccionada');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error al obtener precio de la propiedad:', error);
-                    });
-            }
-        });
-    }
-
-    // Función para formatear moneda
-    function formatCurrency(amount) {
-        if (isNaN(amount) || amount === null || amount === undefined) {
-            return '0.00';
-        }
-        return parseFloat(amount).toLocaleString('es-AR', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-    }
-
-    // Función para calcular montos del propietario
-    function calculateOwnerAmounts() {
-        const amount = parseFloat(amountInput?.value) || 0;
-        const discountPercentage = parseFloat(ownerDiscountInput?.value) || 0;
-        
-        // Calcular monto de descuento
-        const discountAmount = amount * (discountPercentage / 100);
-        
-        // Calcular monto neto del propietario
-        const netAmount = amount - discountAmount;
-        
-        // Actualizar campos calculados
-        if (calculatedDiscountAmount) {
-            calculatedDiscountAmount.value = formatCurrency(discountAmount);
-        }
-        
-        if (calculatedNetAmount) {
-            calculatedNetAmount.value = formatCurrency(netAmount);
-        }
-    }
-
-    // Event listeners para cálculos en tiempo real
-    if (amountInput) {
-        amountInput.addEventListener('input', calculateOwnerAmounts);
-        amountInput.addEventListener('change', calculateOwnerAmounts);
-    }
-    
-    if (ownerDiscountInput) {
-        ownerDiscountInput.addEventListener('input', calculateOwnerAmounts);
-        ownerDiscountInput.addEventListener('change', calculateOwnerAmounts);
-    }
-
-    // Calcular montos iniciales al cargar la página
-    calculateOwnerAmounts();
-
-    // Validación de fechas
-    if (startDateInput && endDateInput) {
-        function validateDates() {
-            const startDate = new Date(startDateInput.value);
-            const endDate = new Date(endDateInput.value);
-            
-            if (startDateInput.value && endDateInput.value && startDate >= endDate) {
-                endDateInput.setCustomValidity('La fecha de fin debe ser posterior a la fecha de inicio');
-                endDateInput.classList.add('is-invalid');
-                return false;
-            } else {
-                endDateInput.setCustomValidity('');
-                endDateInput.classList.remove('is-invalid');
-                return true;
-            }
-        }
-
-        startDateInput.addEventListener('change', validateDates);
-        endDateInput.addEventListener('change', validateDates);
-    }
-
-    // Validación del formulario
-    if (contractForm) {
-        contractForm.addEventListener('submit', function(e) {
-            let isValid = true;
-            
-            // Limpiar errores previos
-            document.querySelectorAll('.is-invalid').forEach(field => {
-                field.classList.remove('is-invalid');
-            });
-
-            // Validar campos requeridos
-            const requiredFields = ['property', 'customer', 'agent', 'start_date', 'amount'];
-            requiredFields.forEach(fieldName => {
-                const field = document.getElementById(`id_${fieldName}`);
-                if (field && !field.value.trim()) {
-                    isValid = false;
-                    field.classList.add('is-invalid');
+        // Auto-completar monto basado en la propiedad seleccionada
+        if (propertySelect) {
+            propertySelect.addEventListener('change', function () {
+                const propertyId = this.value;
+                if (propertyId) {
+                    fetch(`/contracts/ajax/get_property_rental_price/?property_id=${propertyId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.rental_price && amountInput) {
+                                amountInput.value = data.rental_price;
+                                // Recalcular después de actualizar el monto
+                                calculateOwnerAmounts();
+                                // Mostrar toast de información
+                                showInfoToast('Monto actualizado automáticamente basado en la propiedad seleccionada');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error al obtener precio de la propiedad:', error);
+                        });
                 }
             });
-
-            // Validar monto
-            if (amountInput && amountInput.value) {
-                const amount = parseFloat(amountInput.value);
-                if (amount <= 0) {
-                    isValid = false;
-                    amountInput.classList.add('is-invalid');
-                    showErrorToast('El monto debe ser mayor a cero');
-                }
-            }
-
-            // Validar porcentaje de descuento
-            if (ownerDiscountInput && ownerDiscountInput.value) {
-                const percentage = parseFloat(ownerDiscountInput.value);
-                if (percentage < 0) {
-                    isValid = false;
-                    ownerDiscountInput.classList.add('is-invalid');
-                    showErrorToast('El porcentaje de descuento no puede ser negativo');
-                } else if (percentage > 100) {
-                    isValid = false;
-                    ownerDiscountInput.classList.add('is-invalid');
-                    showErrorToast('El porcentaje de descuento no puede ser mayor a 100%');
-                }
-            }
-
-            // Validar fechas
-            if (!validateDates()) {
-                isValid = false;
-            }
-
-            if (!isValid) {
-                e.preventDefault();
-                showErrorToast('Por favor, corrija los errores en el formulario antes de continuar');
-            }
-        });
-    }
-
-    // Función para mostrar toast de información
-    function showInfoToast(message) {
-        showToast(message, 'info');
-    }
-
-    // Función para mostrar toast de error
-    function showErrorToast(message) {
-        showToast(message, 'error');
-    }
-
-    // Función genérica para mostrar toasts
-    function showToast(message, type = 'info') {
-        let toastContainer = document.querySelector('.toast-container');
-        if (!toastContainer) {
-            toastContainer = document.createElement('div');
-            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
-            document.body.appendChild(toastContainer);
         }
-        
-        const iconClass = type === 'error' ? 'bi-exclamation-triangle-fill text-danger' : 'bi-info-circle-fill text-info';
-        const headerText = type === 'error' ? 'Error' : 'Información';
-        
-        const toastHtml = `
+
+        // Función para formatear moneda
+        function formatCurrency(amount) {
+            if (isNaN(amount) || amount === null || amount === undefined) {
+                return '0.00';
+            }
+            return parseFloat(amount).toLocaleString('es-AR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        // Función para calcular montos del propietario
+        function calculateOwnerAmounts() {
+            const amount = parseFloat(amountInput?.value) || 0;
+            const discountPercentage = parseFloat(ownerDiscountInput?.value) || 0;
+
+            // Calcular monto de descuento
+            const discountAmount = amount * (discountPercentage / 100);
+
+            // Calcular monto neto del propietario
+            const netAmount = amount - discountAmount;
+
+            // Actualizar campos calculados
+            if (calculatedDiscountAmount) {
+                calculatedDiscountAmount.value = formatCurrency(discountAmount);
+            }
+
+            if (calculatedNetAmount) {
+                calculatedNetAmount.value = formatCurrency(netAmount);
+            }
+        }
+
+        // Event listeners para cálculos en tiempo real
+        if (amountInput) {
+            amountInput.addEventListener('input', calculateOwnerAmounts);
+            amountInput.addEventListener('change', calculateOwnerAmounts);
+        }
+
+        if (ownerDiscountInput) {
+            ownerDiscountInput.addEventListener('input', calculateOwnerAmounts);
+            ownerDiscountInput.addEventListener('change', calculateOwnerAmounts);
+        }
+
+        // Calcular montos iniciales al cargar la página
+        calculateOwnerAmounts();
+
+        // Validación de fechas
+        if (startDateInput && endDateInput) {
+            function validateDates() {
+                const startDate = new Date(startDateInput.value);
+                const endDate = new Date(endDateInput.value);
+
+                if (startDateInput.value && endDateInput.value && startDate >= endDate) {
+                    endDateInput.setCustomValidity('La fecha de fin debe ser posterior a la fecha de inicio');
+                    endDateInput.classList.add('is-invalid');
+                    return false;
+                } else {
+                    endDateInput.setCustomValidity('');
+                    endDateInput.classList.remove('is-invalid');
+                    return true;
+                }
+            }
+
+            startDateInput.addEventListener('change', validateDates);
+            endDateInput.addEventListener('change', validateDates);
+        }
+
+        // Validación del formulario
+        if (contractForm) {
+            contractForm.addEventListener('submit', function (e) {
+                let isValid = true;
+
+                // Limpiar errores previos
+                document.querySelectorAll('.is-invalid').forEach(field => {
+                    field.classList.remove('is-invalid');
+                });
+
+                // Validar campos requeridos
+                const requiredFields = ['property', 'customer', 'agent', 'start_date', 'amount'];
+                requiredFields.forEach(fieldName => {
+                    const field = document.getElementById(`id_${fieldName}`);
+                    if (field && !field.value.trim()) {
+                        isValid = false;
+                        field.classList.add('is-invalid');
+                    }
+                });
+
+                // Validar monto
+                if (amountInput && amountInput.value) {
+                    const amount = parseFloat(amountInput.value);
+                    if (amount <= 0) {
+                        isValid = false;
+                        amountInput.classList.add('is-invalid');
+                        showErrorToast('El monto debe ser mayor a cero');
+                    }
+                }
+
+                // Validar porcentaje de descuento
+                if (ownerDiscountInput && ownerDiscountInput.value) {
+                    const percentage = parseFloat(ownerDiscountInput.value);
+                    if (percentage < 0) {
+                        isValid = false;
+                        ownerDiscountInput.classList.add('is-invalid');
+                        showErrorToast('El porcentaje de descuento no puede ser negativo');
+                    } else if (percentage > 100) {
+                        isValid = false;
+                        ownerDiscountInput.classList.add('is-invalid');
+                        showErrorToast('El porcentaje de descuento no puede ser mayor a 100%');
+                    }
+                }
+
+                // Validar fechas
+                if (!validateDates()) {
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                    showErrorToast('Por favor, corrija los errores en el formulario antes de continuar');
+                }
+            });
+        }
+
+        // Función para mostrar toast de información
+        function showInfoToast(message) {
+            showToast(message, 'info');
+        }
+
+        // Función para mostrar toast de error
+        function showErrorToast(message) {
+            showToast(message, 'error');
+        }
+
+        // Función genérica para mostrar toasts
+        function showToast(message, type = 'info') {
+            let toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                document.body.appendChild(toastContainer);
+            }
+
+            const iconClass = type === 'error' ? 'bi-exclamation-triangle-fill text-danger' : 'bi-info-circle-fill text-info';
+            const headerText = type === 'error' ? 'Error' : 'Información';
+
+            const toastHtml = `
             <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
                 <div class="toast-header">
                     <i class="${iconClass} me-2"></i>
@@ -673,110 +712,110 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             </div>
         `;
-        
-        toastContainer.insertAdjacentHTML('beforeend', toastHtml);
-        const toast = new bootstrap.Toast(toastContainer.lastElementChild);
-        toast.show();
-        
-        toastContainer.lastElementChild.addEventListener('hidden.bs.toast', function() {
-            this.remove();
-        });
-    }
 
-    // Limpiar clases de error al escribir
-    document.querySelectorAll('.form-control').forEach(input => {
-        input.addEventListener('input', function() {
-            this.classList.remove('is-invalid');
-        });
-    });
+            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+            const toast = new bootstrap.Toast(toastContainer.lastElementChild);
+            toast.show();
 
-    // ===== FUNCIONALIDAD DE AUTOCOMPLETADO DE CLIENTES =====
-    const customerSearchInput = document.getElementById('id_customer_search');
-    const customerHiddenInput = document.getElementById('id_customer');
-    const customerSearchResults = document.getElementById('customer-search-results');
-    const selectedCustomerInfo = document.getElementById('selected-customer-info');
-    const selectedCustomerText = document.getElementById('selected-customer-text');
-    const btnClearCustomer = document.getElementById('btn-clear-customer');
-    const btnCreateCustomer = document.getElementById('btn-create-customer');
-    const createCustomerModal = new bootstrap.Modal(document.getElementById('createCustomerModal'));
-    
-    let searchTimeout;
-    let selectedCustomer = null;
-
-    // Verificar si ya hay un cliente seleccionado al cargar la página
-    if (customerHiddenInput && customerHiddenInput.value && customerSearchInput && customerSearchInput.value) {
-        selectedCustomer = {
-            id: customerHiddenInput.value,
-            text: customerSearchInput.value
-        };
-        showSelectedCustomer();
-    }
-
-    // Búsqueda de clientes con debounce
-    if (customerSearchInput) {
-        customerSearchInput.addEventListener('input', function() {
-            const query = this.value.trim();
-            
-            clearTimeout(searchTimeout);
-            
-            if (query.length < 2) {
-                hideSearchResults();
-                return;
-            }
-            
-            searchTimeout = setTimeout(() => {
-                searchCustomers(query);
-            }, 300);
-        });
-
-        // Ocultar resultados cuando se pierde el foco (con delay para permitir clicks)
-        customerSearchInput.addEventListener('blur', function() {
-            setTimeout(() => {
-                hideSearchResults();
-            }, 200);
-        });
-
-        // Mostrar resultados cuando se hace foco si hay texto
-        customerSearchInput.addEventListener('focus', function() {
-            if (this.value.trim().length >= 2 && !selectedCustomer) {
-                searchCustomers(this.value.trim());
-            }
-        });
-    }
-
-    // Función para buscar clientes
-    function searchCustomers(query) {
-        const url = `/customers/ajax/search/?q=${encodeURIComponent(query)}`;
-        
-        fetch(url)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                showSearchResults(data.results || []);
-            })
-            .catch(error => {
-                console.error("Error buscando clientes:", error);
-                showErrorToast("Error al buscar clientes: " + error.message);
-                hideSearchResults();
+            toastContainer.lastElementChild.addEventListener('hidden.bs.toast', function () {
+                this.remove();
             });
-    }
+        }
 
-    // Mostrar resultados de búsqueda
-    function showSearchResults(results) {
-        if (!results || results.length === 0) {
-            customerSearchResults.innerHTML = `
+        // Limpiar clases de error al escribir
+        document.querySelectorAll('.form-control').forEach(input => {
+            input.addEventListener('input', function () {
+                this.classList.remove('is-invalid');
+            });
+        });
+
+        // ===== FUNCIONALIDAD DE AUTOCOMPLETADO DE CLIENTES =====
+        const customerSearchInput = document.getElementById('id_customer_search');
+        const customerHiddenInput = document.getElementById('id_customer');
+        const customerSearchResults = document.getElementById('customer-search-results');
+        const selectedCustomerInfo = document.getElementById('selected-customer-info');
+        const selectedCustomerText = document.getElementById('selected-customer-text');
+        const btnClearCustomer = document.getElementById('btn-clear-customer');
+        const btnCreateCustomer = document.getElementById('btn-create-customer');
+        const createCustomerModal = new bootstrap.Modal(document.getElementById('createCustomerModal'));
+
+        let searchTimeout;
+        let selectedCustomer = null;
+
+        // Verificar si ya hay un cliente seleccionado al cargar la página
+        if (customerHiddenInput && customerHiddenInput.value && customerSearchInput && customerSearchInput.value) {
+            selectedCustomer = {
+                id: customerHiddenInput.value,
+                text: customerSearchInput.value
+            };
+            showSelectedCustomer();
+        }
+
+        // Búsqueda de clientes con debounce
+        if (customerSearchInput) {
+            customerSearchInput.addEventListener('input', function () {
+                const query = this.value.trim();
+
+                clearTimeout(searchTimeout);
+
+                if (query.length < 2) {
+                    hideSearchResults();
+                    return;
+                }
+
+                searchTimeout = setTimeout(() => {
+                    searchCustomers(query);
+                }, 300);
+            });
+
+            // Ocultar resultados cuando se pierde el foco (con delay para permitir clicks)
+            customerSearchInput.addEventListener('blur', function () {
+                setTimeout(() => {
+                    hideSearchResults();
+                }, 200);
+            });
+
+            // Mostrar resultados cuando se hace foco si hay texto
+            customerSearchInput.addEventListener('focus', function () {
+                if (this.value.trim().length >= 2 && !selectedCustomer) {
+                    searchCustomers(this.value.trim());
+                }
+            });
+        }
+
+        // Función para buscar clientes
+        function searchCustomers(query) {
+            const url = `/customers/ajax/search/?q=${encodeURIComponent(query)}`;
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    showSearchResults(data.results || []);
+                })
+                .catch(error => {
+                    console.error("Error buscando clientes:", error);
+                    showErrorToast("Error al buscar clientes: " + error.message);
+                    hideSearchResults();
+                });
+        }
+
+        // Mostrar resultados de búsqueda
+        function showSearchResults(results) {
+            if (!results || results.length === 0) {
+                customerSearchResults.innerHTML = `
                 <div class="dropdown-item-text text-muted">
                     <i class="bi bi-search me-2"></i>No se encontraron clientes
                     <br>
                     <small>Haga clic en <i class="bi bi-person-plus"></i> para crear uno nuevo</small>
                 </div>
             `;
-        } else {
-            customerSearchResults.innerHTML = results.map(customer => `
+            } else {
+                customerSearchResults.innerHTML = results.map(customer => `
                 <button type="button" class="dropdown-item customer-result" data-customer='${JSON.stringify(customer)}'>
                     <div class="d-flex align-items-center">
                         <i class="bi bi-person-circle text-success me-2"></i>
@@ -787,163 +826,163 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 </button>
             `).join('');
-        }
-        
-        // Mostrar con animación
-        customerSearchResults.style.display = 'block';
-        
-        // Forzar reflow para que la animación CSS funcione
-        customerSearchResults.offsetHeight;
-        
-        // Agregar event listeners a los resultados
-        document.querySelectorAll('.customer-result').forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                const customer = JSON.parse(this.dataset.customer);
-                selectCustomer(customer);
+            }
+
+            // Mostrar con animación
+            customerSearchResults.style.display = 'block';
+
+            // Forzar reflow para que la animación CSS funcione
+            customerSearchResults.offsetHeight;
+
+            // Agregar event listeners a los resultados
+            document.querySelectorAll('.customer-result').forEach(item => {
+                item.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const customer = JSON.parse(this.dataset.customer);
+                    selectCustomer(customer);
+                });
             });
-        });
-    }
-
-    // Ocultar resultados de búsqueda
-    function hideSearchResults() {
-        customerSearchResults.style.display = 'none';
-    }
-
-    // Seleccionar un cliente
-    function selectCustomer(customer) {
-        selectedCustomer = customer;
-        customerHiddenInput.value = customer.id;
-        customerSearchInput.value = customer.text;
-        hideSearchResults();
-        showSelectedCustomer();
-    }
-
-    // Mostrar información del cliente seleccionado
-    function showSelectedCustomer() {
-        if (selectedCustomer) {
-            selectedCustomerText.textContent = selectedCustomer.text;
-            selectedCustomerInfo.style.display = 'block';
-            customerSearchInput.style.display = 'none';
-            // Ocultar el botón de crear cliente cuando hay uno seleccionado
-            if (btnCreateCustomer) {
-                btnCreateCustomer.style.display = 'none';
-            }
         }
-    }
 
-    // Limpiar selección de cliente
-    if (btnClearCustomer) {
-        btnClearCustomer.addEventListener('click', function() {
-            selectedCustomer = null;
-            customerHiddenInput.value = '';
-            customerSearchInput.value = '';
-            selectedCustomerInfo.style.display = 'none';
-            customerSearchInput.style.display = 'block';
-            // Mostrar el botón de crear cliente cuando se limpia la selección
-            if (btnCreateCustomer) {
-                btnCreateCustomer.style.display = 'block';
-            }
-            customerSearchInput.focus();
-        });
-    }
+        // Ocultar resultados de búsqueda
+        function hideSearchResults() {
+            customerSearchResults.style.display = 'none';
+        }
 
-    // ===== FUNCIONALIDAD DE CREACIÓN DE CLIENTES =====
-    if (btnCreateCustomer) {
-        btnCreateCustomer.addEventListener('click', function() {
-            // Limpiar formulario
-            document.getElementById('createCustomerForm').reset();
-            document.getElementById('create-customer-error').style.display = 'none';
-            
-            // Pre-llenar con datos de búsqueda si es posible
-            const searchValue = customerSearchInput.value.trim();
-            if (searchValue && !selectedCustomer) {
-                // Intentar extraer nombre del texto de búsqueda
-                const parts = searchValue.split(' ');
-                if (parts.length >= 2) {
-                    document.getElementById('new_customer_first_name').value = parts[0];
-                    document.getElementById('new_customer_last_name').value = parts.slice(1).join(' ');
-                } else if (parts.length === 1) {
-                    document.getElementById('new_customer_first_name').value = parts[0];
+        // Seleccionar un cliente
+        function selectCustomer(customer) {
+            selectedCustomer = customer;
+            customerHiddenInput.value = customer.id;
+            customerSearchInput.value = customer.text;
+            hideSearchResults();
+            showSelectedCustomer();
+        }
+
+        // Mostrar información del cliente seleccionado
+        function showSelectedCustomer() {
+            if (selectedCustomer) {
+                selectedCustomerText.textContent = selectedCustomer.text;
+                selectedCustomerInfo.style.display = 'block';
+                customerSearchInput.style.display = 'none';
+                // Ocultar el botón de crear cliente cuando hay uno seleccionado
+                if (btnCreateCustomer) {
+                    btnCreateCustomer.style.display = 'none';
                 }
             }
-            
-            createCustomerModal.show();
-        });
-    }
-
-    // Guardar nuevo cliente
-    document.getElementById('btn-save-customer').addEventListener('click', function() {
-        const formData = {
-            first_name: document.getElementById('new_customer_first_name').value.trim(),
-            last_name: document.getElementById('new_customer_last_name').value.trim(),
-            email: document.getElementById('new_customer_email').value.trim(),
-            phone: document.getElementById('new_customer_phone').value.trim(),
-            document: document.getElementById('new_customer_document').value.trim()
-        };
-
-        // Validaciones básicas
-        if (!formData.first_name || !formData.last_name || !formData.email) {
-            showCreateCustomerError('Nombre, apellido y email son requeridos');
-            return;
         }
 
-        // Deshabilitar botón mientras se procesa
-        this.disabled = true;
-        this.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Creando...';
-
-        fetch('/customers/ajax/create/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-            },
-            body: JSON.stringify(formData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Seleccionar el cliente recién creado
-                selectCustomer(data.customer);
-                createCustomerModal.hide();
-                showInfoToast('Cliente creado correctamente');
-            } else {
-                showCreateCustomerError(data.error || 'Error al crear el cliente');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showCreateCustomerError('Error de conexión. Intente nuevamente.');
-        })
-        .finally(() => {
-            // Rehabilitar botón
-            this.disabled = false;
-            this.innerHTML = '<i class="bi bi-check-circle me-1"></i>Crear Cliente';
-        });
-    });
-
-    // Mostrar error en el modal de creación
-    function showCreateCustomerError(message) {
-        const errorDiv = document.getElementById('create-customer-error');
-        errorDiv.textContent = message;
-        errorDiv.style.display = 'block';
-    }
-
-    // Validación del formulario principal - agregar validación de cliente
-    const originalFormValidation = contractForm.querySelector('button[type="submit"]');
-    if (originalFormValidation) {
-        contractForm.addEventListener('submit', function(e) {
-            // Validar que se haya seleccionado un cliente
-            if (!customerHiddenInput.value) {
-                e.preventDefault();
-                showErrorToast('Debe seleccionar un cliente');
-                customerSearchInput.classList.add('is-invalid');
+        // Limpiar selección de cliente
+        if (btnClearCustomer) {
+            btnClearCustomer.addEventListener('click', function () {
+                selectedCustomer = null;
+                customerHiddenInput.value = '';
+                customerSearchInput.value = '';
+                selectedCustomerInfo.style.display = 'none';
+                customerSearchInput.style.display = 'block';
+                // Mostrar el botón de crear cliente cuando se limpia la selección
+                if (btnCreateCustomer) {
+                    btnCreateCustomer.style.display = 'block';
+                }
                 customerSearchInput.focus();
-                return false;
+            });
+        }
+
+        // ===== FUNCIONALIDAD DE CREACIÓN DE CLIENTES =====
+        if (btnCreateCustomer) {
+            btnCreateCustomer.addEventListener('click', function () {
+                // Limpiar formulario
+                document.getElementById('createCustomerForm').reset();
+                document.getElementById('create-customer-error').style.display = 'none';
+
+                // Pre-llenar con datos de búsqueda si es posible
+                const searchValue = customerSearchInput.value.trim();
+                if (searchValue && !selectedCustomer) {
+                    // Intentar extraer nombre del texto de búsqueda
+                    const parts = searchValue.split(' ');
+                    if (parts.length >= 2) {
+                        document.getElementById('new_customer_first_name').value = parts[0];
+                        document.getElementById('new_customer_last_name').value = parts.slice(1).join(' ');
+                    } else if (parts.length === 1) {
+                        document.getElementById('new_customer_first_name').value = parts[0];
+                    }
+                }
+
+                createCustomerModal.show();
+            });
+        }
+
+        // Guardar nuevo cliente
+        document.getElementById('btn-save-customer').addEventListener('click', function () {
+            const formData = {
+                first_name: document.getElementById('new_customer_first_name').value.trim(),
+                last_name: document.getElementById('new_customer_last_name').value.trim(),
+                email: document.getElementById('new_customer_email').value.trim(),
+                phone: document.getElementById('new_customer_phone').value.trim(),
+                document: document.getElementById('new_customer_document').value.trim()
+            };
+
+            // Validaciones básicas
+            if (!formData.first_name || !formData.last_name || !formData.email) {
+                showCreateCustomerError('Nombre, apellido y email son requeridos');
+                return;
             }
+
+            // Deshabilitar botón mientras se procesa
+            this.disabled = true;
+            this.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Creando...';
+
+            fetch('/customers/ajax/create/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify(formData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Seleccionar el cliente recién creado
+                        selectCustomer(data.customer);
+                        createCustomerModal.hide();
+                        showInfoToast('Cliente creado correctamente');
+                    } else {
+                        showCreateCustomerError(data.error || 'Error al crear el cliente');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showCreateCustomerError('Error de conexión. Intente nuevamente.');
+                })
+                .finally(() => {
+                    // Rehabilitar botón
+                    this.disabled = false;
+                    this.innerHTML = '<i class="bi bi-check-circle me-1"></i>Crear Cliente';
+                });
         });
-    }
-});
+
+        // Mostrar error en el modal de creación
+        function showCreateCustomerError(message) {
+            const errorDiv = document.getElementById('create-customer-error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        // Validación del formulario principal - agregar validación de cliente
+        const originalFormValidation = contractForm.querySelector('button[type="submit"]');
+        if (originalFormValidation) {
+            contractForm.addEventListener('submit', function (e) {
+                // Validar que se haya seleccionado un cliente
+                if (!customerHiddenInput.value) {
+                    e.preventDefault();
+                    showErrorToast('Debe seleccionar un cliente');
+                    customerSearchInput.classList.add('is-invalid');
+                    customerSearchInput.focus();
+                    return false;
+                }
+            });
+        }
+    });
 </script>
 {% endblock %}

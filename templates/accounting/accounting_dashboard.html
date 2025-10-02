@@ -4,142 +4,160 @@
 {% block title %}Dashboard de Contabilidad{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12 col-lg-10 mx-auto">
+<div class="container-fluid mt-4">
+    <!-- Breadcrumbs -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb breadcrumb-modern">
+            <li class="breadcrumb-item">
+                <a href="{% url 'core:dashboard' %}" class="text-decoration-none">
+                    <i class="bi bi-house-door me-1"></i>Dashboard
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Contabilidad</li>
+        </ol>
+    </nav>
 
-            <!-- Encabezado -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb mb-2">
-                            <li class="breadcrumb-item">
-                                <a href="{% url 'core:dashboard' %}" class="text-decoration-none">
-                                    <i class="bi bi-house-door me-1"></i>Dashboard
-                                </a>
-                            </li>
-                            <li class="breadcrumb-item active" aria-current="page">Contabilidad</li>
-                        </ol>
-                    </nav>
-                    <h1 class="h3 text-dark mb-1">
-                        <i class="bi bi-calculator me-2 text-primary"></i>Dashboard de Contabilidad
-                    </h1>
-                    <p class="text-muted mb-0">Gestione facturas, pagos y comprobantes de propietarios</p>
-                </div>
-            </div>
-
-            <!-- Contenido del Dashboard -->
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">Resumen Financiero</h5>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="alert alert-success" role="alert">
-                                <h4 class="alert-heading">Ingresos Totales</h4>
-                                <p class="display-6">$0.00</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="alert alert-danger" role="alert">
-                                <h4 class="alert-heading">Gastos Totales</h4>
-                                <p class="display-6">$0.00</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="alert alert-info" role="alert">
-                                <h4 class="alert-heading">Facturas Pendientes</h4>
-                                <p class="display-6">0</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Acciones Rápidas -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="card shadow-sm border-0">
-                        <div class="card-header bg-light">
-                            <h5 class="card-title mb-0">
-                                <i class="bi bi-lightning me-2"></i>Acciones Rápidas
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row g-3">
-                                <div class="col-md-3">
-                                    <a href="{% url 'accounting:invoice_create' %}" class="btn btn-outline-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
-                                        <i class="bi bi-receipt fs-1 mb-2"></i>
-                                        <span class="fw-semibold">Nueva Factura</span>
-                                        <small class="text-muted">Crear factura</small>
-                                    </a>
-                                </div>
-                                <div class="col-md-3">
-                                    <a href="{% url 'accounting:invoice_list' %}" class="btn btn-outline-info w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
-                                        <i class="bi bi-list-ul fs-1 mb-2"></i>
-                                        <span class="fw-semibold">Ver Facturas</span>
-                                        <small class="text-muted">Gestionar facturas</small>
-                                    </a>
-                                </div>
-                                <div class="col-md-3">
-                                    <a href="{% url 'accounting:owner_receipts_list' %}" class="btn btn-outline-warning w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
-                                        <i class="bi bi-file-earmark-check fs-1 mb-2"></i>
-                                        <span class="fw-semibold">Comprobantes</span>
-                                        <small class="text-muted">Propietarios</small>
-                                    </a>
-                                </div>
-                                <div class="col-md-3">
-                                    <a href="{% url 'accounting:payment_list' %}" class="btn btn-outline-success w-100 h-100 d-flex flex-column align-items-center justify-content-center py-3">
-                                        <i class="bi bi-credit-card fs-1 mb-2"></i>
-                                        <span class="fw-semibold">Pagos</span>
-                                        <small class="text-muted">Ver pagos</small>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card shadow-sm border-0 mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title">
-                                <i class="bi bi-credit-card me-2"></i>Pagos Recientes
-                            </h5>
-                            <p>Aquí se mostrarán los pagos más recientes.</p>
-                            <a href="{% url 'accounting:payment_list' %}" class="btn btn-sm btn-outline-primary">Ver todos los pagos</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card shadow-sm border-0 mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title">
-                                <i class="bi bi-file-earmark-check me-2"></i>Comprobantes Recientes
-                            </h5>
-                            <p>Aquí se mostrarán los comprobantes de propietarios más recientes.</p>
-                            <a href="{% url 'accounting:owner_receipts_list' %}" class="btn btn-sm btn-outline-warning">Ver todos los comprobantes</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-12">
-                    <div class="card shadow-sm border-0 mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title">
-                                <i class="bi bi-receipt me-2"></i>Facturas Pendientes
-                            </h5>
-                            <p>Aquí se mostrarán las facturas con estado 'sent' o 'draft'.</p>
-                            <a href="{% url 'accounting:invoice_list' %}" class="btn btn-sm btn-outline-primary">Ver todas las facturas</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+    <!-- Encabezado -->
+    <div class="page-header">
+        <div class="text-center">
+            <h1 class="h2 mb-2">
+                <i class="bi bi-calculator me-3"></i>Dashboard de Contabilidad
+            </h1>
+            <p class="mb-0 opacity-90">Gestione facturas, pagos y comprobantes de propietarios</p>
         </div>
     </div>
-</div>
+
+    <!-- Resumen Financiero -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card card-modern border-0 bg-success text-white stat-card">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-arrow-up-circle fs-1 mb-3 opacity-75"></i>
+                    <h4 class="card-title mb-1">$0.00</h4>
+                    <p class="card-text mb-0 opacity-90">Ingresos Totales</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-modern border-0 bg-danger text-white stat-card">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-arrow-down-circle fs-1 mb-3 opacity-75"></i>
+                    <h4 class="card-title mb-1">$0.00</h4>
+                    <p class="card-text mb-0 opacity-90">Gastos Totales</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-modern border-0 bg-warning text-white stat-card">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-clock-history fs-1 mb-3 opacity-75"></i>
+                    <h4 class="card-title mb-1">0</h4>
+                    <p class="card-text mb-0 opacity-90">Facturas Pendientes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones Rápidas -->
+    <div class="card card-modern mb-4">
+        <div class="card-header bg-light border-bottom py-3">
+            <h5 class="card-title mb-0 text-dark fw-bold">
+                <i class="bi bi-lightning me-2"></i>Acciones Rápidas
+            </h5>
+        </div>
+        <div class="card-body p-4">
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <a href="{% url 'accounting:invoice_create' %}" class="btn btn-outline-primary btn-modern w-100 h-100 d-flex flex-column align-items-center justify-content-center py-4">
+                        <i class="bi bi-receipt fs-1 mb-3"></i>
+                        <span class="fw-semibold mb-1">Nueva Factura</span>
+                        <small class="text-muted">Crear factura</small>
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{% url 'accounting:invoice_list' %}" class="btn btn-outline-info btn-modern w-100 h-100 d-flex flex-column align-items-center justify-content-center py-4">
+                        <i class="bi bi-list-ul fs-1 mb-3"></i>
+                        <span class="fw-semibold mb-1">Ver Facturas</span>
+                        <small class="text-muted">Gestionar facturas</small>
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{% url 'accounting:owner_receipts_list' %}" class="btn btn-outline-warning btn-modern w-100 h-100 d-flex flex-column align-items-center justify-content-center py-4">
+                        <i class="bi bi-file-earmark-check fs-1 mb-3"></i>
+                        <span class="fw-semibold mb-1">Comprobantes</span>
+                        <small class="text-muted">Propietarios</small>
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{% url 'accounting:payment_list' %}" class="btn btn-outline-success btn-modern w-100 h-100 d-flex flex-column align-items-center justify-content-center py-4">
+                        <i class="bi bi-credit-card fs-1 mb-3"></i>
+                        <span class="fw-semibold mb-1">Pagos</span>
+                        <small class="text-muted">Ver pagos</small>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secciones de Información -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card card-modern">
+                <div class="card-header bg-light border-bottom py-3">
+                    <h5 class="card-title mb-0 text-dark fw-bold">
+                        <i class="bi bi-credit-card me-2"></i>Pagos Recientes
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center py-4">
+                        <i class="bi bi-credit-card text-muted" style="font-size: 3rem;"></i>
+                        <p class="text-muted mt-3 mb-3">Aquí se mostrarán los pagos más recientes.</p>
+                        <a href="{% url 'accounting:payment_list' %}" class="btn btn-outline-primary btn-modern">
+                            <i class="bi bi-eye me-2"></i>Ver todos los pagos
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card card-modern">
+                <div class="card-header bg-light border-bottom py-3">
+                    <h5 class="card-title mb-0 text-dark fw-bold">
+                        <i class="bi bi-file-earmark-check me-2"></i>Comprobantes Recientes
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center py-4">
+                        <i class="bi bi-file-earmark-check text-muted" style="font-size: 3rem;"></i>
+                        <p class="text-muted mt-3 mb-3">Aquí se mostrarán los comprobantes de propietarios más recientes.</p>
+                        <a href="{% url 'accounting:owner_receipts_list' %}" class="btn btn-outline-warning btn-modern">
+                            <i class="bi bi-eye me-2"></i>Ver todos los comprobantes
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card card-modern">
+                <div class="card-header bg-light border-bottom py-3">
+                    <h5 class="card-title mb-0 text-dark fw-bold">
+                        <i class="bi bi-receipt me-2"></i>Facturas Pendientes
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center py-4">
+                        <i class="bi bi-receipt text-muted" style="font-size: 3rem;"></i>
+                        <p class="text-muted mt-3 mb-3">Aquí se mostrarán las facturas con estado 'sent' o 'draft'.</p>
+                        <a href="{% url 'accounting:invoice_list' %}" class="btn btn-outline-primary btn-modern">
+                            <i class="bi bi-eye me-2"></i>Ver todas las facturas
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}

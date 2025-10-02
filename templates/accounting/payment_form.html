@@ -10,12 +10,32 @@
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12 col-lg-8 mx-auto">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="h4">
+<div class="container-fluid mt-4">
+    <!-- Breadcrumbs -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb breadcrumb-modern">
+            <li class="breadcrumb-item">
+                <a href="{% url 'accounting:accounting_dashboard' %}" class="text-decoration-none">
+                    <i class="bi bi-calculator me-1"></i>Contabilidad
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'accounting:payment_list' %}" class="text-decoration-none">
+                    Pagos
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                {% if form.instance.pk %}Editar Pago{% else %}Nuevo Pago{% endif %}
+            </li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="card card-modern">
+                <div class="card-header bg-light border-bottom py-3">
+                    <h2 class="h4 mb-0 text-dark fw-bold">
+                        <i class="bi bi-cash-stack me-2"></i>
                         {% if form.instance.pk %}
                             Editar Pago
                         {% else %}
@@ -23,31 +43,67 @@
                         {% endif %}
                     </h2>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     {% if not form.instance.pk %}
-                        <div class="mb-4">
-                            <h5>Detalles de la Factura</h5>
-                            <dl class="row">
-                                <dt class="col-sm-3">Cliente</dt>
-                                <dd class="col-sm-9">{{ invoice.customer.full_name }}</dd>
-                                <dt class="col-sm-3">Total</dt>
-                                <dd class="col-sm-9">${{ invoice.total_amount|floatformat:2 }}</dd>
-                                <dt class="col-sm-3">Pendiente</dt>
-                                <dd class="col-sm-9">${{ invoice.get_balance|floatformat:2 }}</dd>
-                            </dl>
+                        <div class="card card-modern bg-light mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title mb-3">
+                                    <i class="bi bi-info-circle me-2 text-primary"></i>Detalles de la Factura
+                                </h5>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-person-circle text-primary me-2 fs-5"></i>
+                                            <div>
+                                                <small class="text-muted d-block">Cliente</small>
+                                                <strong>{{ invoice.customer.full_name }}</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-currency-dollar text-success me-2 fs-5"></i>
+                                            <div>
+                                                <small class="text-muted d-block">Total Factura</small>
+                                                <strong class="text-success">${{ invoice.total_amount|floatformat:2 }}</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-exclamation-triangle text-warning me-2 fs-5"></i>
+                                            <div>
+                                                <small class="text-muted d-block">Saldo Pendiente</small>
+                                                <strong class="text-warning">${{ invoice.get_balance|floatformat:2 }}</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     {% endif %}
+                    
                     <form method="post">
                         {% csrf_token %}
-                        {{ form|crispy }}
-                        <div class="d-flex justify-content-end mt-3">
-                            <a href="{% if invoice %}{% url 'accounting:invoice_detail' invoice.pk %}{% else %}{% url 'accounting:payment_list' %}{% endif %}" class="btn btn-secondary me-2">Cancelar</a>
-                            <button type="submit" class="btn btn-primary">Guardar Pago</button>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                {{ form|crispy }}
+                            </div>
+                        </div>
+                        
+                        <hr class="my-4">
+                        <div class="d-flex justify-content-end gap-3">
+                            <a href="{% if invoice %}{% url 'accounting:invoice_detail' invoice.pk %}{% else %}{% url 'accounting:payment_list' %}{% endif %}" 
+                               class="btn btn-secondary btn-modern">
+                                <i class="bi bi-x-circle me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-modern">
+                                <i class="bi bi-save me-2"></i>Guardar Pago
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-</div>
 {% endblock %}

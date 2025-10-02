@@ -173,6 +173,7 @@ THIRD_PARTY_APPS = [
     'rest_framework',  # Agregada DRF
     'celery',
     'django_celery_beat',  # For database-backed periodic tasks
+    'widget_tweaks',  # For template form field customization
 ]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS + THIRD_PARTY_APPS

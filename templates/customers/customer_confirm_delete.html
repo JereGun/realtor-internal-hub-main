@@ -3,142 +3,18 @@
 
 {% block title %}Eliminar Cliente - {{ object.get_full_name }}{% endblock %}
 
-{% block extra_css %}
-<style>
-    .danger-zone {
-        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-        border: 2px solid #f87171;
-        border-radius: 15px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-    }
-    
-    .warning-icon {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        background: #dc2626;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1rem;
-        animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-    }
-    
-    .info-card {
-        background: white;
-        border-radius: 15px;
-        padding: 1.5rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        border: 1px solid #e5e7eb;
-        margin-bottom: 1.5rem;
-    }
-    
-    .info-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.75rem 0;
-        border-bottom: 1px solid #f3f4f6;
-    }
-    
-    .info-row:last-child {
-        border-bottom: none;
-    }
-    
-    .info-label {
-        font-weight: 600;
-        color: #6b7280;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
-    .info-value {
-        font-weight: 500;
-        color: #1f2937;
-    }
-    
-    .btn-danger-custom {
-        background: linear-gradient(135deg, #dc2626, #b91c1c);
-        border: none;
-        color: white;
-        padding: 0.75rem 2rem;
-        border-radius: 12px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
-    .btn-danger-custom:hover {
-        background: linear-gradient(135deg, #b91c1c, #991b1b);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px -8px rgba(220, 38, 38, 0.5);
-        color: white;
-    }
-    
-    .btn-cancel-custom {
-        background: white;
-        border: 2px solid #6b7280;
-        color: #6b7280;
-        padding: 0.75rem 2rem;
-        border-radius: 12px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        text-decoration: none;
-    }
-    
-    .btn-cancel-custom:hover {
-        background: #6b7280;
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px -8px rgba(107, 114, 128, 0.3);
-    }
-    
-    .impact-warning {
-        background: #fef3c7;
-        border: 1px solid #f59e0b;
-        border-radius: 12px;
-        padding: 1rem;
-        margin: 1.5rem 0;
-    }
-    
-    .customer-avatar {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        background: #dc2626;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1rem;
-        font-size: 2rem;
-        font-weight: bold;
-        color: white;
-    }
-</style>
 {% endblock %}
 
 {% block content %}
 <div class="container-fluid mt-4">
-    <!-- Header -->
+    <!-- Header Moderno -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <nav aria-label="breadcrumb">
+            <nav aria-label="breadcrumb" class="breadcrumb-modern mb-3">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item">
                         <a href="{% url 'customers:customer_list' %}" class="text-decoration-none">
-                            <i class="bi bi-people me-1"></i>Clientes
+                            <i class="bi bi-people me-2"></i>Clientes
                         </a>
                     </li>
                     <li class="breadcrumb-item">
@@ -149,27 +25,27 @@
                     <li class="breadcrumb-item active" aria-current="page">Eliminar</li>
                 </ol>
             </nav>
-            <h1 class="h3 text-dark mb-1">
-                <i class="bi bi-exclamation-triangle me-2 text-danger"></i>Confirmar Eliminación
+            <h1 class="h2 text-dark mb-2">
+                <i class="bi bi-exclamation-triangle me-3 text-danger"></i>Confirmar Eliminación
             </h1>
             <p class="text-muted mb-0">Esta acción eliminará permanentemente el cliente del sistema</p>
         </div>
-        <div class="d-flex gap-2">
-            <a href="{% url 'customers:customer_detail' object.pk %}" class="btn btn-outline-secondary">
-                <i class="bi bi-eye me-1"></i>Ver Detalle
+        <div class="d-flex gap-3">
+            <a href="{% url 'customers:customer_detail' object.pk %}" class="btn btn-outline-secondary btn-modern">
+                <i class="bi bi-eye me-2"></i>Ver Detalle
             </a>
-            <a href="{% url 'customers:customer_list' %}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i>Volver al Listado
+            <a href="{% url 'customers:customer_list' %}" class="btn btn-outline-secondary btn-modern">
+                <i class="bi bi-arrow-left me-2"></i>Volver al Listado
             </a>
         </div>
     </div>
 
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <!-- Zona de Peligro -->
-            <div class="danger-zone text-center">
-                <div class="warning-icon">
-                    <i class="bi bi-exclamation-triangle fs-1 text-white"></i>
+            <!-- Zona de Peligro Moderna -->
+            <div class="danger-zone-modern text-center">
+                <div class="warning-icon-modern">
+                    <i class="bi bi-exclamation-triangle"></i>
                 </div>
                 <h4 class="text-danger fw-bold mb-3">¡Zona de Peligro!</h4>
                 <p class="text-danger mb-0 fs-5">
@@ -179,9 +55,9 @@
             </div>
 
             <!-- Información del Cliente -->
-            <div class="info-card">
+            <div class="card-modern">
                 <div class="d-flex align-items-center mb-4">
-                    <div class="customer-avatar">
+                    <div class="avatar-large-danger">
                         {{ object.first_name|first }}{{ object.last_name|first }}
                     </div>
                     <div class="ms-3 text-center flex-grow-1">
@@ -196,42 +72,42 @@
                             <i class="bi bi-person me-2"></i>Información Personal
                         </h6>
                         
-                        <div class="info-row">
-                            <span class="info-label">
+                        <div class="info-row-modern">
+                            <span class="info-label-modern">
                                 <i class="bi bi-person-badge"></i>Documento
                             </span>
-                            <span class="info-value">{{ object.document|default:"No especificado" }}</span>
+                            <span class="info-value-modern">{{ object.document|default:"No especificado" }}</span>
                         </div>
                         
-                        <div class="info-row">
-                            <span class="info-label">
+                        <div class="info-row-modern">
+                            <span class="info-label-modern">
                                 <i class="bi bi-envelope"></i>Email
                             </span>
-                            <span class="info-value">{{ object.email|default:"No especificado" }}</span>
+                            <span class="info-value-modern">{{ object.email|default:"No especificado" }}</span>
                         </div>
                         
-                        <div class="info-row">
-                            <span class="info-label">
+                        <div class="info-row-modern">
+                            <span class="info-label-modern">
                                 <i class="bi bi-telephone"></i>Teléfono
                             </span>
-                            <span class="info-value">{{ object.phone|default:"No especificado" }}</span>
+                            <span class="info-value-modern">{{ object.phone|default:"No especificado" }}</span>
                         </div>
                         
                         {% if object.birth_date %}
-                        <div class="info-row">
-                            <span class="info-label">
+                        <div class="info-row-modern">
+                            <span class="info-label-modern">
                                 <i class="bi bi-calendar"></i>Fecha de Nacimiento
                             </span>
-                            <span class="info-value">{{ object.birth_date|date:"d/m/Y" }}</span>
+                            <span class="info-value-modern">{{ object.birth_date|date:"d/m/Y" }}</span>
                         </div>
                         {% endif %}
                         
                         {% if object.profession %}
-                        <div class="info-row">
-                            <span class="info-label">
+                        <div class="info-row-modern">
+                            <span class="info-label-modern">
                                 <i class="bi bi-briefcase"></i>Profesión
                             </span>
-                            <span class="info-value">{{ object.profession }}</span>
+                            <span class="info-value-modern">{{ object.profession }}</span>
                         </div>
                         {% endif %}
                     </div>
@@ -242,47 +118,47 @@
                         </h6>
                         
                         {% if object.street and object.number %}
-                        <div class="info-row">
-                            <span class="info-label">
+                        <div class="info-row-modern">
+                            <span class="info-label-modern">
                                 <i class="bi bi-signpost"></i>Dirección
                             </span>
-                            <span class="info-value">{{ object.street }} {{ object.number }}</span>
+                            <span class="info-value-modern">{{ object.street }} {{ object.number }}</span>
                         </div>
                         {% endif %}
                         
                         {% if object.neighborhood %}
-                        <div class="info-row">
-                            <span class="info-label">
+                        <div class="info-row-modern">
+                            <span class="info-label-modern">
                                 <i class="bi bi-building"></i>Barrio
                             </span>
-                            <span class="info-value">{{ object.neighborhood }}</span>
+                            <span class="info-value-modern">{{ object.neighborhood }}</span>
                         </div>
                         {% endif %}
                         
                         {% if object.locality %}
-                        <div class="info-row">
-                            <span class="info-label">
+                        <div class="info-row-modern">
+                            <span class="info-label-modern">
                                 <i class="bi bi-pin-map"></i>Localidad
                             </span>
-                            <span class="info-value">{{ object.locality.name }}</span>
+                            <span class="info-value-modern">{{ object.locality.name }}</span>
                         </div>
                         {% endif %}
                         
                         {% if object.province %}
-                        <div class="info-row">
-                            <span class="info-label">
+                        <div class="info-row-modern">
+                            <span class="info-label-modern">
                                 <i class="bi bi-map"></i>Provincia
                             </span>
-                            <span class="info-value">{{ object.province.name }}</span>
+                            <span class="info-value-modern">{{ object.province.name }}</span>
                         </div>
                         {% endif %}
                         
                         {% if object.country %}
-                        <div class="info-row">
-                            <span class="info-label">
+                        <div class="info-row-modern">
+                            <span class="info-label-modern">
                                 <i class="bi bi-globe"></i>País
                             </span>
-                            <span class="info-value">{{ object.country.name }}</span>
+                            <span class="info-value-modern">{{ object.country.name }}</span>
                         </div>
                         {% endif %}
                     </div>
@@ -301,38 +177,38 @@
             </div>
 
             <!-- Información del Sistema -->
-            <div class="info-card">
+            <div class="card-modern">
                 <h6 class="fw-bold text-info mb-3">
                     <i class="bi bi-info-circle me-2"></i>Información del Sistema
                 </h6>
                 
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="info-row">
-                            <span class="info-label">
+                        <div class="info-row-modern">
+                            <span class="info-label-modern">
                                 <i class="bi bi-calendar-plus"></i>Fecha de Registro
                             </span>
-                            <span class="info-value">{{ object.created_at|date:"d/m/Y H:i" }}</span>
+                            <span class="info-value-modern">{{ object.created_at|date:"d/m/Y H:i" }}</span>
                         </div>
-                        <div class="info-row">
-                            <span class="info-label">
+                        <div class="info-row-modern">
+                            <span class="info-label-modern">
                                 <i class="bi bi-clock-history"></i>Registrado hace
                             </span>
-                            <span class="info-value">{{ object.created_at|timesince }}</span>
+                            <span class="info-value-modern">{{ object.created_at|timesince }}</span>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="info-row">
-                            <span class="info-label">
+                        <div class="info-row-modern">
+                            <span class="info-label-modern">
                                 <i class="bi bi-pencil-square"></i>Última Actualización
                             </span>
-                            <span class="info-value">{{ object.updated_at|date:"d/m/Y H:i" }}</span>
+                            <span class="info-value-modern">{{ object.updated_at|date:"d/m/Y H:i" }}</span>
                         </div>
-                        <div class="info-row">
-                            <span class="info-label">
+                        <div class="info-row-modern">
+                            <span class="info-label-modern">
                                 <i class="bi bi-file-earmark-text"></i>Contratos
                             </span>
-                            <span class="info-value">{{ object.contract_set.count }} contrato{{ object.contract_set.count|pluralize }}</span>
+                            <span class="info-value-modern">{{ object.contract_set.count }} contrato{{ object.contract_set.count|pluralize }}</span>
                         </div>
                     </div>
                 </div>
@@ -340,7 +216,7 @@
 
             <!-- Advertencia de Impacto -->
             {% if object.contract_set.exists %}
-            <div class="impact-warning">
+            <div class="impact-warning-modern">
                 <div class="d-flex align-items-center">
                     <i class="bi bi-exclamation-triangle fs-4 text-warning me-3"></i>
                     <div>
@@ -355,7 +231,7 @@
             {% endif %}
 
             <!-- Confirmación Final -->
-            <div class="info-card text-center">
+            <div class="card-modern text-center">
                 <h5 class="text-danger mb-4">
                     <i class="bi bi-question-circle me-2"></i>
                     ¿Está completamente seguro de que desea eliminar este cliente?
@@ -364,13 +240,13 @@
                 <div class="d-flex justify-content-center gap-3">
                     <form method="post" class="d-inline" id="deleteForm">
                         {% csrf_token %}
-                        <button type="submit" class="btn-danger-custom" id="confirmDelete">
-                            <i class="bi bi-trash"></i>
+                        <button type="submit" class="btn btn-danger btn-modern" id="confirmDelete">
+                            <i class="bi bi-trash me-2"></i>
                             Sí, Eliminar Permanentemente
                         </button>
                     </form>
-                    <a href="{% url 'customers:customer_detail' object.pk %}" class="btn-cancel-custom">
-                        <i class="bi bi-x-circle"></i>
+                    <a href="{% url 'customers:customer_detail' object.pk %}" class="btn btn-outline-secondary btn-modern">
+                        <i class="bi bi-x-circle me-2"></i>
                         No, Cancelar
                     </a>
                 </div>

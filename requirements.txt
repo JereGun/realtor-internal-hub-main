@@ -13,6 +13,7 @@ tzdata==2025.2
 celery==5.3.6
 redis==5.0.1
 django-celery-beat==2.5.0
+django-widget-tweaks==1.5.0
 
 # Logging and Error Handling
 structlog==23.2.0

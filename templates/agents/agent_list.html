@@ -5,59 +5,64 @@
 
 {% block content %}
 <div class="container-fluid mt-4">
-    <!-- Encabezado -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 text-dark mb-1">
-                <i class="bi bi-people me-2 text-primary"></i>Gestión de Agentes
-            </h1>
-            <p class="text-muted mb-0">Administre el equipo de agentes inmobiliarios</p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{% url 'agents:agent_create' %}" class="btn btn-primary">
-                <i class="bi bi-person-plus me-1"></i>Nuevo Agente
-            </a>
-            <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" 
-                    data-bs-target="#filtersCard" aria-expanded="false">
-                <i class="bi bi-funnel me-1"></i>Filtros
-            </button>
+    <!-- Page Header with Modern Gradient -->
+    <div class="page-header mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h2 mb-2 fw-bold">
+                    <i class="bi bi-people me-3"></i>Gestión de Agentes
+                </h1>
+                <p class="mb-0 opacity-90">Administre el equipo de agentes inmobiliarios</p>
+            </div>
+            <div class="d-flex gap-3">
+                <a href="{% url 'agents:agent_create' %}" class="btn btn-light btn-modern">
+                    <i class="bi bi-person-plus me-2"></i>Nuevo Agente
+                </a>
+                <button class="btn btn-outline-light btn-modern" type="button" data-bs-toggle="collapse" 
+                        data-bs-target="#filtersCard" aria-expanded="false">
+                    <i class="bi bi-funnel me-2"></i>Filtros
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- Filtros -->
+    <!-- Enhanced Filters Section -->
     <div class="collapse mb-4" id="filtersCard">
-        <div class="card shadow-sm border-light">
-            <div class="card-header bg-light border-bottom">
-                <h5 class="mb-0 text-dark fw-bold">
-                    <i class="bi bi-funnel me-2"></i>Filtros de Búsqueda
+        <div class="card-modern">
+            <div class="card-header bg-gradient-light border-0 rounded-top">
+                <h5 class="mb-0 text-dark fw-bold d-flex align-items-center">
+                    <div class="icon-circle bg-primary text-white me-3">
+                        <i class="bi bi-funnel"></i>
+                    </div>
+                    Filtros de Búsqueda
                 </h5>
             </div>
             <div class="card-body p-4">
                 <form method="get" id="filterForm" class="needs-validation" novalidate>
-                    <div class="row g-3">
+                    <div class="row g-4">
                         <div class="col-md-6">
-                            <label for="searchQuery" class="form-label fw-semibold">
-                                <i class="bi bi-search me-1"></i>Búsqueda General
+                            <label for="searchQuery" class="form-label fw-semibold text-dark">
+                                <i class="bi bi-search me-2 text-primary"></i>Búsqueda General
                             </label>
-                            <input type="text" name="search" id="searchQuery" class="form-control" 
+                            <input type="text" name="search" id="searchQuery" class="form-control form-control-modern" 
                                    placeholder="Buscar por nombre, email o matrícula..." 
                                    value="{{ request.GET.search|default:'' }}">
                         </div>
                         <div class="col-md-3">
-                            <label for="statusFilter" class="form-label fw-semibold">
-                                <i class="bi bi-flag me-1"></i>Estado
+                            <label for="statusFilter" class="form-label fw-semibold text-dark">
+                                <i class="bi bi-flag me-2 text-success"></i>Estado
                             </label>
-                            <select name="status" id="statusFilter" class="form-select">
+                            <select name="status" id="statusFilter" class="form-select form-control-modern">
                                 <option value="">Todos los estados</option>
                                 <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Activos</option>
                                 <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inactivos</option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label for="sortFilter" class="form-label fw-semibold">
-                                <i class="bi bi-sort-down me-1"></i>Ordenar por
+                            <label for="sortFilter" class="form-label fw-semibold text-dark">
+                                <i class="bi bi-sort-down me-2 text-info"></i>Ordenar por
                             </label>
-                            <select name="sort" id="sortFilter" class="form-select">
+                            <select name="sort" id="sortFilter" class="form-select form-control-modern">
                                 <option value="name" {% if request.GET.sort == 'name' %}selected{% endif %}>Nombre</option>
                                 <option value="email" {% if request.GET.sort == 'email' %}selected{% endif %}>Email</option>
                                 <option value="properties" {% if request.GET.sort == 'properties' %}selected{% endif %}>Propiedades</option>
@@ -66,18 +71,20 @@
                         </div>
                     </div>
 
-                    <!-- Botones de Acción -->
-                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
-                        <div class="text-muted small">
-                            <i class="bi bi-info-circle me-1"></i>
-                            Use los filtros para encontrar agentes específicos
+                    <div class="section-divider"></div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-muted d-flex align-items-center">
+                            <i class="bi bi-info-circle me-2 text-info"></i>
+                            <span>Use los filtros para encontrar agentes específicos</span>
                         </div>
                         <div class="btn-group" role="group">
-                            <a href="{% url 'agents:agent_list' %}" class="btn btn-outline-secondary">
-                                <i class="bi bi-arrow-clockwise me-1"></i>Limpiar
+                            <a href="{% url 'agents:agent_list' %}" class="btn btn-outline-secondary btn-modern">
+                                <i class="bi bi-arrow-clockwise me-2"></i>Limpiar
                             </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-search me-1"></i>Buscar
+                            <button type="submit" class="btn btn-primary btn-modern">
+                                <i class="bi bi-search me-2"></i>Buscar
                             </button>
                         </div>
                     </div>
@@ -86,107 +93,115 @@
         </div>
     </div>
 
-    <!-- Lista de agentes -->
+    <!-- Enhanced Agent Cards Grid -->
     <div class="row">
         {% for agent in agents %}
         <div class="col-lg-6 col-xl-4 mb-4">
-            <div class="card h-100 shadow-sm border-light">
+            <div class="card-modern h-100 agent-card">
                 <div class="card-body p-4">
-                    <!-- Header del agente -->
-                    <div class="d-flex align-items-center mb-3">
+                    <!-- Agent Header -->
+                    <div class="d-flex align-items-start mb-4">
                         <div class="flex-shrink-0 position-relative">
                             {% if agent.image_path %}
-                                <img src="{{ agent.image_path.url }}" class="rounded-circle border border-2 border-light shadow-sm" 
-                                     width="70" height="70" style="object-fit: cover;" alt="{{ agent.full_name }}">
+                                <img src="{{ agent.image_path.url }}" class="avatar-lg border border-3 border-white shadow" 
+                                     alt="{{ agent.full_name }}">
                             {% else %}
-                                <div class="bg-gradient bg-primary rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
-                                     style="width: 70px; height: 70px;">
-                                    <span class="text-white fw-bold fs-4">
+                                <div class="avatar-lg bg-gradient-primary d-flex align-items-center justify-content-center shadow">
+                                    <span class="text-white fw-bold fs-3">
                                         {{ agent.first_name|first }}{{ agent.last_name|first }}
                                     </span>
                                 </div>
                             {% endif %}
-                            <!-- Indicador de estado -->
-                            <span class="position-absolute bottom-0 end-0 p-1 
-                                {% if agent.is_active %}bg-success{% else %}bg-secondary{% endif %} 
-                                border border-2 border-white rounded-circle">
+                            <!-- Status Indicator -->
+                            <span class="status-indicator 
+                                {% if agent.is_active %}status-active{% else %}status-inactive{% endif %}">
                             </span>
                         </div>
                         <div class="flex-grow-1 ms-3">
-                            <h5 class="card-title mb-1 fw-bold">{{ agent.full_name }}</h5>
-                            <p class="text-muted mb-1 small">
-                                <i class="bi bi-envelope me-1"></i>{{ agent.email }}
-                            </p>
-                            {% if agent.phone %}
-                            <p class="text-muted mb-0 small">
-                                <i class="bi bi-telephone me-1"></i>{{ agent.phone }}
-                            </p>
-                            {% endif %}
+                            <h5 class="card-title mb-2 fw-bold text-dark">{{ agent.full_name }}</h5>
+                            <div class="contact-info">
+                                <p class="text-muted mb-1 d-flex align-items-center">
+                                    <i class="bi bi-envelope me-2 text-primary"></i>
+                                    <span class="text-truncate">{{ agent.email }}</span>
+                                </p>
+                                {% if agent.phone %}
+                                <p class="text-muted mb-0 d-flex align-items-center">
+                                    <i class="bi bi-telephone me-2 text-success"></i>
+                                    <span>{{ agent.phone }}</span>
+                                </p>
+                                {% endif %}
+                            </div>
                         </div>
                         <div class="flex-shrink-0">
                             {% if agent.is_active %}
-                                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                                <span class="badge-modern badge-success">
                                     <i class="bi bi-check-circle me-1"></i>Activo
                                 </span>
                             {% else %}
-                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                                <span class="badge-modern badge-secondary">
                                     <i class="bi bi-pause-circle me-1"></i>Inactivo
                                 </span>
                             {% endif %}
                         </div>
                     </div>
 
-                    <!-- Estadísticas del agente -->
-                    <div class="row g-2 mb-3">
+                    <!-- Agent Statistics -->
+                    <div class="row g-3 mb-4">
                         <div class="col-6">
-                            <div class="text-center p-3 bg-primary-subtle rounded-3 border border-primary-subtle">
-                                <div class="fw-bold text-primary fs-5">{{ agent.property_set.count }}</div>
-                                <small class="text-primary fw-semibold">Propiedades</small>
+                            <div class="stat-card stat-primary">
+                                <div class="stat-value">{{ agent.property_set.count }}</div>
+                                <div class="stat-label">Propiedades</div>
                             </div>
                         </div>
                         <div class="col-6">
-                            <div class="text-center p-3 bg-info-subtle rounded-3 border border-info-subtle">
-                                <div class="fw-bold text-info fs-5">{{ agent.date_joined|timesince|truncatewords:1 }}</div>
-                                <small class="text-info fw-semibold">Antigüedad</small>
+                            <div class="stat-card stat-info">
+                                <div class="stat-value">{{ agent.date_joined|timesince|truncatewords:1 }}</div>
+                                <div class="stat-label">Antigüedad</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Información profesional -->
-                    <div class="mb-3 p-2 bg-light rounded-2">
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-award text-warning me-2"></i>
-                            <div>
-                                <small class="text-muted d-block">Matrícula Profesional</small>
-                                <span class="fw-semibold">{{ agent.license_number }}</span>
+                    <!-- Professional Info -->
+                    <div class="professional-info mb-4">
+                        <div class="d-flex align-items-center p-3 bg-gradient-light rounded-lg">
+                            <div class="icon-circle bg-warning text-white me-3">
+                                <i class="bi bi-award"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <small class="text-muted d-block mb-1">Matrícula Profesional</small>
+                                <span class="fw-semibold text-dark">{{ agent.license_number }}</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Biografía (si existe) -->
+                    <!-- Bio Preview -->
                     {% if agent.bio %}
-                    <div class="mb-3">
-                        <p class="text-muted small mb-0" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                    <div class="bio-preview mb-4">
+                        <p class="text-muted small mb-0 line-clamp-2">
                             {{ agent.bio }}
                         </p>
                     </div>
                     {% endif %}
 
-                    <!-- Footer con acciones -->
-                    <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                        <small class="text-muted">
-                            <i class="bi bi-calendar-plus me-1"></i>
-                            Desde {{ agent.date_joined|date:"M Y" }}
-                        </small>
-                        <div class="btn-group" role="group">
-                            <a href="{% url 'agents:agent_detail' agent.pk %}" 
-                               class="btn btn-sm btn-outline-primary" title="Ver detalles">
-                                <i class="bi bi-eye"></i>
-                            </a>
-                            <a href="{% url 'agents:agent_edit' agent.pk %}" 
-                               class="btn btn-sm btn-outline-secondary" title="Editar">
-                                <i class="bi bi-pencil"></i>
-                            </a>
+                    <!-- Card Footer -->
+                    <div class="card-footer-modern">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted d-flex align-items-center">
+                                <i class="bi bi-calendar-plus me-2"></i>
+                                Desde {{ agent.date_joined|date:"M Y" }}
+                            </small>
+                            <div class="btn-group-modern" role="group">
+                                <a href="{% url 'agents:agent_detail' agent.pk %}" 
+                                   class="btn btn-sm btn-outline-primary btn-modern" 
+                                   title="Ver detalles" data-bs-toggle="tooltip">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{% url 'agents:agent_edit' agent.pk %}" 
+                                   class="btn btn-sm btn-outline-secondary btn-modern" 
+                                   title="Editar" data-bs-toggle="tooltip">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -194,13 +209,13 @@
         </div>
         {% empty %}
         <div class="col-12">
-            <div class="text-center py-5">
-                <div class="mb-4">
-                    <i class="bi bi-people text-muted" style="font-size: 5rem;"></i>
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="bi bi-people"></i>
                 </div>
-                <h3 class="text-muted mb-3">No se encontraron agentes</h3>
-                <p class="text-muted mb-4">No hay agentes que coincidan con los criterios de búsqueda.</p>
-                <a href="{% url 'agents:agent_create' %}" class="btn btn-primary btn-lg">
+                <h3 class="empty-state-title">No se encontraron agentes</h3>
+                <p class="empty-state-text">No hay agentes que coincidan con los criterios de búsqueda.</p>
+                <a href="{% url 'agents:agent_create' %}" class="btn btn-primary btn-lg btn-modern">
                     <i class="bi bi-person-plus me-2"></i>Crear Primer Agente
                 </a>
             </div>
@@ -208,41 +223,52 @@
         {% endfor %}
     </div>
 
-    <!-- Estadísticas Generales -->
-    <div class="row g-3 mt-4">
-        <div class="col-md-3">
-            <div class="card border-0 bg-primary text-white">
-                <div class="card-body text-center">
-                    <i class="bi bi-people fs-1 mb-2"></i>
-                    <h4 class="card-title">{{ agents.count }}</h4>
-                    <p class="card-text mb-0">Total Agentes</p>
+    <!-- Enhanced Statistics Section -->
+    <div class="statistics-section mt-5">
+        <div class="section-divider"></div>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="stat-card-large stat-primary">
+                    <div class="stat-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">{{ agents.count }}</div>
+                        <div class="stat-label">Total Agentes</div>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 bg-success text-white">
-                <div class="card-body text-center">
-                    <i class="bi bi-person-check fs-1 mb-2"></i>
-                    <h4 class="card-title">{{ active_agents_count|default:0 }}</h4>
-                    <p class="card-text mb-0">Agentes Activos</p>
+            <div class="col-md-3">
+                <div class="stat-card-large stat-success">
+                    <div class="stat-icon">
+                        <i class="bi bi-person-check"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">{{ active_agents_count|default:0 }}</div>
+                        <div class="stat-label">Agentes Activos</div>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 bg-info text-white">
-                <div class="card-body text-center">
-                    <i class="bi bi-house fs-1 mb-2"></i>
-                    <h4 class="card-title">{{ total_properties|default:0 }}</h4>
-                    <p class="card-text mb-0">Propiedades Totales</p>
+            <div class="col-md-3">
+                <div class="stat-card-large stat-info">
+                    <div class="stat-icon">
+                        <i class="bi bi-house"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">{{ total_properties|default:0 }}</div>
+                        <div class="stat-label">Propiedades Totales</div>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 bg-warning text-white">
-                <div class="card-body text-center">
-                    <i class="bi bi-calendar-plus fs-1 mb-2"></i>
-                    <h4 class="card-title">{{ agents.count }}</h4>
-                    <p class="card-text mb-0">Este Mes</p>
+            <div class="col-md-3">
+                <div class="stat-card-large stat-warning">
+                    <div class="stat-icon">
+                        <i class="bi bi-calendar-plus"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">{{ agents.count }}</div>
+                        <div class="stat-label">Este Mes</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -250,18 +276,18 @@
 
 
 
-    <!-- Paginación -->
+    <!-- Enhanced Pagination -->
     {% if is_paginated %}
-    <nav aria-label="Paginación de agentes" class="mt-4">
-        <ul class="pagination justify-content-center">
+    <nav aria-label="Paginación de agentes" class="mt-5">
+        <ul class="pagination pagination-modern justify-content-center">
             {% if page_obj.has_previous %}
                 <li class="page-item">
-                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1">
+                    <a class="page-link page-link-modern" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1">
                         <i class="bi bi-chevron-double-left"></i>
                     </a>
                 </li>
                 <li class="page-item">
-                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">
+                    <a class="page-link page-link-modern" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">
                         <i class="bi bi-chevron-left"></i>
                     </a>
                 </li>
@@ -270,23 +296,23 @@
             {% for num in page_obj.paginator.page_range %}
                 {% if num == page_obj.number %}
                     <li class="page-item active">
-                        <span class="page-link">{{ num }}</span>
+                        <span class="page-link page-link-modern">{{ num }}</span>
                     </li>
                 {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
                     <li class="page-item">
-                        <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+                        <a class="page-link page-link-modern" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
                     </li>
                 {% endif %}
             {% endfor %}
             
             {% if page_obj.has_next %}
                 <li class="page-item">
-                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">
+                    <a class="page-link page-link-modern" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">
                         <i class="bi bi-chevron-right"></i>
                     </a>
                 </li>
                 <li class="page-item">
-                    <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.paginator.num_pages }}">
+                    <a class="page-link page-link-modern" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.paginator.num_pages }}">
                         <i class="bi bi-chevron-double-right"></i>
                     </a>
                 </li>
@@ -298,48 +324,94 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Filtros en tiempo real
+    // Initialize tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Enhanced filter functionality
     const filterForm = document.getElementById('filterForm');
     const searchInput = document.getElementById('searchQuery');
     const statusSelect = document.getElementById('statusFilter');
     const sortSelect = document.getElementById('sortFilter');
     
-    // Auto-submit en cambios de select
+    // Auto-submit on select changes with loading state
     [statusSelect, sortSelect].forEach(select => {
         if (select) {
             select.addEventListener('change', function() {
+                showLoadingState();
                 filterForm.submit();
             });
         }
     });
     
-    // Búsqueda con delay
+    // Enhanced search with debounce
     let searchTimeout;
     if (searchInput) {
         searchInput.addEventListener('input', function() {
             clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            
             searchTimeout = setTimeout(() => {
-                if (this.value.length >= 3 || this.value.length === 0) {
+                if (query.length >= 3 || query.length === 0) {
+                    showLoadingState();
                     filterForm.submit();
                 }
-            }, 500);
+            }, 600);
         });
     }
     
-    // Función para mostrar toast de éxito
-    function showSuccessToast(message) {
+    // Loading state for better UX
+    function showLoadingState() {
+        const agentCards = document.querySelectorAll('.agent-card');
+        agentCards.forEach(card => {
+            card.style.opacity = '0.6';
+            card.style.pointerEvents = 'none';
+        });
+    }
+    
+    // Enhanced card animations
+    const agentCards = document.querySelectorAll('.agent-card');
+    agentCards.forEach((card, index) => {
+        // Staggered entrance animation
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('fade-in-up');
+        
+        // Hover effects
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-4px) scale(1.02)';
+            this.style.boxShadow = 'var(--shadow-lg)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0) scale(1)';
+            this.style.boxShadow = 'var(--shadow)';
+        });
+    });
+    
+    // Enhanced toast notifications
+    function showToast(message, type = 'success') {
         let toastContainer = document.querySelector('.toast-container');
         if (!toastContainer) {
             toastContainer = document.createElement('div');
             toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            toastContainer.style.zIndex = '9999';
             document.body.appendChild(toastContainer);
         }
         
+        const iconMap = {
+            success: 'bi-check-circle-fill text-success',
+            error: 'bi-x-circle-fill text-danger',
+            warning: 'bi-exclamation-triangle-fill text-warning',
+            info: 'bi-info-circle-fill text-info'
+        };
+        
         const toastHtml = `
-            <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast toast-modern" role="alert" aria-live="assertive" aria-atomic="true">
                 <div class="toast-header">
-                    <i class="bi bi-check-circle-fill text-success me-2"></i>
-                    <strong class="me-auto">Éxito</strong>
+                    <i class="bi ${iconMap[type]} me-2"></i>
+                    <strong class="me-auto">${type.charAt(0).toUpperCase() + type.slice(1)}</strong>
                     <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
                 </div>
                 <div class="toast-body">
@@ -349,27 +421,277 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         
         toastContainer.insertAdjacentHTML('beforeend', toastHtml);
-        const toast = new bootstrap.Toast(toastContainer.lastElementChild);
+        const toastElement = toastContainer.lastElementChild;
+        const toast = new bootstrap.Toast(toastElement, { delay: 4000 });
         toast.show();
         
-        toastContainer.lastElementChild.addEventListener('hidden.bs.toast', function() {
+        toastElement.addEventListener('hidden.bs.toast', function() {
             this.remove();
         });
     }
     
-    // Animaciones suaves para las tarjetas
-    const agentCards = document.querySelectorAll('.card');
-    agentCards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-2px)';
-            this.style.transition = 'transform 0.2s ease';
-        });
-        
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0)';
-        });
+    // Smooth scroll to top functionality
+    const scrollToTopBtn = document.createElement('button');
+    scrollToTopBtn.className = 'btn btn-primary btn-floating position-fixed';
+    scrollToTopBtn.style.cssText = `
+        bottom: 2rem; 
+        right: 2rem; 
+        z-index: 1000; 
+        border-radius: 50%; 
+        width: 50px; 
+        height: 50px; 
+        display: none;
+        box-shadow: var(--shadow-lg);
+    `;
+    scrollToTopBtn.innerHTML = '<i class="bi bi-arrow-up"></i>';
+    scrollToTopBtn.title = 'Volver arriba';
+    document.body.appendChild(scrollToTopBtn);
+    
+    window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 300) {
+            scrollToTopBtn.style.display = 'block';
+        } else {
+            scrollToTopBtn.style.display = 'none';
+        }
+    });
+    
+    scrollToTopBtn.addEventListener('click', function() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 });
 </script>
+
+<style>
+/* Agent List Specific Styles */
+.agent-card {
+    transition: var(--transition-slow);
+    border: 1px solid var(--gray-200);
+}
+
+.avatar-lg {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.status-indicator {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 3px solid white;
+}
+
+.status-active {
+    background-color: var(--success);
+}
+
+.status-inactive {
+    background-color: var(--gray-400);
+}
+
+.contact-info .text-truncate {
+    max-width: 200px;
+}
+
+.stat-card {
+    text-align: center;
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    border: 1px solid;
+    transition: var(--transition);
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+}
+
+.stat-primary {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.stat-info {
+    background: var(--info-light);
+    border-color: var(--info);
+    color: var(--info);
+}
+
+.stat-value {
+    font-size: var(--text-xl);
+    font-weight: 700;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    margin-top: var(--space-1);
+}
+
+.professional-info .icon-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-lg);
+}
+
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.card-footer-modern {
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--gray-200);
+}
+
+.btn-group-modern .btn {
+    border-radius: var(--radius);
+}
+
+.btn-group-modern .btn:not(:last-child) {
+    margin-right: var(--space-2);
+}
+
+.empty-state {
+    text-align: center;
+    padding: var(--space-12) var(--space-4);
+}
+
+.empty-state-icon {
+    font-size: 5rem;
+    color: var(--gray-400);
+    margin-bottom: var(--space-6);
+}
+
+.empty-state-title {
+    color: var(--gray-600);
+    margin-bottom: var(--space-4);
+}
+
+.empty-state-text {
+    color: var(--gray-500);
+    margin-bottom: var(--space-6);
+}
+
+.statistics-section {
+    margin-top: var(--space-10);
+}
+
+.stat-card-large {
+    background: white;
+    border-radius: var(--radius-xl);
+    padding: var(--space-6);
+    border: 1px solid var(--gray-200);
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.stat-card-large:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-card-large .stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-2xl);
+    color: white;
+}
+
+.stat-card-large.stat-primary .stat-icon {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+}
+
+.stat-card-large.stat-success .stat-icon {
+    background: linear-gradient(135deg, var(--success), #059669);
+}
+
+.stat-card-large.stat-info .stat-icon {
+    background: linear-gradient(135deg, var(--info), #0891b2);
+}
+
+.stat-card-large.stat-warning .stat-icon {
+    background: linear-gradient(135deg, var(--warning), #d97706);
+}
+
+.stat-card-large .stat-value {
+    font-size: var(--text-3xl);
+    font-weight: 700;
+    color: var(--gray-900);
+    line-height: 1;
+}
+
+.stat-card-large .stat-label {
+    font-size: var(--text-sm);
+    color: var(--gray-600);
+    font-weight: 600;
+    margin-top: var(--space-1);
+}
+
+.pagination-modern .page-link-modern {
+    border-radius: var(--radius);
+    margin: 0 var(--space-1);
+    border: 1px solid var(--gray-300);
+    color: var(--gray-700);
+    transition: var(--transition);
+}
+
+.pagination-modern .page-link-modern:hover {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.pagination-modern .page-item.active .page-link-modern {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.toast-modern {
+    border: none;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-floating {
+    transition: var(--transition);
+}
+
+.btn-floating:hover {
+    transform: translateY(-2px) scale(1.1);
+}
+</style>
 
 {% endblock %}

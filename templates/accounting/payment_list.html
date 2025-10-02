@@ -4,79 +4,134 @@
 {% block title %}Listado de Pagos{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12 col-lg-10 mx-auto">
+<div class="container-fluid mt-4">
+    <!-- Breadcrumbs -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb breadcrumb-modern">
+            <li class="breadcrumb-item">
+                <a href="{% url 'accounting:accounting_dashboard' %}" class="text-decoration-none">
+                    <i class="bi bi-calculator me-1"></i>Contabilidad
+                </a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Pagos</li>
+        </ol>
+    </nav>
 
-            <!-- Breadcrumbs -->
-            <nav aria-label="breadcrumb" class="mb-4">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item">
-                        <a href="{% url 'accounting:accounting_dashboard' %}" class="text-decoration-none">
-                            <i class="bi bi-calculator me-1"></i>Contabilidad
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item active" aria-current="page">Pagos</li>
-                </ol>
-            </nav>
-
-            <!-- Encabezado -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h4 text-dark mb-0">
-                    <i class="bi bi-cash-stack me-2"></i> Listado de Pagos
+    <!-- Encabezado -->
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h2 mb-2">
+                    <i class="bi bi-cash-stack me-3"></i>Gestión de Pagos
                 </h1>
-                <a href="{% url 'accounting:payment_create' %}" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i> Nuevo Pago
+                <p class="mb-0 opacity-90">Administre y controle todos los pagos recibidos</p>
+            </div>
+            <div>
+                <a href="{% url 'accounting:payment_create' %}" class="btn btn-light btn-modern">
+                    <i class="bi bi-plus-circle me-2"></i>Nuevo Pago
                 </a>
             </div>
-
-            <!-- Tabla de Pagos -->
-            <div class="card shadow-sm border-0 mb-4">
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover table-sm align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Factura</th>
-                                    <th>Fecha</th>
-                                    <th>Monto</th>
-                                    <th>Método</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for payment in payments %}
-                                <tr>
-                                    <td>{{ payment.id }}</td>
-                                    <td><a href="{% url 'accounting:invoice_detail' payment.invoice.pk %}">{{ payment.invoice.number }}</a></td>
-                                    <td>{{ payment.date|date:"d/m/Y" }}</td>
-                                    <td>{{ payment.amount|floatformat:2 }}</td>
-                                    <td>{{ payment.method }}</td>
-                                    <td>
-                                        <a href="{% url 'accounting:payment_detail' payment.pk %}" class="btn btn-info btn-sm" title="Ver Detalle">
-                                            <i class="bi bi-eye"></i>
-                                        </a>
-                                        <a href="{% url 'accounting:payment_update' payment.pk %}" class="btn btn-warning btn-sm" title="Editar">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <a href="{% url 'accounting:payment_delete' payment.pk %}" class="btn btn-danger btn-sm" title="Eliminar">
-                                            <i class="bi bi-trash"></i>
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="6" class="text-center">No hay pagos registrados.</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
         </div>
     </div>
-</div>
+
+    <!-- Tabla de Pagos -->
+    <div class="card card-modern">
+        <div class="card-header bg-light border-bottom py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-dark fw-bold">
+                    <i class="bi bi-table me-2"></i>Lista de Pagos
+                </h5>
+                <div class="d-flex align-items-center gap-3">
+                    <small class="text-muted">
+                        Total: {{ payments|length }} pagos
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col" class="border-0 ps-4">
+                                <i class="bi bi-hash text-muted me-1"></i>ID
+                            </th>
+                            <th scope="col" class="border-0">
+                                <i class="bi bi-receipt text-muted me-1"></i>Factura
+                            </th>
+                            <th scope="col" class="border-0">
+                                <i class="bi bi-calendar-event text-muted me-1"></i>Fecha
+                            </th>
+                            <th scope="col" class="border-0 text-end">
+                                <i class="bi bi-currency-dollar text-muted me-1"></i>Monto
+                            </th>
+                            <th scope="col" class="border-0">
+                                <i class="bi bi-credit-card text-muted me-1"></i>Método
+                            </th>
+                            <th scope="col" class="border-0 text-center pe-4">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payments %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-receipt-cutoff text-primary me-2"></i>
+                                    <span class="fw-semibold">#{{ payment.id }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-file-earmark-text text-info me-2"></i>
+                                    <a href="{% url 'accounting:invoice_detail' payment.invoice.pk %}" class="text-decoration-none fw-semibold">
+                                        {{ payment.invoice.number|default:payment.invoice.id }}
+                                    </a>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-calendar-check text-success me-2"></i>
+                                    <span>{{ payment.date|date:"d/m/Y" }}</span>
+                                </div>
+                            </td>
+                            <td class="text-end">
+                                <span class="fw-bold text-success fs-6">${{ payment.amount|floatformat:2 }}</span>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark rounded-pill">{{ payment.method }}</span>
+                            </td>
+                            <td class="text-center pe-4">
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'accounting:payment_detail' payment.pk %}" 
+                                       class="btn btn-sm btn-outline-primary btn-modern" title="Ver Detalle">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{% url 'accounting:payment_update' payment.pk %}" 
+                                       class="btn btn-sm btn-outline-warning btn-modern" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a href="{% url 'accounting:payment_delete' payment.pk %}" 
+                                       class="btn btn-sm btn-outline-danger btn-modern" title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                                    <p class="mt-3 mb-1 fw-semibold">No hay pagos registrados</p>
+                                    <p class="mb-0">Registre un pago para comenzar</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}

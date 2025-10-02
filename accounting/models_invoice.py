@@ -315,6 +315,7 @@ class OwnerReceipt(BaseModel):
     receipt_number = models.CharField(
         max_length=50, 
         unique=True,
+        blank=True,
         verbose_name="Número de Comprobante"
     )
     generated_at = models.DateTimeField(

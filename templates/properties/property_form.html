@@ -8,6 +8,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/property-styles.css' %}">
+<link rel="stylesheet" href="{% static 'css/property-form.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -16,36 +17,39 @@
     <div class="row">
       <!-- Main Form Content -->
       <div class="col-12">
-        <!-- Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <div>
-            <h1 class="h3 text-dark mb-1">
-              {% if form.instance.pk %}
-              <i class="bi bi-pencil-square me-2 text-primary"></i>Editar Propiedad
-              {% else %}
-              <i class="bi bi-house-add me-2 text-primary"></i>Nueva Propiedad
-              {% endif %}
-            </h1>
-            <p class="text-muted mb-0">
-              {% if form.instance.pk %} Actualice la información de la propiedad
-              #{{ form.instance.pk }} {% else %} Complete la información de la
-              nueva propiedad inmobiliaria {% endif %}
-            </p>
+        <!-- Modern Page Header -->
+        <div class="page-header mb-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h1 class="h2 mb-2 text-white fw-bold">
+                {% if form.instance.pk %}
+                <i class="bi bi-pencil-square me-2"></i>Editar Propiedad
+                {% else %}
+                <i class="bi bi-house-add me-2"></i>Nueva Propiedad
+                {% endif %}
+              </h1>
+              <p class="mb-0 opacity-90">
+                {% if form.instance.pk %} 
+                Actualice la información de la propiedad #{{ form.instance.pk }}
+                {% else %} 
+                Complete la información de la nueva propiedad inmobiliaria
+                {% endif %}
+              </p>
+            </div>
+            <a href="{% if form.instance.pk %}{% url 'properties:property_detail' form.instance.pk %}{% else %}{% url 'properties:property_list' %}{% endif %}"
+              class="btn btn-outline-light btn-modern">
+              <i class="bi bi-arrow-left me-1"></i>
+              {% if form.instance.pk %}Cancelar{% else %}Volver{% endif %}
+            </a>
           </div>
-          <a href="{% if form.instance.pk %}{% url 'properties:property_detail' form.instance.pk %}{% else %}{% url 'properties:property_list' %}{% endif %}"
-            class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i>
-            {% if form.instance.pk %}Cancelar Cambios{% else %}Volver al listado{% endif %}
-          </a>
         </div>
         <form method="post" enctype="multipart/form-data" novalidate id="propertyForm">
           {% csrf_token %}
           <!-- Global Form Errors -->
           {% if form.errors %}
-          <div class="alert alert-danger border-0 shadow-sm mb-4"
-            style="border-left: 4px solid var(--property-danger) !important;">
+          <div class="alert-modern alert-danger mb-4">
             <div class="d-flex align-items-center mb-2">
-              <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
               <strong>Errores en el formulario:</strong>
             </div>
             <ul class="mb-0">
@@ -59,8 +63,8 @@
           {% endif %}
 
           <!-- Información Básica -->
-          <div class="form-section" id="section-basic">
-            <div class="section-header">
+          <div class="card-modern mb-4" id="section-basic">
+            <div class="card-header">
               <div class="d-flex align-items-center">
                 <div class="bg-primary rounded-circle p-2 me-3">
                   <i class="bi bi-info-circle text-white"></i>
@@ -75,182 +79,185 @@
                 </div>
               </div>
             </div>
-            <div class="section-content">
+            <div class="card-body">
               <div class="row">
                 <div class="col-md-8 mb-4">
-                  <div class="form-floating-label">
-                    <input type="text" class="form-control enhanced-form-control" id="{{ form.title.id_for_label }}"
-                      name="{{ form.title.name }}" value="{{ form.title.value|default:'' }}" placeholder=" " required>
+                  <div class="form-group">
                     <label for="{{ form.title.id_for_label }}" class="form-label">
                       <i class="bi bi-house text-primary me-1"></i>
                       {{ form.title.label }}
                     </label>
-                  </div>
-                  {% if form.title.errors %}
-                  <div class="validation-feedback invalid-feedback">
-                    <i class="bi bi-exclamation-circle"></i>
-                    {{ form.title.errors.0 }}
-                  </div>
-                  {% endif %}
-                  <div class="validation-feedback valid-feedback" style="display: none;">
-                    <i class="bi bi-check-circle"></i>
-                    Título válido
+                    <input type="text" class="form-control-modern {% if form.title.errors %}is-invalid{% endif %}" 
+                           id="{{ form.title.id_for_label }}" name="{{ form.title.name }}" 
+                           value="{{ form.title.value|default:'' }}" required>
+                    {% if form.title.errors %}
+                    <div class="form-feedback invalid-feedback">
+                      <i class="bi bi-exclamation-circle me-1"></i>
+                      {{ form.title.errors.0 }}
+                    </div>
+                    {% endif %}
                   </div>
                 </div>
                 <div class="col-md-4 mb-4">
-                  <label for="{{ form.property_type.id_for_label }}" class="form-label fw-semibold">
-                    <i class="bi bi-house-door text-success me-1"></i>
-                    {{ form.property_type.label }}
-                  </label>
-                  <select class="form-select enhanced-form-control" id="{{ form.property_type.id_for_label }}"
-                    name="{{ form.property_type.name }}" required>
-                    <option value="">Seleccionar tipo...</option>
-                    {% for choice in form.property_type.field.choices %}
-                    {% if choice.0 %}
-                    <option value="{{ choice.0 }}" {% if form.property_type.value == choice.0 %}selected{% endif %}>
-                      {{ choice.1 }}
-                    </option>
+                  <div class="form-group">
+                    <label for="{{ form.property_type.id_for_label }}" class="form-label">
+                      <i class="bi bi-house-door text-success me-1"></i>
+                      {{ form.property_type.label }}
+                    </label>
+                    <select class="form-control-modern form-select-modern {% if form.property_type.errors %}is-invalid{% endif %}" 
+                            id="{{ form.property_type.id_for_label }}" name="{{ form.property_type.name }}" required>
+                      <option value="">Seleccionar tipo...</option>
+                      {% for choice in form.property_type.field.choices %}
+                      {% if choice.0 %}
+                      <option value="{{ choice.0 }}" {% if form.property_type.value == choice.0 %}selected{% endif %}>
+                        {{ choice.1 }}
+                      </option>
+                      {% endif %}
+                      {% endfor %}
+                    </select>
+                    {% if form.property_type.errors %}
+                    <div class="form-feedback invalid-feedback">
+                      <i class="bi bi-exclamation-circle me-1"></i>
+                      {{ form.property_type.errors.0 }}
+                    </div>
                     {% endif %}
-                    {% endfor %}
-                  </select>
-                  {% if form.property_type.errors %}
-                  <div class="validation-feedback invalid-feedback">
-                    <i class="bi bi-exclamation-circle"></i>
-                    {{ form.property_type.errors.0 }}
-                  </div>
-                  {% endif %}
-                  <div class="validation-feedback valid-feedback" style="display: none;">
-                    <i class="bi bi-check-circle"></i>
-                    Tipo seleccionado
                   </div>
                 </div>
                 <div class="col-12 mb-4">
-                  <label for="{{ form.description.id_for_label }}" class="form-label fw-semibold">
-                    <i class="bi bi-card-text text-info me-1"></i>
-                    {{ form.description.label }}
-                  </label>
-                  <textarea class="form-control enhanced-form-control" id="{{ form.description.id_for_label }}"
-                    name="{{ form.description.name }}" rows="4"
-                    placeholder="Describa las características principales de la propiedad...">
-                    {{ form.description.value|default:'' }}
-                  </textarea>
-                  {% if form.description.errors %}
-                  <div class="validation-feedback invalid-feedback">
-                    <i class="bi bi-exclamation-circle"></i>
-                    {{ form.description.errors.0 }}
-                  </div>
-                  {% endif %}
-                  <div class="form-text">
-                    <i class="bi bi-info-circle me-1"></i>
-                    Describa las características principales de la propiedad
-                  </div>
-                </div>
-                <div class="col-md-6 mb-4">
-                  <label for="{{ form.property_status.id_for_label }}" class="form-label fw-semibold">
-                    <i class="bi bi-flag text-warning me-1"></i>
-                    {{ form.property_status.label }}
-                  </label>
-                  <select class="form-select enhanced-form-control" id="{{ form.property_status.id_for_label }}"
-                    name="{{ form.property_status.name }}" required>
-                    <option value="">Seleccionar estado...</option>
-                    {% for choice in form.property_status.field.choices %}
-                    {% if choice.0 %}
-                    <option value="{{ choice.0 }}" {% if form.property_status.value == choice.0 %}selected{% endif %}></option>
-                      {{ choice.1 }}
-                    </option>
+                  <div class="form-group">
+                    <label for="{{ form.description.id_for_label }}" class="form-label">
+                      <i class="bi bi-card-text text-info me-1"></i>
+                      {{ form.description.label }}
+                    </label>
+                    <textarea class="form-control-modern {% if form.description.errors %}is-invalid{% endif %}" 
+                              id="{{ form.description.id_for_label }}" name="{{ form.description.name }}" rows="4"
+                              placeholder="Describa las características principales de la propiedad...">{{ form.description.value|default:'' }}</textarea>
+                    {% if form.description.errors %}
+                    <div class="form-feedback invalid-feedback">
+                      <i class="bi bi-exclamation-circle me-1"></i>
+                      {{ form.description.errors.0 }}
+                    </div>
                     {% endif %}
-                    {% endfor %}
-                  </select>
-                  {% if form.property_status.errors %}
-                  <div class="validation-feedback invalid-feedback">
-                    <i class="bi bi-exclamation-circle"></i>
-                    {{ form.property_status.errors.0 }}
+                    <div class="form-text text-muted">
+                      <i class="bi bi-info-circle me-1"></i>
+                      Describa las características principales de la propiedad
+                    </div>
                   </div>
-                  {% endif %}
                 </div>
                 <div class="col-md-6 mb-4">
-                  <label for="{{ form.agent.id_for_label }}" class="form-label fw-semibold">
-                    <i class="bi bi-person-badge text-info me-1"></i>
-                    {{ form.agent.label }}
-                  </label>
-                  <select class="form-select enhanced-form-control" id="{{ form.agent.id_for_label }}"
-                    name="{{ form.agent.name }}">
-                    {% for choice in form.agent.field.choices %}
-                    <option value="{{ choice.0 }}" {% if form.agent.value == choice.0 %}selected{% endif %}>
-                      {{ choice.1 }}
-                    </option>
-                    {% endfor %}
-                  </select>
-                  {% if form.agent.errors %}
-                  <div class="validation-feedback invalid-feedback">
-                    <i class="bi bi-exclamation-circle"></i>
-                    {{ form.agent.errors.0 }}
-                  </div>
-                  {% endif %}
-                  {% if not form.instance.pk %}
-                  <div class="form-text">
-                    <i class="bi bi-info-circle me-1"></i>
-                    Por defecto eres tú como agente, pero puedes cambiarlo si es necesario.
-                  </div>
-                  {% endif %}
-                </div>
-                <div class="col-md-6 mb-4">
-                  <label for="{{ form.owner.id_for_label }}" class="form-label fw-semibold">
-                    <i class="bi bi-person text-secondary me-1"></i>
-                    {{ form.owner.label }}
-                  </label>
-                  <select class="form-select enhanced-form-control" id="{{ form.owner.id_for_label }}"
-                    name="{{ form.owner.name }}">
-                    <option value="">Seleccionar propietario...</option>
-                    {% for choice in form.owner.field.choices %}
-                    {% if choice.0 %}
-                    <option value="{{ choice.0 }}" {% if form.owner.value == choice.0 %}selected{% endif %}>
-                      {{ choice.1 }}
-                    </option>
+                  <div class="form-group">
+                    <label for="{{ form.property_status.id_for_label }}" class="form-label">
+                      <i class="bi bi-flag text-warning me-1"></i>
+                      {{ form.property_status.label }}
+                    </label>
+                    <select class="form-control-modern form-select-modern {% if form.property_status.errors %}is-invalid{% endif %}" 
+                            id="{{ form.property_status.id_for_label }}" name="{{ form.property_status.name }}" required>
+                      <option value="">Seleccionar estado...</option>
+                      {% for choice in form.property_status.field.choices %}
+                      {% if choice.0 %}
+                      <option value="{{ choice.0 }}" {% if form.property_status.value == choice.0 %}selected{% endif %}>
+                        {{ choice.1 }}
+                      </option>
+                      {% endif %}
+                      {% endfor %}
+                    </select>
+                    {% if form.property_status.errors %}
+                    <div class="form-feedback invalid-feedback">
+                      <i class="bi bi-exclamation-circle me-1"></i>
+                      {{ form.property_status.errors.0 }}
+                    </div>
                     {% endif %}
-                    {% endfor %}
-                  </select>
-                  {% if form.owner.errors %}
-                  <div class="validation-feedback invalid-feedback">
-                    <i class="bi bi-exclamation-circle"></i>
-                    {{ form.owner.errors.0 }}
-                  </div>
-                  {% endif %}
-                  <div class="form-text">
-                    <i class="bi bi-info-circle me-1"></i>
-                    Propietario de la propiedad (opcional)
                   </div>
                 </div>
                 <div class="col-md-6 mb-4">
-                  <label for="{{ form.listing_type.id_for_label }}" class="form-label fw-semibold">
-                    <i class="bi bi-tags text-warning me-1"></i>
-                    {{ form.listing_type.label }}
-                  </label>
-                  <select class="form-select enhanced-form-control" id="{{ form.listing_type.id_for_label }}"
-                    name="{{ form.listing_type.name }}">
-                    {% for choice in form.listing_type.field.choices %}
-                    <option value="{{ choice.0 }}" {% if form.listing_type.value == choice.0 %}selected{% endif %}>
-                      {{ choice.1 }}
-                    </option>
-                    {% endfor %}
-                  </select>
-                  {% if form.listing_type.errors %}
-                  <div class="validation-feedback invalid-feedback">
-                    <i class="bi bi-exclamation-circle"></i>
-                    {{ form.listing_type.errors.0 }}
+                  <div class="form-group">
+                    <label for="{{ form.agent.id_for_label }}" class="form-label">
+                      <i class="bi bi-person-badge text-info me-1"></i>
+                      {{ form.agent.label }}
+                    </label>
+                    <select class="form-control-modern form-select-modern {% if form.agent.errors %}is-invalid{% endif %}" 
+                            id="{{ form.agent.id_for_label }}" name="{{ form.agent.name }}">
+                      {% for choice in form.agent.field.choices %}
+                      <option value="{{ choice.0 }}" {% if form.agent.value == choice.0 %}selected{% endif %}>
+                        {{ choice.1 }}
+                      </option>
+                      {% endfor %}
+                    </select>
+                    {% if form.agent.errors %}
+                    <div class="form-feedback invalid-feedback">
+                      <i class="bi bi-exclamation-circle me-1"></i>
+                      {{ form.agent.errors.0 }}
+                    </div>
+                    {% endif %}
+                    {% if not form.instance.pk %}
+                    <div class="form-text text-muted">
+                      <i class="bi bi-info-circle me-1"></i>
+                      Por defecto eres tú como agente, pero puedes cambiarlo si es necesario.
+                    </div>
+                    {% endif %}
                   </div>
-                  {% endif %}
-                  <div class="form-text">
-                    <i class="bi bi-info-circle me-1"></i>
-                    Tipo de comercialización de la propiedad
+                </div>
+                <div class="col-md-6 mb-4">
+                  <div class="form-group">
+                    <label for="{{ form.owner.id_for_label }}" class="form-label">
+                      <i class="bi bi-person text-secondary me-1"></i>
+                      {{ form.owner.label }}
+                    </label>
+                    <select class="form-control-modern form-select-modern {% if form.owner.errors %}is-invalid{% endif %}" 
+                            id="{{ form.owner.id_for_label }}" name="{{ form.owner.name }}">
+                      <option value="">Seleccionar propietario...</option>
+                      {% for choice in form.owner.field.choices %}
+                      {% if choice.0 %}
+                      <option value="{{ choice.0 }}" {% if form.owner.value == choice.0 %}selected{% endif %}>
+                        {{ choice.1 }}
+                      </option>
+                      {% endif %}
+                      {% endfor %}
+                    </select>
+                    {% if form.owner.errors %}
+                    <div class="form-feedback invalid-feedback">
+                      <i class="bi bi-exclamation-circle me-1"></i>
+                      {{ form.owner.errors.0 }}
+                    </div>
+                    {% endif %}
+                    <div class="form-text text-muted">
+                      <i class="bi bi-info-circle me-1"></i>
+                      Propietario de la propiedad (opcional)
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                  <div class="form-group">
+                    <label for="{{ form.listing_type.id_for_label }}" class="form-label">
+                      <i class="bi bi-tags text-warning me-1"></i>
+                      {{ form.listing_type.label }}
+                    </label>
+                    <select class="form-control-modern form-select-modern {% if form.listing_type.errors %}is-invalid{% endif %}" 
+                            id="{{ form.listing_type.id_for_label }}" name="{{ form.listing_type.name }}">
+                      {% for choice in form.listing_type.field.choices %}
+                      <option value="{{ choice.0 }}" {% if form.listing_type.value == choice.0 %}selected{% endif %}>
+                        {{ choice.1 }}
+                      </option>
+                      {% endfor %}
+                    </select>
+                    {% if form.listing_type.errors %}
+                    <div class="form-feedback invalid-feedback">
+                      <i class="bi bi-exclamation-circle me-1"></i>
+                      {{ form.listing_type.errors.0 }}
+                    </div>
+                    {% endif %}
+                    <div class="form-text text-muted">
+                      <i class="bi bi-info-circle me-1"></i>
+                      Tipo de comercialización de la propiedad
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
           <!-- Ubicación -->
-          <div class="form-section" id="section-location">
-            <div class="section-header">
+          <div class="card-modern mb-4" id="section-location">
+            <div class="card-header">
               <div class="d-flex align-items-center">
                 <div class="bg-success rounded-circle p-2 me-3">
                   <i class="bi bi-geo-alt text-white"></i>
@@ -263,94 +270,120 @@
                 </div>
               </div>
             </div>
-            <div class="section-content">
+            <div class="card-body">
               <div class="row">
                 <div class="col-md-6 mb-3">
-                  <label for="{{ form.street.id_for_label }}" class="form-label fw-semibold">
-                    <i class="bi bi-signpost text-success me-1"></i>
-                    {{form.street.label }}
-                  </label>
-                  {{ form.street }} {% if form.street.errors %}
-                  <div class="text-danger small mt-1">
-                    {{ form.street.errors }}
+                  <div class="form-group">
+                    <label for="{{ form.street.id_for_label }}" class="form-label">
+                      <i class="bi bi-signpost text-success me-1"></i>
+                      {{ form.street.label }}
+                    </label>
+                    <input type="text" class="form-control-modern {% if form.street.errors %}is-invalid{% endif %}" 
+                           id="{{ form.street.id_for_label }}" name="{{ form.street.name }}" 
+                           value="{{ form.street.value|default:'' }}">
+                    {% if form.street.errors %}
+                    <div class="form-feedback invalid-feedback">
+                      <i class="bi bi-exclamation-circle me-1"></i>
+                      {{ form.street.errors.0 }}
+                    </div>
+                    {% endif %}
                   </div>
-                  {% endif %}
                 </div>
                 <div class="col-md-3 mb-3">
-                  <label for="{{ form.number.id_for_label }}" class="form-label fw-semibold">
-                    <i class="bi bi-hash text-success me-1"></i>
-                    {{form.number.label }}
-                  </label>
-                  {{ form.number }} {% if form.number.errors %}
-                  <div class="text-danger small mt-1">
-                    {{ form.number.errors }}
+                  <div class="form-group">
+                    <label for="{{ form.number.id_for_label }}" class="form-label">
+                      <i class="bi bi-hash text-success me-1"></i>
+                      {{ form.number.label }}
+                    </label>
+                    <input type="text" class="form-control-modern {% if form.number.errors %}is-invalid{% endif %}" 
+                           id="{{ form.number.id_for_label }}" name="{{ form.number.name }}" 
+                           value="{{ form.number.value|default:'' }}">
+                    {% if form.number.errors %}
+                    <div class="form-feedback invalid-feedback">
+                      <i class="bi bi-exclamation-circle me-1"></i>
+                      {{ form.number.errors.0 }}
+                    </div>
+                    {% endif %}
                   </div>
-                  {% endif %}
                 </div>
                 <div class="col-md-3 mb-3">
-                  <label for="{{ form.neighborhood.id_for_label }}" class="form-label fw-semibold">
-                    <i class="bi bi-map text-info me-1"></i>
-                    {{form.neighborhood.label }}
-                  </label>
-                  {{ form.neighborhood }} {% if form.neighborhood.errors %}
-                  <div class="text-danger small mt-1">
-                    {{ form.neighborhood.errors }}
-                  </div>
-                  {% endif %}
-                </div>
-                <div class="col-md-4 mb-3">
-                  <label for="{{ form.country.id_for_label }}" class="form-label fw-semibold">
-                    <i class="bi bi-globe text-primary me-1"></i>
-                    {{form.country.label }}
-                  </label>
-                  <div class="location-autocomplete-container">
-                    {{ form.country }}
-                  </div>
-                  {% if form.country.errors %}
-                  <div class="text-danger small mt-1">
-                    {{ form.country.errors }}
-                  </div>
-                  {% endif %}
-                  <div class="form-text">
-                    <i class="bi bi-info-circle me-1"></i>
-                    Escriba para buscar o crear un nuevo país
+                  <div class="form-group">
+                    <label for="{{ form.neighborhood.id_for_label }}" class="form-label">
+                      <i class="bi bi-map text-info me-1"></i>
+                      {{ form.neighborhood.label }}
+                    </label>
+                    <input type="text" class="form-control-modern {% if form.neighborhood.errors %}is-invalid{% endif %}" 
+                           id="{{ form.neighborhood.id_for_label }}" name="{{ form.neighborhood.name }}" 
+                           value="{{ form.neighborhood.value|default:'' }}">
+                    {% if form.neighborhood.errors %}
+                    <div class="form-feedback invalid-feedback">
+                      <i class="bi bi-exclamation-circle me-1"></i>
+                      {{ form.neighborhood.errors.0 }}
+                    </div>
+                    {% endif %}
                   </div>
                 </div>
                 <div class="col-md-4 mb-3">
-                  <label for="{{ form.province.id_for_label }}" class="form-label fw-semibold">
-                    <i class="bi bi-map text-warning me-1"></i>
-                    {{form.province.label }}
-                  </label>
-                  <div class="location-autocomplete-container">
-                    {{ form.province }}
+                  <div class="form-group">
+                    <label for="{{ form.country.id_for_label }}" class="form-label">
+                      <i class="bi bi-globe text-primary me-1"></i>
+                      {{ form.country.label }}
+                    </label>
+                    <div class="location-autocomplete-container">
+                      {{ form.country }}
+                    </div>
+                    {% if form.country.errors %}
+                    <div class="form-feedback invalid-feedback">
+                      <i class="bi bi-exclamation-circle me-1"></i>
+                      {{ form.country.errors.0 }}
+                    </div>
+                    {% endif %}
+                    <div class="form-text text-muted">
+                      <i class="bi bi-info-circle me-1"></i>
+                      Escriba para buscar o crear un nuevo país
+                    </div>
                   </div>
-                  {% if form.province.errors %}
-                  <div class="text-danger small mt-1">
-                    {{ form.province.errors }}
-                  </div>
-                  {% endif %}
-                  <div class="form-text">
-                    <i class="bi bi-info-circle me-1"></i>
-                    Seleccione primero un país, luego escriba para buscar provincia
+                </div>
+                <div class="col-md-4 mb-3">
+                  <div class="form-group">
+                    <label for="{{ form.province.id_for_label }}" class="form-label">
+                      <i class="bi bi-map text-warning me-1"></i>
+                      {{ form.province.label }}
+                    </label>
+                    <div class="location-autocomplete-container">
+                      {{ form.province }}
+                    </div>
+                    {% if form.province.errors %}
+                    <div class="form-feedback invalid-feedback">
+                      <i class="bi bi-exclamation-circle me-1"></i>
+                      {{ form.province.errors.0 }}
+                    </div>
+                    {% endif %}
+                    <div class="form-text text-muted">
+                      <i class="bi bi-info-circle me-1"></i>
+                      Seleccione primero un país, luego escriba para buscar provincia
+                    </div>
                   </div>
                 </div>
                 <div class="col-md-4 mb-4">
-                  <label for="{{ form.locality.id_for_label }}" class="form-label fw-semibold">
-                    <i class="bi bi-geo-alt text-info me-1"></i>
-                    {{ form.locality.label }}
-                  </label>
-                  <div class="location-autocomplete-container">
-                    {{ form.locality }}
-                  </div>
-                  {% if form.locality.errors %}
-                  <div class="validation-feedback invalid-feedback">
-                    <i class="bi bi-exclamation-circle"></i>
-                    {{ form.locality.errors.0 }}
-                  </div>
-                  {% endif %}
-                  <div class="form-text">
-                    <i class="bi bi-info-circle me-1"></i>
-                    Seleccione primero una provincia, luego escriba para buscar ciudad
+                  <div class="form-group">
+                    <label for="{{ form.locality.id_for_label }}" class="form-label">
+                      <i class="bi bi-geo-alt text-info me-1"></i>
+                      {{ form.locality.label }}
+                    </label>
+                    <div class="location-autocomplete-container">
+                      {{ form.locality }}
+                    </div>
+                    {% if form.locality.errors %}
+                    <div class="form-feedback invalid-feedback">
+                      <i class="bi bi-exclamation-circle me-1"></i>
+                      {{ form.locality.errors.0 }}
+                    </div>
+                    {% endif %}
+                    <div class="form-text text-muted">
+                      <i class="bi bi-info-circle me-1"></i>
+                      Seleccione primero una provincia, luego escriba para buscar ciudad
+                    </div>
                   </div>
                 </div>
               </div>
@@ -358,9 +391,9 @@
           </div>
 
           <!-- Características Físicas -->
-          <div class="row mb-5" id="section-physical">
-            <div class="col-12">
-              <div class="d-flex align-items-center mb-4">
+          <div class="card-modern mb-4" id="section-physical">
+            <div class="card-header">
+              <div class="d-flex align-items-center">
                 <div class="bg-warning rounded-circle p-2 me-3">
                   <i class="bi bi-rulers text-white"></i>
                 </div>
@@ -374,115 +407,173 @@
                 </div>
               </div>
             </div>
-            <div class="col-md-6 mb-3">
-              <label for="{{ form.total_surface.id_for_label }}" class="form-label fw-semibold">
-                <i class="bi bi-rulers text-warning me-1"></i>
-                {{form.total_surface.label }}
-              </label>
-              <div class="input-group">
-                {{ form.total_surface }}
-                <span class="input-group-text">m²</span>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <div class="form-group">
+                    <label for="{{ form.total_surface.id_for_label }}" class="form-label">
+                      <i class="bi bi-rulers text-warning me-1"></i>
+                      {{ form.total_surface.label }}
+                    </label>
+                    <div class="input-group">
+                      <input type="number" class="form-control-modern {% if form.total_surface.errors %}is-invalid{% endif %}" 
+                             id="{{ form.total_surface.id_for_label }}" name="{{ form.total_surface.name }}" 
+                             value="{{ form.total_surface.value|default:'' }}" step="0.01" min="0">
+                      <span class="input-group-text">m²</span>
+                    </div>
+                    {% if form.total_surface.errors %}
+                    <div class="form-feedback invalid-feedback">
+                      <i class="bi bi-exclamation-circle me-1"></i>
+                      {{ form.total_surface.errors.0 }}
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <div class="form-group">
+                    <label for="{{ form.covered_surface.id_for_label }}" class="form-label">
+                      <i class="bi bi-rulers text-secondary me-1"></i>
+                      {{ form.covered_surface.label }}
+                    </label>
+                    <div class="input-group">
+                      <input type="number" class="form-control-modern {% if form.covered_surface.errors %}is-invalid{% endif %}" 
+                             id="{{ form.covered_surface.id_for_label }}" name="{{ form.covered_surface.name }}" 
+                             value="{{ form.covered_surface.value|default:'' }}" step="0.01" min="0">
+                      <span class="input-group-text">m²</span>
+                    </div>
+                    {% if form.covered_surface.errors %}
+                    <div class="form-feedback invalid-feedback">
+                      <i class="bi bi-exclamation-circle me-1"></i>
+                      {{ form.covered_surface.errors.0 }}
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <div class="form-group">
+                    <label for="{{ form.year_built.id_for_label }}" class="form-label">
+                      <i class="bi bi-calendar text-secondary me-1"></i>
+                      {{ form.year_built.label }}
+                    </label>
+                    <input type="number" class="form-control-modern {% if form.year_built.errors %}is-invalid{% endif %}" 
+                           id="{{ form.year_built.id_for_label }}" name="{{ form.year_built.name }}" 
+                           value="{{ form.year_built.value|default:'' }}" min="1800" max="2030">
+                    {% if form.year_built.errors %}
+                    <div class="form-feedback invalid-feedback">
+                      <i class="bi bi-exclamation-circle me-1"></i>
+                      {{ form.year_built.errors.0 }}
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                  <div class="form-group">
+                    <label for="{{ form.bedrooms.id_for_label }}" class="form-label">
+                      <i class="bi bi-door-closed text-primary me-1"></i>
+                      {{ form.bedrooms.label }}
+                    </label>
+                    <input type="number" class="form-control-modern {% if form.bedrooms.errors %}is-invalid{% endif %}" 
+                           id="{{ form.bedrooms.id_for_label }}" name="{{ form.bedrooms.name }}" 
+                           value="{{ form.bedrooms.value|default:'' }}" min="0" max="20">
+                    {% if form.bedrooms.errors %}
+                    <div class="form-feedback invalid-feedback">
+                      <i class="bi bi-exclamation-circle me-1"></i>
+                      {{ form.bedrooms.errors.0 }}
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                  <div class="form-group">
+                    <label for="{{ form.bathrooms.id_for_label }}" class="form-label">
+                      <i class="bi bi-droplet text-info me-1"></i>
+                      {{ form.bathrooms.label }}
+                    </label>
+                    <input type="number" class="form-control-modern {% if form.bathrooms.errors %}is-invalid{% endif %}" 
+                           id="{{ form.bathrooms.id_for_label }}" name="{{ form.bathrooms.name }}" 
+                           value="{{ form.bathrooms.value|default:'' }}" min="0" max="10" step="0.5">
+                    {% if form.bathrooms.errors %}
+                    <div class="form-feedback invalid-feedback">
+                      <i class="bi bi-exclamation-circle me-1"></i>
+                      {{ form.bathrooms.errors.0 }}
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                  <div class="form-group">
+                    <div class="form-check form-switch mt-4 pt-2">
+                      <input type="checkbox" class="form-check-input" id="{{ form.garage.id_for_label }}" 
+                             name="{{ form.garage.name }}" {% if form.garage.value %}checked{% endif %}>
+                      <label class="form-check-label" for="{{ form.garage.id_for_label }}">
+                        <i class="bi bi-car-front text-success me-1"></i>
+                        {{ form.garage.label }}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                  <div class="form-group">
+                    <div class="form-check form-switch mt-4 pt-2">
+                      <input type="checkbox" class="form-check-input" id="{{ form.furnished.id_for_label }}" 
+                             name="{{ form.furnished.name }}" {% if form.furnished.value %}checked{% endif %}>
+                      <label class="form-check-label" for="{{ form.furnished.id_for_label }}">
+                        <i class="bi bi-house-check text-info me-1"></i>
+                        {{ form.furnished.label }}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <div class="form-group">
+                    <label for="{{ form.orientation.id_for_label }}" class="form-label">
+                      <i class="bi bi-compass text-secondary me-1"></i>
+                      {{ form.orientation.label }}
+                    </label>
+                    <select class="form-control-modern form-select-modern {% if form.orientation.errors %}is-invalid{% endif %}" 
+                            id="{{ form.orientation.id_for_label }}" name="{{ form.orientation.name }}">
+                      <option value="">Seleccionar orientación...</option>
+                      {% for choice in form.orientation.field.choices %}
+                      {% if choice.0 %}
+                      <option value="{{ choice.0 }}" {% if form.orientation.value == choice.0 %}selected{% endif %}>
+                        {{ choice.1 }}
+                      </option>
+                      {% endif %}
+                      {% endfor %}
+                    </select>
+                    {% if form.orientation.errors %}
+                    <div class="form-feedback invalid-feedback">
+                      <i class="bi bi-exclamation-circle me-1"></i>
+                      {{ form.orientation.errors.0 }}
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <div class="form-group">
+                    <label for="{{ form.floors.id_for_label }}" class="form-label">
+                      <i class="bi bi-building text-warning me-1"></i>
+                      {{ form.floors.label }}
+                    </label>
+                    <input type="number" class="form-control-modern {% if form.floors.errors %}is-invalid{% endif %}" 
+                           id="{{ form.floors.id_for_label }}" name="{{ form.floors.name }}" 
+                           value="{{ form.floors.value|default:'' }}" min="1" max="50">
+                    {% if form.floors.errors %}
+                    <div class="form-feedback invalid-feedback">
+                      <i class="bi bi-exclamation-circle me-1"></i>
+                      {{ form.floors.errors.0 }}
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
               </div>
-              {% if form.total_surface.errors %}
-              <div class="text-danger small mt-1">
-                {{ form.total_surface.errors }}
-              </div>
-              {% endif %}
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="{{ form.covered_surface.id_for_label }}" class="form-label fw-semibold">
-                <i class="bi bi-rulers text-secondary me-1"></i>
-                {{ form.covered_surface.label }}
-              </label>
-              <div class="input-group">
-                {{ form.covered_surface }}
-                <span class="input-group-text">m²</span>
-              </div>
-              {% if form.covered_surface.errors %}
-              <div class="text-danger small mt-1">
-                {{ form.covered_surface.errors }}
-              </div>
-              {% endif %}
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="{{ form.year_built.id_for_label }}" class="form-label fw-semibold">
-                <i class="bi bi-calendar text-secondary me-1"></i>
-                {{ form.year_built.label }}
-              </label>
-              {{ form.year_built }} {% if form.year_built.errors %}
-              <div class="text-danger small mt-1">
-                {{ form.year_built.errors }}
-              </div>
-              {% endif %}
-            </div>
-            <div class="col-md-3 mb-3">
-              <label for="{{ form.bedrooms.id_for_label }}" class="form-label fw-semibold">
-                <i class="bi bi-door-closed text-primary me-1"></i>
-                {{ form.bedrooms.label }}
-              </label>
-              {{ form.bedrooms }} {% if form.bedrooms.errors %}
-              <div class="text-danger small mt-1">
-                {{ form.bedrooms.errors }}
-              </div>
-              {% endif %}
-            </div>
-            <div class="col-md-3 mb-3">
-              <label for="{{ form.bathrooms.id_for_label }}" class="form-label fw-semibold">
-                <i class="bi bi-droplet text-info me-1"></i>
-                {{ form.bathrooms.label }}
-              </label>
-              {{ form.bathrooms }} {% if form.bathrooms.errors %}
-              <div class="text-danger small mt-1">
-                {{ form.bathrooms.errors }}
-              </div>
-              {% endif %}
-            </div>
-            <div class="col-md-3 mb-3">
-              <div class="form-check form-switch mt-4 pt-2">
-                {{ form.garage }}
-                <label class="form-check-label fw-semibold" for="{{ form.garage.id_for_label }}">
-                  <i class="bi bi-car-front text-success me-1"></i>
-                  {{ form.garage.label }}
-                </label>
-              </div>
-            </div>
-            <div class="col-md-3 mb-3">
-              <div class="form-check form-switch mt-4 pt-2">
-                {{ form.furnished }}
-                <label class="form-check-label fw-semibold" for="{{ form.furnished.id_for_label }}">
-                  <i class="bi bi-house-check text-info me-1"></i>
-                  {{ form.furnished.label }}
-                </label>
-              </div>
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="{{ form.orientation.id_for_label }}" class="form-label fw-semibold">
-                <i class="bi bi-compass text-secondary me-1"></i>
-                {{ form.orientation.label }}
-              </label>
-              {{ form.orientation }} {% if form.orientation.errors %}
-              <div class="text-danger small mt-1">
-                {{ form.orientation.errors }}
-              </div>
-              {% endif %}
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="{{ form.floors.id_for_label }}" class="form-label fw-semibold">
-                <i class="bi bi-building text-warning me-1"></i>
-                {{ form.floors.label }}
-              </label>
-              {{ form.floors }} {% if form.floors.errors %}
-              <div class="text-danger small mt-1">
-                {{ form.floors.errors }}
-              </div>
-              {% endif %}
             </div>
           </div>
 
           <!-- Información Financiera -->
-          <div class="row mb-5" id="section-financial">
-            <div class="col-12">
-              <div class="d-flex align-items-center mb-4">
+          <div class="card-modern mb-4" id="section-financial">
+            <div class="card-header">
+              <div class="d-flex align-items-center">
                 <div class="bg-info rounded-circle p-2 me-3">
                   <i class="bi bi-currency-dollar text-white"></i>
                 </div>
@@ -496,71 +587,90 @@
                 </div>
               </div>
             </div>
-            <div class="col-md-6 mb-3">
-              <label for="{{ form.sale_price.id_for_label }}" class="form-label fw-semibold">
-                <i class="bi bi-tag text-success me-1"></i>
-                {{ form.sale_price.label }}
-              </label>
-              <div class="input-group">
-                <span class="input-group-text">$</span>
-                {{ form.sale_price }}
-              </div>
-              {% if form.sale_price.errors %}
-              <div class="text-danger small mt-1">
-                {{ form.sale_price.errors }}
-              </div>
-              {% endif %}
-              <div class="form-text">
-                <i class="bi bi-info-circle me-1"></i>
-                Precio de venta de la propiedad (opcional)
-              </div>
-            </div>
-            <div class="col-md-6 mb-3">
-              <label for="{{ form.rental_price.id_for_label }}" class="form-label fw-semibold">
-                <i class="bi bi-calendar-month text-info me-1"></i>
-                {{ form.rental_price.label }}
-              </label>
-              <div class="input-group">
-                <span class="input-group-text">$</span>
-                {{ form.rental_price }}
-                <span class="input-group-text">/mes</span>
-              </div>
-              {% if form.rental_price.errors %}
-              <div class="text-danger small mt-1">
-                {{ form.rental_price.errors }}
-              </div>
-              {% endif %}
-              <div class="form-text">
-                <i class="bi bi-info-circle me-1"></i>
-                Precio de alquiler mensual (opcional)
-              </div>
-            </div>
-            <div class="col-md-12 mb-3">
-              <label for="{{ form.expenses.id_for_label }}" class="form-label fw-semibold">
-                <i class="bi bi-receipt text-warning me-1"></i>
-                {{ form.expenses.label }}
-              </label>
-              <div class="input-group">
-                <span class="input-group-text">$</span>
-                {{ form.expenses }}
-                <span class="input-group-text">/mes</span>
-              </div>
-              {% if form.expenses.errors %}
-              <div class="text-danger small mt-1">
-                {{ form.expenses.errors }}
-              </div>
-              {% endif %}
-              <div class="form-text">
-                <i class="bi bi-info-circle me-1"></i>
-                Gastos comunes o expensas mensuales (opcional)
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <div class="form-group">
+                    <label for="{{ form.sale_price.id_for_label }}" class="form-label">
+                      <i class="bi bi-tag text-success me-1"></i>
+                      {{ form.sale_price.label }}
+                    </label>
+                    <div class="input-group">
+                      <span class="input-group-text">$</span>
+                      <input type="number" class="form-control-modern {% if form.sale_price.errors %}is-invalid{% endif %}" 
+                             id="{{ form.sale_price.id_for_label }}" name="{{ form.sale_price.name }}" 
+                             value="{{ form.sale_price.value|default:'' }}" step="0.01" min="0">
+                    </div>
+                    {% if form.sale_price.errors %}
+                    <div class="form-feedback invalid-feedback">
+                      <i class="bi bi-exclamation-circle me-1"></i>
+                      {{ form.sale_price.errors.0 }}
+                    </div>
+                    {% endif %}
+                    <div class="form-text text-muted">
+                      <i class="bi bi-info-circle me-1"></i>
+                      Precio de venta de la propiedad (opcional)
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <div class="form-group">
+                    <label for="{{ form.rental_price.id_for_label }}" class="form-label">
+                      <i class="bi bi-calendar-month text-info me-1"></i>
+                      {{ form.rental_price.label }}
+                    </label>
+                    <div class="input-group">
+                      <span class="input-group-text">$</span>
+                      <input type="number" class="form-control-modern {% if form.rental_price.errors %}is-invalid{% endif %}" 
+                             id="{{ form.rental_price.id_for_label }}" name="{{ form.rental_price.name }}" 
+                             value="{{ form.rental_price.value|default:'' }}" step="0.01" min="0">
+                      <span class="input-group-text">/mes</span>
+                    </div>
+                    {% if form.rental_price.errors %}
+                    <div class="form-feedback invalid-feedback">
+                      <i class="bi bi-exclamation-circle me-1"></i>
+                      {{ form.rental_price.errors.0 }}
+                    </div>
+                    {% endif %}
+                    <div class="form-text text-muted">
+                      <i class="bi bi-info-circle me-1"></i>
+                      Precio de alquiler mensual (opcional)
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-12 mb-3">
+                  <div class="form-group">
+                    <label for="{{ form.expenses.id_for_label }}" class="form-label">
+                      <i class="bi bi-receipt text-warning me-1"></i>
+                      {{ form.expenses.label }}
+                    </label>
+                    <div class="input-group">
+                      <span class="input-group-text">$</span>
+                      <input type="number" class="form-control-modern {% if form.expenses.errors %}is-invalid{% endif %}" 
+                             id="{{ form.expenses.id_for_label }}" name="{{ form.expenses.name }}" 
+                             value="{{ form.expenses.value|default:'' }}" step="0.01" min="0">
+                      <span class="input-group-text">/mes</span>
+                    </div>
+                    {% if form.expenses.errors %}
+                    <div class="form-feedback invalid-feedback">
+                      <i class="bi bi-exclamation-circle me-1"></i>
+                      {{ form.expenses.errors.0 }}
+                    </div>
+                    {% endif %}
+                    <div class="form-text text-muted">
+                      <i class="bi bi-info-circle me-1"></i>
+                      Gastos comunes o expensas mensuales (opcional)
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Características y Etiquetas -->
-          <div class="row mb-5" id="section-features">
-            <div class="col-12">
-              <div class="d-flex align-items-center mb-4">
+          <div class="card-modern mb-4" id="section-features">
+            <div class="card-header">
+              <div class="d-flex align-items-center">
                 <div class="bg-success rounded-circle p-2 me-3">
                   <i class="bi bi-tags text-white"></i>
                 </div>
@@ -574,65 +684,87 @@
                 </div>
               </div>
             </div>
-            <div class="col-md-6 mb-3">
-              <label class="form-label fw-semibold">
-                <i class="bi bi-star text-warning me-1"></i>
-                {{ form.features.label }}
-              </label>
-              <div class="border rounded p-3 bg-light" style="max-height: 200px; overflow-y: auto">
-                {{ form.features }}
-              </div>
-              {% if form.features.errors %}
-              <div class="text-danger small mt-1">
-                {{ form.features.errors }}
-              </div>
-              {% endif %}
-              <div class="mt-2">
-                <label for="{{ form.new_features.id_for_label }}" class="form-label fw-semibold small">
-                  Agregar nuevas características
-                </label>
-                {{ form.new_features }} {% if form.new_features.errors %}
-                <div class="text-danger small mt-1">
-                  {{ form.new_features.errors }}
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <div class="form-group">
+                    <label class="form-label">
+                      <i class="bi bi-star text-warning me-1"></i>
+                      {{ form.features.label }}
+                    </label>
+                    <div class="border rounded p-3 bg-light" style="max-height: 200px; overflow-y: auto">
+                      {{ form.features }}
+                    </div>
+                    {% if form.features.errors %}
+                    <div class="form-feedback invalid-feedback">
+                      <i class="bi bi-exclamation-circle me-1"></i>
+                      {{ form.features.errors.0 }}
+                    </div>
+                    {% endif %}
+                    <div class="mt-3">
+                      <label for="{{ form.new_features.id_for_label }}" class="form-label small">
+                        Agregar nuevas características
+                      </label>
+                      <input type="text" class="form-control-modern {% if form.new_features.errors %}is-invalid{% endif %}" 
+                             id="{{ form.new_features.id_for_label }}" name="{{ form.new_features.name }}" 
+                             value="{{ form.new_features.value|default:'' }}" 
+                             placeholder="Separar con comas para múltiples características">
+                      {% if form.new_features.errors %}
+                      <div class="form-feedback invalid-feedback">
+                        <i class="bi bi-exclamation-circle me-1"></i>
+                        {{ form.new_features.errors.0 }}
+                      </div>
+                      {% endif %}
+                    </div>
+                  </div>
                 </div>
-                {% endif %}
-              </div>
-            </div>
-            <div class="col-md-6 mb-3">
-              <label class="form-label fw-semibold">
-                <i class="bi bi-tag text-info me-1"></i>{{ form.tags.label }}
-              </label>
-              <div class="border rounded p-3 bg-light" style="max-height: 200px; overflow-y: auto">
-                {{ form.tags }}
-              </div>
-              {% if form.tags.errors %}
-              <div class="text-danger small mt-1">{{ form.tags.errors }}</div>
-              {% endif %}
-              <div class="mt-2">
-                <label for="{{ form.new_tags.id_for_label }}" class="form-label fw-semibold small">
-                  Agregar nuevas etiquetas
-                </label>
-                {{ form.new_tags }} {% if form.new_tags.errors %}
-                <div class="text-danger small mt-1">
-                  {{ form.new_tags.errors }}
+                <div class="col-md-6 mb-3">
+                  <div class="form-group">
+                    <label class="form-label">
+                      <i class="bi bi-tag text-info me-1"></i>{{ form.tags.label }}
+                    </label>
+                    <div class="border rounded p-3 bg-light" style="max-height: 200px; overflow-y: auto">
+                      {{ form.tags }}
+                    </div>
+                    {% if form.tags.errors %}
+                    <div class="form-feedback invalid-feedback">
+                      <i class="bi bi-exclamation-circle me-1"></i>
+                      {{ form.tags.errors.0 }}
+                    </div>
+                    {% endif %}
+                    <div class="mt-3">
+                      <label for="{{ form.new_tags.id_for_label }}" class="form-label small">
+                        Agregar nuevas etiquetas
+                      </label>
+                      <input type="text" class="form-control-modern {% if form.new_tags.errors %}is-invalid{% endif %}" 
+                             id="{{ form.new_tags.id_for_label }}" name="{{ form.new_tags.name }}" 
+                             value="{{ form.new_tags.value|default:'' }}" 
+                             placeholder="Separar con comas para múltiples etiquetas">
+                      {% if form.new_tags.errors %}
+                      <div class="form-feedback invalid-feedback">
+                        <i class="bi bi-exclamation-circle me-1"></i>
+                        {{ form.new_tags.errors.0 }}
+                      </div>
+                      {% endif %}
+                    </div>
+                  </div>
                 </div>
-                {% endif %}
-              </div>
-            </div>
-            <div class="col-12">
-              <div class="alert alert-info border-info">
-                <i class="bi bi-lightbulb me-2"></i>
-                <strong>Consejo:</strong> Seleccione características y
-                etiquetas existentes o escriba nuevas (separadas por coma)
-                para crearlas automáticamente.
+                <div class="col-12">
+                  <div class="alert-modern alert-info">
+                    <i class="bi bi-lightbulb me-2"></i>
+                    <strong>Consejo:</strong> Seleccione características y
+                    etiquetas existentes o escriba nuevas (separadas por coma)
+                    para crearlas automáticamente.
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Imágenes -->
           {% if image_formset %}
-          <div class="form-section" id="section-images">
-            <div class="section-header">
+          <div class="card-modern mb-4" id="section-images">
+            <div class="card-header">
               <div class="d-flex align-items-center">
                 <div class="bg-secondary rounded-circle p-2 me-3">
                   <i class="bi bi-images text-white"></i>
@@ -645,15 +777,15 @@
                 </div>
               </div>
             </div>
-            <div class="section-content">
+            <div class="card-body">
               <!-- Drag and Drop Zone -->
-              <div class="drag-drop-zone mb-4" id="dragDropZone">
+              <div class="drag-drop-zone mb-4 p-4 border border-2 border-dashed rounded-lg text-center" id="dragDropZone">
                 <div class="text-center">
                   <i class="bi bi-cloud-upload display-4 text-primary mb-3"></i>
                   <h5 class="text-primary mb-2">Arrastra y suelta tus imágenes aquí</h5>
                   <p class="text-muted mb-3">o haz clic para seleccionar archivos</p>
                   <input type="file" id="multipleImageInput" multiple accept="image/*" style="display: none;">
-                  <button type="button" class="btn btn-primary btn-enhanced"
+                  <button type="button" class="btn-modern btn-primary"
                     onclick="document.getElementById('multipleImageInput').click()">
                     <i class="bi bi-plus-circle me-2"></i>Seleccionar Imágenes
                   </button>
@@ -665,8 +797,7 @@
                   </div>
                 </div>
               </div>
-              <div class="alert alert-info border-0 shadow-sm mb-4"
-                style="border-left: 4px solid var(--property-info) !important;">
+              <div class="alert-modern alert-info mb-4">
                 <i class="bi bi-lightbulb me-2"></i>
                 <strong>Consejo:</strong> La primera imagen será la imagen principal. Puedes reordenar las imágenes
                 arrastrándolas.
@@ -674,7 +805,7 @@
               {{ image_formset.management_form }}
               <div id="image-forms-container">
                 {% for image_form in image_formset %}
-                <div class="image-form-container card mb-3 border-light">
+                <div class="image-form-container card-modern mb-3">
                   <div class="card-body p-3">
                     {% if image_form.instance.pk %}{{ image_form.DELETE }}{{ image_form.id }}{% endif %}
                     <div class="row g-3 align-items-start">
@@ -693,30 +824,36 @@
                       </div>
                       <div class="col-md-9">
                         <div class="mb-3">
-                          <label class="form-label fw-semibold">
+                          <label class="form-label">
                             <i class="bi bi-image me-1"></i>Imagen
                           </label>
-                          {{ image_form.image }}
+                          <input type="file" class="form-control-modern" name="{{ image_form.image.name }}" 
+                                 id="{{ image_form.image.id_for_label }}" accept="image/*">
                         </div>
                         <div class="mb-3">
-                          <label class="form-label fw-semibold">
+                          <label class="form-label">
                             <i class="bi bi-card-text me-1"></i>Descripción
                           </label>
-                          {{ image_form.description }}
+                          <input type="text" class="form-control-modern" name="{{ image_form.description.name }}" 
+                                 id="{{ image_form.description.id_for_label }}" 
+                                 value="{{ image_form.description.value|default:'' }}" 
+                                 placeholder="Descripción de la imagen">
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                           <div class="form-check">
-                            {{ image_form.is_cover }}
+                            <input type="checkbox" class="form-check-input" name="{{ image_form.is_cover.name }}" 
+                                   id="{{ image_form.is_cover.id_for_label }}" 
+                                   {% if image_form.is_cover.value %}checked{% endif %}>
                             <label class="form-check-label" for="{{ image_form.is_cover.id_for_label }}">
                               Imagen principal
                             </label>
                           </div>
                           {% if image_form.instance.pk %}
-                          <button type="button" class="btn btn-outline-danger btn-sm mark-for-deletion">
+                          <button type="button" class="btn-modern btn-outline-danger btn-sm mark-for-deletion">
                             <i class="bi bi-trash me-1"></i>Eliminar
                           </button>
                           {% else %}
-                          <button type="button" class="btn btn-outline-secondary btn-sm remove-image-form">
+                          <button type="button" class="btn-modern btn-outline-secondary btn-sm remove-image-form">
                             <i class="bi bi-x me-1"></i>Quitar
                           </button>
                           {% endif %}
@@ -727,7 +864,7 @@
                 </div>
                 {% endfor %}
               </div>
-              <button type="button" id="add-image-form" class="btn btn-outline-primary">
+              <button type="button" id="add-image-form" class="btn-modern btn-outline-primary">
                 <i class="bi bi-plus-circle me-1"></i>Agregar Imagen
               </button>
             </div>
@@ -735,15 +872,14 @@
           {% endif %}
         </form>
         <!-- Form Actions -->
-        <div class="form-actions">
+        <div class="form-actions mt-4">
           <div class="d-flex justify-content-between align-items-center">
-
             <div class="action-buttons">
               <a href="{% if form.instance.pk %}{% url 'properties:property_detail' form.instance.pk %}{% else %}{% url 'properties:property_list' %}{% endif %}"
-                class="btn btn-outline-secondary me-3">
+                class="btn-modern btn-outline-secondary me-3">
                 <i class="bi bi-x-circle me-1"></i> Cancelar
               </a>
-              <button type="submit" form="propertyForm" class="btn btn-primary-enhanced btn-enhanced">
+              <button type="submit" form="propertyForm" class="btn-modern btn-primary btn-lg">
                 <i class="bi bi-check-circle-fill me-2"></i>
                 {% if form.instance.pk %}Actualizar Propiedad{% else %}Guardar Propiedad{% endif %}
               </button>

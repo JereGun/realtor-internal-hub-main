@@ -19,262 +19,323 @@
 
 {% block content %}
 <div class="container-fluid mt-4">
-    <!-- Encabezado -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 text-dark mb-1">
-                {% if object %}
-                    <i class="bi bi-person-gear me-2 text-primary"></i>Editar Agente
-                {% else %}
-                    <i class="bi bi-person-plus me-2 text-primary"></i>Nuevo Agente
-                {% endif %}
-            </h1>
-            <p class="text-muted mb-0">
-                {% if object %}
-                    Actualice la información de {{ object.full_name }}
-                {% else %}
-                    Complete la información del nuevo agente inmobiliario
-                {% endif %}
-            </p>
+    <!-- Enhanced Page Header -->
+    <div class="page-header mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h2 mb-2 fw-bold">
+                    {% if object %}
+                        <i class="bi bi-person-gear me-3"></i>Editar Agente
+                    {% else %}
+                        <i class="bi bi-person-plus me-3"></i>Nuevo Agente
+                    {% endif %}
+                </h1>
+                <p class="mb-0 opacity-90">
+                    {% if object %}
+                        Actualice la información de {{ object.full_name }}
+                    {% else %}
+                        Complete la información del nuevo agente inmobiliario
+                    {% endif %}
+                </p>
+            </div>
+            <a href="{% if object %}{% url 'agents:agent_detail' object.pk %}{% else %}{% url 'agents:agent_list' %}{% endif %}" 
+               class="btn btn-light btn-modern">
+                <i class="bi bi-arrow-left me-2"></i>
+                {% if object %}Volver a Detalles{% else %}Volver a Lista{% endif %}
+            </a>
         </div>
-        <a href="{% if object %}{% url 'agents:agent_detail' object.pk %}{% else %}{% url 'agents:agent_list' %}{% endif %}" 
-           class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i>
-            {% if object %}Volver a Detalles{% else %}Volver a Lista{% endif %}
-        </a>
     </div>
 
     <div class="row">
-        <div class="col-lg-8 mx-auto">
-            <div class="card shadow-sm border-light">
-                <div class="card-body p-4">
-                    <form method="post" enctype="multipart/form-data" id="agentForm">
+        <div class="col-lg-10 col-xl-8 mx-auto">
+            <div class="card-modern">
+                <div class="card-body p-5">
+                    <form method="post" enctype="multipart/form-data" id="agentForm" class="needs-validation" novalidate>
                         {% csrf_token %}
                         
-                        <!-- Información Personal -->
-                        <div class="row mb-5">
-                            <div class="col-12">
-                                <div class="d-flex align-items-center mb-4">
-                                    <div class="bg-primary rounded-circle p-2 me-3">
-                                        <i class="bi bi-person text-white"></i>
+                        <!-- Personal Information Section -->
+                        <div class="form-section mb-5">
+                            <div class="section-header mb-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="section-icon bg-gradient-primary">
+                                        <i class="bi bi-person"></i>
                                     </div>
-                                    <div>
-                                        <h4 class="text-primary mb-1 fw-bold">Información Personal</h4>
-                                        <p class="text-muted small mb-0">Datos básicos del agente</p>
+                                    <div class="ms-4">
+                                        <h4 class="section-title">Información Personal</h4>
+                                        <p class="section-subtitle">Datos básicos del agente inmobiliario</p>
                                     </div>
                                 </div>
                             </div>
                         
-                        <!-- Foto de perfil -->
-                        <div class="col-md-4 text-center mb-3">
-                            <div class="profile-image-container">
-                                <div id="image-preview" class="mb-3">
-                                    {% if object.image_path %}
-                                        <img src="{{ object.image_path.url }}" class="rounded-circle" width="150" height="150" style="object-fit: cover;" alt="Foto actual">
-                                    {% else %}
-                                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 150px; height: 150px; border: 2px dashed #ccc;">
-                                            <i class="bi bi-person text-muted" style="font-size: 4rem;"></i>
+                            <!-- Profile Image Upload -->
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="profile-upload-section text-center">
+                                        <div class="profile-image-container mb-4">
+                                            <div id="image-preview" class="position-relative">
+                                                {% if object.image_path %}
+                                                    <img src="{{ object.image_path.url }}" class="profile-image-preview" alt="Foto actual">
+                                                {% else %}
+                                                    <div class="profile-image-placeholder">
+                                                        <i class="bi bi-person"></i>
+                                                    </div>
+                                                {% endif %}
+                                                <div class="image-overlay">
+                                                    <i class="bi bi-camera"></i>
+                                                </div>
+                                            </div>
                                         </div>
-                                    {% endif %}
+                                        
+                                        <div class="upload-controls">
+                                            <label for="{{ form.image_path.id_for_label }}" class="btn btn-outline-primary btn-modern">
+                                                <i class="bi bi-camera me-2"></i>Seleccionar Foto
+                                            </label>
+                                            <input type="file" id="{{ form.image_path.id_for_label }}" name="{{ form.image_path.name }}" 
+                                                   class="d-none" accept="image/*">
+                                            {% if form.image_path.errors %}
+                                                <div class="invalid-feedback d-block mt-2">{{ form.image_path.errors }}</div>
+                                            {% endif %}
+                                            <div class="form-text mt-2">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-info-circle me-1"></i>
+                                                    JPG, PNG, GIF. Máximo 2MB
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                        
+                                <div class="col-md-8">
+                                    <div class="row g-4">
+                                        <div class="col-md-6">
+                                            <div class="form-group-modern">
+                                                <label for="{{ form.first_name.id_for_label }}" class="form-label-modern">
+                                                    <i class="bi bi-person me-2 text-primary"></i>{{ form.first_name.label }}
+                                                    <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="text" id="{{ form.first_name.id_for_label }}" 
+                                                       name="{{ form.first_name.name }}" 
+                                                       class="form-control form-control-modern {% if form.first_name.errors %}is-invalid{% endif %}"
+                                                       value="{{ form.first_name.value|default:'' }}"
+                                                       placeholder="Ingrese el nombre" required>
+                                                {% if form.first_name.errors %}
+                                                    <div class="invalid-feedback">{{ form.first_name.errors.0 }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group-modern">
+                                                <label for="{{ form.last_name.id_for_label }}" class="form-label-modern">
+                                                    <i class="bi bi-person me-2 text-primary"></i>{{ form.last_name.label }}
+                                                    <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="text" id="{{ form.last_name.id_for_label }}" 
+                                                       name="{{ form.last_name.name }}" 
+                                                       class="form-control form-control-modern {% if form.last_name.errors %}is-invalid{% endif %}"
+                                                       value="{{ form.last_name.value|default:'' }}"
+                                                       placeholder="Ingrese el apellido" required>
+                                                {% if form.last_name.errors %}
+                                                    <div class="invalid-feedback">{{ form.last_name.errors.0 }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-group-modern">
+                                                <label for="{{ form.email.id_for_label }}" class="form-label-modern">
+                                                    <i class="bi bi-envelope me-2 text-success"></i>{{ form.email.label }}
+                                                    <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="email" id="{{ form.email.id_for_label }}" 
+                                                       name="{{ form.email.name }}" 
+                                                       class="form-control form-control-modern {% if form.email.errors %}is-invalid{% endif %}"
+                                                       value="{{ form.email.value|default:'' }}"
+                                                       placeholder="ejemplo@correo.com" required>
+                                                {% if form.email.errors %}
+                                                    <div class="invalid-feedback">{{ form.email.errors.0 }}</div>
+                                                {% endif %}
+                                                <div class="form-text">
+                                                    <i class="bi bi-info-circle me-1 text-info"></i>
+                                                    Este email se usará para iniciar sesión en el sistema
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-group-modern">
+                                                <label for="{{ form.phone.id_for_label }}" class="form-label-modern">
+                                                    <i class="bi bi-telephone me-2 text-info"></i>{{ form.phone.label }}
+                                                </label>
+                                                <input type="tel" id="{{ form.phone.id_for_label }}" 
+                                                       name="{{ form.phone.name }}" 
+                                                       class="form-control form-control-modern {% if form.phone.errors %}is-invalid{% endif %}"
+                                                       value="{{ form.phone.value|default:'' }}"
+                                                       placeholder="+1 (555) 123-4567">
+                                                {% if form.phone.errors %}
+                                                    <div class="invalid-feedback">{{ form.phone.errors.0 }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Professional Information Section -->
+                        <div class="form-section mb-5">
+                            <div class="section-header mb-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="section-icon bg-gradient-success">
+                                        <i class="bi bi-briefcase"></i>
+                                    </div>
+                                    <div class="ms-4">
+                                        <h4 class="section-title">Información Profesional</h4>
+                                        <p class="section-subtitle">Datos profesionales y credenciales del agente</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="form-group-modern">
+                                        <label for="{{ form.license_number.id_for_label }}" class="form-label-modern">
+                                            <i class="bi bi-award me-2 text-warning"></i>{{ form.license_number.label }}
+                                            <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" id="{{ form.license_number.id_for_label }}" 
+                                               name="{{ form.license_number.name }}" 
+                                               class="form-control form-control-modern {% if form.license_number.errors %}is-invalid{% endif %}"
+                                               value="{{ form.license_number.value|default:'' }}"
+                                               placeholder="Ej: MAT-2024-001" required>
+                                        {% if form.license_number.errors %}
+                                            <div class="invalid-feedback">{{ form.license_number.errors.0 }}</div>
+                                        {% endif %}
+                                        <div class="form-text">
+                                            <i class="bi bi-info-circle me-1 text-info"></i>
+                                            Número de matrícula profesional único
+                                        </div>
+                                    </div>
                                 </div>
                                 
-                                <div class="mb-3">
-                                    <label for="{{ form.image_path.id_for_label }}" class="form-label">
-                                        <i class="bi bi-camera"></i> {{ form.image_path.label }}
-                                    </label>
-                                    {{ form.image_path }}
-                                    {% if form.image_path.errors %}
-                                        <div class="text-danger">{{ form.image_path.errors }}</div>
-                                    {% endif %}
-                                    <div class="form-text">
-                                        Formatos permitidos: JPG, PNG, GIF. Tamaño máximo: 2MB.
+                                <div class="col-md-6">
+                                    <div class="form-group-modern">
+                                        <label for="id_bio" class="form-label-modern">
+                                            <i class="bi bi-person-lines-fill me-2 text-info"></i>Biografía Profesional
+                                            <span class="badge badge-modern badge-secondary ms-2">Opcional</span>
+                                        </label>
+                                        <textarea name="bio" id="id_bio" 
+                                                  class="form-control form-control-modern" 
+                                                  rows="4" 
+                                                  placeholder="Breve descripción profesional del agente...">{% if object.bio %}{{ object.bio }}{% endif %}</textarea>
+                                        <div class="form-text">
+                                            <i class="bi bi-info-circle me-1 text-info"></i>
+                                            Descripción que aparecerá en el perfil público
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="col-md-8">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.first_name.id_for_label }}" class="form-label">
-                                        <i class="bi bi-person"></i> {{ form.first_name.label }}
-                                    </label>
-                                    {{ form.first_name }}
-                                    {% if form.first_name.errors %}
-                                        <div class="text-danger">{{ form.first_name.errors }}</div>
-                                    {% endif %}
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.last_name.id_for_label }}" class="form-label">
-                                        <i class="bi bi-person"></i> {{ form.last_name.label }}
-                                    </label>
-                                    {{ form.last_name }}
-                                    {% if form.last_name.errors %}
-                                        <div class="text-danger">{{ form.last_name.errors }}</div>
-                                    {% endif %}
+
+                        <!-- Agent Status and Statistics (Edit Mode Only) -->
+                        {% if object %}
+                        <div class="form-section mb-5">
+                            <div class="section-header mb-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="section-icon bg-gradient-info">
+                                        <i class="bi bi-gear"></i>
+                                    </div>
+                                    <div class="ms-4">
+                                        <h4 class="section-title">Estado y Estadísticas</h4>
+                                        <p class="section-subtitle">Información actual del agente en el sistema</p>
+                                    </div>
                                 </div>
                             </div>
                             
-                            <div class="mb-3">
-                                <label for="{{ form.email.id_for_label }}" class="form-label">
-                                    <i class="bi bi-envelope"></i> {{ form.email.label }}
-                                </label>
-                                {{ form.email }}
-                                {% if form.email.errors %}
-                                    <div class="text-danger">{{ form.email.errors }}</div>
-                                {% endif %}
-                                <div class="form-text">
-                                    Este email se usará para iniciar sesión en el sistema.
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="{{ form.phone.id_for_label }}" class="form-label">
-                                    <i class="bi bi-telephone"></i> {{ form.phone.label }}
-                                </label>
-                                {{ form.phone }}
-                                {% if form.phone.errors %}
-                                    <div class="text-danger">{{ form.phone.errors }}</div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Información Profesional -->
-                    <div class="row mb-5">
-                        <div class="col-12">
-                            <div class="d-flex align-items-center mb-4">
-                                <div class="bg-success rounded-circle p-2 me-3">
-                                    <i class="bi bi-briefcase text-white"></i>
-                                </div>
-                                <div>
-                                    <h4 class="text-success mb-1 fw-bold">Información Profesional</h4>
-                                    <p class="text-muted small mb-0">Datos profesionales del agente</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <label for="{{ form.license_number.id_for_label }}" class="form-label fw-semibold">
-                                <i class="bi bi-award text-warning me-1"></i>{{ form.license_number.label }}
-                            </label>
-                            {{ form.license_number }}
-                            {% if form.license_number.errors %}
-                                <div class="text-danger small mt-1">{{ form.license_number.errors }}</div>
-                            {% endif %}
-                            <div class="form-text">
-                                <i class="bi bi-info-circle me-1"></i>Número de matrícula profesional único
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <label for="{{ form.bio.id_for_label }}" class="form-label fw-semibold">
-                                <i class="bi bi-person-lines-fill text-info me-1"></i>Biografía (Opcional)
-                            </label>
-                            <textarea name="bio" id="id_bio" class="form-control" rows="3" 
-                                      placeholder="Breve descripción profesional del agente...">{% if object.bio %}{{ object.bio }}{% endif %}</textarea>
-                            <div class="form-text">
-                                <i class="bi bi-info-circle me-1"></i>Descripción profesional que aparecerá en el perfil público
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Estado del Agente -->
-                    {% if object %}
-                    <div class="row mb-5">
-                        <div class="col-12">
-                            <div class="d-flex align-items-center mb-4">
-                                <div class="bg-info rounded-circle p-2 me-3">
-                                    <i class="bi bi-gear text-white"></i>
-                                </div>
-                                <div>
-                                    <h4 class="text-info mb-1 fw-bold">Configuración y Estadísticas</h4>
-                                    <p class="text-muted small mb-0">Estado actual del agente en el sistema</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <div class="card bg-light border-light">
-                                <div class="card-body p-3">
-                                    <h6 class="card-title text-dark fw-bold mb-3">
-                                        <i class="bi bi-toggle-on me-1"></i>Estado del Agente
-                                    </h6>
-                                    <div class="d-flex align-items-center mb-3">
-                                        <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" id="agentStatus" 
-                                                   {% if object.is_active %}checked{% endif %} disabled>
-                                            <label class="form-check-label fw-semibold" for="agentStatus">
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="info-card">
+                                        <div class="info-card-header">
+                                            <h6 class="info-card-title">
+                                                <i class="bi bi-toggle-on me-2"></i>Estado del Agente
+                                            </h6>
+                                        </div>
+                                        <div class="info-card-body">
+                                            <div class="status-indicator-large mb-3">
                                                 {% if object.is_active %}
-                                                    <span class="text-success">
-                                                        <i class="bi bi-check-circle me-1"></i>Agente Activo
-                                                    </span>
+                                                    <div class="status-badge status-active-large">
+                                                        <i class="bi bi-check-circle me-2"></i>
+                                                        <span>Agente Activo</span>
+                                                    </div>
                                                 {% else %}
-                                                    <span class="text-danger">
-                                                        <i class="bi bi-pause-circle me-1"></i>Agente Inactivo
-                                                    </span>
+                                                    <div class="status-badge status-inactive-large">
+                                                        <i class="bi bi-pause-circle me-2"></i>
+                                                        <span>Agente Inactivo</span>
+                                                    </div>
                                                 {% endif %}
-                                            </label>
+                                            </div>
+                                            <div class="alert alert-info-modern">
+                                                <i class="bi bi-info-circle me-2"></i>
+                                                <small>El estado del agente se gestiona desde el panel de administración</small>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="alert alert-info py-2 mb-0">
-                                        <small>
-                                            <i class="bi bi-info-circle me-1"></i>
-                                            El estado del agente se gestiona desde el panel de administración.
-                                        </small>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <div class="card bg-light border-light">
-                                <div class="card-body p-3">
-                                    <h6 class="card-title text-dark fw-bold mb-3">
-                                        <i class="bi bi-bar-chart me-1"></i>Estadísticas
-                                    </h6>
-                                    <div class="row g-2 text-center">
-                                        <div class="col-4">
-                                            <div class="bg-primary-subtle rounded-2 p-2 border border-primary-subtle">
-                                                <div class="fw-bold text-primary">{{ object.property_set.count }}</div>
-                                                <small class="text-primary fw-semibold">Propiedades</small>
-                                            </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="info-card">
+                                        <div class="info-card-header">
+                                            <h6 class="info-card-title">
+                                                <i class="bi bi-bar-chart me-2"></i>Estadísticas
+                                            </h6>
                                         </div>
-                                        <div class="col-4">
-                                            <div class="bg-success-subtle rounded-2 p-2 border border-success-subtle">
-                                                <div class="fw-bold text-success">{{ object.date_joined|timesince|truncatewords:1 }}</div>
-                                                <small class="text-success fw-semibold">Antigüedad</small>
-                                            </div>
-                                        </div>
-                                        <div class="col-4">
-                                            <div class="bg-info-subtle rounded-2 p-2 border border-info-subtle">
-                                                <div class="fw-bold text-info">{{ object.date_joined|date:"M Y" }}</div>
-                                                <small class="text-info fw-semibold">Registro</small>
+                                        <div class="info-card-body">
+                                            <div class="stats-grid">
+                                                <div class="stat-item stat-primary">
+                                                    <div class="stat-value">{{ object.property_set.count }}</div>
+                                                    <div class="stat-label">Propiedades</div>
+                                                </div>
+                                                <div class="stat-item stat-success">
+                                                    <div class="stat-value">{{ object.date_joined|timesince|truncatewords:1 }}</div>
+                                                    <div class="stat-label">Antigüedad</div>
+                                                </div>
+                                                <div class="stat-item stat-info">
+                                                    <div class="stat-value">{{ object.date_joined|date:"M Y" }}</div>
+                                                    <div class="stat-label">Registro</div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    {% endif %}
+                        {% endif %}
 
-                    <!-- Botones -->
-                    <div class="row">
-                        <div class="col-12">
-                            <hr>
-                            <div class="d-flex justify-content-end gap-2">
-                                <a href="{% if object %}{% url 'agents:agent_detail' object.pk %}{% else %}{% url 'agents:agent_list' %}{% endif %}" class="btn btn-secondary">
-                                    <i class="bi bi-x-circle"></i> Cancelar
-                                </a>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-check-circle"></i> 
-                                    {% if object %}Actualizar{% else %}Crear{% endif %} Agente
-                                </button>
+                        <!-- Form Actions -->
+                        <div class="form-actions">
+                            <div class="section-divider"></div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="form-help-text">
+                                    <i class="bi bi-info-circle me-2 text-info"></i>
+                                    <small class="text-muted">Los campos marcados con * son obligatorios</small>
+                                </div>
+                                <div class="btn-group-modern">
+                                    <a href="{% if object %}{% url 'agents:agent_detail' object.pk %}{% else %}{% url 'agents:agent_list' %}{% endif %}" 
+                                       class="btn btn-outline-secondary btn-modern">
+                                        <i class="bi bi-x-circle me-2"></i>Cancelar
+                                    </a>
+                                    <button type="submit" class="btn btn-primary btn-modern" id="submitBtn">
+                                        <span class="btn-text">
+                                            <i class="bi bi-check-circle me-2"></i>
+                                            {% if object %}Actualizar{% else %}Crear{% endif %} Agente
+                                        </span>
+                                        <span class="btn-loading d-none">
+                                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                            Guardando...
+                                        </span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -282,112 +343,515 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Vista previa de imagen
+    // Enhanced image preview functionality
     const imageInput = document.getElementById('{{ form.image_path.id_for_label }}');
     const imagePreview = document.getElementById('image-preview');
 
-    if (imageInput) {
+    if (imageInput && imagePreview) {
         imageInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
-                // Validar tipo de archivo
+                // Validate file type
                 const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
                 if (!validTypes.includes(file.type)) {
-                    alert('Por favor, selecciona un archivo de imagen válido (JPG, PNG, GIF).');
+                    showToast('Por favor, selecciona un archivo de imagen válido (JPG, PNG, GIF)', 'error');
                     this.value = '';
                     return;
                 }
 
-                // Validar tamaño (2MB = 2 * 1024 * 1024 bytes)
+                // Validate file size (2MB)
                 if (file.size > 2 * 1024 * 1024) {
-                    alert('El archivo es demasiado grande. El tamaño máximo es 2MB.');
+                    showToast('El archivo es demasiado grande. El tamaño máximo es 2MB', 'error');
                     this.value = '';
                     return;
                 }
 
-                // Mostrar vista previa
+                // Show preview with animation
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     imagePreview.innerHTML = `
-                        <img src="${e.target.result}" class="rounded-circle" width="150" height="150" style="object-fit: cover;" alt="Vista previa">
+                        <img src="${e.target.result}" class="profile-image-preview" alt="Vista previa">
+                        <div class="image-overlay">
+                            <i class="bi bi-camera"></i>
+                        </div>
                     `;
+                    imagePreview.classList.add('has-image');
                 };
                 reader.readAsDataURL(file);
             }
         });
     }
 
-    // Validación del formulario
-    const form = document.querySelector('form');
+    // Enhanced form validation
+    const form = document.getElementById('agentForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
     if (form) {
-        form.addEventListener('submit', function(e) {
-            let isValid = true;
-            const requiredFields = ['first_name', 'last_name', 'email', 'license_number'];
-            
-            requiredFields.forEach(fieldName => {
-                const field = document.getElementById(`id_${fieldName}`);
-                if (field && !field.value.trim()) {
-                    isValid = false;
-                    field.classList.add('is-invalid');
-                } else if (field) {
-                    field.classList.remove('is-invalid');
-                }
+        // Real-time validation
+        const requiredFields = ['first_name', 'last_name', 'email', 'license_number'];
+        
+        requiredFields.forEach(fieldName => {
+            const field = document.getElementById(`id_${fieldName}`);
+            if (field) {
+                field.addEventListener('blur', function() {
+                    validateField(this);
+                });
+                
+                field.addEventListener('input', function() {
+                    if (this.classList.contains('is-invalid')) {
+                        validateField(this);
+                    }
+                });
+            }
+        });
+
+        // Email validation
+        const emailField = document.getElementById('id_email');
+        if (emailField) {
+            emailField.addEventListener('blur', function() {
+                validateEmail(this);
             });
+        }
 
-            // Validar email
-            const emailField = document.getElementById('id_email');
-            if (emailField && emailField.value) {
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(emailField.value)) {
-                    isValid = false;
-                    emailField.classList.add('is-invalid');
+        // Bio validation
+        const bioField = document.getElementById('id_bio');
+        if (bioField) {
+            bioField.addEventListener('input', function() {
+                const charCount = this.value.length;
+                const maxChars = 500;
+                
+                // Add character counter
+                let counter = this.parentNode.querySelector('.char-counter');
+                if (!counter) {
+                    counter = document.createElement('div');
+                    counter.className = 'char-counter form-text text-end';
+                    this.parentNode.appendChild(counter);
                 }
-            }
+                
+                counter.textContent = `${charCount}/${maxChars} caracteres`;
+                counter.className = `char-counter form-text text-end ${charCount > maxChars ? 'text-danger' : 'text-muted'}`;
+            });
+        }
 
-            // Validar biografía (opcional, pero si se proporciona debe tener longitud mínima)
-            const bioField = document.getElementById('id_bio');
-            if (bioField && bioField.value.trim() && bioField.value.trim().length < 10) {
-                isValid = false;
-                bioField.classList.add('is-invalid');
-                alert('La biografía debe tener al menos 10 caracteres si se proporciona.');
-            }
-
-            if (!isValid) {
-                e.preventDefault();
-                alert('Por favor, completa todos los campos requeridos correctamente.');
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (validateForm()) {
+                showLoadingState();
+                // Submit form after short delay to show loading state
+                setTimeout(() => {
+                    this.submit();
+                }, 300);
             }
         });
     }
 
-    // Limpiar clases de error al escribir
-    document.querySelectorAll('.form-control').forEach(input => {
+    // Validation functions
+    function validateField(field) {
+        const value = field.value.trim();
+        const isValid = value.length > 0;
+        
+        field.classList.toggle('is-invalid', !isValid);
+        field.classList.toggle('is-valid', isValid);
+        
+        return isValid;
+    }
+
+    function validateEmail(field) {
+        const value = field.value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const isValid = value.length > 0 && emailRegex.test(value);
+        
+        field.classList.toggle('is-invalid', !isValid);
+        field.classList.toggle('is-valid', isValid);
+        
+        return isValid;
+    }
+
+    function validateForm() {
+        let isValid = true;
+        const requiredFields = ['first_name', 'last_name', 'email', 'license_number'];
+        
+        requiredFields.forEach(fieldName => {
+            const field = document.getElementById(`id_${fieldName}`);
+            if (field && !validateField(field)) {
+                isValid = false;
+            }
+        });
+
+        const emailField = document.getElementById('id_email');
+        if (emailField && !validateEmail(emailField)) {
+            isValid = false;
+        }
+
+        if (!isValid) {
+            showToast('Por favor, completa todos los campos requeridos correctamente', 'error');
+            // Scroll to first invalid field
+            const firstInvalid = form.querySelector('.is-invalid');
+            if (firstInvalid) {
+                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstInvalid.focus();
+            }
+        }
+
+        return isValid;
+    }
+
+    function showLoadingState() {
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.querySelector('.btn-text').classList.add('d-none');
+            submitBtn.querySelector('.btn-loading').classList.remove('d-none');
+        }
+    }
+
+    // Toast notification function
+    function showToast(message, type = 'success') {
+        let toastContainer = document.querySelector('.toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            toastContainer.style.zIndex = '9999';
+            document.body.appendChild(toastContainer);
+        }
+        
+        const iconMap = {
+            success: 'bi-check-circle-fill text-success',
+            error: 'bi-x-circle-fill text-danger',
+            warning: 'bi-exclamation-triangle-fill text-warning',
+            info: 'bi-info-circle-fill text-info'
+        };
+        
+        const toastHtml = `
+            <div class="toast toast-modern" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <i class="bi ${iconMap[type]} me-2"></i>
+                    <strong class="me-auto">${type.charAt(0).toUpperCase() + type.slice(1)}</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            </div>
+        `;
+        
+        toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+        const toastElement = toastContainer.lastElementChild;
+        const toast = new bootstrap.Toast(toastElement, { delay: 4000 });
+        toast.show();
+        
+        toastElement.addEventListener('hidden.bs.toast', function() {
+            this.remove();
+        });
+    }
+
+    // Auto-save draft functionality (optional)
+    let autoSaveTimeout;
+    const formInputs = form.querySelectorAll('input, textarea, select');
+    
+    formInputs.forEach(input => {
         input.addEventListener('input', function() {
-            this.classList.remove('is-invalid');
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                // Could implement auto-save to localStorage here
+                console.log('Auto-saving draft...');
+            }, 2000);
         });
     });
 });
 </script>
 
 <style>
-.profile-image-container {
+/* Agent Form Specific Styles */
+.form-section {
     position: relative;
 }
 
+.section-header {
+    margin-bottom: var(--space-6);
+}
+
+.section-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--radius-xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-xl);
+    color: white;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, var(--success), #059669);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, var(--info), #0891b2);
+}
+
+.section-title {
+    color: var(--gray-900);
+    font-weight: 700;
+    margin-bottom: var(--space-1);
+}
+
+.section-subtitle {
+    color: var(--gray-600);
+    font-size: var(--text-sm);
+    margin: 0;
+}
+
+.form-group-modern {
+    margin-bottom: var(--space-4);
+}
+
+.form-label-modern {
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: var(--space-2);
+    display: flex;
+    align-items: center;
+}
+
+.profile-upload-section {
+    padding: var(--space-4);
+}
+
+.profile-image-container {
+    position: relative;
+    display: inline-block;
+}
+
+.profile-image-preview {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid white;
+    box-shadow: var(--shadow-lg);
+    transition: var(--transition);
+}
+
+.profile-image-placeholder {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: var(--gray-100);
+    border: 3px dashed var(--gray-300);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    color: var(--gray-400);
+    transition: var(--transition);
+}
+
+.profile-image-placeholder:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: var(--transition);
+    color: white;
+    font-size: var(--text-xl);
+}
+
+.profile-image-container:hover .image-overlay {
+    opacity: 1;
+}
+
+.upload-controls {
+    margin-top: var(--space-4);
+}
+
+.info-card {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    height: 100%;
+}
+
+.info-card-header {
+    background: var(--gray-50);
+    padding: var(--space-4);
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.info-card-title {
+    margin: 0;
+    font-weight: 600;
+    color: var(--gray-700);
+    display: flex;
+    align-items: center;
+}
+
+.info-card-body {
+    padding: var(--space-4);
+}
+
+.status-indicator-large {
+    text-align: center;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    font-size: var(--text-sm);
+}
+
+.status-active-large {
+    background: var(--success-light);
+    color: var(--success);
+    border: 1px solid var(--success);
+}
+
+.status-inactive-large {
+    background: var(--gray-100);
+    color: var(--gray-600);
+    border: 1px solid var(--gray-300);
+}
+
+.alert-info-modern {
+    background: var(--info-light);
+    border: 1px solid var(--info);
+    color: var(--info);
+    border-radius: var(--radius);
+    padding: var(--space-3);
+    margin: 0;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-3);
+}
+
+.stat-item {
+    text-align: center;
+    padding: var(--space-3);
+    border-radius: var(--radius);
+    border: 1px solid;
+}
+
+.stat-item.stat-primary {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.stat-item.stat-success {
+    background: var(--success-light);
+    border-color: var(--success);
+    color: var(--success);
+}
+
+.stat-item.stat-info {
+    background: var(--info-light);
+    border-color: var(--info);
+    color: var(--info);
+}
+
+.stat-value {
+    font-weight: 700;
+    font-size: var(--text-lg);
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    margin-top: var(--space-1);
+}
+
+.form-actions {
+    margin-top: var(--space-8);
+}
+
+.form-help-text {
+    display: flex;
+    align-items: center;
+}
+
+.btn-group-modern {
+    display: flex;
+    gap: var(--space-3);
+}
+
+.btn-loading {
+    display: flex;
+    align-items: center;
+}
+
+.char-counter {
+    font-size: var(--text-xs);
+    margin-top: var(--space-1);
+}
+
+.form-control.is-valid {
+    border-color: var(--success);
+    box-shadow: 0 0 0 3px var(--success-light);
+}
+
 .form-control.is-invalid {
-    border-color: #dc3545;
+    border-color: var(--danger);
+    box-shadow: 0 0 0 3px var(--danger-light);
 }
 
-.is-invalid + .form-text {
-    color: #dc3545;
+.toast-modern {
+    border: none;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
 }
 
-#image-preview img {
-    border: 3px solid #e9ecef;
-    transition: border-color 0.3s ease;
-}
-
-#image-preview img:hover {
-    border-color: #007bff;
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .section-icon {
+        width: 50px;
+        height: 50px;
+        font-size: var(--text-lg);
+    }
+    
+    .profile-image-preview,
+    .profile-image-placeholder {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-2);
+    }
+    
+    .btn-group-modern {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .btn-group-modern .btn {
+        width: 100%;
+    }
 }
 </style>
 {% endblock %}

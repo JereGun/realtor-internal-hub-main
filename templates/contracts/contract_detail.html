@@ -5,36 +5,38 @@
 
 {% block content %}
 <div class="container-fluid mt-4">
-    <!-- Encabezado -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 text-dark mb-1">
-                <i class="bi bi-file-earmark-text me-2 text-primary"></i>Contrato #{{ contract.id }}
-            </h1>
-            <p class="text-muted mb-0">
-                {{ contract.property.title }} - {{ contract.customer.get_full_name }}
-            </p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{% url 'contracts:contract_edit' contract.pk %}" class="btn btn-warning">
-                <i class="bi bi-pencil me-1"></i>Editar
-            </a>
-            <a href="{% url 'contracts:contract_delete' contract.pk %}" class="btn btn-outline-danger">
-                <i class="bi bi-trash me-1"></i>Eliminar
-            </a>
-            <a href="{% url 'contracts:contract_list' %}" class="btn btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i>Volver al listado
-            </a>
+    <!-- Encabezado Moderno -->
+    <div class="page-header mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h2 mb-2 fw-bold">
+                    <i class="bi bi-file-earmark-text me-3"></i>Contrato #{{ contract.id }}
+                </h1>
+                <p class="mb-0 opacity-90">
+                    {{ contract.property.title }} - {{ contract.customer.get_full_name }}
+                </p>
+            </div>
+            <div class="d-flex gap-3">
+                <a href="{% url 'contracts:contract_edit' contract.pk %}" class="btn btn-modern btn-warning btn-lg">
+                    <i class="bi bi-pencil me-2"></i>Editar
+                </a>
+                <a href="{% url 'contracts:contract_delete' contract.pk %}" class="btn btn-modern btn-outline-light btn-lg">
+                    <i class="bi bi-trash me-2"></i>Eliminar
+                </a>
+                <a href="{% url 'contracts:contract_list' %}" class="btn btn-modern btn-outline-light btn-lg">
+                    <i class="bi bi-arrow-left me-2"></i>Volver
+                </a>
+            </div>
         </div>
     </div>
 
     <div class="row g-lg-4 g-md-3 g-2">
         <!-- Columna Principal: Detalles del Contrato y Aumentos -->
         <div class="col-lg-8">
-            <div class="card shadow-sm border-light mb-4">
-                <div class="card-header bg-light border-bottom py-3">
-                    <h5 class="mb-0 text-dark fw-bold">
-                        <i class="bi bi-file-text me-2"></i>Información del Contrato
+            <div class="card-modern mb-4">
+                <div class="card-header bg-gradient-light border-0 py-4">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-file-text me-2 text-primary"></i>Información del Contrato
                     </h5>
                 </div>
                 <div class="card-body p-4">
@@ -42,35 +44,35 @@
                         <div class="col-md-6">
                             <!-- Información de la propiedad -->
                             <div class="mb-4">
-                                <div class="d-flex align-items-center p-3 bg-primary-subtle rounded-3 border border-primary-subtle">
-                                    <div class="bg-primary rounded-circle p-2 me-3">
-                                        <i class="bi bi-house text-white"></i>
+                                <div class="info-card info-card-primary">
+                                    <div class="info-card-icon">
+                                        <i class="bi bi-house"></i>
                                     </div>
-                                    <div>
-                                        <small class="text-muted d-block">Propiedad</small>
+                                    <div class="info-card-content">
+                                        <small class="info-card-label">Propiedad</small>
                                         <a href="{% url 'properties:property_detail' contract.property.pk %}" 
-                                           class="text-decoration-none fw-semibold">
+                                           class="info-card-title">
                                             {{ contract.property.title }}
                                         </a>
-                                        <small class="text-muted d-block">{{ contract.property.address }}</small>
+                                        <small class="info-card-subtitle">{{ contract.property.address }}</small>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Información del cliente -->
                             <div class="mb-4">
-                                <div class="d-flex align-items-center p-3 bg-success-subtle rounded-3 border border-success-subtle">
-                                    <div class="bg-success rounded-circle p-2 me-3">
-                                        <i class="bi bi-person text-white"></i>
+                                <div class="info-card info-card-success">
+                                    <div class="info-card-icon">
+                                        <i class="bi bi-person"></i>
                                     </div>
-                                    <div>
-                                        <small class="text-muted d-block">Cliente</small>
+                                    <div class="info-card-content">
+                                        <small class="info-card-label">Cliente</small>
                                         <a href="{% url 'customers:customer_detail' contract.customer.pk %}" 
-                                           class="text-decoration-none fw-semibold">
+                                           class="info-card-title">
                                             {{ contract.customer.get_full_name }}
                                         </a>
                                         {% if contract.customer.email %}
-                                            <small class="text-muted d-block">{{ contract.customer.email }}</small>
+                                            <small class="info-card-subtitle">{{ contract.customer.email }}</small>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -78,15 +80,15 @@
 
                             <!-- Información del agente -->
                             <div class="mb-0">
-                                <div class="d-flex align-items-center p-3 bg-info-subtle rounded-3 border border-info-subtle">
-                                    <div class="bg-info rounded-circle p-2 me-3">
-                                        <i class="bi bi-person-badge text-white"></i>
+                                <div class="info-card info-card-info">
+                                    <div class="info-card-icon">
+                                        <i class="bi bi-person-badge"></i>
                                     </div>
-                                    <div>
-                                        <small class="text-muted d-block">Agente Responsable</small>
-                                        <span class="fw-semibold">{{ contract.agent.get_full_name }}</span>
+                                    <div class="info-card-content">
+                                        <small class="info-card-label">Agente Responsable</small>
+                                        <span class="info-card-title">{{ contract.agent.get_full_name }}</span>
                                         {% if contract.agent.email %}
-                                            <small class="text-muted d-block">{{ contract.agent.email }}</small>
+                                            <small class="info-card-subtitle">{{ contract.agent.email }}</small>
                                         {% endif %}
                                     </div>
                                 </div>
@@ -96,14 +98,14 @@
                         <div class="col-md-6">
                             <!-- Información financiera -->
                             <div class="mb-4">
-                                <div class="d-flex align-items-center p-3 bg-warning-subtle rounded-3 border border-warning-subtle">
-                                    <div class="bg-warning rounded-circle p-2 me-3">
-                                        <i class="bi bi-currency-dollar text-white"></i>
+                                <div class="info-card info-card-warning">
+                                    <div class="info-card-icon">
+                                        <i class="bi bi-currency-dollar"></i>
                                     </div>
-                                    <div>
-                                        <small class="text-muted d-block">Monto del Contrato</small>
-                                        <span class="fw-bold fs-5 text-success">${{ contract.amount|intcomma }}</span>
-                                        <small class="text-muted d-block">{{ contract.currency }}</small>
+                                    <div class="info-card-content">
+                                        <small class="info-card-label">Monto del Contrato</small>
+                                        <span class="info-card-amount">${{ contract.amount|intcomma }}</span>
+                                        <small class="info-card-subtitle">{{ contract.currency }}</small>
                                     </div>
                                 </div>
                             </div>
@@ -178,19 +180,19 @@
 
                             <!-- Estado del contrato -->
                             <div class="mb-0">
-                                <div class="text-center p-3 bg-light rounded-3 border">
-                                    <div class="mb-2">
-                                        <span class="badge fs-6 px-3 py-2
-                                            {% if contract.status == 'active' %}bg-success
-                                            {% elif contract.status == 'draft' %}bg-secondary
-                                            {% elif contract.status == 'finished' %}bg-info
-                                            {% elif contract.status == 'cancelled' %}bg-danger
-                                            {% else %}bg-light text-dark
+                                <div class="status-card">
+                                    <div class="status-card-badge">
+                                        <span class="status-badge status-badge-
+                                            {% if contract.status == 'active' %}success
+                                            {% elif contract.status == 'draft' %}secondary
+                                            {% elif contract.status == 'finished' %}info
+                                            {% elif contract.status == 'cancelled' %}danger
+                                            {% else %}light
                                             {% endif %}">
                                             {{ contract.get_status_display }}
                                         </span>
                                     </div>
-                                    <small class="text-muted">Estado Actual</small>
+                                    <small class="status-card-label">Estado Actual</small>
                                 </div>
                             </div>
                         </div>
@@ -237,13 +239,13 @@
             </div>
 
             <!-- Historial de Aumentos -->
-            <div class="card shadow-sm border-light mb-4">
-                <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center py-3">
-                    <h5 class="mb-0 text-dark fw-bold">
-                        <i class="bi bi-graph-up-arrow me-2"></i>Historial de Aumentos
+            <div class="card-modern mb-4">
+                <div class="card-header bg-gradient-light border-0 d-flex justify-content-between align-items-center py-4">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-graph-up-arrow me-2 text-primary"></i>Historial de Aumentos
                     </h5>
-                    <a href="{% url 'contracts:add_increase' contract.pk %}" class="btn btn-primary btn-sm">
-                        <i class="bi bi-plus-circle me-1"></i>Registrar Aumento
+                    <a href="{% url 'contracts:add_increase' contract.pk %}" class="btn btn-modern btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>Registrar Aumento
                     </a>
                 </div>
                 <div class="card-body p-0">
@@ -306,11 +308,11 @@
 
         <!-- Columna Lateral: Facturas -->
         <div class="col-lg-4">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="bi bi-receipt-cutoff me-2"></i>Facturas Asociadas</h5>
-                     <a href="{% url 'contracts:create_invoice_from_contract' contract.id %}" class="btn btn-success btn-sm">
-                        <i class="bi bi-plus-circle me-1"></i> Generar Factura
+            <div class="card-modern mb-4">
+                <div class="card-header bg-gradient-light border-0 d-flex justify-content-between align-items-center py-4">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-receipt-cutoff me-2 text-primary"></i>Facturas Asociadas</h5>
+                     <a href="{% url 'contracts:create_invoice_from_contract' contract.id %}" class="btn btn-modern btn-success">
+                        <i class="bi bi-plus-circle me-2"></i>Generar
                     </a>
                 </div>
                 <div class="card-body p-0">

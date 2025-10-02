@@ -8,13 +8,13 @@
     <div class="row g-lg-4 g-md-3 g-2">
         <!-- Columna del Formulario Principal -->
         <div class="col-lg-7 col-md-12">
-            <div class="card shadow-sm border-light mb-4">
+            <div class="card card-modern mb-4">
                 <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center py-3">
                     <h5 class="mb-0 text-dark fw-bold">
                         <i class="bi bi-file-earmark-text me-2"></i>
                         {% if invoice %}Editar Factura #{{ invoice.number }}{% else %}Nueva Factura{% endif %}
                     </h5>
-                    <a href="{% url 'accounting:invoice_list' %}" class="btn btn-sm btn-outline-secondary">
+                    <a href="{% url 'accounting:invoice_list' %}" class="btn btn-sm btn-outline-secondary btn-modern">
                         <i class="bi bi-arrow-left me-1"></i> Volver al listado
                     </a>
                 </div>
@@ -49,7 +49,7 @@
                                         <div class="form-check d-inline-block me-2" style="display:none;"> <!-- Ocultar checkbox si no se quiere mostrar -->
                                              {{ item_form.DELETE }}
                                         </div>
-                                        <button type="button" class="btn btn-sm btn-outline-danger remove-item-btn">
+                                        <button type="button" class="btn btn-sm btn-outline-danger btn-modern remove-item-btn">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                         {% endif %}
@@ -57,18 +57,18 @@
                                 </div>
                                 {% endfor %}
                             </div>
-                            <button type="button" id="add-item-btn" class="btn btn-sm btn-outline-success mt-2">
+                            <button type="button" id="add-item-btn" class="btn btn-sm btn-outline-success btn-modern mt-2">
                                 <i class="bi bi-plus-circle me-1"></i> Agregar Ítem
                             </button>
                         </fieldset>
                         
                         <hr class="my-4">
-                        <div class="d-flex justify-content-end">
-                            <a href="{% url 'accounting:invoice_list' %}" class="btn btn-secondary me-2">
-                                <i class="bi bi-x-circle me-1"></i> Cancelar
+                        <div class="d-flex justify-content-end gap-3">
+                            <a href="{% url 'accounting:invoice_list' %}" class="btn btn-secondary btn-modern">
+                                <i class="bi bi-x-circle me-2"></i> Cancelar
                             </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-save me-1"></i> Guardar Factura
+                            <button type="submit" class="btn btn-primary btn-modern">
+                                <i class="bi bi-save me-2"></i> Guardar Factura
                             </button>
                         </div>
                     </form>
@@ -78,14 +78,14 @@
 
         <!-- Columna de la Vista Previa -->
         <div class="col-lg-5 col-md-12">
-            <div class="card shadow-sm border-light sticky-top" style="top: 20px;">
+            <div class="card card-modern sticky-top" style="top: 20px;">
                 <div class="card-header bg-light border-bottom py-3">
                     <h5 class="mb-0 text-dark fw-bold"><i class="bi bi-eye-fill me-2"></i>Vista Previa de Factura</h5>
                 </div>
                 <div class="card-body p-4">
                     <div class="mb-3 d-flex justify-content-between align-items-center">
                         <h4 class="text-primary mb-0">FACTURA</h4>
-                        <span class="badge bg-secondary" id="preview-status-badge">Pendiente</span>
+                        <span class="badge bg-secondary rounded-pill" id="preview-status-badge">Pendiente</span>
                     </div>
                     
                     <div class="row mb-3">

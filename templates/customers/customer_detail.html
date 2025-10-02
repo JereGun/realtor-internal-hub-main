@@ -5,32 +5,31 @@
 
 {% block content %}
 <div class="container-fluid mt-4">
-    <!-- Header con breadcrumb -->
+    <!-- Header moderno con breadcrumb -->
     <div class="d-flex justify-content-between align-items-start mb-4">
         <div>
-            <nav aria-label="breadcrumb">
+            <nav aria-label="breadcrumb" class="breadcrumb-modern mb-3">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item">
                         <a href="{% url 'customers:customer_list' %}" class="text-decoration-none">
-                            <i class="bi bi-people me-1"></i>Clientes
+                            <i class="bi bi-people me-2"></i>Clientes
                         </a>
                     </li>
                     <li class="breadcrumb-item active" aria-current="page">{{ customer.get_full_name }}</li>
                 </ol>
             </nav>
             <div class="d-flex align-items-center">
-                <div class="me-3">
-                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" 
-                         style="width: 60px; height: 60px;">
-                        <span class="text-white fw-bold fs-4">
+                <div class="me-4">
+                    <div class="avatar-large">
+                        <span class="avatar-initials">
                             {{ customer.first_name|first }}{{ customer.last_name|first }}
                         </span>
                     </div>
                 </div>
                 <div>
-                    <h1 class="h3 text-dark mb-1">{{ customer.get_full_name }}</h1>
+                    <h1 class="h2 text-dark mb-2">{{ customer.get_full_name }}</h1>
                     <p class="text-muted mb-0">
-                        <i class="bi bi-person-badge me-1"></i>Cliente #{{ customer.id }}
+                        <i class="bi bi-person-badge me-2"></i>Cliente #{{ customer.id }}
                         {% if customer.document %}
                             • {{ customer.document }}
                         {% endif %}
@@ -38,52 +37,68 @@
                 </div>
             </div>
         </div>
-        <div class="btn-group" role="group">
-            <a href="{% url 'customers:customer_edit' customer.pk %}" class="btn btn-warning">
-                <i class="bi bi-pencil me-1"></i>Editar
+        <div class="btn-group-modern" role="group">
+            <a href="{% url 'customers:customer_edit' customer.pk %}" class="btn btn-warning btn-modern">
+                <i class="bi bi-pencil me-2"></i>Editar
             </a>
-            <a href="{% url 'customers:customer_delete' customer.pk %}" class="btn btn-danger"
+            <a href="{% url 'customers:customer_delete' customer.pk %}" class="btn btn-danger btn-modern"
                onclick="return confirm('¿Está seguro de eliminar este cliente?')">
-                <i class="bi bi-trash me-1"></i>Eliminar
+                <i class="bi bi-trash me-2"></i>Eliminar
             </a>
         </div>
     </div>
 
-    <!-- Estadísticas rápidas -->
-    <div class="row g-3 mb-4">
+    <!-- Estadísticas modernas -->
+    <div class="row g-4 mb-4">
         <div class="col-md-3">
-            <div class="card border-0 bg-primary text-white">
-                <div class="card-body text-center">
-                    <i class="bi bi-file-earmark-text fs-1 mb-2"></i>
-                    <h4 class="card-title">{{ customer.contract_set.count|default:0 }}</h4>
-                    <p class="card-text mb-0">Contratos</p>
+            <div class="stat-card stat-card-primary">
+                <div class="stat-card-body">
+                    <div class="stat-icon">
+                        <i class="bi bi-file-earmark-text"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-number">{{ customer.contract_set.count|default:0 }}</h3>
+                        <p class="stat-label">Contratos</p>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card border-0 bg-success text-white">
-                <div class="card-body text-center">
-                    <i class="bi bi-check-circle fs-1 mb-2"></i>
-                    <h4 class="card-title">{{ active_contracts_count|default:0 }}</h4>
-                    <p class="card-text mb-0">Activos</p>
+            <div class="stat-card stat-card-success">
+                <div class="stat-card-body">
+                    <div class="stat-icon">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-number">{{ active_contracts_count|default:0 }}</h3>
+                        <p class="stat-label">Activos</p>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card border-0 bg-info text-white">
-                <div class="card-body text-center">
-                    <i class="bi bi-house fs-1 mb-2"></i>
-                    <h4 class="card-title">{{ properties_count|default:0 }}</h4>
-                    <p class="card-text mb-0">Propiedades</p>
+            <div class="stat-card stat-card-info">
+                <div class="stat-card-body">
+                    <div class="stat-icon">
+                        <i class="bi bi-house"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-number">{{ properties_count|default:0 }}</h3>
+                        <p class="stat-label">Propiedades</p>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card border-0 bg-warning text-white">
-                <div class="card-body text-center">
-                    <i class="bi bi-calendar-event fs-1 mb-2"></i>
-                    <h4 class="card-title">{{ customer.created_at|timesince }}</h4>
-                    <p class="card-text mb-0">Cliente desde</p>
+            <div class="stat-card stat-card-warning">
+                <div class="stat-card-body">
+                    <div class="stat-icon">
+                        <i class="bi bi-calendar-event"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 class="stat-number">{{ customer.created_at|timesince }}</h3>
+                        <p class="stat-label">Cliente desde</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -93,9 +108,9 @@
         <!-- Información principal -->
         <div class="col-lg-8">
             <!-- Información Personal -->
-            <div class="card shadow-sm border-light mb-4">
-                <div class="card-header bg-light border-bottom">
-                    <h5 class="mb-0 text-dark fw-bold">
+            <div class="card-modern mb-4">
+                <div class="card-header-modern">
+                    <h5 class="mb-0">
                         <i class="bi bi-person me-2"></i>Información Personal
                     </h5>
                 </div>
@@ -163,9 +178,9 @@
             </div>
 
             <!-- Información de Dirección -->
-            <div class="card shadow-sm border-light mb-4">
-                <div class="card-header bg-light border-bottom">
-                    <h5 class="mb-0 text-dark fw-bold">
+            <div class="card-modern mb-4">
+                <div class="card-header-modern">
+                    <h5 class="mb-0">
                         <i class="bi bi-geo-alt me-2"></i>Información de Dirección
                     </h5>
                 </div>
@@ -208,21 +223,21 @@
             </div>
 
             <!-- Contratos -->
-            <div class="card shadow-sm border-light">
-                <div class="card-header bg-light border-bottom">
+            <div class="card-modern">
+                <div class="card-header-modern">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 text-dark fw-bold">
+                        <h5 class="mb-0">
                             <i class="bi bi-file-earmark-text me-2"></i>Contratos
                         </h5>
-                        <a href="{% url 'contracts:contract_create' %}?customer={{ customer.pk }}" class="btn btn-sm btn-primary">
-                            <i class="bi bi-plus-circle me-1"></i>Nuevo Contrato
+                        <a href="{% url 'contracts:contract_create' %}?customer={{ customer.pk }}" class="btn btn-sm btn-primary btn-modern">
+                            <i class="bi bi-plus-circle me-2"></i>Nuevo Contrato
                         </a>
                     </div>
                 </div>
                 <div class="card-body p-0">
                     {% if customer.contract_set.exists %}
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
+                        <table class="table-modern">
                             <thead class="table-light">
                                 <tr>
                                     <th class="border-0 ps-4">Propiedad</th>
@@ -275,7 +290,7 @@
                                     </td>
                                     <td class="text-center pe-4">
                                         <a href="{% url 'contracts:contract_detail' contract.pk %}" 
-                                           class="btn btn-sm btn-outline-primary" title="Ver contrato">
+                                           class="btn btn-sm btn-outline-primary btn-modern" title="Ver contrato">
                                             <i class="bi bi-eye"></i>
                                         </a>
                                     </td>
@@ -285,13 +300,17 @@
                         </table>
                     </div>
                     {% else %}
-                    <div class="text-center py-5">
-                        <i class="bi bi-file-earmark display-1 text-muted"></i>
-                        <h6 class="text-muted mt-3">No hay contratos registrados</h6>
-                        <p class="text-muted">Este cliente aún no tiene contratos asociados.</p>
-                        <a href="{% url 'contracts:contract_create' %}?customer={{ customer.pk }}" class="btn btn-primary">
-                            <i class="bi bi-plus-circle me-1"></i>Crear Primer Contrato
-                        </a>
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="bi bi-file-earmark"></i>
+                        </div>
+                        <h6 class="empty-state-title">No hay contratos registrados</h6>
+                        <p class="empty-state-description">Este cliente aún no tiene contratos asociados.</p>
+                        <div class="empty-state-actions">
+                            <a href="{% url 'contracts:contract_create' %}?customer={{ customer.pk }}" class="btn btn-primary btn-modern">
+                                <i class="bi bi-plus-circle me-2"></i>Crear Primer Contrato
+                            </a>
+                        </div>
                     </div>
                     {% endif %}
                 </div>
@@ -301,9 +320,9 @@
         <!-- Sidebar -->
         <div class="col-lg-4">
             <!-- Información del Sistema -->
-            <div class="card shadow-sm border-light mb-4">
-                <div class="card-header bg-light border-bottom">
-                    <h5 class="mb-0 text-dark fw-bold">
+            <div class="card-modern mb-4">
+                <div class="card-header-modern">
+                    <h5 class="mb-0">
                         <i class="bi bi-info-circle me-2"></i>Información del Sistema
                     </h5>
                 </div>
@@ -322,38 +341,38 @@
             </div>
 
             <!-- Acciones Rápidas -->
-            <div class="card shadow-sm border-light">
-                <div class="card-header bg-light border-bottom">
-                    <h5 class="mb-0 text-dark fw-bold">
+            <div class="card-modern">
+                <div class="card-header-modern">
+                    <h5 class="mb-0">
                         <i class="bi bi-lightning me-2"></i>Acciones Rápidas
                     </h5>
                 </div>
                 <div class="card-body p-4">
-                    <div class="d-grid gap-2">
+                    <div class="d-grid gap-3">
                         {% if customer.email %}
-                        <a href="mailto:{{ customer.email }}" class="btn btn-outline-primary">
+                        <a href="mailto:{{ customer.email }}" class="btn btn-outline-primary btn-modern">
                             <i class="bi bi-envelope me-2"></i>Enviar Email
                         </a>
                         {% endif %}
                         
                         {% if customer.phone %}
-                        <a href="tel:{{ customer.phone }}" class="btn btn-outline-success">
+                        <a href="tel:{{ customer.phone }}" class="btn btn-outline-success btn-modern">
                             <i class="bi bi-telephone me-2"></i>Llamar
                         </a>
                         {% endif %}
 
-                        <a href="{% url 'contracts:contract_create' %}?customer={{ customer.pk }}" class="btn btn-outline-info">
+                        <a href="{% url 'contracts:contract_create' %}?customer={{ customer.pk }}" class="btn btn-outline-info btn-modern">
                             <i class="bi bi-file-earmark-plus me-2"></i>Nuevo Contrato
                         </a>
 
-                        <a href="{% url 'customers:customer_edit' customer.pk %}" class="btn btn-outline-warning">
+                        <a href="{% url 'customers:customer_edit' customer.pk %}" class="btn btn-outline-warning btn-modern">
                             <i class="bi bi-pencil me-2"></i>Editar Cliente
                         </a>
 
-                        <hr class="my-3">
+                        <div class="section-divider"></div>
 
                         <a href="{% url 'customers:customer_delete' customer.pk %}" 
-                           class="btn btn-outline-danger"
+                           class="btn btn-outline-danger btn-modern"
                            onclick="return confirm('¿Está seguro de eliminar este cliente? Esta acción no se puede deshacer.')">
                             <i class="bi bi-trash me-2"></i>Eliminar Cliente
                         </a>

@@ -3,70 +3,68 @@
 {% block title %}Página no encontrada - Sistema de Gestión Inmobiliaria{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row justify-content-center">
-        <div class="col-lg-8 col-xl-6">
-            <div class="card border-0 shadow-lg">
-                <div class="card-body p-5 text-center">
-                    <!-- 404 Specific Icon -->
-                    <div class="mb-4">
-                        <i class="bi bi-house-x text-primary" style="font-size: 4rem;"></i>
-                    </div>
+<div class="error-page-container error-404">
+    <div class="container-fluid">
+        <div class="row justify-content-center align-items-center min-vh-100">
+            <div class="col-lg-8 col-xl-6">
+                <div class="card-modern error-card">
+                    <div class="card-body p-5 text-center">
+                        <!-- 404 Specific Icon -->
+                        <div class="error-icon mb-4">
+                            <i class="bi bi-house-x text-primary"></i>
+                        </div>
 
-                    <!-- 404 Title -->
-                    <h1 class="display-4 fw-bold mb-3 text-primary">
-                        Propiedad no encontrada
-                    </h1>
+                        <!-- 404 Title -->
+                        <h1 class="error-title text-primary mb-3">
+                            Propiedad no encontrada
+                        </h1>
 
-                    <!-- 404 Message -->
-                    <p class="lead text-muted mb-4">
-                        La propiedad, cliente o recurso que buscas no existe o ha sido movido.
-                    </p>
+                        <!-- 404 Message -->
+                        <p class="error-message mb-4">
+                            La propiedad, cliente o recurso que buscas no existe o ha sido movido.
+                        </p>
 
-                    <!-- Search Suggestion -->
-                    <div class="mb-4">
-                        <p class="text-muted">¿Quizás estabas buscando alguna de estas opciones?</p>
-                        <div class="d-flex justify-content-center gap-2 flex-wrap">
-                            <a href="{% url 'properties:property_list' %}" class="btn btn-outline-primary btn-sm">
-                                <i class="bi bi-building me-1"></i>Propiedades
-                            </a>
-                            <a href="{% url 'customers:customer_list' %}" class="btn btn-outline-primary btn-sm">
-                                <i class="bi bi-people me-1"></i>Clientes
-                            </a>
-                            <a href="{% url 'contracts:contract_list' %}" class="btn btn-outline-primary btn-sm">
-                                <i class="bi bi-file-text me-1"></i>Contratos
+                        <!-- Search Suggestions -->
+                        <div class="error-suggestions mb-4">
+                            <p class="text-muted mb-3">¿Quizás estabas buscando alguna de estas opciones?</p>
+                            <div class="suggestion-buttons d-flex justify-content-center gap-2 flex-wrap">
+                                <a href="{% url 'properties:property_list' %}" class="btn-modern btn-outline-primary btn-sm">
+                                    <i class="bi bi-building me-1"></i>Propiedades
+                                </a>
+                                <a href="{% url 'customers:customer_list' %}" class="btn-modern btn-outline-primary btn-sm">
+                                    <i class="bi bi-people me-1"></i>Clientes
+                                </a>
+                                <a href="{% url 'contracts:contract_list' %}" class="btn-modern btn-outline-primary btn-sm">
+                                    <i class="bi bi-file-text me-1"></i>Contratos
+                                </a>
+                                <a href="{% url 'agents:agent_list' %}" class="btn-modern btn-outline-primary btn-sm">
+                                    <i class="bi bi-person-badge me-1"></i>Agentes
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="error-actions d-flex justify-content-center gap-3 mb-4">
+                            <button onclick="history.back()" class="btn-modern btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Volver
+                            </button>
+                            <a href="{% url 'agents:dashboard' %}" class="btn-modern btn-primary">
+                                <i class="bi bi-house me-2"></i>Ir al Dashboard
                             </a>
                         </div>
-                    </div>
 
-                    <!-- Action Buttons -->
-                    <div class="d-flex justify-content-center gap-3">
-                        <a href="javascript:history.back()" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-left me-2"></i>Volver
-                        </a>
-                        <a href="{% url 'agents:dashboard' %}" class="btn btn-primary">
-                            <i class="bi bi-house me-2"></i>Ir al Dashboard
-                        </a>
+                        <!-- Help Text -->
+                        <div class="error-help">
+                            <div class="section-divider"></div>
+                            <p class="text-muted small mb-0">
+                                <i class="bi bi-search me-1"></i>
+                                Usa la barra de búsqueda o navega desde el menú principal.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-    body {
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-        min-height: 100vh;
-    }
-    
-    .card {
-        backdrop-filter: blur(10px);
-        background: rgba(255, 255, 255, 0.95);
-    }
-    
-    .main-content {
-        margin-left: 0 !important;
-    }
-</style>
 {% endblock %}

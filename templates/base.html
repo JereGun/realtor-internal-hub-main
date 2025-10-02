@@ -1,5 +1,6 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="h-100">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,26 +10,91 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
     
+    <!-- Design System CSS -->
+    <link rel="stylesheet" href="{% static 'css/design-system.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'css/utilities.css' %}">
+    
     {% block extra_css %}{% endblock %}
     
     <style>
+        /* Enhanced Layout System */
+        .app-container {
+            min-height: 100vh;
+            background-color: var(--gray-50);
+        }
+        
         .main-content {
             margin-left: 250px;
-            transition: margin-left 0.3s;
+            transition: var(--transition-slow);
+            min-height: 100vh;
+            padding: var(--space-6);
+            background-color: var(--gray-50);
         }
+        
         .sidebar-collapsed .main-content {
             margin-left: 0;
         }
+        
+        .content-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: var(--white);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: var(--space-8);
+            min-height: calc(100vh - 3rem);
+        }
+        
+        /* Responsive Design */
         @media (max-width: 992px) {
             .main-content {
                 margin-left: 0;
+                padding: var(--space-4);
             }
+            
+            .content-wrapper {
+                padding: var(--space-6);
+                border-radius: var(--radius-lg);
+                min-height: calc(100vh - 2rem);
+            }
+            
             #sidebar {
                 display: none;
             }
         }
+        
+        @media (max-width: 576px) {
+            .main-content {
+                padding: var(--space-3);
+            }
+            
+            .content-wrapper {
+                padding: var(--space-4);
+                border-radius: var(--radius);
+                min-height: calc(100vh - 1.5rem);
+            }
+        }
+        
+        /* Enhanced Sidebar Transitions */
         #sidebar {
-            transition: transform 0.3s ease, opacity 0.3s ease;
+            transition: var(--transition-slow);
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            border-right: 1px solid var(--gray-200);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        #sidebar::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%, rgba(37, 99, 235, 0.05) 100%);
+            pointer-events: none;
         }
 
         #sidebar.hidden-slide {
@@ -36,30 +102,75 @@
             opacity: 0;
             pointer-events: none;
         }
+        
+        /* Enhanced Button Styles */
+        .sidebar-toggle-btn {
+            background: linear-gradient(135deg, var(--white) 0%, var(--gray-50) 100%);
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+            z-index: var(--z-fixed);
+            color: var(--gray-600);
+        }
+        
+        .sidebar-toggle-btn:hover {
+            background: linear-gradient(135deg, var(--gray-50) 0%, var(--white) 100%);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px) scale(1.05);
+            color: var(--primary);
+        }
+        
+        .sidebar-toggle-btn:active {
+            transform: translateY(0) scale(0.95);
+        }
     </style>
 </head>
-<body class="{% if request.session.sidebar_collapsed %}sidebar-collapsed{% endif %}">
-    <button id="showSidebarBtn" class="btn btn-light border position-fixed top-0 start-0 m-2 d-print-none" style="z-index: 1050; display: none;">
+<body class="app-container {% if request.session.sidebar_collapsed %}sidebar-collapsed{% endif %}">
+    <!-- Mobile Sidebar Toggle -->
+    <button id="showSidebarBtn" class="btn sidebar-toggle-btn position-fixed top-0 start-0 m-3 d-print-none" style="display: none;">
         <i class="bi bi-list"></i>
     </button>
+    
     {% if user.is_authenticated %}
         {% include 'includes/navbar.html' %}
-        <button id="expandSidebarBtn" class="btn btn-light border position-fixed top-0 start-0 m-2 d-print-none" style="z-index: 1050; display: none;">
+        <!-- Sidebar Expand Button -->
+        <button id="expandSidebarBtn" class="btn sidebar-toggle-btn position-fixed top-0 start-0 m-3 d-print-none" style="display: none;">
             <i class="bi bi-chevron-double-right"></i>
         </button>
     {% endif %}
     
-    <div class="main-content p-4">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <div class="content-wrapper">
+            <!-- Enhanced Alert Messages -->
+            {% if messages %}
+                <div class="mb-6">
+                    {% for message in messages %}
+                        <div class="alert alert-modern alert-{{ message.tags }} alert-dismissible fade show mb-3" role="alert">
+                            <div class="d-flex align-items-center">
+                                {% if message.tags == 'success' %}
+                                    <i class="bi bi-check-circle-fill me-3 text-success"></i>
+                                {% elif message.tags == 'error' or message.tags == 'danger' %}
+                                    <i class="bi bi-exclamation-triangle-fill me-3 text-danger"></i>
+                                {% elif message.tags == 'warning' %}
+                                    <i class="bi bi-exclamation-circle-fill me-3 text-warning"></i>
+                                {% elif message.tags == 'info' %}
+                                    <i class="bi bi-info-circle-fill me-3 text-info"></i>
+                                {% else %}
+                                    <i class="bi bi-info-circle me-3"></i>
+                                {% endif %}
+                                <div class="flex-grow-1">{{ message }}</div>
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                        </div>
+                    {% endfor %}
                 </div>
-            {% endfor %}
-        {% endif %}
-        
-        {% block content %}{% endblock %}
+            {% endif %}
+            
+            <!-- Page Content -->
+            {% block content %}{% endblock %}
+        </div>
     </div>
     
     <script>
@@ -110,6 +221,11 @@
     </script>
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Enhanced Notifications -->
+    {% load static %}
+    <script src="{% static 'js/notifications-enhanced.js' %}"></script>
+    
     {% block extra_js %}{% endblock %}
 </body>
 </html>

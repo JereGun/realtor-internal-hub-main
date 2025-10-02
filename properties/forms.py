@@ -1,10 +1,7 @@
 from django import forms
 from django.forms import inlineformset_factory
-from .models import Property, PropertyImage, Feature, Tag, PropertyType, PropertyStatus
+from .models import Property, PropertyImage, Feature, Tag
 from customers.models import Customer
-from locations.models import Country, State, City
-import json
-
 
 class PropertyForm(forms.ModelForm):
     # Campos adicionales para gestión inline

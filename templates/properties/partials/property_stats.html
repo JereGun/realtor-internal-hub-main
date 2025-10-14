@@ -1,0 +1,216 @@
+{% load static %}
+{% load humanize %}
+
+<!-- Property Statistics -->
+<div class="property-stats-container">
+    <div class="card-modern">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-graph-up me-2"></i>Estadísticas
+                </h5>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-three-dots"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="refreshStats()">
+                            <i class="bi bi-arrow-clockwise me-2"></i>Actualizar
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" onclick="exportStats()">
+                            <i class="bi bi-download me-2"></i>Exportar
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Main Statistics -->
+            <div class="property-stats-grid">
+                <!-- Views -->
+                <div class="property-stat-item">
+                    <div class="property-stat-icon bg-primary">
+                        <i class="bi bi-eye text-white"></i>
+                    </div>
+                    <div class="property-stat-content">
+                        <div class="property-stat-value">0</div>
+                        <div class="property-stat-label">Visualizaciones</div>
+                        <div class="property-stat-change">
+                            <small class="text-muted">próximamente</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Inquiries -->
+                <div class="property-stat-item">
+                    <div class="property-stat-icon bg-info">
+                        <i class="bi bi-chat-dots text-white"></i>
+                    </div>
+                    <div class="property-stat-content">
+                        <div class="property-stat-value">0</div>
+                        <div class="property-stat-label">Consultas</div>
+                        <div class="property-stat-change">
+                            <small class="text-muted">próximamente</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Days on Market -->
+                <div class="property-stat-item">
+                    <div class="property-stat-icon bg-warning">
+                        <i class="bi bi-calendar text-white"></i>
+                    </div>
+                    <div class="property-stat-content">
+                        <div class="property-stat-value">{{ property.created_at|timesince|truncatewords:1 }}</div>
+                        <div class="property-stat-label">Tiempo en Sistema</div>
+                        <div class="property-stat-change">
+                            <small class="text-muted">desde {{ property.created_at|date:"d/m/Y" }}</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Favorites -->
+                <div class="property-stat-item">
+                    <div class="property-stat-icon bg-danger">
+                        <i class="bi bi-heart text-white"></i>
+                    </div>
+                    <div class="property-stat-content">
+                        <div class="property-stat-value">0</div>
+                        <div class="property-stat-label">Favoritos</div>
+                        <div class="property-stat-change">
+                            <small class="text-muted">próximamente</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% comment %}
+            <!-- Performance Metrics -->
+            <div class="property-performance-metrics mt-4 pt-3 border-top">
+                <h6 class="property-subsection-title small mb-3">
+                    <i class="bi bi-speedometer2 me-1"></i>Métricas de Rendimiento
+                </h6>
+                
+                <!-- Conversion Rate -->
+                <div class="property-metric-item mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="property-metric-label">Tasa de Conversión</span>
+                        <span class="property-metric-value">{{ property.conversion_rate|default:"0"|floatformat:1 }}%</span>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar bg-success" style="width: {{ property.conversion_rate|default:0 }}%"></div>
+                    </div>
+                </div>
+                
+                <!-- Interest Level -->
+                <div class="property-metric-item mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="property-metric-label">Nivel de Interés</span>
+                        <span class="property-metric-value">{{ property.interest_level|default:"Bajo" }}</span>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar bg-{% if property.interest_level == 'Alto' %}success{% elif property.interest_level == 'Medio' %}warning{% else %}danger{% endif %}" 
+                             style="width: {% if property.interest_level == 'Alto' %}80{% elif property.interest_level == 'Medio' %}50{% else %}20{% endif %}%"></div>
+                    </div>
+                </div>
+                
+                <!-- Market Position -->
+                <div class="property-metric-item">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="property-metric-label">Posición en Mercado</span>
+                        <span class="property-metric-value">{{ property.market_position|default:"Promedio" }}</span>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar bg-{% if property.market_position == 'Competitivo' %}success{% elif property.market_position == 'Promedio' %}info{% else %}warning{% endif %}" 
+                             style="width: {% if property.market_position == 'Competitivo' %}75{% elif property.market_position == 'Promedio' %}50{% else %}25{% endif %}%"></div>
+                    </div>
+                </div>
+            </div>
+            {% endcomment %}
+            
+            {% comment %}
+            <!-- Comparison with Similar Properties -->
+            <div class="property-comparison mt-4 pt-3 border-top">
+                <h6 class="property-subsection-title small mb-3">
+                    <i class="bi bi-bar-chart me-1"></i>Comparación con Propiedades Similares
+                </h6>
+                <div class="property-comparison-grid">
+                    <div class="property-comparison-item">
+                        <div class="property-comparison-metric">Precio</div>
+                        <div class="property-comparison-value">
+                            {% if property.price_vs_market > 0 %}
+                            <span class="text-danger">+{{ property.price_vs_market }}%</span>
+                            <small class="text-muted">sobre mercado</small>
+                            {% elif property.price_vs_market < 0 %}
+                            <span class="text-success">{{ property.price_vs_market }}%</span>
+                            <small class="text-muted">bajo mercado</small>
+                            {% else %}
+                            <span class="text-info">En mercado</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="property-comparison-item">
+                        <div class="property-comparison-metric">Tiempo Venta</div>
+                        <div class="property-comparison-value">
+                            {% if property.time_vs_average > 0 %}
+                            <span class="text-warning">+{{ property.time_vs_average }} días</span>
+                            <small class="text-muted">sobre promedio</small>
+                            {% elif property.time_vs_average < 0 %}
+                            <span class="text-success">{{ property.time_vs_average|abs }} días</span>
+                            <small class="text-muted">bajo promedio</small>
+                            {% else %}
+                            <span class="text-info">En promedio</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Activity -->
+            <div class="property-recent-activity mt-4 pt-3 border-top">
+                <h6 class="property-subsection-title small mb-3">
+                    <i class="bi bi-activity me-1"></i>Actividad Reciente
+                </h6>
+                <div class="property-activity-list">
+                    {% if property.recent_activities %}
+                    {% for activity in property.recent_activities|slice:":5" %}
+                    <div class="property-activity-item">
+                        <div class="property-activity-icon">
+                            <i class="bi bi-{% if activity.type == 'view' %}eye{% elif activity.type == 'inquiry' %}chat-dots{% elif activity.type == 'favorite' %}heart{% else %}circle{% endif %}"></i>
+                        </div>
+                        <div class="property-activity-content">
+                            <div class="property-activity-description">{{ activity.description }}</div>
+                            <div class="property-activity-time">{{ activity.created_at|timesince }} atrás</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="property-activity-empty text-center py-3">
+                        <i class="bi bi-clock text-muted mb-2" style="font-size: 1.5rem;"></i>
+                        <p class="text-muted small mb-0">Sin actividad reciente</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Statistics Summary -->
+            <div class="property-stats-summary mt-4 pt-3 border-top">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <div class="property-summary-stat">
+                            <div class="property-summary-stat-value">{{ property.total_interactions|default:"0" }}</div>
+                            <div class="property-summary-stat-label">Interacciones Totales</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="property-summary-stat">
+                            <div class="property-summary-stat-value">{{ property.engagement_score|default:"0"|floatformat:1 }}</div>
+                            <div class="property-summary-stat-label">Score de Engagement</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endcomment %}
+        </div>
+    </div>
+</div>

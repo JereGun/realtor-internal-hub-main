@@ -1,0 +1,26 @@
+<div class="table-responsive mb-3">
+    <table class="table table-sm">
+        <thead class="table-light">
+            <tr>
+                <th>Concepto</th>
+                <th class="text-end">Monto</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if invoice.lines.all %}
+            {% for line in invoice.lines.all %}
+            <tr>
+                <td>{{ line.concept }}</td>
+                <td class="text-end">${{ line.amount|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+                <td colspan="2" class="text-center text-muted py-3">
+                    No hay ítems agregados.
+                </td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>

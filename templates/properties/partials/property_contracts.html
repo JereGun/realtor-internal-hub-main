@@ -1,0 +1,206 @@
+{% load static %}
+{% load humanize %}
+
+<!-- Contracts Section -->
+<div class="property-contracts-container mb-4">
+    <div class="card-modern">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-file-earmark-text me-2"></i>Contratos
+                </h5>
+                <div class="d-flex gap-2">
+                    {% if contracts %}
+                    <span class="badge bg-info">{{ contracts|length }}</span>
+                    {% endif %}
+                    <a href="{% url 'contracts:contract_create' %}?property={{ property.id }}" class="btn btn-success btn-sm">
+                        <i class="bi bi-plus-circle me-1"></i>Nuevo
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if contracts %}
+            <div class="property-contracts-list">
+                {% for contract in contracts %}
+                <div class="property-contract-item {% if not forloop.last %}mb-3 pb-3 border-bottom{% endif %}">
+                    <div class="property-contract-header">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="property-contract-title mb-1">
+                                    <a href="{% url 'contracts:contract_detail' contract.pk %}" class="text-decoration-none">
+                                        <i class="bi bi-file-earmark-text me-1"></i>
+                                        Contrato #{{ contract.id }}
+                                    </a>
+                                </h6>
+                                <div class="property-contract-type">
+                                    <span class="badge bg-light text-dark">{{ contract.get_contract_type_display }}</span>
+                                </div>
+                            </div>
+                            <div class="property-contract-status">
+                                <span class="badge bg-{% if contract.status == 'active' %}success{% elif contract.status == 'draft' %}secondary{% elif contract.status == 'finished' %}info{% elif contract.status == 'cancelled' %}danger{% else %}secondary{% endif %}">
+                                    {{ contract.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="property-contract-details mt-2">
+                        <!-- Customer Info -->
+                        <div class="property-contract-field">
+                            <div class="property-contract-field-icon">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            <div class="property-contract-field-content">
+                                <span class="property-contract-field-label">Cliente:</span>
+                                <span class="property-contract-field-value">
+                                    <a href="{% url 'customers:customer_detail' contract.customer.pk %}" class="text-decoration-none">
+                                        {{ contract.customer.get_full_name }}
+                                    </a>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Amount -->
+                        <div class="property-contract-field">
+                            <div class="property-contract-field-icon">
+                                <i class="bi bi-currency-dollar"></i>
+                            </div>
+                            <div class="property-contract-field-content">
+                                <span class="property-contract-field-label">Monto:</span>
+                                <span class="property-contract-field-value">${{ contract.amount }}</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Dates -->
+                        <div class="property-contract-field">
+                            <div class="property-contract-field-icon">
+                                <i class="bi bi-calendar-range"></i>
+                            </div>
+                            <div class="property-contract-field-content">
+                                <span class="property-contract-field-label">Período:</span>
+                                <span class="property-contract-field-value">
+                                    {{ contract.start_date|date:"d/m/Y" }}
+                                    {% if contract.end_date %}
+                                    - {{ contract.end_date|date:"d/m/Y" }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        {% comment %}
+                        <!-- Duration -->
+                        {% if contract.duration_months %}
+                        <div class="property-contract-field">
+                            <div class="property-contract-field-icon">
+                                <i class="bi bi-clock"></i>
+                            </div>
+                            <div class="property-contract-field-content">
+                                <span class="property-contract-field-label">Duración:</span>
+                                <span class="property-contract-field-value">{{ contract.duration_months }} meses</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endcomment %}
+                        
+                        {% comment %}
+                        <!-- Progress Bar for Active Contracts -->
+                        {% if contract.status == 'active' and contract.end_date %}
+                        <div class="property-contract-progress mt-2">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <small class="text-muted">Progreso del contrato</small>
+                                <small class="text-muted">{{ contract.progress_percentage|floatformat:0 }}%</small>
+                            </div>
+                            <div class="progress" style="height: 4px;">
+                                <div class="progress-bar bg-{% if contract.progress_percentage < 30 %}success{% elif contract.progress_percentage < 70 %}warning{% else %}danger{% endif %}" 
+                                     style="width: {{ contract.progress_percentage }}%"></div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endcomment %}
+                    </div>
+                    
+                    <!-- Contract Actions -->
+                    <div class="property-contract-actions mt-3">
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="{% url 'contracts:contract_detail' contract.pk %}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-eye me-1"></i>Ver
+                            </a>
+                            {% if contract.status != 'finished' and contract.status != 'cancelled' %}
+                            <a href="{% url 'contracts:contract_edit' contract.pk %}" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-pencil me-1"></i>Editar
+                            </a>
+                            {% endif %}
+                            {% if contract.status == 'active' %}
+                            <button class="btn btn-outline-info btn-sm" onclick="generateInvoice({{ contract.pk }})">
+                                <i class="bi bi-receipt me-1"></i>Facturar
+                            </button>
+                            {% endif %}
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" onclick="downloadContract({{ contract.pk }})">
+                                        <i class="bi bi-download me-2"></i>Descargar PDF
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="duplicateContract({{ contract.pk }})">
+                                        <i class="bi bi-files me-2"></i>Duplicar
+                                    </a></li>
+                                    {% if contract.status == 'active' %}
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-warning" href="#" onclick="suspendContract({{ contract.pk }})">
+                                        <i class="bi bi-pause me-2"></i>Suspender
+                                    </a></li>
+                                    <li><a class="dropdown-item text-danger" href="#" onclick="cancelContract({{ contract.pk }})">
+                                        <i class="bi bi-x-circle me-2"></i>Cancelar
+                                    </a></li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Contracts Summary -->
+            <div class="property-contracts-summary mt-4 pt-3 border-top">
+                <div class="row text-center">
+                    <div class="col-4">
+                        <div class="property-contracts-stat">
+                            <div class="property-contracts-stat-value">{{ contracts|length }}</div>
+                            <div class="property-contracts-stat-label">Total</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="property-contracts-stat">
+                            <div class="property-contracts-stat-value">0</div>
+                            <div class="property-contracts-stat-label">Activos</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="property-contracts-stat">
+                            <div class="property-contracts-stat-value">
+                                ${{ contracts.0.amount|default:"0" }}
+                            </div>
+                            <div class="property-contracts-stat-label">Ingresos</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="property-contracts-empty text-center py-4">
+                <div class="property-empty-icon mb-3">
+                    <i class="bi bi-file-earmark-text text-muted" style="font-size: 2rem;"></i>
+                </div>
+                <h6 class="text-muted mb-2">Sin contratos</h6>
+                <p class="text-muted small mb-3">No hay contratos registrados para esta propiedad</p>
+                <a href="{% url 'contracts:contract_create' %}?property={{ property.id }}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-circle me-1"></i>Crear Primer Contrato
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

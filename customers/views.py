@@ -43,6 +43,32 @@ class CustomerListView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['search_form'] = CustomerSearchForm(self.request.GET)
+        
+        # Add statistics for the template
+        context['total_customers'] = Customer.objects.count()
+        context['active_customers'] = Customer.objects.count()  # All customers are considered active
+        
+        # New customers this month
+        from django.utils import timezone
+        current_month = timezone.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        context['new_customers_month'] = Customer.objects.filter(created_at__gte=current_month).count()
+        
+        # Customers with contracts - using the correct related name
+        try:
+            context['customers_with_contracts'] = Customer.objects.filter(contract_set__isnull=False).distinct().count()
+        except:
+            context['customers_with_contracts'] = 0
+        
+        # Add localities for the filter dropdown
+        try:
+            from locations.models import City
+            context['localities'] = City.objects.filter(customer__isnull=False).distinct().order_by('name')
+        except:
+            context['localities'] = []
+        
+        # Check if search was performed
+        context['search_performed'] = bool(self.request.GET.get('search') or self.request.GET.get('locality'))
+        
         return context
 
 

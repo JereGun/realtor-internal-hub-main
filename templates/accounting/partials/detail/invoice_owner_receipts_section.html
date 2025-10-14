@@ -1,0 +1,39 @@
+<!-- Comprobantes de Propietario -->
+{% if invoice.contract %}
+<div class="card card-modern mb-4">
+    <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center py-3">
+        <h5 class="mb-0 text-dark fw-bold">
+            <i class="bi bi-file-earmark-check me-2"></i>Comprobantes de Propietario
+        </h5>
+        {% if invoice.status in 'validated,sent,paid' %}
+        <button type="button" class="btn btn-warning btn-sm btn-modern" data-invoice-id="{{ invoice.pk }}"
+            data-invoice-number="{{ invoice.number|default:invoice.id }}"
+            data-has-receipt="{% if invoice.owner_receipts.exists %}true{% else %}false{% endif %}"
+            onclick="showOwnerReceiptModal(this.dataset.invoiceId, this.dataset.invoiceNumber, this.dataset.hasReceipt === 'true')">
+            <i class="bi bi-{% if invoice.owner_receipts.exists %}file-check{% else %}file-plus{% endif %} me-1"></i>
+            {% if invoice.owner_receipts.exists %}Ver Comprobantes{% else %}Generar Comprobante{% endif %}
+        </button>
+        {% endif %}
+    </div>
+    <div class="card-body p-4">
+        {% if invoice.owner_receipts.exists %}
+        {% include 'accounting/partials/detail/invoice_owner_receipts_table.html' %}
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-file-earmark-plus text-muted" style="font-size: 3rem;"></i>
+            <p class="text-muted mt-3 mb-1">No hay comprobantes generados para esta factura.</p>
+            <small class="text-muted">Los comprobantes proporcionan transparencia al propietario sobre los cálculos de alquiler.</small>
+            {% if invoice.status in 'validated,sent,paid' %}
+            <div class="mt-3">
+                <button type="button" class="btn btn-warning btn-modern" data-invoice-id="{{ invoice.pk }}"
+                    data-invoice-number="{{ invoice.number|default:invoice.id }}" data-has-receipt="false"
+                    onclick="showOwnerReceiptModal(this.dataset.invoiceId, this.dataset.invoiceNumber, this.dataset.hasReceipt === 'true')">
+                    <i class="bi bi-file-plus me-2"></i>Generar Primer Comprobante
+                </button>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}

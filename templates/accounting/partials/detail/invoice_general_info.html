@@ -1,0 +1,87 @@
+<!-- Información General -->
+<div class="card card-modern mb-4">
+    <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center py-3">
+        <h2 class="h4 mb-0 text-dark fw-bold">
+            <i class="bi bi-file-earmark-text me-2"></i>
+            Factura #{{ invoice.number|default:invoice.id }}
+        </h2>
+        <div class="btn-group" role="group">
+            <a href="{% url 'accounting:invoice_update' invoice.pk %}"
+                class="btn btn-warning btn-sm btn-modern">
+                <i class="bi bi-pencil me-1"></i>Editar
+            </a>
+            <a href="{% url 'accounting:invoice_delete' invoice.pk %}"
+                class="btn btn-danger btn-sm btn-modern">
+                <i class="bi bi-trash me-1"></i>Eliminar
+            </a>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-person-circle text-primary me-2 fs-5"></i>
+                    <div>
+                        <small class="text-muted d-block">Cliente</small>
+                        <strong>{{ invoice.customer.get_full_name }}</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-calendar-event text-primary me-2 fs-5"></i>
+                    <div>
+                        <small class="text-muted d-block">Fecha de emisión</small>
+                        <strong>{{ invoice.date|date:'d/m/Y' }}</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-calendar-x text-primary me-2 fs-5"></i>
+                    <div>
+                        <small class="text-muted d-block">Vencimiento</small>
+                        <strong>{{ invoice.due_date|date:'d/m/Y' }}</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-flag text-primary me-2 fs-5"></i>
+                    <div>
+                        <small class="text-muted d-block">Estado</small>
+                        <span class="badge rounded-pill
+                            {% if invoice.status == 'paid' %}bg-success
+                            {% elif invoice.status == 'sent' %}bg-info
+                            {% elif invoice.status == 'validated' %}bg-warning text-dark
+                            {% elif invoice.status == 'cancelled' %}bg-danger
+                            {% else %}bg-secondary
+                            {% endif %}">
+                            {{ invoice.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% if invoice.description %}
+            <div class="col-12">
+                <div class="d-flex align-items-start">
+                    <i class="bi bi-card-text text-primary me-2 fs-5 mt-1"></i>
+                    <div>
+                        <small class="text-muted d-block">Descripción</small>
+                        <p class="mb-0">{{ invoice.description }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            <div class="col-12">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-currency-dollar text-success me-2 fs-4"></i>
+                    <div>
+                        <small class="text-muted d-block">Total</small>
+                        <h4 class="text-success mb-0">${{ invoice.total_amount|floatformat:2 }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

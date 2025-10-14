@@ -286,17 +286,40 @@ class PropertyDeleteView(LoginRequiredMixin, DeleteView):
 
 
 @login_required
-def add_property_image(request, pk):
-    property_obj = get_object_or_404(Property, pk=pk)
+def add_property_image(request, pk=None):
+    """Vista para agregar imagen a una propiedad"""
+    property_obj = None
+    if pk:
+        property_obj = get_object_or_404(Property, pk=pk)
     
     if request.method == 'POST':
         form = PropertyImageForm(request.POST, request.FILES)
+        
+        # Si no hay propiedad preseleccionada, obtenerla del POST
+        if not property_obj:
+            property_id = request.POST.get('property')
+            if property_id:
+                try:
+                    property_obj = Property.objects.get(pk=property_id)
+                except Property.DoesNotExist:
+                    messages.error(request, 'Propiedad no encontrada.')
+                    return render(request, 'properties/add_image.html', {
+                        'form': form,
+                        'property': None
+                    })
+            else:
+                messages.error(request, 'Debe seleccionar una propiedad.')
+                return render(request, 'properties/add_image.html', {
+                    'form': form,
+                    'property': None
+                })
+        
         if form.is_valid():
             image = form.save(commit=False)
             image.property = property_obj
             image.save()
-            messages.success(request, 'Imagen agregada correctamente.')
-            return redirect('properties:property_detail', pk=pk)
+            messages.success(request, f'Imagen agregada correctamente a {property_obj.title}.')
+            return redirect('properties:property_detail', pk=property_obj.pk)
     else:
         form = PropertyImageForm()
     
@@ -523,3 +546,119 @@ def autocomplete_localities(request):
         localities = localities.filter(state_id=province_id)
     results = [{'id': locality.id, 'text': locality.name} for locality in localities[:10]]
     return JsonResponse({'results': results})
+
+@login_required
+def autocomplete_properties(request):
+    """Autocompletado de propiedades"""
+    term = request.GET.get('term', '')
+    property_id = request.GET.get('id')  # Para cargar una propiedad específica por ID
+    
+    if property_id:
+        # Cargar propiedad específica por ID
+        try:
+            property_obj = Property.objects.get(id=property_id)
+            results = [{
+                'id': property_obj.id,
+                'title': property_obj.title,
+                'address': property_obj.full_address,
+                'property_type': property_obj.property_type.name if property_obj.property_type else None,
+                'status': property_obj.property_status.name if property_obj.property_status else None,
+                'surface': str(property_obj.total_surface) if property_obj.total_surface else None
+            }]
+            return JsonResponse({'results': results})
+        except Property.DoesNotExist:
+            return JsonResponse({'results': []})
+    
+    # Búsqueda por término
+    if len(term) < 2:
+        return JsonResponse({'results': []})
+    
+    properties = Property.objects.filter(
+        Q(title__icontains=term) |
+        Q(street__icontains=term) |
+        Q(neighborhood__icontains=term) |
+        Q(locality__name__icontains=term) |
+        Q(property_code__icontains=term)
+    ).select_related('property_type', 'property_status', 'locality')[:10]
+    
+    results = []
+    for prop in properties:
+        results.append({
+            'id': prop.id,
+            'title': prop.title,
+            'address': prop.full_address,
+            'property_type': prop.property_type.name if prop.property_type else 'N/A',
+            'status': prop.property_status.name if prop.property_status else 'N/A',
+            'surface': str(prop.total_surface) if prop.total_surface else 'N/A'
+        })
+    
+    return JsonResponse({'results': results})
+
+
+@login_required
+def create_property_ajax(request):
+    """Crear propiedad via AJAX"""
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            
+            # Validaciones básicas
+            title = data.get('title', '').strip()
+            property_type_name = data.get('property_type', '').strip()
+            property_status_name = data.get('property_status', '').strip()
+            
+            if not title or not property_type_name or not property_status_name:
+                return JsonResponse({
+                    'success': False, 
+                    'error': 'Título, tipo y estado son obligatorios'
+                })
+            
+            # Obtener o crear tipo de propiedad
+            property_type, created = PropertyType.objects.get_or_create(
+                name=property_type_name,
+                defaults={'description': f'Tipo {property_type_name}'}
+            )
+            
+            # Obtener o crear estado de propiedad
+            property_status, created = PropertyStatus.objects.get_or_create(
+                name=property_status_name,
+                defaults={'description': f'Estado {property_status_name}'}
+            )
+            
+            # Crear la propiedad
+            property_obj = Property.objects.create(
+                title=title,
+                description=data.get('description', ''),
+                property_type=property_type,
+                property_status=property_status,
+                street=data.get('street', ''),
+                number=data.get('number', ''),
+                total_surface=data.get('total_surface') or None,
+                listing_type=data.get('listing_type', ''),
+                agent=request.user.agent if hasattr(request.user, 'agent') else None
+            )
+            
+            return JsonResponse({
+                'success': True,
+                'property': {
+                    'id': property_obj.id,
+                    'title': property_obj.title,
+                    'address': property_obj.full_address,
+                    'property_type': property_obj.property_type.name,
+                    'status': property_obj.property_status.name,
+                    'surface': str(property_obj.total_surface) if property_obj.total_surface else 'N/A'
+                }
+            })
+            
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'error': 'Datos JSON inválidos'})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    
+    return JsonResponse({'success': False, 'error': 'Método no permitido'})
+
+
+@login_required
+def image_upload_demo(request):
+    """Vista de demostración del formulario mejorado de subida de imágenes"""
+    return render(request, 'properties/image_upload_demo.html')

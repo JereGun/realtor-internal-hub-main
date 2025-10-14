@@ -1,0 +1,327 @@
+<script>
+    // Función para actualizar el contador de facturas seleccionadas
+    function updateSelectedCount() {
+        const checkboxes = document.querySelectorAll('.invoice-checkbox:checked');
+        const count = checkboxes.length;
+        document.getElementById('selected-count').textContent = count;
+
+        // Habilitar o deshabilitar el botón de envío masivo
+        const sendButton = document.getElementById('send-bulk-emails');
+        sendButton.disabled = count === 0;
+
+        // Actualizar el estado de los checkboxes de seleccionar todos
+        const allCheckboxes = document.querySelectorAll('.invoice-checkbox');
+        const selectAllHeader = document.getElementById('select-all-header');
+        const selectAll = document.getElementById('select-all');
+
+        if (count === 0) {
+            selectAllHeader.checked = false;
+            selectAll.checked = false;
+            selectAllHeader.indeterminate = false;
+            selectAll.indeterminate = false;
+        } else if (count === allCheckboxes.length) {
+            selectAllHeader.checked = true;
+            selectAll.checked = true;
+            selectAllHeader.indeterminate = false;
+            selectAll.indeterminate = false;
+        } else {
+            selectAllHeader.indeterminate = true;
+            selectAll.indeterminate = true;
+        }
+    }
+
+    // Función para seleccionar o deseleccionar todas las facturas
+    function toggleAllCheckboxes(checkbox) {
+        const checkboxes = document.querySelectorAll('.invoice-checkbox');
+        checkboxes.forEach(cb => {
+            cb.checked = checkbox.checked;
+        });
+
+        // Sincronizar los dos checkboxes de seleccionar todos
+        const selectAllHeader = document.getElementById('select-all-header');
+        const selectAll = document.getElementById('select-all');
+        selectAllHeader.checked = checkbox.checked;
+        selectAll.checked = checkbox.checked;
+        selectAllHeader.indeterminate = false;
+        selectAll.indeterminate = false;
+
+        updateSelectedCount();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Configurar CSRF token
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // Función para mostrar toast de éxito
+        function showSuccessToast(message) {
+            let toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                document.body.appendChild(toastContainer);
+            }
+
+            const toastHtml = `
+            <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    <strong class="me-auto">Éxito</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            </div>
+        `;
+
+            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+            const toast = new bootstrap.Toast(toastContainer.lastElementChild);
+            toast.show();
+
+            toastContainer.lastElementChild.addEventListener('hidden.bs.toast', function () {
+                this.remove();
+            });
+        }
+
+        // Función para manejar eliminación de facturas
+        window.handleDelete = function () {
+            const form = document.getElementById('deleteInvoiceForm');
+            const formData = new FormData(form);
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Eliminando...';
+            submitBtn.disabled = true;
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('deleteInvoiceModal'));
+                        modal.hide();
+                        showSuccessToast('Factura eliminada correctamente');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        alert(`Error: ${data.error || 'Error al eliminar la factura'}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al eliminar la factura. Por favor, inténtelo nuevamente.');
+                })
+                .finally(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                });
+        };
+
+        // Configurar modal de eliminación
+        const deleteButtons = document.querySelectorAll('[data-bs-target="#deleteInvoiceModal"]');
+        const invoiceNumberElement = document.getElementById('invoiceNumber');
+        const deleteInvoiceForm = document.getElementById('deleteInvoiceForm');
+
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const invoiceId = this.dataset.invoiceId;
+                const invoiceNumber = this.dataset.invoiceNumber;
+                invoiceNumberElement.textContent = invoiceNumber;
+                deleteInvoiceForm.action = `{% url 'accounting:invoice_delete' 0 %}`.replace('0', invoiceId);
+            });
+        });
+
+        // Configurar el formulario de acciones masivas
+        const form = document.getElementById('bulk-actions-form');
+        const sendButton = document.getElementById('send-bulk-emails');
+        const confirmButton = document.getElementById('confirm-send-emails');
+        const bulkEmailModal = new bootstrap.Modal(document.getElementById('bulkEmailModal'));
+
+        // Mostrar modal de confirmación al hacer clic en el botón de envío
+        sendButton.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const checkboxes = document.querySelectorAll('.invoice-checkbox:checked');
+            const emailCount = Array.from(checkboxes).filter(cb =>
+                cb.dataset.hasEmail === 'true' &&
+                (cb.dataset.status === 'validated' || cb.dataset.status === 'sent')
+            ).length;
+
+            document.getElementById('email-count').textContent = emailCount;
+
+            // Mostrar advertencias
+            const hasNoEmail = Array.from(checkboxes).some(cb => cb.dataset.hasEmail === 'false');
+            document.getElementById('warning-no-email').classList.toggle('d-none', !hasNoEmail);
+
+            const hasInvalidStatus = Array.from(checkboxes).some(cb =>
+                cb.dataset.status !== 'validated' && cb.dataset.status !== 'sent'
+            );
+            document.getElementById('warning-invalid-status').classList.toggle('d-none', !hasInvalidStatus);
+
+            bulkEmailModal.show();
+        });
+
+        // Enviar el formulario al confirmar
+        confirmButton.addEventListener('click', function () {
+            form.submit();
+            bulkEmailModal.hide();
+        });
+
+        // Filtros en tiempo real
+        const filterForm = document.getElementById('filterForm');
+        const searchInput = document.getElementById('searchQuery');
+        const statusSelect = document.getElementById('statusFilter');
+        const customerSelect = document.getElementById('customerFilter');
+
+        // Auto-submit en cambios de select
+        [statusSelect, customerSelect].forEach(select => {
+            if (select) {
+                select.addEventListener('change', function () {
+                    filterForm.submit();
+                });
+            }
+        });
+
+        // Búsqueda con delay
+        let searchTimeout;
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    if (this.value.length >= 3 || this.value.length === 0) {
+                        filterForm.submit();
+                    }
+                }, 500);
+            });
+        }
+
+        // Inicializar contador
+        updateSelectedCount();
+    });
+
+    // Función para mostrar el modal de comprobante de propietario
+    function showOwnerReceiptModal(invoiceId, invoiceNumber, hasReceipt) {
+        const modal = new bootstrap.Modal(document.getElementById('ownerReceiptModal'));
+        const modalTitle = document.getElementById('ownerReceiptModalLabel');
+        const modalBody = document.getElementById('ownerReceiptModalBody');
+        const generateBtn = document.getElementById('generateOwnerReceiptBtn');
+        const previewBtn = document.getElementById('previewOwnerReceiptBtn');
+
+        if (hasReceipt) {
+            modalTitle.textContent = `Comprobante de Propietario - Factura ${invoiceNumber}`;
+            modalBody.innerHTML = `
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                Ya existe un comprobante generado para esta factura.
+            </div>
+            <div class="d-grid gap-2">
+                <a href="/accounting/invoice/${invoiceId}/owner-receipt-detail/" class="btn btn-primary">
+                    <i class="bi bi-eye me-2"></i>Ver Comprobante Existente
+                </a>
+                <button type="button" class="btn btn-outline-warning" onclick="regenerateOwnerReceipt(${invoiceId})">
+                    <i class="bi bi-arrow-clockwise me-2"></i>Regenerar Comprobante
+                </button>
+            </div>
+        `;
+            generateBtn.style.display = 'none';
+            previewBtn.style.display = 'none';
+        } else {
+            modalTitle.textContent = `Generar Comprobante de Propietario - Factura ${invoiceNumber}`;
+            modalBody.innerHTML = `
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                Se generará un comprobante detallado para el propietario con información del alquiler y descuentos aplicados.
+            </div>
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="sendEmailCheck" checked>
+                <label class="form-check-label" for="sendEmailCheck">
+                    Enviar automáticamente por correo electrónico al propietario
+                </label>
+            </div>
+        `;
+            generateBtn.style.display = 'inline-block';
+            previewBtn.style.display = 'inline-block';
+            generateBtn.onclick = () => generateOwnerReceipt(invoiceId);
+            previewBtn.onclick = () => previewOwnerReceipt(invoiceId);
+        }
+
+        modal.show();
+    }
+
+    // Función para generar comprobante de propietario
+    function generateOwnerReceipt(invoiceId) {
+        const sendEmail = document.getElementById('sendEmailCheck')?.checked || false;
+        const btn = document.getElementById('generateOwnerReceiptBtn');
+        const originalText = btn.innerHTML;
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Generando...';
+
+        fetch(`/contabilidad/invoice/${invoiceId}/generate-owner-receipt/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: `send_email=${sendEmail}`
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('success', `Comprobante ${data.receipt_number} generado exitosamente.`);
+                    bootstrap.Modal.getInstance(document.getElementById('ownerReceiptModal')).hide();
+                    // Actualizar la página para mostrar el nuevo estado
+                    location.reload();
+                } else {
+                    showAlert('danger', `Error: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                showAlert('danger', 'Error al generar el comprobante. Intente nuevamente.');
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            });
+    }
+
+    // Función para previsualizar comprobante
+    function previewOwnerReceipt(invoiceId) {
+        window.open(`/accounting/invoice/${invoiceId}/preview-owner-receipt/`, '_blank');
+    }
+
+    // Función para regenerar comprobante
+    function regenerateOwnerReceipt(invoiceId) {
+        if (confirm('¿Está seguro de que desea regenerar el comprobante? Esto creará un nuevo comprobante.')) {
+            generateOwnerReceipt(invoiceId);
+        }
+    }
+
+    // Función para mostrar alertas
+    function showAlert(type, message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+
+        const container = document.querySelector('.container-fluid');
+        container.insertBefore(alertDiv, container.firstChild);
+
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+</script>

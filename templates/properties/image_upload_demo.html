@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Demo - Subir Imagen{% endblock %}
+{% block page_title %}Demo - Subir Imagen{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <h4><i class="bi bi-info-circle me-2"></i>Formulario Mejorado de Subida de Imágenes</h4>
+                <p class="mb-2">El formulario de agregar imágenes ahora incluye las siguientes mejoras:</p>
+                <ul class="mb-0">
+                    <li><strong>Búsqueda de Propiedades:</strong> Autocompletado inteligente para buscar propiedades existentes</li>
+                    <li><strong>Creación Rápida:</strong> Posibilidad de crear nuevas propiedades directamente desde el formulario</li>
+                    <li><strong>Drag & Drop:</strong> Arrastra y suelta archivos para subirlos</li>
+                    <li><strong>Vista Previa:</strong> Previsualización de la imagen antes de subirla</li>
+                    <li><strong>Validación Mejorada:</strong> Validación de tipos de archivo y tamaño</li>
+                    <li><strong>Interfaz Moderna:</strong> Diseño actualizado con mejor UX</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-house-add me-2"></i>Opción 1: Con Propiedad Preseleccionada</h5>
+                </div>
+                <div class="card-body">
+                    <p>Cuando accedes desde el detalle de una propiedad específica:</p>
+                    <a href="{% url 'properties:property_list' %}" class="btn btn-primary">
+                        <i class="bi bi-list me-1"></i>Ver Lista de Propiedades
+                    </a>
+                    <small class="d-block mt-2 text-muted">
+                        Desde cualquier propiedad, usa el botón "Agregar Imagen"
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-search me-2"></i>Opción 2: Búsqueda y Selección</h5>
+                </div>
+                <div class="card-body">
+                    <p>Formulario con búsqueda inteligente de propiedades:</p>
+                    <a href="{% url 'properties:add_image_no_property' %}" class="btn btn-success">
+                        <i class="bi bi-camera-fill me-1"></i>Subir Imagen (Nuevo)
+                    </a>
+                    <small class="d-block mt-2 text-muted">
+                        Busca una propiedad o crea una nueva directamente
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-gear me-2"></i>Características Técnicas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6><i class="bi bi-search text-primary me-1"></i>Búsqueda Inteligente</h6>
+                            <ul class="small">
+                                <li>Búsqueda por título</li>
+                                <li>Búsqueda por dirección</li>
+                                <li>Búsqueda por código</li>
+                                <li>Resultados en tiempo real</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h6><i class="bi bi-plus-circle text-success me-1"></i>Creación Rápida</h6>
+                            <ul class="small">
+                                <li>Modal integrado</li>
+                                <li>Campos esenciales</li>
+                                <li>Validación en tiempo real</li>
+                                <li>Selección automática</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h6><i class="bi bi-upload text-info me-1"></i>Subida Avanzada</h6>
+                            <ul class="small">
+                                <li>Drag & Drop</li>
+                                <li>Vista previa</li>
+                                <li>Validación de archivos</li>
+                                <li>Feedback visual</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

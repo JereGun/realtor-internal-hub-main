@@ -1,0 +1,34 @@
+<!-- Resumen de Pagos -->
+<div class="card-footer bg-light">
+    <div class="row text-center">
+        <div class="col-md-4">
+            <div class="d-flex align-items-center justify-content-center">
+                <i class="bi bi-currency-dollar text-primary me-2"></i>
+                <div>
+                    <small class="text-muted d-block">Total Pagado</small>
+                    <strong class="text-success">${{ total_paid|floatformat:2 }}</strong>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="d-flex align-items-center justify-content-center">
+                <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                <div>
+                    <small class="text-muted d-block">Saldo Pendiente</small>
+                    <strong class="{% if balance <= 0 %}text-success{% else %}text-warning{% endif %}">
+                        ${{ balance|floatformat:2 }}
+                    </strong>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="d-flex align-items-center justify-content-center">
+                <i class="bi bi-receipt text-info me-2"></i>
+                <div>
+                    <small class="text-muted d-block">Total Factura</small>
+                    <strong class="text-info">${{ invoice.total_amount|floatformat:2 }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

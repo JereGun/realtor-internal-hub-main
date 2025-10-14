@@ -1,0 +1,146 @@
+{% load static %}
+
+<!-- Property Details -->
+<div class="card-modern mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="bi bi-info-square me-2"></i>Información Detallada
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-4">
+            <!-- General Information -->
+            <div class="col-md-6">
+                <h6 class="property-subsection-title">
+                    <i class="bi bi-house me-2"></i>Información General
+                </h6>
+                <div class="property-detail-list">
+                    <div class="property-detail-item">
+                        <span class="property-detail-label">Tipo de Propiedad:</span>
+                        <span class="property-detail-value">{{ property.property_type.name }}</span>
+                    </div>
+                    <div class="property-detail-item">
+                        <span class="property-detail-label">Estado:</span>
+                        <span class="property-detail-value">
+                            <span class="badge bg-{% if property.property_status.name == 'Disponible' %}success{% elif property.property_status.name == 'Vendida' %}danger{% elif property.property_status.name == 'Alquilada' %}info{% elif property.property_status.name == 'En Proceso' %}warning{% else %}secondary{% endif %}">
+                                {{ property.property_status.name }}
+                            </span>
+                        </span>
+                    </div>
+                    {% if property.year_built %}
+                    <div class="property-detail-item">
+                        <span class="property-detail-label">Año de Construcción:</span>
+                        <span class="property-detail-value">{{ property.year_built }}</span>
+                    </div>
+                    {% endif %}
+                    {% comment %}
+                    {% if property.floors %}
+                    <div class="property-detail-item">
+                        <span class="property-detail-label">Pisos:</span>
+                        <span class="property-detail-value">{{ property.floors }}</span>
+                    </div>
+                    {% endif %}
+                    {% if property.orientation %}
+                    <div class="property-detail-item">
+                        <span class="property-detail-label">Orientación:</span>
+                        <span class="property-detail-value">{{ property.orientation }}</span>
+                    </div>
+                    {% endif %}
+                    {% endcomment %}
+                </div>
+            </div>
+            
+            <!-- Technical Information -->
+            <div class="col-md-6">
+                <h6 class="property-subsection-title">
+                    <i class="bi bi-gear me-2"></i>Información Técnica
+                </h6>
+                <div class="property-detail-list">
+                    {% comment %}
+                    {% if property.heating_type %}
+                    <div class="property-detail-item">
+                        <span class="property-detail-label">Calefacción:</span>
+                        <span class="property-detail-value">{{ property.heating_type }}</span>
+                    </div>
+                    {% endif %}
+                    {% if property.cooling_type %}
+                    <div class="property-detail-item">
+                        <span class="property-detail-label">Refrigeración:</span>
+                        <span class="property-detail-value">{{ property.cooling_type }}</span>
+                    </div>
+                    {% endif %}
+                    {% if property.energy_rating %}
+                    <div class="property-detail-item">
+                        <span class="property-detail-label">Eficiencia Energética:</span>
+                        <span class="property-detail-value">
+                            <span class="badge bg-{% if property.energy_rating == 'A' %}success{% elif property.energy_rating == 'B' %}info{% elif property.energy_rating == 'C' %}warning{% else %}secondary{% endif %}">
+                                Clase {{ property.energy_rating }}
+                            </span>
+                        </span>
+                    </div>
+                    {% endif %}
+                    {% if property.construction_quality %}
+                    <div class="property-detail-item">
+                        <span class="property-detail-label">Calidad de Construcción:</span>
+                        <span class="property-detail-value">{{ property.construction_quality }}</span>
+                    </div>
+                    {% endif %}
+                    {% endcomment %}
+                </div>
+            </div>
+        </div>
+        
+        {% comment %}
+        <!-- Property Condition -->
+        {% if property.condition %}
+        <div class="property-condition mt-4 pt-4 border-top">
+            <h6 class="property-subsection-title">
+                <i class="bi bi-tools me-2"></i>Estado de la Propiedad
+            </h6>
+            <div class="property-condition-indicator">
+                <div class="d-flex align-items-center">
+                    <div class="property-condition-badge me-3">
+                        <span class="badge bg-{% if property.condition == 'Excelente' %}success{% elif property.condition == 'Muy Bueno' %}info{% elif property.condition == 'Bueno' %}primary{% elif property.condition == 'Regular' %}warning{% else %}danger{% endif %} fs-6">
+                            {{ property.condition }}
+                        </span>
+                    </div>
+                    <div class="property-condition-description">
+                        <small class="text-muted">
+                            {% if property.condition == 'Excelente' %}
+                                Propiedad en perfectas condiciones, lista para habitar
+                            {% elif property.condition == 'Muy Bueno' %}
+                                Propiedad en muy buen estado, mínimas mejoras necesarias
+                            {% elif property.condition == 'Bueno' %}
+                                Propiedad en buen estado general
+                            {% elif property.condition == 'Regular' %}
+                                Propiedad que requiere algunas mejoras
+                            {% else %}
+                                Propiedad que requiere renovación
+                            {% endif %}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endcomment %}
+        
+        <!-- Property Metadata -->
+        <div class="property-metadata mt-4 pt-4 border-top">
+            <div class="row text-muted small">
+                <div class="col-md-6">
+                    <div class="property-metadata-item">
+                        <i class="bi bi-calendar-plus me-1"></i>
+                        <span>Creado: {{ property.created_at|date:"d/m/Y H:i" }}</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="property-metadata-item">
+                        <i class="bi bi-pencil-square me-1"></i>
+                        <span>Modificado: {{ property.updated_at|date:"d/m/Y H:i" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

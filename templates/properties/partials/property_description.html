@@ -1,0 +1,68 @@
+{% load static %}
+
+<!-- Property Description -->
+{% if property.description %}
+<div class="card-modern mb-4">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="bi bi-card-text me-2"></i>Descripción
+            </h5>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-secondary" onclick="copyDescription()">
+                    <i class="bi bi-clipboard me-1"></i>Copiar
+                </button>
+                <button class="btn btn-sm btn-outline-secondary" onclick="toggleDescription()">
+                    <i class="bi bi-arrows-expand me-1"></i>Expandir
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div id="propertyDescription" class="property-description">
+            <div class="property-description-content">
+                {{ property.description|linebreaksbr }}
+            </div>
+            {% if property.description|length > 300 %}
+            <div class="property-description-toggle mt-3">
+                <button class="btn btn-link p-0 text-decoration-none" onclick="toggleDescriptionExpansion()">
+                    <span class="expand-text">
+                        <i class="bi bi-chevron-down me-1"></i>Ver más
+                    </span>
+                    <span class="collapse-text d-none">
+                        <i class="bi bi-chevron-up me-1"></i>Ver menos
+                    </span>
+                </button>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Description Metadata -->
+        <div class="property-description-meta mt-3 pt-3 border-top">
+            <div class="row text-muted small">
+                <div class="col-md-6">
+                    <i class="bi bi-type me-1"></i>
+                    {{ property.description|length }} caracteres
+                </div>
+                <div class="col-md-6">
+                    <i class="bi bi-clock me-1"></i>
+                    Tiempo de lectura: ~{% widthratio property.description|length 200 1 %} min
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="card-modern mb-4">
+    <div class="card-body text-center py-4">
+        <div class="bg-light rounded-circle p-3 d-inline-flex mb-3">
+            <i class="bi bi-card-text text-muted" style="font-size: 1.5rem;"></i>
+        </div>
+        <h6 class="text-muted mb-2">Sin descripción</h6>
+        <p class="text-muted mb-3 small">Esta propiedad no tiene una descripción detallada</p>
+        <a href="{% url 'properties:property_edit' property.pk %}" class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-plus-circle me-1"></i>Agregar Descripción
+        </a>
+    </div>
+</div>
+{% endif %}

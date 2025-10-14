@@ -1,0 +1,365 @@
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Configurar CSRF token para todas las peticiones AJAX
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // Función para mostrar mensajes de error
+        function showFieldError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const feedback = field.parentNode.querySelector('.invalid-feedback');
+            field.classList.add('is-invalid');
+            if (feedback) {
+                feedback.textContent = message;
+            }
+        }
+
+        // Función para limpiar errores
+        function clearFieldErrors() {
+            document.querySelectorAll('.is-invalid').forEach(field => {
+                field.classList.remove('is-invalid');
+            });
+        }
+
+        // Función para mostrar toast de éxito
+        function showSuccessToast(message) {
+            // Crear toast dinámicamente si no existe
+            let toastContainer = document.querySelector('.toast-container');
+            if (!toastContainer) {
+                toastContainer = document.createElement('div');
+                toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                document.body.appendChild(toastContainer);
+            }
+
+            const toastHtml = `
+            <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    <strong class="me-auto">Éxito</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            </div>
+        `;
+
+            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+            const toast = new bootstrap.Toast(toastContainer.lastElementChild);
+            toast.show();
+
+            // Remover el toast después de que se oculte
+            toastContainer.lastElementChild.addEventListener('hidden.bs.toast', function () {
+                this.remove();
+            });
+        }
+
+        // Manejar formulario de agregar ítem
+        const addItemForm = document.getElementById('addItemForm');
+        const addItemModal = new bootstrap.Modal(document.getElementById('addItemModal'));
+
+        addItemForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            clearFieldErrors();
+
+            const formData = new FormData(addItemForm);
+            formData.append('csrfmiddlewaretoken', csrfToken);
+
+            const submitBtn = addItemForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Agregando...';
+            submitBtn.disabled = true;
+
+            fetch('{% url "accounting:invoiceline_create" invoice.pk %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        addItemModal.hide();
+                        showSuccessToast('Ítem agregado correctamente');
+                        // Recargar la página para mostrar el nuevo ítem
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        // Mostrar errores de validación
+                        if (data.errors) {
+                            Object.keys(data.errors).forEach(field => {
+                                const fieldId = field === 'concept' ? 'itemConcept' : 'itemAmount';
+                                showFieldError(fieldId, data.errors[field][0]);
+                            });
+                        } else {
+                            showFieldError('itemConcept', data.error || 'Error al agregar el ítem');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showFieldError('itemConcept', 'Error de conexión. Inténtelo de nuevo.');
+                })
+                .finally(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                });
+        });
+
+        // Limpiar formulario cuando se cierra el modal
+        document.getElementById('addItemModal').addEventListener('hidden.bs.modal', function () {
+            addItemForm.reset();
+            clearFieldErrors();
+        });
+
+        // Manejar formulario de pago rápido
+        const quickPaymentForm = document.getElementById('quickPaymentForm');
+        const quickPaymentModal = new bootstrap.Modal(document.getElementById('quickPaymentModal'));
+
+        quickPaymentForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            clearFieldErrors();
+
+            const formData = new FormData(quickPaymentForm);
+            formData.append('csrfmiddlewaretoken', csrfToken);
+
+            const submitBtn = quickPaymentForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Registrando...';
+            submitBtn.disabled = true;
+
+            fetch('{% url "accounting:quick_payment_create" invoice.pk %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        quickPaymentModal.hide();
+                        showSuccessToast('Pago registrado correctamente');
+                        // Recargar la página para mostrar el nuevo pago
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        // Mostrar errores de validación
+                        if (data.errors) {
+                            Object.keys(data.errors).forEach(field => {
+                                const fieldId = field === 'amount' ? 'paymentAmount' : 'paymentMethod';
+                                showFieldError(fieldId, data.errors[field][0]);
+                            });
+                        } else {
+                            showFieldError('paymentAmount', data.error || 'Error al registrar el pago');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showFieldError('paymentAmount', 'Error de conexión. Inténtelo de nuevo.');
+                })
+                .finally(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                });
+        });
+
+        // Limpiar formulario cuando se cierra el modal
+        document.getElementById('quickPaymentModal').addEventListener('hidden.bs.modal', function () {
+            quickPaymentForm.reset();
+            clearFieldErrors();
+            // Restaurar el valor del saldo pendiente
+            document.getElementById('paymentAmount').value = '{{ balance|floatformat:2 }}';
+        });
+    });
+
+    // Función para mostrar el modal de comprobante de propietario
+    function showOwnerReceiptModal(invoiceId, invoiceNumber, hasReceipt) {
+        const modal = new bootstrap.Modal(document.getElementById('ownerReceiptModal'));
+        const modalTitle = document.getElementById('ownerReceiptModalLabel');
+        const modalBody = document.getElementById('ownerReceiptModalBody');
+        const generateBtn = document.getElementById('generateOwnerReceiptBtn');
+        const previewBtn = document.getElementById('previewOwnerReceiptBtn');
+
+        if (hasReceipt) {
+            modalTitle.textContent = `Comprobante de Propietario - Factura ${invoiceNumber}`;
+            modalBody.innerHTML = `
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                Ya existe un comprobante generado para esta factura.
+            </div>
+            <div class="d-grid gap-2">
+                <button type="button" class="btn btn-outline-warning" onclick="regenerateOwnerReceipt(${invoiceId})">
+                    <i class="bi bi-arrow-clockwise me-2"></i>Regenerar Comprobante
+                </button>
+            </div>
+        `;
+            generateBtn.style.display = 'none';
+            previewBtn.style.display = 'none';
+        } else {
+            modalTitle.textContent = `Generar Comprobante de Propietario - Factura ${invoiceNumber}`;
+            modalBody.innerHTML = `
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle me-2"></i>
+                Se generará un comprobante detallado para el propietario con información del alquiler y descuentos aplicados.
+            </div>
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="sendEmailCheck" checked>
+                <label class="form-check-label" for="sendEmailCheck">
+                    Enviar automáticamente por correo electrónico al propietario
+                </label>
+            </div>
+        `;
+            generateBtn.style.display = 'inline-block';
+            previewBtn.style.display = 'inline-block';
+            generateBtn.onclick = () => generateOwnerReceipt(invoiceId);
+            previewBtn.onclick = () => previewOwnerReceipt(invoiceId);
+        }
+
+        modal.show();
+    }
+
+    // Función para generar comprobante de propietario
+    function generateOwnerReceipt(invoiceId) {
+        const sendEmail = document.getElementById('sendEmailCheck')?.checked || false;
+        const btn = document.getElementById('generateOwnerReceiptBtn');
+        const originalText = btn.innerHTML;
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Generando...';
+
+        fetch(`{% url 'accounting:generate_owner_receipt' 0 %}`.replace('0', invoiceId), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: `send_email=${sendEmail}`
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('success', `Comprobante ${data.receipt_number} generado exitosamente.`);
+                    bootstrap.Modal.getInstance(document.getElementById('ownerReceiptModal')).hide();
+                    // Actualizar la página para mostrar el nuevo comprobante
+                    location.reload();
+                } else {
+                    showAlert('danger', `Error: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                showAlert('danger', 'Error al generar el comprobante. Intente nuevamente.');
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            });
+    }
+
+    // Función para previsualizar comprobante
+    function previewOwnerReceipt(invoiceId) {
+        window.open(`/accounting/invoice/${invoiceId}/preview-owner-receipt/`, '_blank');
+    }
+
+    // Función para regenerar comprobante
+    function regenerateOwnerReceipt(invoiceId) {
+        if (confirm('¿Está seguro de que desea regenerar el comprobante? Esto creará un nuevo comprobante.')) {
+            generateOwnerReceipt(invoiceId);
+        }
+    }
+
+    // Función para reenviar comprobante
+    function resendOwnerReceipt(receiptId) {
+        if (confirm('¿Desea reenviar este comprobante por correo electrónico?')) {
+            fetch(`/accounting/owner-receipt/${receiptId}/resend/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('success', 'Comprobante reenviado exitosamente.');
+                        location.reload();
+                    } else {
+                        showAlert('danger', `Error: ${data.error}`);
+                    }
+                })
+                .catch(error => {
+                    showAlert('danger', 'Error al reenviar el comprobante.');
+                    console.error('Error:', error);
+                });
+        }
+    }
+
+    // Función para mostrar alertas
+    function showAlert(type, message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+
+        const container = document.querySelector('.container-fluid');
+        container.insertBefore(alertDiv, container.firstChild);
+
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+</script>
+
+<style>
+    /* Estilos personalizados para las notificaciones de vencimiento */
+    .alert-danger {
+        border-left: 4px solid #dc3545;
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    }
+    
+    .alert-warning {
+        border-left: 4px solid #ffc107;
+        background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    }
+    
+    .alert .bi {
+        font-size: 1.2rem;
+    }
+    
+    .alert-heading {
+        font-weight: 600;
+        color: inherit;
+    }
+    
+    /* Animación suave para las alertas */
+    .alert.fade.show {
+        animation: slideInDown 0.5s ease-out;
+    }
+    
+    @keyframes slideInDown {
+        from {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    /* Mejorar la apariencia del botón de cerrar */
+    .alert .btn-close {
+        padding: 0.75rem;
+        margin: -0.75rem -0.75rem -0.75rem auto;
+    }
+</style>

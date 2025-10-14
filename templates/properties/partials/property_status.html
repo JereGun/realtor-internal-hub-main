@@ -1,0 +1,126 @@
+{% load static %}
+
+<!-- Property Status Card -->
+<div class="property-status-container mb-4">
+    <div class="card-modern">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-flag me-2"></i>Estado Actual
+                </h5>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-gear"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{% url 'properties:property_edit' property.pk %}">
+                            <i class="bi bi-pencil me-2"></i>Cambiar Estado
+                        </a></li>
+                        <li><a class="dropdown-item" href="#" onclick="showStatusHistory()">
+                            <i class="bi bi-clock-history me-2"></i>Ver Historial
+                        </a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="property-status-content">
+                <!-- Current Status -->
+                <div class="property-status-current mb-3">
+                    <div class="property-status-badge-container">
+                        <span class="property-status-badge property-status-badge-lg badge bg-{% if property.property_status.name == 'Disponible' %}success{% elif property.property_status.name == 'Vendida' %}danger{% elif property.property_status.name == 'Alquilada' %}info{% elif property.property_status.name == 'En Proceso' %}warning{% else %}secondary{% endif %}">
+                            <i class="bi bi-{% if property.property_status.name == 'Disponible' %}check-circle{% elif property.property_status.name == 'Vendida' %}x-circle{% elif property.property_status.name == 'Alquilada' %}house-check{% elif property.property_status.name == 'En Proceso' %}clock{% else %}question-circle{% endif %} me-1"></i>
+                            {{ property.property_status.name }}
+                        </span>
+                    </div>
+                    <div class="property-status-description mt-2">
+                        <small class="text-muted">
+                            {% if property.property_status.name == 'Disponible' %}
+                                La propiedad está disponible para venta o alquiler
+                            {% elif property.property_status.name == 'Vendida' %}
+                                La propiedad ha sido vendida
+                            {% elif property.property_status.name == 'Alquilada' %}
+                                La propiedad está actualmente alquilada
+                            {% elif property.property_status.name == 'En Proceso' %}
+                                La propiedad está en proceso de negociación
+                            {% else %}
+                                Estado personalizado de la propiedad
+                            {% endif %}
+                        </small>
+                    </div>
+                </div>
+                
+                {% comment %}
+                <!-- Status Timeline -->
+                {% if property.status_history.all %}
+                <div class="property-status-timeline">
+                    <h6 class="property-subsection-title small mb-2">
+                        <i class="bi bi-clock-history me-1"></i>Cambios Recientes
+                    </h6>
+                    <div class="property-status-timeline-list">
+                        {% for status_change in property.status_history.all|slice:":3" %}
+                        <div class="property-status-timeline-item">
+                            <div class="property-status-timeline-marker">
+                                <div class="property-status-timeline-dot bg-{% if status_change.status.name == 'Disponible' %}success{% elif status_change.status.name == 'Vendida' %}danger{% elif status_change.status.name == 'Alquilada' %}info{% elif status_change.status.name == 'En Proceso' %}warning{% else %}secondary{% endif %}"></div>
+                            </div>
+                            <div class="property-status-timeline-content">
+                                <div class="property-status-timeline-header">
+                                    <span class="property-status-timeline-status">{{ status_change.status.name }}</span>
+                                    <span class="property-status-timeline-date">{{ status_change.date|date:"d/m" }}</span>
+                                </div>
+                                {% if status_change.notes %}
+                                <div class="property-status-timeline-notes">
+                                    {{ status_change.notes|truncatechars:50 }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                {% endcomment %}
+                
+                <!-- Status Actions -->
+                <div class="property-status-actions mt-3 pt-3 border-top">
+                    <div class="d-grid gap-2">
+                        {% if property.property_status.name == 'Disponible' %}
+                        <button class="btn btn-success btn-sm" onclick="markAsRented()">
+                            <i class="bi bi-house-check me-1"></i>Marcar como Alquilada
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="markAsSold()">
+                            <i class="bi bi-check-circle me-1"></i>Marcar como Vendida
+                        </button>
+                        {% elif property.property_status.name == 'En Proceso' %}
+                        <button class="btn btn-success btn-sm" onclick="markAsAvailable()">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Volver a Disponible
+                        </button>
+                        {% elif property.property_status.name == 'Alquilada' or property.property_status.name == 'Vendida' %}
+                        <button class="btn btn-warning btn-sm" onclick="markAsAvailable()">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Volver a Disponible
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Status Statistics -->
+                <div class="property-status-stats mt-3 pt-3 border-top">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="property-status-stat">
+                                <div class="property-status-stat-value">{{ property.created_at|timesince|truncatewords:1 }}</div>
+                                <div class="property-status-stat-label">Tiempo en Sistema</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="property-status-stat">
+                                <div class="property-status-stat-value">1</div>
+                                <div class="property-status-stat-label">Estado Actual</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

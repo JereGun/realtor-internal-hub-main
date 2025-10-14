@@ -1,0 +1,113 @@
+{% load static %}
+
+<!-- Modern Image Gallery -->
+{% if property.images.all %}
+<div class="card-modern mb-4">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="bi bi-images me-2"></i>Galería de Imágenes
+            </h5>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-info">
+                    {{ property.images.count }} imagen{{ property.images.count|pluralize:"es" }}
+                </span>
+                <a href="{% url 'properties:add_image' property.pk %}" class="btn-modern btn-primary btn-sm">
+                    <i class="bi bi-plus-circle me-1"></i>Agregar
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="property-gallery-main">
+            <div id="propertyCarousel" class="property-carousel" data-bs-ride="carousel">
+                <div class="carousel-inner property-carousel-inner">
+                    {% for image in property.images.all %}
+                    <div class="carousel-item property-carousel-item {% if forloop.first %}active{% endif %}">
+                        <div class="property-image-container">
+                            <img src="{{ image.image.url }}" class="property-gallery-image" 
+                                 alt="{{ property.title }}" loading="{% if forloop.first %}eager{% else %}lazy{% endif %}">
+                            <div class="property-image-overlay">
+                                <div class="property-image-caption">
+                                    <p class="mb-0">{{ image.description|default:'Imagen de la propiedad' }}</p>
+                                    {% if image.is_main %}
+                                    <span class="badge bg-warning text-dark mt-1">
+                                        <i class="bi bi-star-fill me-1"></i>Principal
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <div class="property-image-actions">
+                                    <button class="btn btn-sm btn-outline-light" onclick="downloadImage('{{ image.image.url }}', '{{ property.title }}_{{ forloop.counter }}')">
+                                        <i class="bi bi-download"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-light" onclick="shareImage('{{ image.image.url }}')">
+                                        <i class="bi bi-share"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                {% if property.images.count > 1 %}
+                <!-- Enhanced Carousel Controls -->
+                <button class="property-carousel-control property-carousel-control-prev" type="button" 
+                        data-bs-target="#propertyCarousel" data-bs-slide="prev">
+                    <i class="bi bi-chevron-left"></i>
+                    <span class="visually-hidden">Anterior</span>
+                </button>
+                <button class="property-carousel-control property-carousel-control-next" type="button" 
+                        data-bs-target="#propertyCarousel" data-bs-slide="next">
+                    <i class="bi bi-chevron-right"></i>
+                    <span class="visually-hidden">Siguiente</span>
+                </button>
+                
+                <!-- Enhanced Carousel Indicators -->
+                <div class="property-carousel-indicators">
+                    {% for image in property.images.all %}
+                    <button type="button" class="property-carousel-indicator {% if forloop.first %}active{% endif %}" 
+                            data-bs-target="#propertyCarousel" data-bs-slide-to="{{ forloop.counter0 }}" 
+                            aria-label="Imagen {{ forloop.counter }}">
+                        <span class="property-indicator-number">{{ forloop.counter }}</span>
+                    </button>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <!-- Thumbnail Navigation -->
+            {% if property.images.count > 1 %}
+            <div class="property-thumbnail-nav mt-3">
+                <div class="d-flex gap-2 overflow-auto pb-2">
+                    {% for image in property.images.all %}
+                    <button class="property-thumbnail flex-shrink-0 {% if forloop.first %}active{% endif %}" 
+                            data-bs-target="#propertyCarousel" data-bs-slide-to="{{ forloop.counter0 }}">
+                        <img src="{{ image.image.url }}" alt="Miniatura {{ forloop.counter }}" class="property-thumbnail-image">
+                        {% if image.is_main %}
+                        <div class="property-thumbnail-badge">
+                            <i class="bi bi-star-fill"></i>
+                        </div>
+                        {% endif %}
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="card-modern mb-4 text-center py-5">
+    <div class="card-body">
+        <div class="bg-light rounded-circle p-4 d-inline-flex mb-3">
+            <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
+        </div>
+        <h5 class="text-muted mb-2">Sin imágenes</h5>
+        <p class="text-muted mb-3">Esta propiedad no tiene imágenes cargadas</p>
+        <a href="{% url 'properties:add_image' property.pk %}" class="btn-modern btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>Agregar Primera Imagen
+        </a>
+    </div>
+</div>
+{% endif %}

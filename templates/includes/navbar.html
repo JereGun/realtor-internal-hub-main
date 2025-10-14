@@ -1,291 +1,193 @@
-<div class="sidebar position-fixed d-flex flex-column vh-100" style="width: 275px;" id="sidebar">
-    <!-- Enhanced Brand Header -->
-    <div class="sidebar-header d-flex justify-content-between align-items-center p-4 border-bottom border-gray-200">
-        <a href="{% url 'properties:property_list' %}"
-            class="navbar-brand d-flex align-items-center text-decoration-none transition">
-            <div class="brand-icon bg-primary text-white rounded-lg d-flex align-items-center justify-content-center me-3"
-                style="width: 40px; height: 40px;">
-                <i class="bi bi-house-door fs-5"></i>
+<div class="sidebar position-fixed d-flex flex-column vh-100" id="sidebar">
+    <!-- Modern Brand Header -->
+    <div class="sidebar-header">
+        <a href="{% url 'properties:property_list' %}" class="brand-link">
+            <div class="brand-icon">
+                <i class="bi bi-buildings"></i>
             </div>
-            <div>
-                <strong class="text-gray-900 font-semibold">InmoGest</strong>
-                <div class="text-xs text-gray-500">Gestión Inmobiliaria</div>
+            <div class="brand-text">
+                <h1 class="brand-title">InmoGest</h1>
+                <p class="brand-subtitle">Gestión Inmobiliaria</p>
             </div>
         </a>
-        <button class="btn btn-sm sidebar-toggle-btn border-0" onclick="toggleSidebar()" title="Colapsar menú">
-            <i class="bi bi-chevron-double-left"></i>
-        </button>
     </div>
 
     <!-- Navigation Container -->
-    <div class="sidebar-nav flex-grow-1 p-4">
-        <ul class="nav nav-pills flex-column">
-            <!-- Dashboard -->
-            <li class="nav-item mb-2">
-                <a href="{% url 'core:dashboard' %}"
-                    class="nav-link-modern {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-                    <i class="bi bi-speedometer2 nav-icon"></i>
-                    <span class="nav-text">Dashboard</span>
-                    {% if request.resolver_match.url_name == 'dashboard' %}
-                    <div class="nav-indicator"></div>
-                    {% endif %}
-                </a>
-            </li>
+    <nav class="sidebar-nav">
+        <div class="nav-section">
+            <h3 class="nav-section-title">Principal</h3>
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="{% url 'core:dashboard' %}" 
+                       class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                        <i class="bi bi-grid-3x3-gap"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'properties:property_list' %}" 
+                       class="nav-link {% if request.resolver_match.url_name == 'property_list' %}active{% endif %}">
+                        <i class="bi bi-house"></i>
+                        <span>Propiedades</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'customers:customer_list' %}" 
+                       class="nav-link {% if request.resolver_match.url_name == 'customer_list' %}active{% endif %}">
+                        <i class="bi bi-people"></i>
+                        <span>Clientes</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
 
-            <!-- Propiedades -->
-            <li class="nav-item mb-2">
-                <a href="{% url 'properties:property_list' %}"
-                    class="nav-link-modern {% if request.resolver_match.url_name == 'property_list' %}active{% endif %}">
-                    <i class="bi bi-house nav-icon"></i>
-                    <span class="nav-text">Propiedades</span>
-                    {% if request.resolver_match.url_name == 'property_list' %}
-                    <div class="nav-indicator"></div>
-                    {% endif %}
-                </a>
-            </li>
+        <div class="nav-section">
+            <h3 class="nav-section-title">Gestión</h3>
+            <ul class="nav-list">
 
-            <!-- Clientes -->
-            <li class="nav-item mb-2">
-                <a href="{% url 'customers:customer_list' %}"
-                    class="nav-link-modern {% if request.resolver_match.url_name == 'customer_list' %}active{% endif %}">
-                    <i class="bi bi-people nav-icon"></i>
-                    <span class="nav-text">Clientes</span>
-                    {% if request.resolver_match.url_name == 'customer_list' %}
-                    <div class="nav-indicator"></div>
-                    {% endif %}
-                </a>
-            </li>
+                <li class="nav-item nav-dropdown">
+                    <button class="nav-link dropdown-btn {% if request.resolver_match.app_name == 'contracts' %}active{% endif %}" 
+                            data-bs-toggle="collapse" data-bs-target="#contractsMenu" aria-expanded="false">
+                        <i class="bi bi-file-earmark-text"></i>
+                        <span>Contratos</span>
+                        <i class="bi bi-chevron-down dropdown-icon"></i>
+                    </button>
+                    <div class="collapse nav-submenu" id="contractsMenu">
+                        <a href="{% url 'contracts:contract_list' %}" 
+                           class="nav-sublink {% if request.resolver_match.url_name == 'contract_list' %}active{% endif %}">
+                            <i class="bi bi-list-ul"></i>
+                            <span>Listar Contratos</span>
+                        </a>
+                        <a href="{% url 'contracts:contract_create' %}" 
+                           class="nav-sublink {% if request.resolver_match.url_name == 'contract_create' %}active{% endif %}">
+                            <i class="bi bi-plus-circle"></i>
+                            <span>Nuevo Contrato</span>
+                        </a>
+                    </div>
+                </li>
+                <li class="nav-item nav-dropdown">
+                    <button class="nav-link dropdown-btn {% if request.resolver_match.app_name == 'accounting' %}active{% endif %}" 
+                            data-bs-toggle="collapse" data-bs-target="#accountingMenu" aria-expanded="false">
+                        <i class="bi bi-calculator"></i>
+                        <span>Contabilidad</span>
+                        <i class="bi bi-chevron-down dropdown-icon"></i>
+                    </button>
+                    <div class="collapse nav-submenu" id="accountingMenu">
+                        <a href="{% url 'accounting:invoice_list' %}" 
+                           class="nav-sublink {% if request.resolver_match.url_name == 'invoice_list' %}active{% endif %}">
+                            <i class="bi bi-receipt"></i>
+                            <span>Facturas</span>
+                        </a>
+                        <a href="{% url 'accounting:invoice_create' %}" 
+                           class="nav-sublink {% if request.resolver_match.url_name == 'invoice_create' %}active{% endif %}">
+                            <i class="bi bi-plus-circle"></i>
+                            <span>Nueva Factura</span>
+                        </a>
+                        <a href="{% url 'accounting:owner_receipts_list' %}" 
+                           class="nav-sublink {% if 'owner_receipt' in request.resolver_match.url_name %}active{% endif %}">
+                            <i class="bi bi-file-earmark-check"></i>
+                            <span>Comprobantes</span>
+                        </a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'agents:agent_list' %}" 
+                       class="nav-link {% if request.resolver_match.url_name == 'agent_list' and request.resolver_match.app_name == 'agents' %}active{% endif %}">
+                        <i class="bi bi-person-badge"></i>
+                        <span>Agentes</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
 
-            <!-- Contratos Dropdown -->
-            <li class="nav-item dropdown mb-2">
-                <a class="nav-link-modern dropdown-toggle {% if request.resolver_match.app_name == 'contracts' %}active{% endif %}"
-                    href="#" id="contractsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-file-earmark-text nav-icon"></i>
-                    <span class="nav-text">Contratos</span>
-                    <i class="bi bi-chevron-down dropdown-arrow"></i>
-                    {% if request.resolver_match.app_name == 'contracts' %}
-                    <div class="nav-indicator"></div>
-                    {% endif %}
-                </a>
-                <ul class="dropdown-menu dropdown-menu-modern" aria-labelledby="contractsDropdown">
-                    <li>
-                        <a class="dropdown-item-modern {% if request.resolver_match.url_name == 'contract_list' and request.resolver_match.app_name == 'contracts' %}active{% endif %}"
-                            href="{% url 'contracts:contract_list' %}">
-                            <i class="bi bi-list-ul me-2"></i>
-                            Listar Contratos
+        <div class="nav-section">
+            <h3 class="nav-section-title">Sistema</h3>
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="{% url 'accounting:invoice_notifications' %}" 
+                       class="nav-link {% if request.resolver_match.url_name == 'invoice_notifications' %}active{% endif %}">
+                        <i class="bi bi-bell"></i>
+                        <span>Notificaciones</span>
+                        {% if unread_notifications_count > 0 %}
+                        <span class="notification-badge">{{ unread_notifications_count }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+                <li class="nav-item nav-dropdown">
+                    <button class="nav-link dropdown-btn {% if 'configuracion' in request.path or request.resolver_match.url_name == 'company_settings' %}active{% endif %}" 
+                            data-bs-toggle="collapse" data-bs-target="#configMenu" aria-expanded="false">
+                        <i class="bi bi-gear"></i>
+                        <span>Configuración</span>
+                        {% if has_pending_config_changes %}
+                        <span class="notification-badge warning">!</span>
+                        {% endif %}
+                        <i class="bi bi-chevron-down dropdown-icon"></i>
+                    </button>
+                    <div class="collapse nav-submenu" id="configMenu">
+                        <a href="{% url 'core:company_configuration' %}" 
+                           class="nav-sublink {% if request.resolver_match.url_name == 'company_configuration' %}active{% endif %}">
+                            <i class="bi bi-building"></i>
+                            <span>Panel Principal</span>
                         </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item-modern {% if request.resolver_match.url_name == 'contract_create' and request.resolver_match.app_name == 'contracts' %}active{% endif %}"
-                            href="{% url 'contracts:contract_create' %}">
-                            <i class="bi bi-plus-circle me-2"></i>
-                            Nuevo Contrato
+                        <a href="{% url 'core:company_basic_info' %}" 
+                           class="nav-sublink {% if request.resolver_match.url_name == 'company_basic_info' %}active{% endif %}">
+                            <i class="bi bi-info-circle"></i>
+                            <span>Datos Básicos</span>
                         </a>
-                    </li>
-                </ul>
-            </li>
+                        <a href="{% url 'core:contact_info' %}" 
+                           class="nav-sublink {% if request.resolver_match.url_name == 'contact_info' %}active{% endif %}">
+                            <i class="bi bi-telephone"></i>
+                            <span>Contacto</span>
+                        </a>
+                        <a href="{% url 'core:system_configuration' %}" 
+                           class="nav-sublink {% if request.resolver_match.url_name == 'system_configuration' %}active{% endif %}">
+                            <i class="bi bi-sliders"></i>
+                            <span>Sistema</span>
+                        </a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
 
-            <!-- Contabilidad Dropdown -->
-            <li class="nav-item dropdown mb-2">
-                <a class="nav-link-modern dropdown-toggle {% if request.resolver_match.app_name == 'accounting' %}active{% endif %}"
-                    href="#" id="accountingDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-calculator nav-icon"></i>
-                    <span class="nav-text">Contabilidad</span>
-                    <i class="bi bi-chevron-down dropdown-arrow"></i>
-                    {% if request.resolver_match.app_name == 'accounting' %}
-                    <div class="nav-indicator"></div>
-                    {% endif %}
-                </a>
-                <ul class="dropdown-menu dropdown-menu-modern" aria-labelledby="accountingDropdown">
-                    <li>
-                        <a class="dropdown-item-modern {% if request.resolver_match.url_name == 'invoice_list' and request.resolver_match.app_name == 'accounting' %}active{% endif %}"
-                            href="{% url 'accounting:invoice_list' %}">
-                            <i class="bi bi-receipt me-2"></i>
-                            Facturas
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item-modern {% if request.resolver_match.url_name == 'invoice_create' and request.resolver_match.app_name == 'accounting' %}active{% endif %}"
-                            href="{% url 'accounting:invoice_create' %}">
-                            <i class="bi bi-plus-circle me-2"></i>
-                            Nueva Factura
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item-modern {% if 'owner_receipt' in request.resolver_match.url_name and request.resolver_match.app_name == 'accounting' %}active{% endif %}"
-                            href="{% url 'accounting:owner_receipts_list' %}"
-                            title="Gestionar comprobantes enviados a propietarios">
-                            <i class="bi bi-file-earmark-check me-2"></i>
-                            Comprobantes de Propietarios
-                        </a>
-                    </li>
-                    <li>
-                        <hr class="dropdown-divider-modern">
-                    </li>
-                    <li>
-                        <span class="dropdown-item-modern disabled text-gray-400">
-                            <i class="bi bi-graph-up me-2"></i>
-                            Reportes (próximamente)
-                        </span>
-                    </li>
-                </ul>
-            </li>
-
-            <!-- Agentes -->
-            <li class="nav-item mb-2">
-                <a href="{% url 'agents:agent_list' %}"
-                    class="nav-link-modern {% if request.resolver_match.url_name == 'agent_list' and request.resolver_match.app_name == 'agents' %}active{% endif %}">
-                    <i class="bi bi-person-badge nav-icon"></i>
-                    <span class="nav-text">Agentes</span>
-                    {% if request.resolver_match.url_name == 'agent_list' and request.resolver_match.app_name == 'agents' %}
-                    <div class="nav-indicator"></div>
-                    {% endif %}
-                </a>
-            </li>
-
-            <!-- Notificaciones -->
-            <li class="nav-item mb-2">
-                <a href="{% url 'accounting:invoice_notifications' %}"
-                    class="nav-link-modern {% if request.resolver_match.url_name == 'invoice_notifications' and request.resolver_match.app_name == 'accounting' %}active{% endif %}">
-                    <i class="bi bi-bell nav-icon"></i>
-                    <span class="nav-text">Notificaciones</span>
-                    {% if unread_notifications_count > 0 %}
-                    <span class="notification-badge bg-danger text-white">{{ unread_notifications_count }}</span>
-                    {% endif %}
-                    {% if request.resolver_match.url_name == 'invoice_notifications' and request.resolver_match.app_name == 'accounting' %}
-                    <div class="nav-indicator"></div>
-                    {% endif %}
-                </a>
-            </li>
-
-            <!-- Configuración Dropdown -->
-            <li class="nav-item dropdown mb-2">
-                <a class="nav-link-modern dropdown-toggle {% if 'configuracion' in request.path or request.resolver_match.url_name == 'company_settings' %}active{% endif %}"
-                    href="#" id="configDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-gear nav-icon"></i>
-                    <span class="nav-text">Configuración</span>
-                    {% if has_pending_config_changes %}
-                    <span class="notification-badge bg-warning text-white">!</span>
-                    {% endif %}
-                    <i class="bi bi-chevron-down dropdown-arrow"></i>
-                    {% if 'configuracion' in request.path or request.resolver_match.url_name == 'company_settings' %}
-                    <div class="nav-indicator"></div>
-                    {% endif %}
-                </a>
-                <ul class="dropdown-menu dropdown-menu-modern" aria-labelledby="configDropdown">
-                    <li>
-                        <a class="dropdown-item-modern {% if request.resolver_match.url_name == 'company_configuration' %}active{% endif %}"
-                            href="{% url 'core:company_configuration' %}">
-                            <i class="bi bi-building me-2"></i>
-                            Panel de Configuración
-                        </a>
-                    </li>
-                    <li>
-                        <hr class="dropdown-divider-modern">
-                    </li>
-                    <li>
-                        <a class="dropdown-item-modern {% if request.resolver_match.url_name == 'company_basic_info' %}active{% endif %}"
-                            href="{% url 'core:company_basic_info' %}">
-                            <i class="bi bi-info-circle me-2"></i>
-                            Datos Básicos
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item-modern {% if request.resolver_match.url_name == 'contact_info' %}active{% endif %}"
-                            href="{% url 'core:contact_info' %}">
-                            <i class="bi bi-telephone me-2"></i>
-                            Información de Contacto
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item-modern {% if request.resolver_match.url_name == 'system_configuration' %}active{% endif %}"
-                            href="{% url 'core:system_configuration' %}">
-                            <i class="bi bi-sliders me-2"></i>
-                            Configuración del Sistema
-                        </a>
-                    </li>
-                    <li>
-                        <hr class="dropdown-divider-modern">
-                    </li>
-                    <li>
-                        <a class="dropdown-item-modern {% if request.resolver_match.url_name == 'document_templates' %}active{% endif %}"
-                            href="{% url 'core:document_templates' %}">
-                            <i class="bi bi-file-earmark-text me-2"></i>
-                            Plantillas de Documentos
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item-modern {% if request.resolver_match.url_name == 'notification_settings' %}active{% endif %}"
-                            href="{% url 'core:notification_settings' %}">
-                            <i class="bi bi-bell-fill me-2"></i>
-                            Configuración de Notificaciones
-                        </a>
-                    </li>
-                    <li>
-                        <hr class="dropdown-divider-modern">
-                    </li>
-                    <li>
-                        <a class="dropdown-item-modern {% if request.resolver_match.url_name == 'backup_restore' %}active{% endif %}"
-                            href="{% url 'core:backup_restore' %}">
-                            <i class="bi bi-download me-2"></i>
-                            Respaldo y Restauración
-                        </a>
-                    </li>
-                    <li>
-                        <hr class="dropdown-divider-modern">
-                    </li>
-                    <li>
-                        <a class="dropdown-item-modern {% if request.resolver_match.url_name == 'company_settings' %}active{% endif %}"
-                            href="{% url 'core:company_settings' %}">
-                            <i class="bi bi-gear-wide me-2"></i>
-                            Configuración Básica (Legacy)
-                        </a>
-                    </li>
-                </ul>
-            </li>
-        </ul>
-    </div>
-
-    <!-- Enhanced User Profile Section -->
-    <div class="sidebar-footer border-top border-gray-200 p-4">
-        <div class="dropdown">
-            <a href="#" class="user-profile-link d-flex align-items-center text-decoration-none dropdown-toggle"
-                id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+    <!-- User Profile Section -->
+    <div class="sidebar-footer">
+        <div class="user-profile dropdown">
+            <button class="user-profile-btn" data-bs-toggle="dropdown" aria-expanded="false">
                 {% load static %}
-                <div class="user-avatar me-3">
+                <div class="user-avatar">
                     {% if user.image_path %}
-                    <img src="{{ user.image_path.url }}" alt="Perfil de {{ user.get_full_name }}" class="avatar-img">
+                    <img src="{{ user.image_path.url }}" alt="{{ user.get_full_name }}">
                     {% else %}
-                    <img src="{% static 'default-profile.png' %}" alt="Perfil por defecto" class="avatar-img">
+                    <div class="avatar-placeholder">
+                        <i class="bi bi-person"></i>
+                    </div>
                     {% endif %}
-                    <div class="avatar-status"></div>
                 </div>
-                <div class="user-info flex-grow-1">
-                    <div class="user-name font-semibold text-gray-900">{{ user.get_full_name }}</div>
-                    <div class="user-role text-xs text-gray-500">Administrador</div>
+                <div class="user-info">
+                    <span class="user-name">{{ user.get_full_name }}</span>
+                    <span class="user-role">Administrador</span>
                 </div>
-                <i class="bi bi-chevron-up text-gray-400"></i>
-            </a>
-            <ul class="dropdown-menu dropdown-menu-modern dropdown-menu-end">
+                <i class="bi bi-three-dots"></i>
+            </button>
+            <ul class="dropdown-menu">
                 <li>
-                    <a class="dropdown-item-modern" href="{% url 'agents:profile' %}">
-                        <i class="bi bi-person-circle me-2"></i>
-                        Mi Perfil
+                    <a class="dropdown-item" href="{% url 'agents:profile' %}">
+                        <i class="bi bi-person-circle"></i>
+                        <span>Mi Perfil</span>
                     </a>
                 </li>
                 <li>
-                    <a class="dropdown-item-modern" href="{% url 'core:company_settings' %}">
-                        <i class="bi bi-gear me-2"></i>
-                        Configuración
+                    <a class="dropdown-item" href="{% url 'core:company_settings' %}">
+                        <i class="bi bi-gear"></i>
+                        <span>Configuración</span>
                     </a>
                 </li>
+                <li><hr class="dropdown-divider"></li>
                 <li>
-                    <hr class="dropdown-divider-modern">
-                </li>
-                <li>
-                    <a class="dropdown-item-modern text-danger" href="{% url 'agents:logout' %}">
-                        <i class="bi bi-box-arrow-right me-2"></i>
-                        Cerrar Sesión
+                    <a class="dropdown-item logout" href="{% url 'agents:logout' %}">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>Cerrar Sesión</span>
                     </a>
                 </li>
             </ul>

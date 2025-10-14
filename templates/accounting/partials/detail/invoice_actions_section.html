@@ -1,0 +1,25 @@
+<!-- Acciones -->
+<div class="card card-modern mb-4">
+    <div class="card-body p-4">
+        <div class="d-flex flex-wrap gap-3 justify-content-center">
+            <a href="{% url 'accounting:invoice_pdf' invoice.pk %}" class="btn btn-info btn-modern">
+                <i class="bi bi-file-earmark-pdf me-2"></i>Descargar PDF
+            </a>
+            {% if invoice.status == 'validated' or invoice.status == 'sent' %}
+            <a href="{% url 'accounting:send_invoice_email' invoice.pk %}"
+                class="btn btn-primary btn-modern">
+                <i class="bi bi-envelope me-2"></i>Enviar por Correo
+            </a>
+            {% endif %}
+            {% if invoice.status != 'cancelled' and invoice.status != 'paid' %}
+            <a href="{% url 'accounting:invoice_cancel' invoice.pk %}"
+                class="btn btn-outline-danger btn-modern">
+                <i class="bi bi-x-circle me-2"></i>Cancelar Factura
+            </a>
+            {% endif %}
+            <a href="{% url 'accounting:invoice_list' %}" class="btn btn-secondary btn-modern">
+                <i class="bi bi-arrow-left me-2"></i>Volver a la lista
+            </a>
+        </div>
+    </div>
+</div>

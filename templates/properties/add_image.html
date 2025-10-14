@@ -1,151 +1,543 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
+{% load static %}
 
-{% block title %}Agregar Imagen - {{ property.title }} - {{ block.super }}{% endblock %}
+{% block title %}Agregar Imagen{% if property %} - {{ property.title }}{% endif %} - {{ block.super }}{% endblock %}
 {% block page_title %}Agregar Imagen{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/property-styles.css' %}">
+<style>
+.image-upload-container {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 1rem;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+}
+
+.card-modern {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-modern:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.form-control-modern {
+    border: 2px solid #e9ecef;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background-color: #fff;
+}
+
+.form-control-modern:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    background-color: #fff;
+}
+
+.btn-modern {
+    border-radius: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-primary-modern {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary-modern:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+.property-info-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.upload-zone {
+    border: 3px dashed #dee2e6;
+    border-radius: 1rem;
+    padding: 3rem 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    background-color: #f8f9fa;
+}
+
+.upload-zone:hover {
+    border-color: #667eea;
+    background-color: #f0f2ff;
+}
+
+.upload-zone.dragover {
+    border-color: #667eea;
+    background-color: #e8ecff;
+    transform: scale(1.02);
+}
+
+.preview-container {
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>
-        <i class="bi bi-camera"></i> Agregar Imagen
-    </h2>
-    <a href="{% url 'properties:property_detail' property.pk %}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left"></i> Volver a Propiedad
-    </a>
-</div>
-
-<div class="row">
-    <div class="col-lg-8 mx-auto">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">{{ property.title }}</h5>
-                <small class="text-muted">{{ property.full_address }}</small>
-            </div>
-            <div class="card-body">
-                <!-- Información de la propiedad -->
-                <div class="row mb-4">
-                    <div class="col-md-4">
-                        {% if property.cover_image %}
-                            <img src="{{ property.cover_image.image.url }}" class="img-fluid rounded" alt="{{ property.title }}">
-                        {% else %}
-                            <div class="bg-light d-flex align-items-center justify-content-center rounded" style="height: 150px;">
-                                <i class="bi bi-house text-muted" style="font-size: 3rem;"></i>
-                            </div>
-                        {% endif %}
-                    </div>
-                    <div class="col-md-8">
-                        <div class="row">
-                            <div class="col-4">
-                                <small class="text-muted">Tipo</small><br>
-                                <strong>{{ property.property_type }}</strong>
-                            </div>
-                            <div class="col-4">
-                                <small class="text-muted">Estado</small><br>
-                                <strong>{{ property.property_status }}</strong>
-                            </div>
-                            <div class="col-4">
-                                <small class="text-muted">Superficie</small><br>
-                                <strong>{{ property.total_surface }} m²</strong>
-                            </div>
-                        </div>
-                        
-                        {% if property.images.exists %}
-                        <hr>
-                        <small class="text-muted">Imágenes actuales: {{ property.images.count }}</small>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <hr>
-
-                <!-- Formulario para agregar imagen -->
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    
-                    <div class="mb-4">
-                        <label for="{{ form.image.id_for_label }}" class="form-label">
-                            <i class="bi bi-image"></i> {{ form.image.label }}
-                        </label>
-                        {{ form.image }}
-                        {% if form.image.errors %}
-                            <div class="text-danger">{{ form.image.errors }}</div>
-                        {% endif %}
-                        <div class="form-text">
-                            Formatos permitidos: JPG, PNG, GIF. Tamaño máximo: 5MB.
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label for="{{ form.description.id_for_label }}" class="form-label">
-                            <i class="bi bi-card-text"></i> {{ form.description.label }}
-                        </label>
-                        {{ form.description }}
-                        {% if form.description.errors %}
-                            <div class="text-danger">{{ form.description.errors }}</div>
-                        {% endif %}
-                        <div class="form-text">
-                            Breve descripción de lo que muestra la imagen (opcional).
-                        </div>
-                    </div>
-
-                    <div class="form-check mb-4">
-                        {{ form.is_cover }}
-                        <label class="form-check-label" for="{{ form.is_cover.id_for_label }}">
-                            <i class="bi bi-star"></i> {{ form.is_cover.label }}
-                        </label>
-                        {% if form.is_cover.errors %}
-                            <div class="text-danger">{{ form.is_cover.errors }}</div>
-                        {% endif %}
-                        <div class="form-text">
-                            La imagen de portada aparece en las listas de propiedades.
-                        </div>
-                    </div>
-
-                    <hr>
-
-                    <div class="d-flex justify-content-end gap-2">
-                        <a href="{% url 'properties:property_detail' property.pk %}" class="btn btn-secondary">
-                            <i class="bi bi-x-circle"></i> Cancelar
-                        </a>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-upload"></i> Subir Imagen
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Vista previa de imagen (JavaScript) -->
-        <div class="card mt-4" id="preview-card" style="display: none;">
-            <div class="card-header">
-                <h6 class="mb-0">Vista Previa</h6>
-            </div>
-            <div class="card-body text-center">
-                <img id="image-preview" class="img-fluid rounded" style="max-height: 300px;" alt="Vista previa">
-            </div>
+<div class="image-upload-container">
+    <div class="container">
+        <div class="text-center text-white">
+            <h1 class="display-5 fw-bold mb-3">
+                <i class="bi bi-camera-fill me-3"></i>Agregar Imagen
+            </h1>
+            <p class="lead mb-0">
+                {% if property %}
+                Sube una nueva imagen para {{ property.title }}
+                {% else %}
+                Selecciona una propiedad y sube una imagen
+                {% endif %}
+            </p>
         </div>
     </div>
 </div>
 
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            
+            <!-- Selector de Propiedad (si no hay propiedad seleccionada) -->
+            {% if not property %}
+            <div class="card-modern mb-4">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-search me-2"></i>
+                        <h5 class="mb-0">Seleccionar Propiedad</h5>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="property-search" class="form-label">
+                            <i class="bi bi-house-door text-primary me-1"></i>
+                            Buscar Propiedad
+                        </label>
+                        <input type="text" 
+                               class="form-control-modern property-autocomplete" 
+                               id="property-search" 
+                               name="property"
+                               placeholder="Buscar por título, dirección o código...">
+                        <div class="form-text">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Escribe para buscar una propiedad existente o crear una nueva
+                        </div>
+                    </div>
+                    <div class="property-info-container"></div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Información de la propiedad seleccionada -->
+            {% if property %}
+            <div class="property-info-card">
+                <div class="row align-items-center">
+                    <div class="col-md-3">
+                        {% if property.cover_image %}
+                            <img src="{{ property.cover_image.image.url }}" 
+                                 class="img-fluid rounded shadow-sm" 
+                                 alt="{{ property.title }}"
+                                 style="height: 120px; width: 100%; object-fit: cover;">
+                        {% else %}
+                            <div class="bg-white d-flex align-items-center justify-content-center rounded shadow-sm" 
+                                 style="height: 120px;">
+                                <i class="bi bi-house text-muted" style="font-size: 3rem;"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-9">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h4 class="mb-1 text-primary fw-bold">{{ property.title }}</h4>
+                            <a href="{% url 'properties:property_detail' property.pk %}" 
+                               class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-eye me-1"></i>Ver Propiedad
+                            </a>
+                        </div>
+                        <p class="text-muted mb-2">
+                            <i class="bi bi-geo-alt me-1"></i>{{ property.full_address|default:"Sin dirección" }}
+                        </p>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <small class="text-muted d-block">Tipo</small>
+                                <span class="badge bg-light text-dark">{{ property.property_type|default:"N/A" }}</span>
+                            </div>
+                            <div class="col-md-3">
+                                <small class="text-muted d-block">Estado</small>
+                                <span class="badge bg-success">{{ property.property_status|default:"N/A" }}</span>
+                            </div>
+                            <div class="col-md-3">
+                                <small class="text-muted d-block">Superficie</small>
+                                <strong>{{ property.total_surface|default:"N/A" }} m²</strong>
+                            </div>
+                            <div class="col-md-3">
+                                <small class="text-muted d-block">Imágenes</small>
+                                <strong>{{ property.images.count }} actual{{ property.images.count|pluralize:"es" }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Formulario para agregar imagen -->
+            <div class="card-modern">
+                <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-cloud-upload me-2"></i>
+                        <h5 class="mb-0">Subir Nueva Imagen</h5>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data" id="imageUploadForm">
+                        {% csrf_token %}
+                        
+                        <!-- Zona de arrastrar y soltar -->
+                        <div class="upload-zone mb-4" id="uploadZone">
+                            <div class="upload-content">
+                                <i class="bi bi-cloud-upload text-primary mb-3" style="font-size: 3rem;"></i>
+                                <h5 class="text-primary mb-2">Arrastra tu imagen aquí</h5>
+                                <p class="text-muted mb-3">o haz clic para seleccionar un archivo</p>
+                                <input type="file" 
+                                       class="form-control d-none" 
+                                       id="{{ form.image.id_for_label }}" 
+                                       name="{{ form.image.name }}"
+                                       accept="image/*">
+                                <button type="button" class="btn btn-outline-primary btn-modern" id="selectFileBtn">
+                                    <i class="bi bi-folder2-open me-2"></i>Seleccionar Archivo
+                                </button>
+                                <div class="mt-3">
+                                    <small class="text-muted">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Formatos: JPG, PNG, GIF • Tamaño máximo: 5MB
+                                    </small>
+                                </div>
+                            </div>
+                            {% if form.image.errors %}
+                                <div class="alert alert-danger mt-3">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    {{ form.image.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Vista previa -->
+                        <div class="preview-container mb-4" id="previewContainer" style="display: none;">
+                            <div class="text-center p-4 bg-light rounded">
+                                <img id="imagePreview" class="img-fluid rounded shadow" style="max-height: 300px;" alt="Vista previa">
+                                <div class="mt-3">
+                                    <button type="button" class="btn btn-outline-danger btn-sm" id="removeImageBtn">
+                                        <i class="bi bi-trash me-1"></i>Quitar Imagen
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Descripción -->
+                        <div class="mb-4">
+                            <label for="{{ form.description.id_for_label }}" class="form-label fw-semibold">
+                                <i class="bi bi-card-text text-info me-1"></i>
+                                {{ form.description.label }}
+                            </label>
+                            <textarea class="form-control-modern {% if form.description.errors %}is-invalid{% endif %}" 
+                                      id="{{ form.description.id_for_label }}" 
+                                      name="{{ form.description.name }}" 
+                                      rows="3"
+                                      placeholder="Describe brevemente lo que muestra la imagen...">{{ form.description.value|default:'' }}</textarea>
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback">
+                                    <i class="bi bi-exclamation-circle me-1"></i>
+                                    {{ form.description.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                <i class="bi bi-lightbulb me-1"></i>
+                                Una buena descripción ayuda a organizar y encontrar las imágenes más fácilmente
+                            </div>
+                        </div>
+
+                        <!-- Imagen de portada -->
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" 
+                                       type="checkbox" 
+                                       id="{{ form.is_cover.id_for_label }}" 
+                                       name="{{ form.is_cover.name }}"
+                                       {% if form.is_cover.value %}checked{% endif %}>
+                                <label class="form-check-label fw-semibold" for="{{ form.is_cover.id_for_label }}">
+                                    <i class="bi bi-star-fill text-warning me-1"></i>
+                                    {{ form.is_cover.label }}
+                                </label>
+                            </div>
+                            {% if form.is_cover.errors %}
+                                <div class="text-danger mt-1">
+                                    <i class="bi bi-exclamation-circle me-1"></i>
+                                    {{ form.is_cover.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">
+                                <i class="bi bi-info-circle me-1"></i>
+                                La imagen de portada será la principal que se muestre en las listas de propiedades
+                            </div>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                            <div class="text-muted">
+                                <i class="bi bi-shield-check me-1"></i>
+                                <small>Tus imágenes se suben de forma segura</small>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="{% if property %}{% url 'properties:property_detail' property.pk %}{% else %}{% url 'properties:property_list' %}{% endif %}" 
+                                   class="btn btn-outline-secondary btn-modern">
+                                    <i class="bi bi-x-circle me-1"></i>Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-primary-modern btn-modern" id="submitBtn" disabled>
+                                    <i class="bi bi-upload me-1"></i>Subir Imagen
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Galería de imágenes existentes (si hay propiedad seleccionada) -->
+            {% if property and property.images.exists %}
+            <div class="card-modern mt-4">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-images me-2"></i>
+                        <h5 class="mb-0">Imágenes Existentes ({{ property.images.count }})</h5>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        {% for image in property.images.all %}
+                        <div class="col-md-4 col-lg-3">
+                            <div class="position-relative">
+                                <img src="{{ image.image.url }}" 
+                                     class="img-fluid rounded shadow-sm" 
+                                     alt="{{ image.description|default:'Imagen de propiedad' }}"
+                                     style="height: 150px; width: 100%; object-fit: cover;">
+                                {% if image.is_cover %}
+                                    <span class="position-absolute top-0 end-0 m-2">
+                                        <span class="badge bg-warning">
+                                            <i class="bi bi-star-fill"></i> Portada
+                                        </span>
+                                    </span>
+                                {% endif %}
+                                {% if image.description %}
+                                    <div class="position-absolute bottom-0 start-0 end-0 bg-dark bg-opacity-75 text-white p-2 rounded-bottom">
+                                        <small>{{ image.description|truncatechars:50 }}</small>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="{% static 'js/property-autocomplete.js' %}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const imageInput = document.getElementById('{{ form.image.id_for_label }}');
-    const previewCard = document.getElementById('preview-card');
-    const imagePreview = document.getElementById('image-preview');
+    const uploadZone = document.getElementById('uploadZone');
+    const selectFileBtn = document.getElementById('selectFileBtn');
+    const previewContainer = document.getElementById('previewContainer');
+    const imagePreview = document.getElementById('imagePreview');
+    const removeImageBtn = document.getElementById('removeImageBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    const form = document.getElementById('imageUploadForm');
 
-    imageInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                imagePreview.src = e.target.result;
-                previewCard.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        } else {
-            previewCard.style.display = 'none';
+    // Funciones de utilidad
+    function showPreview(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            imagePreview.src = e.target.result;
+            previewContainer.style.display = 'block';
+            uploadZone.style.display = 'none';
+            submitBtn.disabled = false;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function hidePreview() {
+        previewContainer.style.display = 'none';
+        uploadZone.style.display = 'block';
+        imagePreview.src = '';
+        submitBtn.disabled = true;
+    }
+
+    function validateFile(file) {
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+        const maxSize = 5 * 1024 * 1024; // 5MB
+
+        if (!validTypes.includes(file.type)) {
+            showNotification('Formato de archivo no válido. Use JPG, PNG o GIF.', 'error');
+            return false;
+        }
+
+        if (file.size > maxSize) {
+            showNotification('El archivo es demasiado grande. Máximo 5MB.', 'error');
+            return false;
+        }
+
+        return true;
+    }
+
+    function showNotification(message, type = 'info') {
+        const toastContainer = getToastContainer();
+        const iconClass = type === 'error' ? 'bi-exclamation-triangle-fill text-danger' : 'bi-info-circle-fill text-info';
+        const headerText = type === 'error' ? 'Error' : 'Información';
+        
+        const toastHtml = `
+            <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <i class="${iconClass} me-2"></i>
+                    <strong class="me-auto">${headerText}</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            </div>
+        `;
+        
+        toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+        const toast = new bootstrap.Toast(toastContainer.lastElementChild);
+        toast.show();
+        
+        toastContainer.lastElementChild.addEventListener('hidden.bs.toast', function() {
+            this.remove();
+        });
+    }
+
+    function getToastContainer() {
+        let container = document.querySelector('.toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'toast-container position-fixed top-0 end-0 p-3';
+            container.style.zIndex = '9999';
+            document.body.appendChild(container);
+        }
+        return container;
+    }
+
+    // Event Listeners
+    
+    // Clic en botón seleccionar archivo
+    selectFileBtn.addEventListener('click', function() {
+        imageInput.click();
+    });
+
+    // Clic en zona de upload
+    uploadZone.addEventListener('click', function(e) {
+        if (e.target === uploadZone || e.target.closest('.upload-content')) {
+            imageInput.click();
         }
     });
+
+    // Cambio en input de archivo
+    imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file && validateFile(file)) {
+            showPreview(file);
+        } else if (file) {
+            // Si hay archivo pero no es válido, limpiar input
+            imageInput.value = '';
+        }
+    });
+
+    // Drag and Drop
+    uploadZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadZone.classList.add('dragover');
+    });
+
+    uploadZone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        uploadZone.classList.remove('dragover');
+    });
+
+    uploadZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadZone.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            const file = files[0];
+            if (validateFile(file)) {
+                // Asignar archivo al input
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                imageInput.files = dt.files;
+                
+                showPreview(file);
+            }
+        }
+    });
+
+    // Quitar imagen
+    removeImageBtn.addEventListener('click', function() {
+        imageInput.value = '';
+        hidePreview();
+    });
+
+    // Validación del formulario
+    form.addEventListener('submit', function(e) {
+        if (!imageInput.files || imageInput.files.length === 0) {
+            e.preventDefault();
+            showNotification('Por favor selecciona una imagen para subir.', 'error');
+            return false;
+        }
+
+        // Deshabilitar botón de envío para evitar doble envío
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="bi bi-hourglass me-1"></i>Subiendo...';
+    });
+
+    // Manejar selección de propiedad (si no hay propiedad preseleccionada)
+    {% if not property %}
+    const propertySearch = document.getElementById('property-search');
+    if (propertySearch) {
+        propertySearch.addEventListener('propertySelected', function(e) {
+            const property = e.detail;
+            
+            // Actualizar la acción del formulario para incluir la propiedad
+            const currentAction = form.action || window.location.pathname;
+            form.action = currentAction.replace(/\/add_image\/?$/, `/${property.id}/add_image/`);
+            
+            // Mostrar notificación
+            showNotification(`Propiedad "${property.title}" seleccionada correctamente.`, 'success');
+        });
+    }
+    {% endif %}
 });
 </script>
 {% endblock %}

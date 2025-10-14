@@ -1,0 +1,33 @@
+<div class="btn-group" role="group">
+    <a href="{% url 'accounting:invoice_detail' invoice.pk %}"
+        class="btn btn-sm btn-outline-primary btn-modern" title="Ver detalle">
+        <i class="bi bi-eye"></i>
+    </a>
+    <a href="{% url 'accounting:invoice_update' invoice.pk %}"
+        class="btn btn-sm btn-outline-secondary btn-modern" title="Editar">
+        <i class="bi bi-pencil"></i>
+    </a>
+    {% if invoice.customer.email and invoice.status == 'validated' or invoice.customer.email and invoice.status == 'sent' %}
+    <a href="{% url 'accounting:send_invoice_email' invoice.pk %}"
+        class="btn btn-sm btn-outline-info btn-modern" title="Enviar por correo">
+        <i class="bi bi-envelope"></i>
+    </a>
+    {% endif %}
+    {% if invoice.contract and invoice.status == 'validated' or invoice.contract and invoice.status == 'sent' or invoice.contract and invoice.status == 'paid' %}
+    <button type="button" class="btn btn-sm btn-outline-warning btn-modern"
+        onclick="showOwnerReceiptModal({{ invoice.pk }}, '{{ invoice.number|default:invoice.id }}', {% if invoice.owner_receipts.exists %}true{% else %}false{% endif %})"
+        title="{% if invoice.owner_receipts.exists %}Ver comprobante propietario{% else %}Generar comprobante propietario{% endif %}">
+        <i class="bi bi-{% if invoice.owner_receipts.exists %}file-check{% else %}file-plus{% endif %}"></i>
+    </button>
+    {% endif %}
+    <a href="{% url 'accounting:invoice_pdf' invoice.pk %}"
+        class="btn btn-sm btn-outline-success btn-modern" title="Descargar PDF">
+        <i class="bi bi-file-earmark-pdf"></i>
+    </a>
+    <button type="button" class="btn btn-sm btn-outline-danger btn-modern"
+        data-bs-toggle="modal" data-bs-target="#deleteInvoiceModal"
+        data-invoice-id="{{ invoice.pk }}"
+        data-invoice-number="{{ invoice.number|default:invoice.id }}" title="Eliminar">
+        <i class="bi bi-trash"></i>
+    </button>
+</div>

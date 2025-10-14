@@ -52,9 +52,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Mark notification as read on click
-    const notificationLinks = document.querySelectorAll('.notification-list-item a, .notification-card a');
-    notificationLinks.forEach(link => {
+    // Mark notification as read on click and handle smooth scrolling
+    const notificationReadLinks = document.querySelectorAll('.notification-list-item a, .notification-card a');
+    notificationReadLinks.forEach(link => {
         link.addEventListener('click', function() {
             const notificationItem = this.closest('.notification-list-item, .notification-card');
             if (notificationItem && notificationItem.classList.contains('unread')) {
@@ -78,8 +78,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Smooth scroll to notifications
-    const notificationLinks = document.querySelectorAll('a[href*="notification"]');
-    notificationLinks.forEach(link => {
+    const notificationScrollLinks = document.querySelectorAll('a[href*="notification"]');
+    notificationScrollLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             const href = this.getAttribute('href');
             if (href.includes('#')) {

@@ -2,7 +2,7 @@
 {% load crispy_forms_tags %}
 {% load humanize %}
 
-{% block title %}Gestión de Clientes{% endblock %}
+{% block page_title %}Clientes{% endblock %}
 
 {% block content %}
 <div class="container-fluid mt-4">
@@ -10,17 +10,17 @@
     <div class="page-header mb-4">
         <div class="d-flex justify-content-between align-items-center">
             <div>
-                <h1 class="h2 mb-2">
+                <h1 class="h2 mb-2 fw-bold">
                     <i class="bi bi-people me-3"></i>Gestión de Clientes
                 </h1>
-                <p class="mb-0 opacity-90">Administre todos los clientes del sistema</p>
+                <p class="mb-0 opacity-90">Administre todos los clientes del sistema de manera eficiente</p>
             </div>
             <div class="d-flex gap-3">
-                <a href="{% url 'customers:customer_create' %}" class="btn btn-light btn-modern">
+                <a href="{% url 'customers:customer_create' %}" class="btn btn-modern btn-light btn-lg">
                     <i class="bi bi-person-plus me-2"></i>Nuevo Cliente
                 </a>
-                <button class="btn btn-outline-light btn-modern" type="button" data-bs-toggle="collapse" 
-                        data-bs-target="#filtersCard" aria-expanded="false">
+                <button class="btn btn-modern btn-outline-light btn-lg" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#filtersCard" aria-expanded="false">
                     <i class="bi bi-funnel me-2"></i>Filtros
                 </button>
             </div>
@@ -30,57 +30,64 @@
     <!-- Filtros Modernos -->
     <div class="collapse mb-4" id="filtersCard">
         <div class="card-modern">
-            <div class="card-header-modern">
-                <h5 class="mb-0">
-                    <i class="bi bi-funnel me-2"></i>Filtros de Búsqueda
+            <div class="card-header bg-gradient-light border-0 py-4">
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-funnel me-2 text-primary"></i>Filtros de Búsqueda
                 </h5>
             </div>
             <div class="card-body p-4">
                 <form method="get" id="filterForm" class="needs-validation" novalidate>
-                    <div class="row g-4">
+                    <div class="row g-3">
                         <div class="col-md-4">
-                            <label for="searchQuery" class="form-label-modern">
-                                <i class="bi bi-search me-2"></i>Búsqueda General
+                            <label for="searchQuery" class="form-label fw-semibold text-dark">
+                                <i class="bi bi-search me-2 text-primary"></i>Búsqueda General
                             </label>
-                            <input type="text" name="search" id="searchQuery" class="form-control-modern" 
-                                   placeholder="Buscar por nombre, email o documento..." 
-                                   value="{{ request.GET.search|default:'' }}">
+                            <input type="text" name="search" id="searchQuery" class="form-control-modern"
+                                placeholder="Buscar por nombre, email o documento..."
+                                value="{{ request.GET.search|default:'' }}">
                         </div>
                         <div class="col-md-3">
-                            <label for="localityFilter" class="form-label-modern">
-                                <i class="bi bi-geo-alt me-2"></i>Localidad
+                            <label for="localityFilter" class="form-label fw-semibold text-dark">
+                                <i class="bi bi-geo-alt me-2 text-success"></i>Localidad
                             </label>
                             <select name="locality" id="localityFilter" class="form-select-modern">
                                 <option value="">Todas las localidades</option>
                                 {% for locality in localities %}
-                                    <option value="{{ locality.id }}" {% if request.GET.locality == locality.id|stringformat:"s" %}selected{% endif %}>
-                                        {{ locality.name }}
-                                    </option>
+                                <option value="{{ locality.id }}" {% if request.GET.locality == locality.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ locality.name }}
+                                </option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-md-3">
-                            <label for="sortFilter" class="form-label-modern">
-                                <i class="bi bi-sort-down me-2"></i>Ordenar por
+                        <div class="col-md-5">
+                            <label for="sortFilter" class="form-label fw-semibold text-dark">
+                                <i class="bi bi-sort-down me-2 text-info"></i>Ordenar por
                             </label>
                             <select name="sort" id="sortFilter" class="form-select-modern">
-                                <option value="-created_at" {% if request.GET.sort == '-created_at' or not request.GET.sort %}selected{% endif %}>Más recientes</option>
-                                <option value="created_at" {% if request.GET.sort == 'created_at' %}selected{% endif %}>Más antiguos</option>
-                                <option value="first_name" {% if request.GET.sort == 'first_name' %}selected{% endif %}>Nombre (A-Z)</option>
-                                <option value="-first_name" {% if request.GET.sort == '-first_name' %}selected{% endif %}>Nombre (Z-A)</option>
-                                <option value="last_name" {% if request.GET.sort == 'last_name' %}selected{% endif %}>Apellido (A-Z)</option>
-                                <option value="-last_name" {% if request.GET.sort == '-last_name' %}selected{% endif %}>Apellido (Z-A)</option>
+                                <option value="-created_at" {% if request.GET.sort == "-created_at" or not request.GET.sort %}selected{% endif %}>Más recientes</option>
+                                <option value="created_at" {% if request.GET.sort == "created_at" %}selected{% endif %}>Más antiguos</option>
+                                <option value="first_name" {% if request.GET.sort == "first_name" %}selected{% endif %}>Nombre (A-Z)</option>
+                                <option value="-first_name" {% if request.GET.sort == "-first_name" %}selected{% endif %}>Nombre (Z-A)</option>
+                                <option value="last_name" {% if request.GET.sort == "last_name" %}selected{% endif %}>Apellido (A-Z)</option>
+                                <option value="-last_name" {% if request.GET.sort == "-last_name" %}selected{% endif %}>Apellido (Z-A)</option>
                             </select>
                         </div>
-                        <div class="col-md-2 d-flex align-items-end">
-                            <div class="btn-group w-100" role="group">
-                                <button type="submit" class="btn btn-primary btn-modern">
-                                    <i class="bi bi-search me-2"></i>Buscar
-                                </button>
-                                <a href="{% url 'customers:customer_list' %}" class="btn btn-outline-secondary btn-modern">
-                                    <i class="bi bi-arrow-clockwise"></i>
-                                </a>
-                            </div>
+                    </div>
+
+                    <!-- Botones de Acción Modernos -->
+                    <div class="section-divider"></div>
+                    <div class="d-flex justify-content-between align-items-center mt-4">
+                        <div class="text-muted">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Use los filtros para encontrar clientes específicos
+                        </div>
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'customers:customer_list' %}" class="btn btn-modern btn-outline-secondary">
+                                <i class="bi bi-arrow-clockwise me-2"></i>Limpiar
+                            </a>
+                            <button type="submit" class="btn btn-modern btn-primary">
+                                <i class="bi bi-search me-2"></i>Buscar
+                            </button>
                         </div>
                     </div>
                 </form>
@@ -89,101 +96,93 @@
     </div>
 
     <!-- Estadísticas Modernas -->
-    <div class="row g-4 mb-4">
+    <div class="row g-4 mb-5">
         <div class="col-md-3">
             <div class="stat-card stat-card-primary">
-                <div class="stat-card-body">
-                    <div class="stat-icon">
-                        <i class="bi bi-people"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3 class="stat-number">{{ total_customers|default:0 }}</h3>
-                        <p class="stat-label">Total Clientes</p>
-                    </div>
+                <div class="stat-card-icon">
+                    <i class="bi bi-people"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h3 class="stat-card-number">{{ total_customers|default:0 }}</h3>
+                    <p class="stat-card-label">Total Clientes</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card stat-card-success">
-                <div class="stat-card-body">
-                    <div class="stat-icon">
-                        <i class="bi bi-person-check"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3 class="stat-number">{{ active_customers|default:0 }}</h3>
-                        <p class="stat-label">Clientes Activos</p>
-                    </div>
+                <div class="stat-card-icon">
+                    <i class="bi bi-person-check"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h3 class="stat-card-number">{{ active_customers|default:0 }}</h3>
+                    <p class="stat-card-label">Clientes Activos</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card stat-card-info">
-                <div class="stat-card-body">
-                    <div class="stat-icon">
-                        <i class="bi bi-calendar-plus"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3 class="stat-number">{{ new_customers_month|default:0 }}</h3>
-                        <p class="stat-label">Nuevos este Mes</p>
-                    </div>
+                <div class="stat-card-icon">
+                    <i class="bi bi-calendar-plus"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h3 class="stat-card-number">{{ new_customers_month|default:0 }}</h3>
+                    <p class="stat-card-label">Nuevos este Mes</p>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="stat-card stat-card-warning">
-                <div class="stat-card-body">
-                    <div class="stat-icon">
-                        <i class="bi bi-file-earmark-person"></i>
-                    </div>
-                    <div class="stat-content">
-                        <h3 class="stat-number">{{ customers_with_contracts|default:0 }}</h3>
-                        <p class="stat-label">Con Contratos</p>
-                    </div>
+                <div class="stat-card-icon">
+                    <i class="bi bi-file-earmark-person"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h3 class="stat-card-number">{{ customers_with_contracts|default:0 }}</h3>
+                    <p class="stat-card-label">Con Contratos</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Lista de Clientes Moderna -->
+    <!-- Tabla de clientes moderna -->
     {% if object_list %}
     <div class="card-modern">
-        <div class="card-header-modern">
+        <div class="card-header bg-gradient-light border-0 py-4">
             <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i class="bi bi-table me-2"></i>Lista de Clientes
+                <h5 class="mb-0 fw-bold">
+                    <i class="bi bi-table me-2 text-primary"></i>Lista de Clientes
                 </h5>
-                <div class="d-flex align-items-center gap-3">
-                    <small class="text-muted">
-                        Mostrando {{ object_list|length }} cliente{{ object_list|length|pluralize }}
+                <div class="d-flex align-items-center gap-4">
+                    <div class="badge bg-primary-subtle text-primary px-3 py-2">
+                        {{ object_list|length }} cliente{{ object_list|length|pluralize }}
                         {% if search_performed %}encontrado{{ object_list|length|pluralize }}{% endif %}
-                    </small>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table-modern">
-                    <thead>
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
                         <tr>
-                            <th scope="col" class="ps-4">
-                                <i class="bi bi-hash text-muted me-2"></i>ID
+                            <th scope="col" class="border-0 ps-4">
+                                <i class="bi bi-hash text-muted me-1"></i>ID
                             </th>
-                            <th scope="col">
-                                <i class="bi bi-person text-muted me-2"></i>Cliente
+                            <th scope="col" class="border-0">
+                                <i class="bi bi-person text-muted me-1"></i>Cliente
                             </th>
-                            <th scope="col">
-                                <i class="bi bi-envelope text-muted me-2"></i>Contacto
+                            <th scope="col" class="border-0">
+                                <i class="bi bi-envelope text-muted me-1"></i>Contacto
                             </th>
-                            <th scope="col">
-                                <i class="bi bi-geo-alt text-muted me-2"></i>Ubicación
+                            <th scope="col" class="border-0">
+                                <i class="bi bi-geo-alt text-muted me-1"></i>Ubicación
                             </th>
-                            <th scope="col" class="text-center">
-                                <i class="bi bi-file-earmark-text text-muted me-2"></i>Contratos
+                            <th scope="col" class="border-0 text-center">
+                                <i class="bi bi-file-earmark-text text-muted me-1"></i>Contratos
                             </th>
-                            <th scope="col">
-                                <i class="bi bi-calendar text-muted me-2"></i>Registro
+                            <th scope="col" class="border-0">
+                                <i class="bi bi-calendar text-muted me-1"></i>Registro
                             </th>
-                            <th scope="col" class="text-center pe-4">Acciones</th>
+                            <th scope="col" class="border-0 text-center pe-4">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -197,19 +196,19 @@
                             </td>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <div class="me-3">
-                                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" 
-                                             style="width: 40px; height: 40px;">
-                                            <span class="text-white fw-bold">
+                                    <div class="me-2">
+                                        <div class="bg-primary-subtle rounded-circle d-flex align-items-center justify-content-center"
+                                            style="width: 32px; height: 32px;">
+                                            <span class="text-primary fw-bold small">
                                                 {{ customer.first_name|first }}{{ customer.last_name|first }}
                                             </span>
                                         </div>
                                     </div>
                                     <div>
                                         <div class="fw-semibold">
-                                            <a href="{% url 'customers:customer_detail' customer.pk %}" 
-                                               class="text-decoration-none">
-                                                {{ customer.get_full_name }}
+                                            <a href="{% url 'customers:customer_detail' customer.pk %}"
+                                                class="text-decoration-none">
+                                                {{ customer.get_full_name|truncatechars:20 }}
                                             </a>
                                         </div>
                                         <small class="text-muted">{{ customer.document|default:"Sin documento" }}</small>
@@ -219,73 +218,75 @@
                             <td>
                                 <div>
                                     {% if customer.email %}
-                                        <div class="fw-semibold">
-                                            <a href="mailto:{{ customer.email }}" class="text-decoration-none">
-                                                <i class="bi bi-envelope me-1"></i>{{ customer.email|truncatechars:25 }}
-                                            </a>
-                                        </div>
+                                    <div class="fw-semibold">
+                                        <a href="mailto:{{ customer.email }}" class="text-decoration-none">
+                                            <i class="bi bi-envelope me-1"></i>{{ customer.email|truncatechars:25 }}
+                                        </a>
+                                    </div>
                                     {% endif %}
                                     {% if customer.phone %}
-                                        <small class="text-muted">
-                                            <a href="tel:{{ customer.phone }}" class="text-decoration-none">
-                                                <i class="bi bi-telephone me-1"></i>{{ customer.phone }}
-                                            </a>
-                                        </small>
+                                    <small class="text-muted">
+                                        <a href="tel:{{ customer.phone }}" class="text-decoration-none">
+                                            <i class="bi bi-telephone me-1"></i>{{ customer.phone }}
+                                        </a>
+                                    </small>
                                     {% endif %}
                                     {% if not customer.email and not customer.phone %}
-                                        <span class="text-muted">Sin contacto</span>
+                                    <span class="text-muted">Sin contacto</span>
                                     {% endif %}
                                 </div>
                             </td>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    <i class="bi bi-geo-alt text-danger me-2"></i>
+                                    <i class="bi bi-geo-alt text-success me-2"></i>
                                     <div>
                                         {% if customer.locality %}
-                                            <div class="fw-semibold">{{ customer.locality.name }}</div>
-                                            {% if customer.province %}
-                                                <small class="text-muted">{{ customer.province.name }}</small>
-                                            {% endif %}
+                                        <div class="fw-semibold">{{ customer.locality.name }}</div>
+                                        {% if customer.province %}
+                                        <small class="text-muted">{{ customer.province.name }}</small>
+                                        {% endif %}
                                         {% elif customer.neighborhood %}
-                                            <div class="fw-semibold">{{ customer.neighborhood }}</div>
+                                        <div class="fw-semibold">{{ customer.neighborhood }}</div>
                                         {% else %}
-                                            <span class="text-muted">No especificada</span>
+                                        <span class="text-muted">No especificada</span>
                                         {% endif %}
                                     </div>
                                 </div>
                             </td>
                             <td class="text-center">
                                 {% with customer.contract_set.count as contract_count %}
-                                    {% if contract_count > 0 %}
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle">
-                                            <i class="bi bi-file-earmark-check me-1"></i>{{ contract_count }}
-                                        </span>
-                                    {% else %}
-                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
-                                            <i class="bi bi-file-earmark me-1"></i>0
-                                        </span>
-                                    {% endif %}
+                                {% if contract_count > 0 %}
+                                <span class="badge bg-success-subtle text-success fw-semibold">
+                                    {{ contract_count }}
+                                </span>
+                                {% else %}
+                                <span class="text-muted">
+                                    <i class="bi bi-dash"></i>
+                                </span>
+                                {% endif %}
                                 {% endwith %}
                             </td>
                             <td>
-                                <div>
-                                    <div class="fw-semibold">{{ customer.created_at|date:"d/m/Y" }}</div>
-                                    <small class="text-muted">{{ customer.created_at|timesince }} atrás</small>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-calendar-check text-info me-2"></i>
+                                    <div>
+                                        <span>{{ customer.created_at|date:"d/m/Y" }}</span>
+                                        <small class="text-muted d-block">{{ customer.created_at|timesince }} atrás</small>
+                                    </div>
                                 </div>
                             </td>
                             <td class="text-center pe-4">
-                                <div class="btn-group-modern" role="group">
-                                    <a href="{% url 'customers:customer_detail' customer.pk %}" 
-                                       class="btn btn-sm btn-outline-primary btn-modern" title="Ver detalles">
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'customers:customer_detail' customer.pk %}"
+                                        class="btn btn-modern btn-sm btn-outline-primary" title="Ver detalles">
                                         <i class="bi bi-eye"></i>
                                     </a>
-                                    <a href="{% url 'customers:customer_edit' customer.pk %}" 
-                                       class="btn btn-sm btn-outline-secondary btn-modern" title="Editar">
+                                    <a href="{% url 'customers:customer_edit' customer.pk %}"
+                                        class="btn btn-modern btn-sm btn-outline-secondary" title="Editar">
                                         <i class="bi bi-pencil"></i>
                                     </a>
-                                    <a href="{% url 'customers:customer_delete' customer.pk %}" 
-                                       class="btn btn-sm btn-outline-danger btn-modern" title="Eliminar"
-                                       onclick="return confirm('¿Está seguro de eliminar este cliente?')">
+                                    <a href="{% url 'customers:customer_delete' customer.pk %}"
+                                        class="btn btn-modern btn-sm btn-outline-danger" title="Eliminar">
                                         <i class="bi bi-trash"></i>
                                     </a>
                                 </div>
@@ -296,49 +297,56 @@
                 </table>
             </div>
         </div>
-        
-        <!-- Paginación -->
+
         {% if is_paginated %}
-        <div class="card-footer bg-light border-top">
+        <div class="card-footer bg-light">
             <nav aria-label="Paginación de clientes">
                 <ul class="pagination justify-content-center mb-0">
                     {% if page_obj.has_previous %}
                         <li class="page-item">
-                            <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.locality %}&locality={{ request.GET.locality }}{% endif %}">
-                                <i class="bi bi-chevron-double-left"></i>
+                            <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1" aria-label="Primera">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
                             </a>
                         </li>
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.locality %}&locality={{ request.GET.locality }}{% endif %}">
-                                <i class="bi bi-chevron-left"></i>
+                            <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}" aria-label="Anterior">
+                                <span aria-hidden="true">&laquo;</span>
                             </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link" aria-hidden="true">&laquo;&laquo;</span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link" aria-hidden="true">&laquo;</span>
                         </li>
                     {% endif %}
 
                     {% for num in page_obj.paginator.page_range %}
                         {% if page_obj.number == num %}
-                            <li class="page-item active">
-                                <span class="page-link">{{ num }}</span>
-                            </li>
+                            <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span></li>
                         {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.locality %}&locality={{ request.GET.locality }}{% endif %}">
-                                    {{ num }}
-                                </a>
-                            </li>
+                            <li class="page-item"><a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a></li>
                         {% endif %}
                     {% endfor %}
 
                     {% if page_obj.has_next %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.locality %}&locality={{ request.GET.locality }}{% endif %}">
-                                <i class="bi bi-chevron-right"></i>
+                            <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}" aria-label="Siguiente">
+                                <span aria-hidden="true">&raquo;</span>
                             </a>
                         </li>
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.locality %}&locality={{ request.GET.locality }}{% endif %}">
-                                <i class="bi bi-chevron-double-right"></i>
+                            <a class="page-link" href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.paginator.num_pages }}" aria-label="Última">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
                             </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link" aria-hidden="true">&raquo;</span>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link" aria-hidden="true">&raquo;&raquo;</span>
                         </li>
                     {% endif %}
                 </ul>
@@ -347,59 +355,109 @@
         {% endif %}
     </div>
     {% else %}
-    <!-- Estado vacío moderno -->
-    <div class="card-modern">
-        <div class="card-body text-center py-5">
-            <div class="empty-state">
-                <div class="empty-state-icon">
-                    <i class="bi bi-people"></i>
-                </div>
-                <h5 class="empty-state-title">
-                    {% if search_performed %}
-                        No se encontraron clientes
-                    {% else %}
-                        No hay clientes registrados
-                    {% endif %}
-                </h5>
-                <p class="empty-state-description">
-                    {% if search_performed %}
-                        No se encontraron clientes con los criterios especificados. Intente con otros filtros.
-                    {% else %}
-                        Comience agregando su primer cliente al sistema.
-                    {% endif %}
-                </p>
-                <div class="empty-state-actions">
-                    {% if not search_performed %}
-                        <a href="{% url 'customers:customer_create' %}" class="btn btn-primary btn-modern">
-                            <i class="bi bi-person-plus me-2"></i>Agregar Primer Cliente
-                        </a>
-                    {% else %}
-                        <div class="d-flex gap-3 justify-content-center">
-                            <a href="{% url 'customers:customer_list' %}" class="btn btn-outline-secondary btn-modern">
-                                <i class="bi bi-arrow-clockwise me-2"></i>Limpiar Filtros
-                            </a>
-                            <a href="{% url 'customers:customer_create' %}" class="btn btn-primary btn-modern">
-                                <i class="bi bi-person-plus me-2"></i>Nuevo Cliente
-                            </a>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <i class="bi bi-people"></i>
         </div>
+        <h3 class="empty-state-title">
+            {% if search_performed %}
+            No se encontraron clientes
+            {% else %}
+            No hay clientes registrados
+            {% endif %}
+        </h3>
+        <p class="empty-state-description">
+            {% if search_performed %}
+            No se encontraron clientes con los criterios especificados. Intente con otros filtros.
+            {% else %}
+            Comience agregando su primer cliente al sistema.
+            {% endif %}
+        </p>
+        <a href="{% url 'customers:customer_create' %}" class="btn btn-modern btn-primary btn-lg">
+            <i class="bi bi-person-plus me-2"></i>
+            {% if search_performed %}Crear Nuevo Cliente{% else %}Crear Primer Cliente{% endif %}
+        </a>
     </div>
     {% endif %}
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Auto-submit form on sort change
-    document.getElementById('sortFilter').addEventListener('change', function() {
-        document.getElementById('filterForm').submit();
+    // Filtros en tiempo real
+    const filterForm = document.getElementById('filterForm');
+    const searchInput = document.getElementById('searchQuery');
+    const localitySelect = document.getElementById('localityFilter');
+    const sortSelect = document.getElementById('sortFilter');
+    
+    // Auto-submit en cambios de select
+    [localitySelect, sortSelect].forEach(select => {
+        if (select) {
+            select.addEventListener('change', function() {
+                filterForm.submit();
+            });
+        }
+    });
+    
+    // Búsqueda con delay
+    let searchTimeout;
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                if (this.value.length >= 3 || this.value.length === 0) {
+                    filterForm.submit();
+                }
+            }, 500);
+        });
+    }
+    
+    // Función para mostrar toast de éxito
+    function showSuccessToast(message) {
+        let toastContainer = document.querySelector('.toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            document.body.appendChild(toastContainer);
+        }
+        
+        const toastHtml = `
+            <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    <strong class="me-auto">Éxito</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            </div>
+        `;
+        
+        toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+        const toast = new bootstrap.Toast(toastContainer.lastElementChild);
+        toast.show();
+        
+        toastContainer.lastElementChild.addEventListener('hidden.bs.toast', function() {
+            this.remove();
+        });
+    }
+    
+    // Animaciones suaves para las filas de la tabla
+    const customerRows = document.querySelectorAll('tbody tr');
+    customerRows.forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.01)';
+            this.style.transition = 'transform 0.2s ease';
+        });
+        
+        row.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
     });
     
     // Confirm delete actions
-    document.querySelectorAll('a[href*="delete"]').forEach(function(link) {
-        link.addEventListener('click', function(e) {
+    document.querySelectorAll('a[href*="delete"]').forEach(function (link) {
+        link.addEventListener('click', function (e) {
             if (!confirm('¿Está seguro de que desea eliminar este cliente? Esta acción no se puede deshacer.')) {
                 e.preventDefault();
             }

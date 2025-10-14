@@ -1,0 +1,69 @@
+<!-- Filtros -->
+<div class="collapse mb-4" id="filtersCard">
+    <div class="card card-modern">
+        <div class="card-header bg-light border-bottom">
+            <h5 class="mb-0 text-dark fw-bold">
+                <i class="bi bi-funnel me-2"></i>Filtros de Búsqueda
+            </h5>
+        </div>
+        <div class="card-body p-4">
+            <form method="get" action="{% url 'accounting:invoice_list' %}" id="filterForm" class="needs-validation" novalidate>
+                <!-- Filtros Básicos -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="searchQuery" class="form-label fw-semibold">
+                            <i class="bi bi-search me-1"></i>Búsqueda General
+                        </label>
+                        <input type="text" name="q" id="searchQuery" class="form-control form-control-modern"
+                            placeholder="Buscar por número de factura o nombre del cliente..."
+                            value="{{ query|default:'' }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="statusFilter" class="form-label fw-semibold">
+                            <i class="bi bi-flag me-1"></i>Estado
+                        </label>
+                        <select name="status" id="statusFilter" class="form-select form-control-modern">
+                            <option value="">Todos los estados</option>
+                            <option value="draft" {% if status == 'draft' %}selected{% endif %}>Borrador</option>
+                            <option value="validated" {% if status == 'validated' %}selected{% endif %}>Validada</option>
+                            <option value="sent" {% if status == 'sent' %}selected{% endif %}>Enviada</option>
+                            <option value="paid" {% if status == 'paid' %}selected{% endif %}>Pagada</option>
+                            <option value="cancelled" {% if status == 'cancelled' %}selected{% endif %}>Cancelada</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="customerFilter" class="form-label fw-semibold">
+                            <i class="bi bi-person me-1"></i>Cliente
+                        </label>
+                        <select name="customer" id="customerFilter" class="form-select form-control-modern">
+                            <option value="">Todos los clientes</option>
+                            {% for customer in customers %}
+                            <option value="{{ customer.id }}" {% if customer_id|stringformat:"s" == customer.id|stringformat:"s" %}selected{% endif %}>
+                                {{ customer.get_full_name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                {% include 'accounting/partials/invoice_advanced_filters.html' %}
+
+                <!-- Botones de Acción -->
+                <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                    <div class="text-muted small">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Use los filtros para encontrar facturas específicas
+                    </div>
+                    <div class="btn-group" role="group">
+                        <a href="{% url 'accounting:invoice_list' %}" class="btn btn-outline-secondary btn-modern">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Limpiar
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-modern">
+                            <i class="bi bi-search me-1"></i>Buscar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

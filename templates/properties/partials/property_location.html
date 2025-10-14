@@ -1,0 +1,116 @@
+{% load static %}
+
+<!-- Property Location -->
+<div class="card-modern mb-4">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="bi bi-geo-alt me-2"></i>Ubicación
+            </h5>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-secondary" onclick="copyAddress()">
+                    <i class="bi bi-clipboard me-1"></i>Copiar Dirección
+                </button>
+                <a href="https://maps.google.com/?q={{ property.address|urlencode }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-map me-1"></i>Ver en Maps
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <!-- Address Information -->
+        <div class="property-address-info mb-4">
+            <div class="property-address-main">
+                <h6 class="mb-2">
+                    <i class="bi bi-house-door me-2"></i>{{ property.address|default:"Dirección no especificada" }}
+                </h6>
+            </div>
+            
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <div class="property-address-detail">
+                        <span class="property-address-label">Dirección Completa:</span>
+                        <span class="property-address-value">{{ property.address|default:"No especificada" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% comment %}
+        <!-- Map Integration -->
+        {% if property.latitude and property.longitude %}
+        <div class="property-map-container mb-4">
+            <div class="property-map-header mb-3">
+                <h6 class="mb-0">
+                    <i class="bi bi-map me-2"></i>Mapa de Ubicación
+                </h6>
+            </div>
+            <div class="property-map-wrapper">
+                <div id="propertyMap" class="property-map" style="height: 300px; border-radius: 8px;">
+                    <!-- Map will be loaded here via JavaScript -->
+                </div>
+                <div class="property-map-coordinates mt-2 text-muted small">
+                    <i class="bi bi-crosshair me-1"></i>
+                    Coordenadas: {{ property.latitude }}, {{ property.longitude }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endcomment %}
+        
+        {% comment %}
+        <!-- Nearby Places -->
+        {% if property.nearby_places %}
+        <div class="property-nearby-places">
+            <h6 class="property-subsection-title mb-3">
+                <i class="bi bi-compass me-2"></i>Lugares Cercanos
+            </h6>
+            <div class="property-nearby-list">
+                {% for place in property.nearby_places.all %}
+                <div class="property-nearby-item">
+                    <div class="property-nearby-icon">
+                        <i class="bi bi-{% if place.type == 'school' %}mortarboard{% elif place.type == 'hospital' %}hospital{% elif place.type == 'transport' %}bus-front{% elif place.type == 'shopping' %}shop{% else %}geo-alt{% endif %}"></i>
+                    </div>
+                    <div class="property-nearby-info">
+                        <div class="property-nearby-name">{{ place.name }}</div>
+                        <div class="property-nearby-distance text-muted small">
+                            <i class="bi bi-arrow-right me-1"></i>{{ place.distance }} metros
+                        </div>
+                    </div>
+                    <div class="property-nearby-type">
+                        <span class="badge bg-light text-dark">{{ place.get_type_display }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        {% endcomment %}
+        
+        {% comment %}
+        <!-- Transportation -->
+        {% if property.transportation_info %}
+        <div class="property-transportation mt-4 pt-4 border-top">
+            <h6 class="property-subsection-title mb-3">
+                <i class="bi bi-bus-front me-2"></i>Transporte Público
+            </h6>
+            <div class="property-transportation-info">
+                {{ property.transportation_info|linebreaksbr }}
+            </div>
+        </div>
+        {% endif %}
+        {% endcomment %}
+    </div>
+</div>
+
+{% comment %}
+<!-- Map JavaScript -->
+{% if property.latitude and property.longitude %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize map when the page loads
+    initPropertyMap({{ property.latitude }}, {{ property.longitude }}, '{{ property.title|escapejs }}');
+});
+</script>
+{% endif %}
+{% endcomment %}

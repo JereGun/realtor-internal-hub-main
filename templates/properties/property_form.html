@@ -29,9 +29,9 @@
                 {% endif %}
               </h1>
               <p class="mb-0 opacity-90">
-                {% if form.instance.pk %} 
+                {% if form.instance.pk %}
                 Actualice la información de la propiedad #{{ form.instance.pk }}
-                {% else %} 
+                {% else %}
                 Complete la información de la nueva propiedad inmobiliaria
                 {% endif %}
               </p>
@@ -87,9 +87,9 @@
                       <i class="bi bi-house text-primary me-1"></i>
                       {{ form.title.label }}
                     </label>
-                    <input type="text" class="form-control-modern {% if form.title.errors %}is-invalid{% endif %}" 
-                           id="{{ form.title.id_for_label }}" name="{{ form.title.name }}" 
-                           value="{{ form.title.value|default:'' }}" required>
+                    <input type="text" class="form-control-modern {% if form.title.errors %}is-invalid{% endif %}"
+                      id="{{ form.title.id_for_label }}" name="{{ form.title.name }}"
+                      value="{{ form.title.value|default:'' }}" required>
                     {% if form.title.errors %}
                     <div class="form-feedback invalid-feedback">
                       <i class="bi bi-exclamation-circle me-1"></i>
@@ -104,14 +104,21 @@
                       <i class="bi bi-house-door text-success me-1"></i>
                       {{ form.property_type.label }}
                     </label>
-                    <select class="form-control-modern form-select-modern {% if form.property_type.errors %}is-invalid{% endif %}" 
-                            id="{{ form.property_type.id_for_label }}" name="{{ form.property_type.name }}" required>
+                    <select
+                      class="form-control-modern form-select-modern {% if form.property_type.errors %}is-invalid{% endif %}"
+                      id="{{ form.property_type.id_for_label }}" name="{{ form.property_type.name }}" required>
                       <option value="">Seleccionar tipo...</option>
                       {% for choice in form.property_type.field.choices %}
                       {% if choice.0 %}
-                      <option value="{{ choice.0 }}" {% if form.property_type.value == choice.0 %}selected{% endif %}>
+                      {% if form.property_type.value == choice.0 %}
+                      <option value="{{ choice.0 }}" selected>
                         {{ choice.1 }}
                       </option>
+                      {% else %}
+                      <option value="{{ choice.0 }}">
+                        {{ choice.1 }}
+                      </option>
+                      {% endif %}
                       {% endif %}
                       {% endfor %}
                     </select>
@@ -129,9 +136,9 @@
                       <i class="bi bi-card-text text-info me-1"></i>
                       {{ form.description.label }}
                     </label>
-                    <textarea class="form-control-modern {% if form.description.errors %}is-invalid{% endif %}" 
-                              id="{{ form.description.id_for_label }}" name="{{ form.description.name }}" rows="4"
-                              placeholder="Describa las características principales de la propiedad...">{{ form.description.value|default:'' }}</textarea>
+                    <textarea class="form-control-modern {% if form.description.errors %}is-invalid{% endif %}"
+                      id="{{ form.description.id_for_label }}" name="{{ form.description.name }}" rows="4"
+                      placeholder="Describa las características principales de la propiedad...">{{ form.description.value|default:'' }}</textarea>
                     {% if form.description.errors %}
                     <div class="form-feedback invalid-feedback">
                       <i class="bi bi-exclamation-circle me-1"></i>
@@ -150,14 +157,21 @@
                       <i class="bi bi-flag text-warning me-1"></i>
                       {{ form.property_status.label }}
                     </label>
-                    <select class="form-control-modern form-select-modern {% if form.property_status.errors %}is-invalid{% endif %}" 
-                            id="{{ form.property_status.id_for_label }}" name="{{ form.property_status.name }}" required>
+                    <select
+                      class="form-control-modern form-select-modern {% if form.property_status.errors %}is-invalid{% endif %}"
+                      id="{{ form.property_status.id_for_label }}" name="{{ form.property_status.name }}" required>
                       <option value="">Seleccionar estado...</option>
                       {% for choice in form.property_status.field.choices %}
                       {% if choice.0 %}
-                      <option value="{{ choice.0 }}" {% if form.property_status.value == choice.0 %}selected{% endif %}>
+                      {% if form.property_status.value == choice.0 %}
+                      <option value="{{ choice.0 }}" selected>
                         {{ choice.1 }}
                       </option>
+                      {% else %}
+                      <option value="{{ choice.0 }}">
+                        {{ choice.1 }}
+                      </option>
+                      {% endif %}
                       {% endif %}
                       {% endfor %}
                     </select>
@@ -175,12 +189,19 @@
                       <i class="bi bi-person-badge text-info me-1"></i>
                       {{ form.agent.label }}
                     </label>
-                    <select class="form-control-modern form-select-modern {% if form.agent.errors %}is-invalid{% endif %}" 
-                            id="{{ form.agent.id_for_label }}" name="{{ form.agent.name }}">
+                    <select
+                      class="form-control-modern form-select-modern {% if form.agent.errors %}is-invalid{% endif %}"
+                      id="{{ form.agent.id_for_label }}" name="{{ form.agent.name }}">
                       {% for choice in form.agent.field.choices %}
-                      <option value="{{ choice.0 }}" {% if form.agent.value == choice.0 %}selected{% endif %}>
+                      {% if form.agent.value == choice.0 %}
+                      <option value="{{ choice.0 }}" selected>
                         {{ choice.1 }}
                       </option>
+                      {% else %}
+                      <option value="{{ choice.0 }}">
+                        {{ choice.1 }}
+                      </option>
+                      {% endif %}
                       {% endfor %}
                     </select>
                     {% if form.agent.errors %}
@@ -203,14 +224,21 @@
                       <i class="bi bi-person text-secondary me-1"></i>
                       {{ form.owner.label }}
                     </label>
-                    <select class="form-control-modern form-select-modern {% if form.owner.errors %}is-invalid{% endif %}" 
-                            id="{{ form.owner.id_for_label }}" name="{{ form.owner.name }}">
+                    <select
+                      class="form-control-modern form-select-modern {% if form.owner.errors %}is-invalid{% endif %}"
+                      id="{{ form.owner.id_for_label }}" name="{{ form.owner.name }}">
                       <option value="">Seleccionar propietario...</option>
                       {% for choice in form.owner.field.choices %}
                       {% if choice.0 %}
-                      <option value="{{ choice.0 }}" {% if form.owner.value == choice.0 %}selected{% endif %}>
+                      {% if form.owner.value == choice.0 %}
+                      <option value="{{ choice.0 }}" selected>
                         {{ choice.1 }}
                       </option>
+                      {% else %}
+                      <option value="{{ choice.0 }}">
+                        {{ choice.1 }}
+                      </option>
+                      {% endif %}
                       {% endif %}
                       {% endfor %}
                     </select>
@@ -232,12 +260,19 @@
                       <i class="bi bi-tags text-warning me-1"></i>
                       {{ form.listing_type.label }}
                     </label>
-                    <select class="form-control-modern form-select-modern {% if form.listing_type.errors %}is-invalid{% endif %}" 
-                            id="{{ form.listing_type.id_for_label }}" name="{{ form.listing_type.name }}">
+                    <select
+                      class="form-control-modern form-select-modern {% if form.listing_type.errors %}is-invalid{% endif %}"
+                      id="{{ form.listing_type.id_for_label }}" name="{{ form.listing_type.name }}">
                       {% for choice in form.listing_type.field.choices %}
-                      <option value="{{ choice.0 }}" {% if form.listing_type.value == choice.0 %}selected{% endif %}>
+                      {% if form.listing_type.value == choice.0 %}
+                      <option value="{{ choice.0 }}" selected>
                         {{ choice.1 }}
                       </option>
+                      {% else %}
+                      <option value="{{ choice.0 }}">
+                        {{ choice.1 }}
+                      </option>
+                      {% endif %}
                       {% endfor %}
                     </select>
                     {% if form.listing_type.errors %}
@@ -278,9 +313,9 @@
                       <i class="bi bi-signpost text-success me-1"></i>
                       {{ form.street.label }}
                     </label>
-                    <input type="text" class="form-control-modern {% if form.street.errors %}is-invalid{% endif %}" 
-                           id="{{ form.street.id_for_label }}" name="{{ form.street.name }}" 
-                           value="{{ form.street.value|default:'' }}">
+                    <input type="text" class="form-control-modern {% if form.street.errors %}is-invalid{% endif %}"
+                      id="{{ form.street.id_for_label }}" name="{{ form.street.name }}"
+                      value="{{ form.street.value|default:'' }}">
                     {% if form.street.errors %}
                     <div class="form-feedback invalid-feedback">
                       <i class="bi bi-exclamation-circle me-1"></i>
@@ -295,9 +330,9 @@
                       <i class="bi bi-hash text-success me-1"></i>
                       {{ form.number.label }}
                     </label>
-                    <input type="text" class="form-control-modern {% if form.number.errors %}is-invalid{% endif %}" 
-                           id="{{ form.number.id_for_label }}" name="{{ form.number.name }}" 
-                           value="{{ form.number.value|default:'' }}">
+                    <input type="text" class="form-control-modern {% if form.number.errors %}is-invalid{% endif %}"
+                      id="{{ form.number.id_for_label }}" name="{{ form.number.name }}"
+                      value="{{ form.number.value|default:'' }}">
                     {% if form.number.errors %}
                     <div class="form-feedback invalid-feedback">
                       <i class="bi bi-exclamation-circle me-1"></i>
@@ -312,9 +347,10 @@
                       <i class="bi bi-map text-info me-1"></i>
                       {{ form.neighborhood.label }}
                     </label>
-                    <input type="text" class="form-control-modern {% if form.neighborhood.errors %}is-invalid{% endif %}" 
-                           id="{{ form.neighborhood.id_for_label }}" name="{{ form.neighborhood.name }}" 
-                           value="{{ form.neighborhood.value|default:'' }}">
+                    <input type="text"
+                      class="form-control-modern {% if form.neighborhood.errors %}is-invalid{% endif %}"
+                      id="{{ form.neighborhood.id_for_label }}" name="{{ form.neighborhood.name }}"
+                      value="{{ form.neighborhood.value|default:'' }}">
                     {% if form.neighborhood.errors %}
                     <div class="form-feedback invalid-feedback">
                       <i class="bi bi-exclamation-circle me-1"></i>
@@ -416,9 +452,10 @@
                       {{ form.total_surface.label }}
                     </label>
                     <div class="input-group">
-                      <input type="number" class="form-control-modern {% if form.total_surface.errors %}is-invalid{% endif %}" 
-                             id="{{ form.total_surface.id_for_label }}" name="{{ form.total_surface.name }}" 
-                             value="{{ form.total_surface.value|default:'' }}" step="0.01" min="0">
+                      <input type="number"
+                        class="form-control-modern {% if form.total_surface.errors %}is-invalid{% endif %}"
+                        id="{{ form.total_surface.id_for_label }}" name="{{ form.total_surface.name }}"
+                        value="{{ form.total_surface.value|default:'' }}" step="0.01" min="0">
                       <span class="input-group-text">m²</span>
                     </div>
                     {% if form.total_surface.errors %}
@@ -436,9 +473,10 @@
                       {{ form.covered_surface.label }}
                     </label>
                     <div class="input-group">
-                      <input type="number" class="form-control-modern {% if form.covered_surface.errors %}is-invalid{% endif %}" 
-                             id="{{ form.covered_surface.id_for_label }}" name="{{ form.covered_surface.name }}" 
-                             value="{{ form.covered_surface.value|default:'' }}" step="0.01" min="0">
+                      <input type="number"
+                        class="form-control-modern {% if form.covered_surface.errors %}is-invalid{% endif %}"
+                        id="{{ form.covered_surface.id_for_label }}" name="{{ form.covered_surface.name }}"
+                        value="{{ form.covered_surface.value|default:'' }}" step="0.01" min="0">
                       <span class="input-group-text">m²</span>
                     </div>
                     {% if form.covered_surface.errors %}
@@ -455,9 +493,10 @@
                       <i class="bi bi-calendar text-secondary me-1"></i>
                       {{ form.year_built.label }}
                     </label>
-                    <input type="number" class="form-control-modern {% if form.year_built.errors %}is-invalid{% endif %}" 
-                           id="{{ form.year_built.id_for_label }}" name="{{ form.year_built.name }}" 
-                           value="{{ form.year_built.value|default:'' }}" min="1800" max="2030">
+                    <input type="number"
+                      class="form-control-modern {% if form.year_built.errors %}is-invalid{% endif %}"
+                      id="{{ form.year_built.id_for_label }}" name="{{ form.year_built.name }}"
+                      value="{{ form.year_built.value|default:'' }}" min="1800" max="2030">
                     {% if form.year_built.errors %}
                     <div class="form-feedback invalid-feedback">
                       <i class="bi bi-exclamation-circle me-1"></i>
@@ -472,9 +511,9 @@
                       <i class="bi bi-door-closed text-primary me-1"></i>
                       {{ form.bedrooms.label }}
                     </label>
-                    <input type="number" class="form-control-modern {% if form.bedrooms.errors %}is-invalid{% endif %}" 
-                           id="{{ form.bedrooms.id_for_label }}" name="{{ form.bedrooms.name }}" 
-                           value="{{ form.bedrooms.value|default:'' }}" min="0" max="20">
+                    <input type="number" class="form-control-modern {% if form.bedrooms.errors %}is-invalid{% endif %}"
+                      id="{{ form.bedrooms.id_for_label }}" name="{{ form.bedrooms.name }}"
+                      value="{{ form.bedrooms.value|default:'' }}" min="0" max="20">
                     {% if form.bedrooms.errors %}
                     <div class="form-feedback invalid-feedback">
                       <i class="bi bi-exclamation-circle me-1"></i>
@@ -489,9 +528,9 @@
                       <i class="bi bi-droplet text-info me-1"></i>
                       {{ form.bathrooms.label }}
                     </label>
-                    <input type="number" class="form-control-modern {% if form.bathrooms.errors %}is-invalid{% endif %}" 
-                           id="{{ form.bathrooms.id_for_label }}" name="{{ form.bathrooms.name }}" 
-                           value="{{ form.bathrooms.value|default:'' }}" min="0" max="10" step="0.5">
+                    <input type="number" class="form-control-modern {% if form.bathrooms.errors %}is-invalid{% endif %}"
+                      id="{{ form.bathrooms.id_for_label }}" name="{{ form.bathrooms.name }}"
+                      value="{{ form.bathrooms.value|default:'' }}" min="0" max="10" step="0.5">
                     {% if form.bathrooms.errors %}
                     <div class="form-feedback invalid-feedback">
                       <i class="bi bi-exclamation-circle me-1"></i>
@@ -503,8 +542,8 @@
                 <div class="col-md-3 mb-3">
                   <div class="form-group">
                     <div class="form-check form-switch mt-4 pt-2">
-                      <input type="checkbox" class="form-check-input" id="{{ form.garage.id_for_label }}" 
-                             name="{{ form.garage.name }}" {% if form.garage.value %}checked{% endif %}>
+                      <input type="checkbox" class="form-check-input" id="{{ form.garage.id_for_label }}"
+                        name="{{ form.garage.name }}" {% if form.garage.value %}checked{% endif %}>
                       <label class="form-check-label" for="{{ form.garage.id_for_label }}">
                         <i class="bi bi-car-front text-success me-1"></i>
                         {{ form.garage.label }}
@@ -515,8 +554,8 @@
                 <div class="col-md-3 mb-3">
                   <div class="form-group">
                     <div class="form-check form-switch mt-4 pt-2">
-                      <input type="checkbox" class="form-check-input" id="{{ form.furnished.id_for_label }}" 
-                             name="{{ form.furnished.name }}" {% if form.furnished.value %}checked{% endif %}>
+                      <input type="checkbox" class="form-check-input" id="{{ form.furnished.id_for_label }}"
+                        name="{{ form.furnished.name }}" {% if form.furnished.value %}checked{% endif %}>
                       <label class="form-check-label" for="{{ form.furnished.id_for_label }}">
                         <i class="bi bi-house-check text-info me-1"></i>
                         {{ form.furnished.label }}
@@ -530,14 +569,21 @@
                       <i class="bi bi-compass text-secondary me-1"></i>
                       {{ form.orientation.label }}
                     </label>
-                    <select class="form-control-modern form-select-modern {% if form.orientation.errors %}is-invalid{% endif %}" 
-                            id="{{ form.orientation.id_for_label }}" name="{{ form.orientation.name }}">
+                    <select
+                      class="form-control-modern form-select-modern {% if form.orientation.errors %}is-invalid{% endif %}"
+                      id="{{ form.orientation.id_for_label }}" name="{{ form.orientation.name }}">
                       <option value="">Seleccionar orientación...</option>
                       {% for choice in form.orientation.field.choices %}
                       {% if choice.0 %}
-                      <option value="{{ choice.0 }}" {% if form.orientation.value == choice.0 %}selected{% endif %}>
+                      {% if form.orientation.value == choice.0 %}
+                      <option value="{{ choice.0 }}" selected>
                         {{ choice.1 }}
                       </option>
+                      {% else %}
+                      <option value="{{ choice.0 }}">
+                        {{ choice.1 }}
+                      </option>
+                      {% endif %}
                       {% endif %}
                       {% endfor %}
                     </select>
@@ -555,9 +601,9 @@
                       <i class="bi bi-building text-warning me-1"></i>
                       {{ form.floors.label }}
                     </label>
-                    <input type="number" class="form-control-modern {% if form.floors.errors %}is-invalid{% endif %}" 
-                           id="{{ form.floors.id_for_label }}" name="{{ form.floors.name }}" 
-                           value="{{ form.floors.value|default:'' }}" min="1" max="50">
+                    <input type="number" class="form-control-modern {% if form.floors.errors %}is-invalid{% endif %}"
+                      id="{{ form.floors.id_for_label }}" name="{{ form.floors.name }}"
+                      value="{{ form.floors.value|default:'' }}" min="1" max="50">
                     {% if form.floors.errors %}
                     <div class="form-feedback invalid-feedback">
                       <i class="bi bi-exclamation-circle me-1"></i>
@@ -597,9 +643,10 @@
                     </label>
                     <div class="input-group">
                       <span class="input-group-text">$</span>
-                      <input type="number" class="form-control-modern {% if form.sale_price.errors %}is-invalid{% endif %}" 
-                             id="{{ form.sale_price.id_for_label }}" name="{{ form.sale_price.name }}" 
-                             value="{{ form.sale_price.value|default:'' }}" step="0.01" min="0">
+                      <input type="number"
+                        class="form-control-modern {% if form.sale_price.errors %}is-invalid{% endif %}"
+                        id="{{ form.sale_price.id_for_label }}" name="{{ form.sale_price.name }}"
+                        value="{{ form.sale_price.value|default:'' }}" step="0.01" min="0">
                     </div>
                     {% if form.sale_price.errors %}
                     <div class="form-feedback invalid-feedback">
@@ -621,9 +668,10 @@
                     </label>
                     <div class="input-group">
                       <span class="input-group-text">$</span>
-                      <input type="number" class="form-control-modern {% if form.rental_price.errors %}is-invalid{% endif %}" 
-                             id="{{ form.rental_price.id_for_label }}" name="{{ form.rental_price.name }}" 
-                             value="{{ form.rental_price.value|default:'' }}" step="0.01" min="0">
+                      <input type="number"
+                        class="form-control-modern {% if form.rental_price.errors %}is-invalid{% endif %}"
+                        id="{{ form.rental_price.id_for_label }}" name="{{ form.rental_price.name }}"
+                        value="{{ form.rental_price.value|default:'' }}" step="0.01" min="0">
                       <span class="input-group-text">/mes</span>
                     </div>
                     {% if form.rental_price.errors %}
@@ -646,9 +694,10 @@
                     </label>
                     <div class="input-group">
                       <span class="input-group-text">$</span>
-                      <input type="number" class="form-control-modern {% if form.expenses.errors %}is-invalid{% endif %}" 
-                             id="{{ form.expenses.id_for_label }}" name="{{ form.expenses.name }}" 
-                             value="{{ form.expenses.value|default:'' }}" step="0.01" min="0">
+                      <input type="number"
+                        class="form-control-modern {% if form.expenses.errors %}is-invalid{% endif %}"
+                        id="{{ form.expenses.id_for_label }}" name="{{ form.expenses.name }}"
+                        value="{{ form.expenses.value|default:'' }}" step="0.01" min="0">
                       <span class="input-group-text">/mes</span>
                     </div>
                     {% if form.expenses.errors %}
@@ -705,10 +754,11 @@
                       <label for="{{ form.new_features.id_for_label }}" class="form-label small">
                         Agregar nuevas características
                       </label>
-                      <input type="text" class="form-control-modern {% if form.new_features.errors %}is-invalid{% endif %}" 
-                             id="{{ form.new_features.id_for_label }}" name="{{ form.new_features.name }}" 
-                             value="{{ form.new_features.value|default:'' }}" 
-                             placeholder="Separar con comas para múltiples características">
+                      <input type="text"
+                        class="form-control-modern {% if form.new_features.errors %}is-invalid{% endif %}"
+                        id="{{ form.new_features.id_for_label }}" name="{{ form.new_features.name }}"
+                        value="{{ form.new_features.value|default:'' }}"
+                        placeholder="Separar con comas para múltiples características">
                       {% if form.new_features.errors %}
                       <div class="form-feedback invalid-feedback">
                         <i class="bi bi-exclamation-circle me-1"></i>
@@ -736,10 +786,10 @@
                       <label for="{{ form.new_tags.id_for_label }}" class="form-label small">
                         Agregar nuevas etiquetas
                       </label>
-                      <input type="text" class="form-control-modern {% if form.new_tags.errors %}is-invalid{% endif %}" 
-                             id="{{ form.new_tags.id_for_label }}" name="{{ form.new_tags.name }}" 
-                             value="{{ form.new_tags.value|default:'' }}" 
-                             placeholder="Separar con comas para múltiples etiquetas">
+                      <input type="text" class="form-control-modern {% if form.new_tags.errors %}is-invalid{% endif %}"
+                        id="{{ form.new_tags.id_for_label }}" name="{{ form.new_tags.name }}"
+                        value="{{ form.new_tags.value|default:'' }}"
+                        placeholder="Separar con comas para múltiples etiquetas">
                       {% if form.new_tags.errors %}
                       <div class="form-feedback invalid-feedback">
                         <i class="bi bi-exclamation-circle me-1"></i>
@@ -779,7 +829,8 @@
             </div>
             <div class="card-body">
               <!-- Drag and Drop Zone -->
-              <div class="drag-drop-zone mb-4 p-4 border border-2 border-dashed rounded-lg text-center" id="dragDropZone">
+              <div class="drag-drop-zone mb-4 p-4 border border-2 border-dashed rounded-lg text-center"
+                id="dragDropZone">
                 <div class="text-center">
                   <i class="bi bi-cloud-upload display-4 text-primary mb-3"></i>
                   <h5 class="text-primary mb-2">Arrastra y suelta tus imágenes aquí</h5>
@@ -827,23 +878,23 @@
                           <label class="form-label">
                             <i class="bi bi-image me-1"></i>Imagen
                           </label>
-                          <input type="file" class="form-control-modern" name="{{ image_form.image.name }}" 
-                                 id="{{ image_form.image.id_for_label }}" accept="image/*">
+                          <input type="file" class="form-control-modern" name="{{ image_form.image.name }}"
+                            id="{{ image_form.image.id_for_label }}" accept="image/*">
                         </div>
                         <div class="mb-3">
                           <label class="form-label">
                             <i class="bi bi-card-text me-1"></i>Descripción
                           </label>
-                          <input type="text" class="form-control-modern" name="{{ image_form.description.name }}" 
-                                 id="{{ image_form.description.id_for_label }}" 
-                                 value="{{ image_form.description.value|default:'' }}" 
-                                 placeholder="Descripción de la imagen">
+                          <input type="text" class="form-control-modern" name="{{ image_form.description.name }}"
+                            id="{{ image_form.description.id_for_label }}"
+                            value="{{ image_form.description.value|default:'' }}"
+                            placeholder="Descripción de la imagen">
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                           <div class="form-check">
-                            <input type="checkbox" class="form-check-input" name="{{ image_form.is_cover.name }}" 
-                                   id="{{ image_form.is_cover.id_for_label }}" 
-                                   {% if image_form.is_cover.value %}checked{% endif %}>
+                            <input type="checkbox" class="form-check-input" name="{{ image_form.is_cover.name }}"
+                              id="{{ image_form.is_cover.id_for_label }}" {% if image_form.is_cover.value %}checked{%
+                              endif %}>
                             <label class="form-check-label" for="{{ image_form.is_cover.id_for_label }}">
                               Imagen principal
                             </label>

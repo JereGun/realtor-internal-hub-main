@@ -1,0 +1,143 @@
+{% load static %}
+{% load humanize %}
+
+<!-- Enhanced Price Display -->
+<div class="property-pricing-container mb-4">
+    <div class="card-modern">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bi bi-currency-dollar me-2"></i>Información de Precios
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if property.sale_price or property.rental_price %}
+            <div class="property-pricing-content">
+                <!-- Sale Price -->
+                {% if property.sale_price %}
+                <div class="card border-success mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-tag text-success me-2"></i>
+                                <span class="fw-bold">Precio de Venta</span>
+                            </div>
+                            <span class="badge bg-success">Venta</span>
+                        </div>
+                        <div class="h4 text-success mb-1">${{ property.sale_price|intcomma }}</div>
+                        {% if property.total_surface %}
+                        <small class="text-muted">
+                            {% widthratio property.sale_price property.total_surface 1 as price_per_sqm %}
+                            ${{ price_per_sqm|floatformat:0|intcomma }}/m²
+                        </small>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Rental Price -->
+                {% if property.rental_price %}
+                <div class="card border-info mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-calendar-month text-info me-2"></i>
+                                <span class="fw-bold">Precio de Alquiler</span>
+                            </div>
+                            <span class="badge bg-info">Alquiler</span>
+                        </div>
+                        <div class="h4 text-info mb-1">${{ property.rental_price|intcomma }}</div>
+                        <small class="text-muted">por mes</small>
+                        {% if property.total_surface %}
+                        <br><small class="text-muted">
+                            {% widthratio property.rental_price property.total_surface 1 as rental_per_sqm %}
+                            ${{ rental_per_sqm|floatformat:0|intcomma }}/m² mes
+                        </small>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% comment %}
+                <!-- Price History -->
+                {% if property.price_history.all %}
+                <div class="property-price-history mt-3">
+                    <div class="property-price-history-header">
+                        <h6 class="small mb-2">
+                            <i class="bi bi-graph-up me-1"></i>Historial de Precios
+                        </h6>
+                    </div>
+                    <div class="property-price-history-list">
+                        {% for price in property.price_history.all|slice:":3" %}
+                        <div class="property-price-history-item">
+                            <div class="property-price-history-date">
+                                {{ price.date|date:"M Y" }}
+                            </div>
+                            <div class="property-price-history-amount">
+                                ${{ price.price }}
+                            </div>
+                            {% if price.change_percentage %}
+                            <div class="property-price-history-change">
+                                <span class="badge bg-{% if price.change_percentage > 0 %}success{% else %}danger{% endif %} badge-sm">
+                                    {% if price.change_percentage > 0 %}+{% endif %}{{ price.change_percentage }}%
+                                </span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                {% endcomment %}
+                
+                <!-- Price Calculator -->
+                <div class="property-price-calculator mt-4 pt-3 border-top">
+                    <h6 class="small mb-3">
+                        <i class="bi bi-calculator me-1"></i>Calculadora de Financiamiento
+                    </h6>
+                    <div class="property-calculator-form">
+                        <div class="mb-2">
+                            <label class="form-label small">Monto del préstamo</label>
+                            <input type="number" class="form-control form-control-sm" id="loanAmount" 
+                                   {% if property.sale_price %}value="{% widthratio property.sale_price 10 8 %}"{% endif %} placeholder="Monto">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small">Tasa de interés (%)</label>
+                            <input type="number" class="form-control form-control-sm" id="interestRate" 
+                                   value="7.5" step="0.1" placeholder="Tasa">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small">Años</label>
+                            <select class="form-select form-select-sm" id="loanYears">
+                                <option value="10">10 años</option>
+                                <option value="15">15 años</option>
+                                <option value="20" selected>20 años</option>
+                                <option value="25">25 años</option>
+                                <option value="30">30 años</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-primary btn-sm w-100" onclick="calculateMortgage()">
+                            <i class="bi bi-calculator me-1"></i>Calcular Cuota
+                        </button>
+                        <div id="mortgageResult" class="property-calculator-result mt-2 d-none">
+                            <div class="alert alert-info alert-sm mb-0">
+                                <strong>Cuota mensual: <span id="monthlyPayment"></span></strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="property-price-empty text-center py-4">
+                <div class="property-empty-icon mb-3">
+                    <i class="bi bi-currency-dollar text-muted" style="font-size: 2rem;"></i>
+                </div>
+                <h6 class="text-muted mb-2">Sin precios definidos</h6>
+                <p class="text-muted small mb-3">Esta propiedad no tiene precios configurados</p>
+                <a href="{% url 'properties:property_edit' property.pk %}" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-plus-circle me-1"></i>Configurar Precios
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>

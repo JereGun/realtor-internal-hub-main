@@ -1,0 +1,46 @@
+<div class="table-responsive">
+    <table class="table table-hover mb-0">
+        <thead class="table-light">
+            <tr>
+                <th class="border-0 ps-4">Fecha</th>
+                <th class="border-0">Método</th>
+                <th class="border-0 text-end">Monto</th>
+                <th class="border-0">Notas</th>
+                <th class="border-0 text-center pe-4">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for payment in invoice.payments.all %}
+            <tr>
+                <td class="ps-4 align-middle">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-calendar-check text-success me-2"></i>
+                        <span>{{ payment.date|date:'d/m/Y' }}</span>
+                    </div>
+                </td>
+                <td class="align-middle">
+                    <span class="badge bg-light text-dark rounded-pill">{{ payment.method }}</span>
+                </td>
+                <td class="text-end align-middle">
+                    <span class="fw-bold text-success">${{ payment.amount|floatformat:2 }}</span>
+                </td>
+                <td class="align-middle">
+                    <span class="text-muted">{{ payment.notes|default:'-' }}</span>
+                </td>
+                <td class="text-center align-middle pe-4">
+                    <div class="btn-group btn-group-sm" role="group">
+                        <a href="{% url 'accounting:payment_update' payment.pk %}"
+                            class="btn btn-outline-warning btn-modern" title="Editar">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="{% url 'accounting:payment_delete' payment.pk %}"
+                            class="btn btn-outline-danger btn-modern" title="Eliminar">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

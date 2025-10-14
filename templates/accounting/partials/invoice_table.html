@@ -1,0 +1,25 @@
+<!-- Tabla de facturas -->
+<div class="card card-modern">
+    <div class="card-header bg-light border-bottom py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 text-dark fw-bold">
+                <i class="bi bi-table me-2"></i>Lista de Facturas
+            </h5>
+            <div class="d-flex align-items-center gap-3">
+                <small class="text-muted">
+                    Mostrando {{ invoices.start_index }}-{{ invoices.end_index }} de {{ invoices.paginator.count }} facturas
+                </small>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                {% include 'accounting/partials/invoice_table_header.html' %}
+                {% include 'accounting/partials/invoice_table_body.html' %}
+            </table>
+        </div>
+    </div>
+
+    {% include 'accounting/partials/invoice_pagination.html' %}
+</div>

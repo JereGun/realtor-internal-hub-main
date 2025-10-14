@@ -1,0 +1,130 @@
+{% load static %}
+
+<!-- Property Features -->
+<div class="card-modern mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="bi bi-house-gear me-2"></i>Características Principales
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <!-- Bedrooms -->
+            {% if property.bedrooms %}
+            <div class="col-md-6 col-lg-4">
+                <div class="d-flex align-items-center p-3 bg-light rounded">
+                    <div class="bg-primary rounded-circle p-2 me-3">
+                        <i class="bi bi-door-closed text-white"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold">{{ property.bedrooms }}</div>
+                        <small class="text-muted">Dormitorio{{ property.bedrooms|pluralize:"s" }}</small>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Bathrooms -->
+            {% if property.bathrooms %}
+            <div class="col-md-6 col-lg-4">
+                <div class="d-flex align-items-center p-3 bg-light rounded">
+                    <div class="bg-info rounded-circle p-2 me-3">
+                        <i class="bi bi-droplet text-white"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold">{{ property.bathrooms }}</div>
+                        <small class="text-muted">Baño{{ property.bathrooms|pluralize:"s" }}</small>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Total Surface -->
+            {% if property.total_surface %}
+            <div class="col-md-6 col-lg-4">
+                <div class="d-flex align-items-center p-3 bg-light rounded">
+                    <div class="bg-warning rounded-circle p-2 me-3">
+                        <i class="bi bi-rulers text-white"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold">{{ property.total_surface }} m²</div>
+                        <small class="text-muted">Superficie Total</small>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Garage -->
+            {% if property.garage %}
+            <div class="col-md-6 col-lg-4">
+                <div class="d-flex align-items-center p-3 bg-light rounded">
+                    <div class="bg-success rounded-circle p-2 me-3">
+                        <i class="bi bi-car-front-fill text-white"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold text-success">Disponible</div>
+                        <small class="text-muted">Garage</small>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Furnished -->
+            {% if property.furnished %}
+            <div class="col-md-6 col-lg-4">
+                <div class="d-flex align-items-center p-3 bg-light rounded">
+                    <div class="bg-secondary rounded-circle p-2 me-3">
+                        <i class="bi bi-house-fill text-white"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold text-success">Sí</div>
+                        <small class="text-muted">Amueblado</small>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Additional Features -->
+        {% comment %}
+        {% if property.additional_features %}
+        <div class="property-additional-features mt-4 pt-4 border-top">
+            <h6 class="mb-3">
+                <i class="bi bi-plus-circle me-2"></i>Características Adicionales
+            </h6>
+            <div class="property-features-tags">
+                {% for feature in property.additional_features.all %}
+                <span class="badge bg-light text-dark me-2 mb-2">
+                    <i class="bi bi-check me-1"></i>{{ feature.name }}
+                </span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+        {% endcomment %}
+        
+        <!-- Feature Summary -->
+        <div class="property-feature-summary mt-4 pt-4 border-top">
+            <div class="row text-center">
+                <div class="col-4">
+                    <div class="property-summary-item">
+                        <div class="property-summary-value">{{ property.bedrooms|default:"0" }}</div>
+                        <div class="property-summary-label">Dormitorios</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="property-summary-item">
+                        <div class="property-summary-value">{{ property.bathrooms|default:"0" }}</div>
+                        <div class="property-summary-label">Baños</div>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="property-summary-item">
+                        <div class="property-summary-value">{{ property.total_surface|default:"0" }}</div>
+                        <div class="property-summary-label">m² Totales</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

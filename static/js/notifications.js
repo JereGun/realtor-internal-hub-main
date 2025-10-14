@@ -40,43 +40,62 @@ class NotificationManager {
     }
 
     getCSRFToken() {
+        // Try to get from input field first
         const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
-        if (csrfInput) {
+        if (csrfInput && csrfInput.value) {
+            console.log('CSRF token found in input field');
             return csrfInput.value;
         }
         
         // Try to get from meta tag
         const csrfMeta = document.querySelector('meta[name=csrf-token]');
         if (csrfMeta) {
-            return csrfMeta.getAttribute('content');
+            const token = csrfMeta.getAttribute('content');
+            if (token) {
+                console.log('CSRF token found in meta tag');
+                return token;
+            }
         }
         
         // Try to get from cookie
         const cookies = document.cookie.split(';');
         for (let cookie of cookies) {
             const [name, value] = cookie.trim().split('=');
-            if (name === 'csrftoken') {
+            if (name === 'csrftoken' && value) {
+                console.log('CSRF token found in cookie');
                 return value;
             }
         }
         
+        console.warn('CSRF token not found!');
         return '';
     }
 
     async markAsRead(notificationId) {
+        console.log(`Intentando marcar notificación ${notificationId} como leída`);
+        console.log(`CSRF Token: ${this.csrfToken ? 'Presente' : 'Ausente'}`);
+        
         try {
             const response = await fetch(`/notifications/${notificationId}/mark-as-read/`, {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': this.csrfToken,
                     'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
                 },
             });
 
+            console.log(`Response status: ${response.status}`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const data = await response.json();
+            console.log('Response data:', data);
 
             if (data.success) {
-                console.log(`Notificación ${notificationId} marcada como leída`);
+                console.log(`✅ Notificación ${notificationId} marcada como leída exitosamente`);
                 
                 // Update UI elements
                 this.updateNotificationUI(notificationId, true);
@@ -85,8 +104,8 @@ class NotificationManager {
                 
                 return true;
             } else {
-                console.error('Error:', data.error);
-                this.showMessage('error', 'Error al marcar la notificación como leída');
+                console.error('❌ Error en respuesta:', data.error);
+                this.showMessage('error', data.error || 'Error al marcar la notificación como leída');
                 
                 // Revert checkbox state
                 const checkbox = document.getElementById(`notification_${notificationId}`);
@@ -97,8 +116,8 @@ class NotificationManager {
                 return false;
             }
         } catch (error) {
-            console.error('Error:', error);
-            this.showMessage('error', 'Error al marcar la notificación como leída');
+            console.error('❌ Error en request:', error);
+            this.showMessage('error', `Error de conexión: ${error.message}`);
             
             // Revert checkbox state
             const checkbox = document.getElementById(`notification_${notificationId}`);
@@ -111,19 +130,30 @@ class NotificationManager {
     }
 
     async markAllAsRead() {
+        console.log('Intentando marcar todas las notificaciones como leídas');
+        console.log(`CSRF Token: ${this.csrfToken ? 'Presente' : 'Ausente'}`);
+        
         try {
             const response = await fetch('/notifications/mark-all-as-read/', {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': this.csrfToken,
                     'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
                 },
             });
 
+            console.log(`Response status: ${response.status}`);
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const data = await response.json();
+            console.log('Response data:', data);
 
             if (data.success) {
-                console.log('Todas las notificaciones marcadas como leídas');
+                console.log('✅ Todas las notificaciones marcadas como leídas exitosamente');
                 
                 // Update all checkboxes
                 document.querySelectorAll('.notification-checkbox').forEach(checkbox => {
@@ -139,15 +169,20 @@ class NotificationManager {
                 this.updateUnreadCount(0);
                 this.showMessage('success', data.message);
                 
+                // Refresh page after a short delay to show updated counts
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+                
                 return true;
             } else {
-                console.error('Error:', data.error);
-                this.showMessage('error', 'Error al marcar las notificaciones como leídas');
+                console.error('❌ Error en respuesta:', data.error);
+                this.showMessage('error', data.error || 'Error al marcar las notificaciones como leídas');
                 return false;
             }
         } catch (error) {
-            console.error('Error:', error);
-            this.showMessage('error', 'Error al marcar las notificaciones como leídas');
+            console.error('❌ Error en request:', error);
+            this.showMessage('error', `Error de conexión: ${error.message}`);
             return false;
         }
     }

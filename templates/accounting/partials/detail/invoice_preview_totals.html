@@ -1,0 +1,26 @@
+<div class="row justify-content-end">
+    <div class="col-md-8">
+        <div class="d-flex justify-content-between mb-1">
+            <span class="text-muted">Subtotal:</span>
+            <span>${{ invoice.total_amount|floatformat:2 }}</span>
+        </div>
+        <hr class="my-1">
+        <div class="d-flex justify-content-between fw-bold h5 mt-2">
+            <span>TOTAL:</span>
+            <span class="text-success">${{ invoice.total_amount|floatformat:2 }}</span>
+        </div>
+        {% if total_paid > 0 %}
+        <div class="d-flex justify-content-between text-success">
+            <span>Pagado:</span>
+            <span>-${{ total_paid|floatformat:2 }}</span>
+        </div>
+        <hr class="my-1">
+        <div class="d-flex justify-content-between fw-bold">
+            <span>SALDO:</span>
+            <span class="{% if balance <= 0 %}text-success{% else %}text-warning{% endif %}">
+                ${{ balance|floatformat:2 }}
+            </span>
+        </div>
+        {% endif %}
+    </div>
+</div>

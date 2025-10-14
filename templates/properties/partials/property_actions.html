@@ -1,0 +1,141 @@
+{% load static %}
+
+<!-- Quick Actions -->
+<div class="property-actions-container mb-4">
+    <div class="card-modern">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bi bi-lightning me-2"></i>Acciones Rápidas
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="property-actions-grid">
+                <!-- Primary Actions -->
+                <div class="property-actions-section mb-3">
+                    <h6 class="property-actions-section-title">Principales</h6>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'properties:property_edit' property.pk %}" class="btn btn-warning btn-sm">
+                            <i class="bi bi-pencil me-2"></i>Editar Propiedad
+                        </a>
+                        <a href="{% url 'properties:add_image' property.pk %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-image me-2"></i>Agregar Imágenes
+                        </a>
+                        <a href="{% url 'contracts:contract_create' %}?property={{ property.id }}" class="btn btn-success btn-sm">
+                            <i class="bi bi-file-earmark-text me-2"></i>Nuevo Contrato
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Marketing Actions -->
+                <div class="property-actions-section mb-3">
+                    <h6 class="property-actions-section-title">Marketing</h6>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-info btn-sm" onclick="generatePropertyFlyer({{ property.pk }})">
+                            <i class="bi bi-file-earmark-pdf me-2"></i>Generar Folleto
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="shareProperty({{ property.pk }})">
+                            <i class="bi bi-share me-2"></i>Compartir Propiedad
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm" onclick="createVirtualTour({{ property.pk }})">
+                            <i class="bi bi-camera-video me-2"></i>Tour Virtual
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Administrative Actions -->
+                <div class="property-actions-section mb-3">
+                    <h6 class="property-actions-section-title">Administrativo</h6>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-warning btn-sm" onclick="scheduleInspection({{ property.pk }})">
+                            <i class="bi bi-clipboard-check me-2"></i>Programar Inspección
+                        </button>
+                        <button class="btn btn-outline-info btn-sm" onclick="addMaintenance({{ property.pk }})">
+                            <i class="bi bi-tools me-2"></i>Registrar Mantenimiento
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="updateValuation({{ property.pk }})">
+                            <i class="bi bi-calculator me-2"></i>Actualizar Valuación
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Communication Actions -->
+                <div class="property-actions-section mb-3">
+                    <h6 class="property-actions-section-title">Comunicación</h6>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-success btn-sm" onclick="sendPropertyUpdate()">
+                            <i class="bi bi-envelope me-2"></i>Enviar Actualización
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm" onclick="scheduleShowing({{ property.pk }})">
+                            <i class="bi bi-calendar-event me-2"></i>Agendar Visita
+                        </button>
+                        <button class="btn btn-outline-info btn-sm" onclick="contactInterestedClients({{ property.pk }})">
+                            <i class="bi bi-people me-2"></i>Contactar Interesados
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Status Actions -->
+                <div class="property-actions-section mb-3">
+                    <h6 class="property-actions-section-title">Estado</h6>
+                    <div class="d-grid gap-2">
+                        {% if property.property_status.name == 'Disponible' %}
+                        <button class="btn btn-outline-warning btn-sm" onclick="markAsInProcess({{ property.pk }})">
+                            <i class="bi bi-clock me-2"></i>Marcar En Proceso
+                        </button>
+                        <button class="btn btn-outline-success btn-sm" onclick="markAsRented({{ property.pk }})">
+                            <i class="bi bi-house-check me-2"></i>Marcar Alquilada
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" onclick="markAsSold({{ property.pk }})">
+                            <i class="bi bi-check-circle me-2"></i>Marcar Vendida
+                        </button>
+                        {% elif property.property_status.name == 'En Proceso' %}
+                        <button class="btn btn-outline-primary btn-sm" onclick="markAsAvailable({{ property.pk }})">
+                            <i class="bi bi-arrow-clockwise me-2"></i>Volver Disponible
+                        </button>
+                        {% elif property.property_status.name == 'Alquilada' or property.property_status.name == 'Vendida' %}
+                        <button class="btn btn-outline-warning btn-sm" onclick="markAsAvailable({{ property.pk }})">
+                            <i class="bi bi-arrow-clockwise me-2"></i>Volver Disponible
+                        </button>
+                        {% endif %}
+                        <button class="btn btn-outline-secondary btn-sm" onclick="toggleFeatured({{ property.pk }})">
+                            <i class="bi bi-star me-2"></i>
+                            Destacar Propiedad
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Export Actions -->
+                <div class="property-actions-section">
+                    <h6 class="property-actions-section-title">Exportar</h6>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-secondary btn-sm" onclick="exportPropertyPDF({{ property.pk }})">
+                            <i class="bi bi-file-earmark-pdf me-2"></i>Exportar PDF
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="exportPropertyExcel({{ property.pk }})">
+                            <i class="bi bi-file-earmark-excel me-2"></i>Exportar Excel
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="printProperty({{ property.pk }})">
+                            <i class="bi bi-printer me-2"></i>Imprimir
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bulk Actions -->
+            <div class="property-bulk-actions mt-4 pt-3 border-top">
+                <h6 class="property-actions-section-title">Acciones Avanzadas</h6>
+                <div class="d-flex gap-2 flex-wrap">
+                    <button class="btn btn-outline-info btn-sm" onclick="duplicateProperty({{ property.pk }})">
+                        <i class="bi bi-files me-1"></i>Duplicar
+                    </button>
+                    <button class="btn btn-outline-warning btn-sm" onclick="archiveProperty({{ property.pk }})">
+                        <i class="bi bi-archive me-1"></i>Archivar
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" onclick="deleteProperty({{ property.pk }})">
+                        <i class="bi bi-trash me-1"></i>Eliminar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

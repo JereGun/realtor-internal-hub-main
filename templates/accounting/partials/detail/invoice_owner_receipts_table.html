@@ -1,0 +1,72 @@
+<div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+            <tr>
+                <th scope="col">Número</th>
+                <th scope="col">Generado</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Monto Neto</th>
+                <th scope="col" class="text-center">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for receipt in invoice.owner_receipts.all %}
+            <tr>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-file-earmark-check text-warning me-2"></i>
+                        <span class="fw-semibold">{{ receipt.receipt_number }}</span>
+                    </div>
+                </td>
+                <td>
+                    <div>
+                        <div class="fw-semibold">{{ receipt.generated_at|date:'d/m/Y H:i' }}</div>
+                        <small class="text-muted">por {{ receipt.generated_by.get_full_name}}</small>
+                    </div>
+                </td>
+                <td>
+                    <span class="badge rounded-pill
+                        {% if receipt.status == 'sent' %}bg-success
+                        {% elif receipt.status == 'failed' %}bg-danger
+                        {% else %}bg-warning text-dark
+                        {% endif %}">
+                        {{ receipt.get_status_display }}
+                    </span>
+                    {% if receipt.sent_at %}
+                    <br><small class="text-muted">{{ receipt.sent_at|date:'d/m/Y H:i' }}</small>
+                    {% endif %}
+                </td>
+                <td>
+                    <div>
+                        <span class="fw-bold text-success">${{ receipt.net_amount|floatformat:2}}</span>
+                        {% if receipt.discount_percentage %}
+                        <br><small class="text-muted">
+                            Descuento: {{ receipt.discount_percentage }}%
+                            (-${{ receipt.discount_amount|floatformat:2 }})
+                        </small>
+                        {% endif %}
+                    </div>
+                </td>
+                <td class="text-center">
+                    <div class="btn-group" role="group">
+                        <a href="{% url 'accounting:owner_receipt_detail' receipt.pk %}"
+                            class="btn btn-sm btn-outline-primary btn-modern" title="Ver detalle">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        <a href="{% url 'accounting:owner_receipt_pdf' receipt.pk %}"
+                            class="btn btn-sm btn-outline-success btn-modern" title="Descargar PDF">
+                            <i class="bi bi-file-earmark-pdf"></i>
+                        </a>
+                        {% if receipt.status == 'failed' %}
+                        <button type="button" class="btn btn-sm btn-outline-warning btn-modern"
+                            onclick="resendOwnerReceipt({{ receipt.pk }})" title="Reenviar">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,194 @@
+{% load static %}
+
+<!-- Agent Information -->
+<div class="property-agent-container mb-4">
+    <div class="card-modern">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bi bi-person-badge me-2"></i>Agente Responsable
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="property-agent-content">
+                <!-- Agent Profile -->
+                <div class="property-agent-profile">
+                    <div class="property-agent-avatar-container">
+                        <div class="property-agent-avatar">
+                            {% if property.agent.profile_image %}
+                            <img src="{{ property.agent.profile_image.url }}" alt="{{ property.agent.get_full_name }}" class="property-agent-avatar-img">
+                            {% else %}
+                            <div class="property-agent-avatar-placeholder">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% comment %}
+                        {% if property.agent.is_online %}
+                        <div class="property-agent-status-indicator online"></div>
+                        {% endif %}
+                        {% endcomment %}
+                    </div>
+                    <div class="property-agent-info">
+                        <div class="property-agent-name">
+                            <a href="{% url 'agents:agent_detail' property.agent.pk %}" class="text-decoration-none">
+                                {{ property.agent.get_full_name }}
+                            </a>
+                        </div>
+                        {% comment %}
+                        {% if property.agent.title %}
+                        <div class="property-agent-title">{{ property.agent.title }}</div>
+                        {% endif %}
+                        {% if property.agent.license_number %}
+                        <div class="property-agent-license">
+                            <small class="text-muted">Matrícula: {{ property.agent.license_number }}</small>
+                        </div>
+                        {% endif %}
+                        {% endcomment %}
+                    </div>
+                </div>
+                
+                <!-- Contact Information -->
+                <div class="property-agent-contact mt-3">
+                    {% if property.agent.email %}
+                    <div class="property-agent-contact-item">
+                        <div class="property-agent-contact-icon">
+                            <i class="bi bi-envelope"></i>
+                        </div>
+                        <div class="property-agent-contact-info">
+                            <a href="mailto:{{ property.agent.email }}" class="text-decoration-none">
+                                {{ property.agent.email }}
+                            </a>
+                        </div>
+                        <div class="property-agent-contact-action">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('{{ property.agent.email }}')">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if property.agent.phone %}
+                    <div class="property-agent-contact-item">
+                        <div class="property-agent-contact-icon">
+                            <i class="bi bi-telephone"></i>
+                        </div>
+                        <div class="property-agent-contact-info">
+                            <a href="tel:{{ property.agent.phone }}" class="text-decoration-none">
+                                {{ property.agent.phone }}
+                            </a>
+                        </div>
+                        <div class="property-agent-contact-action">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="copyToClipboard('{{ property.agent.phone }}')">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% comment %}
+                    {% if property.agent.whatsapp %}
+                    <div class="property-agent-contact-item">
+                        <div class="property-agent-contact-icon">
+                            <i class="bi bi-whatsapp"></i>
+                        </div>
+                        <div class="property-agent-contact-info">
+                            <span>{{ property.agent.whatsapp }}</span>
+                        </div>
+                        <div class="property-agent-contact-action">
+                            <a href="https://wa.me/{{ property.agent.whatsapp }}" target="_blank" class="btn btn-sm btn-success">
+                                <i class="bi bi-chat-dots"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endcomment %}
+                </div>
+                
+                <!-- Agent Statistics -->
+                <div class="property-agent-stats mt-4 pt-3 border-top">
+                    <h6 class="property-subsection-title small mb-3">
+                        <i class="bi bi-graph-up me-1"></i>Estadísticas del Agente
+                    </h6>
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="property-agent-stat">
+                                <div class="property-agent-stat-value">0</div>
+                                <div class="property-agent-stat-label">Propiedades</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="property-agent-stat">
+                                <div class="property-agent-stat-value">0</div>
+                                <div class="property-agent-stat-label">Ventas</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="property-agent-stat">
+                                <div class="property-agent-stat-value">5.0</div>
+                                <div class="property-agent-stat-label">Rating</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% comment %}
+                <!-- Agent Performance -->
+                {% if property.agent.performance_metrics %}
+                <div class="property-agent-performance mt-3">
+                    <div class="property-agent-performance-item">
+                        <div class="property-agent-performance-label">Tiempo promedio de venta:</div>
+                        <div class="property-agent-performance-value">{{ property.agent.avg_sale_time|default:"N/A" }} días</div>
+                    </div>
+                    <div class="property-agent-performance-item">
+                        <div class="property-agent-performance-label">Satisfacción del cliente:</div>
+                        <div class="property-agent-performance-value">
+                            <div class="property-rating-stars">
+                                {% for i in "12345" %}
+                                <i class="bi bi-star{% if property.agent.rating >= i|add:0 %}-fill text-warning{% endif %}"></i>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endcomment %}
+                
+                <!-- Quick Actions -->
+                <div class="property-agent-actions mt-4 pt-3 border-top">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'agents:agent_detail' property.agent.pk %}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-eye me-1"></i>Ver Perfil Completo
+                        </a>
+                        {% if property.agent.email %}
+                        <button class="btn btn-outline-secondary btn-sm" onclick="composeEmail('{{ property.agent.email }}', 'Consulta sobre {{ property.title }}')">
+                            <i class="bi bi-envelope me-1"></i>Enviar Email
+                        </button>
+                        {% endif %}
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-outline-info btn-sm" onclick="scheduleCall('{{ property.agent.pk }}')">
+                                <i class="bi bi-telephone me-1"></i>Programar Llamada
+                            </button>
+                            <button class="btn btn-outline-info btn-sm" onclick="scheduleMeeting('{{ property.agent.pk }}')">
+                                <i class="bi bi-calendar-event me-1"></i>Agendar Reunión
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                {% comment %}
+                <!-- Agent Notes -->
+                {% if property.agent_notes %}
+                <div class="property-agent-notes mt-4 pt-3 border-top">
+                    <h6 class="property-subsection-title small mb-2">
+                        <i class="bi bi-sticky me-1"></i>Notas del Agente
+                    </h6>
+                    <div class="property-agent-notes-content">
+                        <p class="small text-muted mb-0">{{ property.agent_notes|linebreaksbr }}</p>
+                    </div>
+                </div>
+                {% endif %}
+                {% endcomment %}
+            </div>
+        </div>
+    </div>
+</div>

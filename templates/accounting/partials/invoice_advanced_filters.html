@@ -1,0 +1,95 @@
+<!-- Filtros Avanzados -->
+<div class="border-top pt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="text-muted mb-0">Filtros Avanzados</h6>
+        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse"
+            data-bs-target="#advancedFilters">
+            <i class="bi bi-chevron-down me-1"></i>Mostrar más opciones
+        </button>
+    </div>
+
+    <div class="collapse" id="advancedFilters">
+        <div class="row g-3">
+            <!-- Fechas -->
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                    <i class="bi bi-calendar-event me-1"></i>Fecha de Emisión
+                </label>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <input type="date" name="date_from" class="form-control form-control-modern"
+                            value="{{ date_from|default:'' }}" placeholder="Desde">
+                    </div>
+                    <div class="col-6">
+                        <input type="date" name="date_to" class="form-control form-control-modern"
+                            value="{{ date_to|default:'' }}" placeholder="Hasta">
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                    <i class="bi bi-calendar-x me-1"></i>Fecha de Vencimiento
+                </label>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <input type="date" name="due_date_from" class="form-control form-control-modern"
+                            value="{{ due_date_from|default:'' }}" placeholder="Desde">
+                    </div>
+                    <div class="col-6">
+                        <input type="date" name="due_date_to" class="form-control form-control-modern"
+                            value="{{ due_date_to|default:'' }}" placeholder="Hasta">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Montos -->
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">
+                    <i class="bi bi-currency-dollar me-1"></i>Rango de Monto
+                </label>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" name="min_amount" class="form-control form-control-modern" 
+                                step="0.01" min="0" placeholder="Mínimo" value="{{ min_amount|default:'' }}">
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" name="max_amount" class="form-control form-control-modern" 
+                                step="0.01" min="0" placeholder="Máximo" value="{{ max_amount|default:'' }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Opciones adicionales -->
+            <div class="col-md-6">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label for="contractFilter" class="form-label fw-semibold">
+                            <i class="bi bi-file-text me-1"></i>Contrato
+                        </label>
+                        <select name="contract" id="contractFilter" class="form-select form-control-modern">
+                            <option value="">Todos</option>
+                            <option value="with_contract" {% if contract == 'with_contract' %}selected{% endif %}>Con contrato</option>
+                            <option value="without_contract" {% if contract == 'without_contract' %}selected{% endif %}>Sin contrato</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="overdueSwitch"
+                                name="overdue" value="yes" {% if overdue == 'yes' %}checked{% endif %}>
+                            <label class="form-check-label fw-semibold" for="overdueSwitch">
+                                <i class="bi bi-exclamation-triangle text-warning me-1"></i>Solo facturas vencidas
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

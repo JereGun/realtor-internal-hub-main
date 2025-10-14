@@ -1,0 +1,87 @@
+<tbody>
+    {% for invoice in invoices %}
+    <tr class="{% if invoice.due_date < today and invoice.status == 'validated' or invoice.due_date < today and invoice.status == 'sent' %}table-warning{% endif %}">
+        <td class="ps-4">
+            <div class="form-check">
+                <input class="form-check-input invoice-checkbox" type="checkbox" name="invoice_ids"
+                    value="{{ invoice.pk }}"
+                    data-has-email="{% if invoice.customer.email %}true{% else %}false{% endif %}"
+                    data-status="{{ invoice.status }}" onchange="updateSelectedCount()">
+            </div>
+        </td>
+        <td>
+            <div class="d-flex align-items-center">
+                <i class="bi bi-receipt text-primary me-2"></i>
+                <span class="fw-semibold">{{ invoice.number|default:invoice.id }}</span>
+            </div>
+        </td>
+        <td>
+            <div class="d-flex align-items-center">
+                <div class="me-2">
+                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center"
+                        style="width: 32px; height: 32px;">
+                        <span class="text-white fw-bold small">
+                            {{ invoice.customer.first_name|first }}{{ invoice.customer.last_name|first}}
+                        </span>
+                    </div>
+                </div>
+                <div>
+                    <div class="fw-semibold">{{ invoice.customer.get_full_name }}</div>
+                    {% if invoice.customer.email %}
+                    <small class="text-muted">{{ invoice.customer.email }}</small>
+                    {% else %}
+                    <small class="text-warning">
+                        <i class="bi bi-exclamation-triangle me-1"></i>Sin email
+                    </small>
+                    {% endif %}
+                </div>
+            </div>
+        </td>
+        <td>
+            <div class="d-flex align-items-center">
+                <i class="bi bi-calendar-check text-success me-2"></i>
+                <span>{{ invoice.date|date:'d/m/Y' }}</span>
+            </div>
+        </td>
+        <td>
+            <div class="d-flex align-items-center">
+                {% if invoice.due_date < today and invoice.status == 'validated' or invoice.due_date < today and invoice.status == 'sent' %}
+                <i class="bi bi-exclamation-triangle text-danger me-2"></i>
+                {% else %}
+                <i class="bi bi-calendar-event text-muted me-2"></i>
+                {% endif %}
+                <span class="{% if invoice.due_date < today and invoice.status == 'validated' or invoice.due_date < today and invoice.status == 'sent' %}text-danger fw-semibold{% endif %}">
+                    {{ invoice.due_date|date:'d/m/Y' }}
+                </span>
+            </div>
+        </td>
+        <td>
+            <span class="badge rounded-pill
+                {% if invoice.status == 'paid' %}bg-success
+                {% elif invoice.status == 'sent' %}bg-info
+                {% elif invoice.status == 'validated' %}bg-warning text-dark
+                {% elif invoice.status == 'cancelled' %}bg-danger
+                {% else %}bg-secondary
+                {% endif %}">
+                {{ invoice.get_status_display }}
+            </span>
+        </td>
+        <td class="text-end">
+            <span class="fw-bold text-success fs-6">${{ invoice.total_amount|floatformat:2 }}</span>
+        </td>
+        <td class="text-center pe-4">
+            {% include 'accounting/partials/invoice_actions.html' %}
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="8" class="text-center py-5">
+            <div class="text-muted">
+                <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                <p class="mt-3 mb-1 fw-semibold">No hay facturas que mostrar</p>
+                <p class="mb-0">Intente ajustar los filtros o crear una nueva factura</p>
+            </div>
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>

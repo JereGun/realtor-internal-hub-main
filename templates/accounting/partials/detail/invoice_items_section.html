@@ -1,0 +1,60 @@
+<!-- Ítems de la Factura -->
+<div class="card card-modern mb-4">
+    <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center py-3">
+        <h5 class="mb-0 text-dark fw-bold">
+            <i class="bi bi-list-ul me-2"></i>Ítems de la Factura
+        </h5>
+        <button type="button" class="btn btn-primary btn-sm btn-modern" data-bs-toggle="modal"
+            data-bs-target="#addItemModal">
+            <i class="bi bi-plus-circle me-1"></i>Agregar Ítem
+        </button>
+    </div>
+    <div class="card-body p-0">
+        {% if invoice.lines.all %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="border-0 ps-4">Concepto</th>
+                        <th class="border-0 text-end">Monto</th>
+                        <th class="border-0 text-center pe-4">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in invoice.lines.all %}
+                    <tr>
+                        <td class="ps-4 align-middle">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-dot text-primary me-2 fs-4"></i>
+                                <span>{{ item.concept }}</span>
+                            </div>
+                        </td>
+                        <td class="text-end align-middle">
+                            <span class="fw-bold text-success">${{ item.amount|floatformat:2 }}</span>
+                        </td>
+                        <td class="text-center align-middle pe-4">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="{% url 'accounting:invoiceline_update' item.pk %}"
+                                    class="btn btn-outline-warning btn-modern" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'accounting:invoiceline_delete' item.pk %}"
+                                    class="btn btn-outline-danger btn-modern" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+            <p class="text-muted mt-3 mb-0">No hay ítems registrados en esta factura.</p>
+            <small class="text-muted">Agregue ítems para completar la factura.</small>
+        </div>
+        {% endif %}
+    </div>
+</div>

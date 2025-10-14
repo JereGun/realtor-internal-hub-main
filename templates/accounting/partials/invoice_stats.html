@@ -1,0 +1,39 @@
+<!-- Estadísticas Rápidas -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card card-modern border-0 bg-primary text-white stat-card">
+            <div class="card-body text-center p-4">
+                <i class="bi bi-receipt fs-1 mb-3 opacity-75"></i>
+                <h4 class="card-title mb-1">{{ invoices.paginator.count }}</h4>
+                <p class="card-text mb-0 opacity-90">Total Facturas</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-modern border-0 bg-success text-white stat-card">
+            <div class="card-body text-center p-4">
+                <i class="bi bi-check-circle fs-1 mb-3 opacity-75"></i>
+                <h4 class="card-title mb-1">{{ invoices.object_list|length }}</h4>
+                <p class="card-text mb-0 opacity-90">En esta página</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-modern border-0 bg-warning text-white stat-card">
+            <div class="card-body text-center p-4">
+                <i class="bi bi-clock fs-1 mb-3 opacity-75"></i>
+                <h4 class="card-title mb-1">Pendientes</h4>
+                <p class="card-text mb-0 opacity-90">Por cobrar</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-modern border-0 bg-info text-white stat-card">
+            <div class="card-body text-center p-4">
+                <i class="bi bi-currency-dollar fs-1 mb-3 opacity-75"></i>
+                <h4 class="card-title mb-1">Total</h4>
+                <p class="card-text mb-0 opacity-90">Facturado</p>
+            </div>
+        </div>
+    </div>
+</div>

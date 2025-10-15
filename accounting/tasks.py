@@ -2,7 +2,7 @@ from celery import shared_task
 from django.core.management import call_command
 from django.utils import timezone
 from .models_invoice import Invoice
-from .services.invoice_notification import InvoiceNotificationService
+from .service_modules.invoice_notification import InvoiceNotificationService
 from user_notifications.services import create_notification
 import logging
 
@@ -32,7 +32,7 @@ def check_invoice_notifications_task():
 # Tareas de facturación automática
 from celery import shared_task
 from django.utils import timezone
-from .services.automatic_invoice_service import AutomaticInvoiceService
+from .service_modules.automatic_invoice_service import AutomaticInvoiceService
 import logging
 
 logger = logging.getLogger(__name__)

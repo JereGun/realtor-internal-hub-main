@@ -1475,7 +1475,7 @@ def generate_owner_receipt(request, invoice_pk):
 def preview_owner_receipt(request, invoice_pk):
     """
     Previsualiza el comprobante antes de generar.
-    
+
     Muestra cálculos y información que se incluirá en el comprobante
     usando OwnerReceiptService.get_receipt_data() sin generar el comprobante.
     """
@@ -1525,6 +1525,7 @@ def preview_owner_receipt(request, invoice_pk):
         # Obtener información de la empresa
         try:
             from core.models import Company
+
             company = Company.objects.first()
         except Exception as e:
             logger.warning(
@@ -1557,8 +1558,8 @@ def preview_owner_receipt(request, invoice_pk):
             exc_info=True,
         )
         messages.error(
-            request, 
-            "Error interno generando la previsualización. Por favor, contacte al administrador del sistema."
+            request,
+            "Error interno generando la previsualización. Por favor, contacte al administrador del sistema.",
         )
         return redirect("accounting:invoice_detail", pk=invoice.pk)
 
@@ -1954,6 +1955,12 @@ def owner_receipt_pdf(request, receipt_pk):
         messages.error(request, f"Error al generar el PDF: {str(e)}")
         return redirect("accounting:owner_receipt_detail", pk=receipt.pk)
     except Exception as e:
-        logger.error(f"Error inesperado generando PDF para comprobante {receipt_pk}: {str(e)}", exc_info=True)
-        messages.error(request, "Error interno al generar el PDF. Por favor, contacte al administrador del sistema.")
+        logger.error(
+            f"Error inesperado generando PDF para comprobante {receipt_pk}: {str(e)}",
+            exc_info=True,
+        )
+        messages.error(
+            request,
+            "Error interno al generar el PDF. Por favor, contacte al administrador del sistema.",
+        )
         return redirect("accounting:owner_receipt_detail", pk=receipt.pk)
